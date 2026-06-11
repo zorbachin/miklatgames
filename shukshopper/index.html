@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1a0f08">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SHUK SHOPPER">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧺</text></svg>">
+<meta property="og:title" content="SHUK SHOPPER 🧺 — outrun the vendor, fill the basket">
+<meta property="og:description" content="Friday rush at the shuk. Swipe through 3 lanes, grab Ima's list, dodge the savtas — before Shabbat closes the market. No app. One thumb.">
+<meta property="og:url" content="https://miklatgames.fun/shukshopper/">
+<meta name="description" content="Endless market runner from the MIKLAT GAMES shelter arcade. Works offline.">
+<title>SHUK SHOPPER 🧺 — מרוץ השוק</title>
+<style>
+  :root{
+    --c-bg:#1a0f08; --c-panel:#2a1a0e; --c-ink:#fdf3e3; --c-dim:#c9a980;
+    --c-gold:#ffd166; --c-red:#ff5d73; --c-green:#5dffa8; --c-cyan:#3ee6ff;
+    --font-display:"Courier New","Heebo",ui-monospace,Menlo,Consolas,monospace;
+    --font-body:"Heebo",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{background:var(--c-bg);height:100%;overflow:hidden;overscroll-behavior:none;
+    font-family:var(--font-body);color:var(--c-ink);
+    -webkit-user-select:none;user-select:none;touch-action:none;}
+  #wrap{position:fixed;inset:0;display:flex;justify-content:center;background:#000;}
+  #stage{position:relative;width:100%;max-width:520px;height:100%;}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:24px;z-index:5;
+    background:linear-gradient(180deg,rgba(26,15,8,.82),rgba(26,15,8,.94));}
+  .overlay.hidden{display:none;}
+  .ttl{font-family:var(--font-display);font-weight:700;font-size:clamp(30px,9vw,40px);
+    letter-spacing:.06em;text-transform:uppercase;color:var(--c-gold);
+    text-shadow:0 0 18px rgba(255,209,102,.55);line-height:1.1;}
+  .ttl-he{margin-top:6px;font-size:17px;color:var(--c-cyan);}
+  .tag{margin:14px auto 0;max-width:320px;font-size:15px;line-height:1.5;color:var(--c-dim);}
+  .howgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;width:min(320px,86%);}
+  .how{background:var(--c-panel);border:1px solid rgba(255,209,102,.3);border-radius:12px;
+    padding:10px 8px;font-size:12.5px;color:var(--c-ink);line-height:1.35;}
+  .how b{display:block;font-size:20px;margin-bottom:2px;}
+  .bigbtn{margin-top:22px;min-width:220px;min-height:56px;border:none;border-radius:14px;cursor:pointer;
+    background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;
+    font:900 18px var(--font-body);box-shadow:0 8px 24px rgba(233,162,59,.45);}
+  .bigbtn:active{transform:scale(.97);}
+  .ghostbtn{margin-top:12px;min-height:46px;min-width:220px;border-radius:12px;cursor:pointer;
+    background:transparent;border:1px solid rgba(253,243,227,.35);color:var(--c-ink);
+    font:700 14px var(--font-body);}
+  .arcade{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);inset-inline-start:12px;z-index:6;
+    font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--c-gold);text-decoration:none;
+    background:rgba(26,15,8,.7);border:1px solid rgba(255,209,102,.4);border-radius:999px;padding:6px 14px;}
+  .beatbanner{margin-top:14px;font-size:14px;font-weight:800;color:var(--c-red);
+    background:rgba(255,93,115,.12);border:1px solid rgba(255,93,115,.45);border-radius:999px;padding:7px 16px;}
+  .score-card{margin-top:16px;background:var(--c-panel);border:1px solid rgba(255,209,102,.35);
+    border-radius:16px;padding:16px 22px;font-size:15px;line-height:1.9;min-width:240px;}
+  .score-card .big{font-family:var(--font-display);font-size:26px;color:var(--c-gold);}
+  .best-line{margin-top:10px;font-size:13px;color:var(--c-dim);}
+  #toast{position:absolute;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--c-panel);border:1px solid rgba(255,209,102,.55);border-radius:999px;
+    color:var(--c-gold);padding:10px 20px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;
+    transition:all .2s ease;z-index:50;white-space:nowrap;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+  <canvas id="cv"></canvas>
+  <a class="arcade" id="arcadeBack" href="../">🚨 MIKLAT ARCADE</a>
+
+  <div class="overlay" id="menu">
+    <h1 class="ttl" data-i18n="title">SHUK SHOPPER</h1>
+    <div class="ttl-he" data-i18n="titleAlt">מרוץ השוק</div>
+    <p class="tag" data-i18n="tag">Friday, 1:45pm. Ima sent a list. You grabbed a "free sample." The vendor noticed. RUN.</p>
+    <div class="howgrid">
+      <div class="how"><b>↔️</b><span data-i18n="howLane">Swipe to switch stalls</span></div>
+      <div class="how"><b>⬆️</b><span data-i18n="howJump">Swipe up — jump the crates</span></div>
+      <div class="how"><b>⬇️</b><span data-i18n="howSlide">Swipe down — slide under awnings</span></div>
+      <div class="how"><b>🧺</b><span data-i18n="howList">Fill Ima's list = basket bonus</span></div>
+    </div>
+    <div class="beatbanner" id="beatBanner" style="display:none"></div>
+    <button class="bigbtn" id="startBtn" data-i18n="start">RUN! ▶</button>
+    <div class="best-line" id="menuBest"></div>
+  </div>
+
+  <div class="overlay hidden" id="over">
+    <h1 class="ttl" style="color:var(--c-red);text-shadow:0 0 18px rgba(255,93,115,.5)" data-i18n="caught">CAUGHT BY THE VENDOR!</h1>
+    <div style="font-size:44px;margin-top:8px">👨‍🍳🥄</div>
+    <div class="score-card">
+      <div><span data-i18n="baskets">Baskets for Ima</span>: <span class="big" id="ovBaskets">0</span> 🧺</div>
+      <div><span data-i18n="shekels">Shekels pocketed</span>: <span class="big" id="ovShekels">0</span> ₪</div>
+      <div id="ovBeat" style="display:none;color:var(--c-green);font-weight:800"></div>
+    </div>
+    <div class="best-line" id="ovBest"></div>
+    <button class="bigbtn" id="againBtn" data-i18n="again">RUN AGAIN ▶</button>
+    <button class="ghostbtn" id="shareBtn" data-i18n="share">📤 Challenge the Group Chat</button>
+  </div>
+
+  <div class="overlay hidden" id="paused">
+    <h1 class="ttl" data-i18n="pausedT">PAUSED</h1>
+    <button class="bigbtn" id="resumeBtn" data-i18n="resume">KEEP RUNNING ▶</button>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+</div></div>
+
+<script>
+'use strict';
+/* ================= i18n ================= */
+const I18N={
+ en:{dir:'ltr',title:'SHUK SHOPPER',titleAlt:'מרוץ השוק',
+  tag:'Friday, 1:45pm. Ima sent a list. You grabbed a "free sample." The vendor noticed. RUN.',
+  howLane:'Swipe to switch stalls',howJump:'Swipe up — jump the crates',
+  howSlide:'Swipe down — slide under awnings',howList:"Fill Ima's list = basket bonus",
+  start:'RUN! ▶',again:'RUN AGAIN ▶',resume:'KEEP RUNNING ▶',pausedT:'PAUSED',
+  caught:'CAUGHT BY THE VENDOR!',baskets:'Baskets for Ima',shekels:'Shekels pocketed',
+  share:'📤 Challenge the Group Chat',copied:'✅ Copied — paste it in the chat',
+  best:(b,s)=>`🏆 Your best: ${b} basket${b===1?'':'s'} · ${s}₪`,
+  beatBanner:b=>`⚔️ Your friend filled ${b} basket${b===1?'':'s'} — beat that!`,
+  beatWin:'🎉 You beat the challenge!',
+  basketDone:'🧺 Basket full! Ima is proud',listNew:'📜 New list from Ima!',
+  stumble:'😱 The vendor is RIGHT BEHIND YOU',
+  magnet:'🧲 Magnet! Everything sticks',cart:'🛒 CART DASH! Unstoppable',
+  shareTxt:(b,s)=>`🧺 SHUK SHOPPER — I filled ${b} basket${b===1?'':'s'} & pocketed ${s}₪ before the vendor caught me. Your turn: https://miklatgames.fun/shukshopper/?beat=${b}`},
+ he:{dir:'rtl',title:'מרוץ השוק',titleAlt:'SHUK SHOPPER',
+  tag:'שישי, 13:45. אמא שלחה רשימה. לקחת "טעימה חינם". המוכר שם לב. רוץ!',
+  howLane:'החליקו הצידה להחליף דוכן',howJump:'החליקו למעלה — לקפוץ מעל ארגזים',
+  howSlide:'החליקו למטה — להחליק מתחת לסככות',howList:'מלאו את הרשימה של אמא = בונוס סלסלה',
+  start:'רוץ! ▶',again:'עוד פעם ▶',resume:'ממשיכים ▶',pausedT:'הפסקה',
+  caught:'המוכר תפס אותך!',baskets:'סלסלות לאמא',shekels:'שקלים בכיס',
+  share:'📤 אתגרו את הקבוצה',copied:'✅ הועתק — הדביקו בקבוצה',
+  best:(b,s)=>`🏆 השיא שלכם: ${b} סלסלות · ${s}₪`,
+  beatBanner:b=>`⚔️ חבר מילא ${b} סלסלות — תנצחו!`,
+  beatWin:'🎉 ניצחתם את האתגר!',
+  basketDone:'🧺 סלסלה מלאה! אמא גאה',listNew:'📜 רשימה חדשה מאמא!',
+  stumble:'😱 המוכר ממש מאחוריך',
+  magnet:'🧲 מגנט! הכל נדבק',cart:'🛒 עגלת טורבו! בלתי ניתן לעצירה',
+  shareTxt:(b,s)=>`🧺 מרוץ השוק — מילאתי ${b} סלסלות עם ${s}₪ בכיס לפני שהמוכר תפס אותי. תורכם: https://miklatgames.fun/shukshopper/?beat=${b}`}
+};
+let lang='en';
+try{
+  const q=new URLSearchParams(location.search).get('lang');
+  const s=localStorage.getItem('miklat.lang');
+  lang=(q==='he'||q==='en')?q:(s==='he'||s==='en')?s:((navigator.language||'en').startsWith('he')?'he':'en');
+}catch(e){}
+const T=()=>I18N[lang];
+function applyLang(){
+  document.documentElement.lang=lang; document.documentElement.dir=T().dir;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v=T()[el.getAttribute('data-i18n')];
+    if(typeof v==='string') el.textContent=v;
+  });
+}
+function track(name){
+  try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'evt-ss-'+name,event:true}); }catch(e){}
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1800);}
+
+/* ================= canvas ================= */
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+let W=0,H=0,DPR=1;
+function resize(){
+  const r=cv.parentElement.getBoundingClientRect();
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=r.width;H=r.height;
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize',resize);resize();
+/* iOS self-heal: if the canvas ever reports 0, re-measure (mamaddash #102 lesson) */
+setInterval(()=>{ if(cv.width===0||cv.height===0) resize(); },1500);
+
+/* ================= geometry: pseudo-3D, z 0=horizon → 1=player ================= */
+const HORIZON=()=>H*0.30, PLAYY=()=>H*0.84;
+const persp=z=>Math.pow(z,1.75);
+const roadY=z=>HORIZON()+(PLAYY()-HORIZON())*persp(z);
+const roadHalf=z=>W*(0.085+0.40*persp(z));
+const laneX=(lane,z)=>W/2+(lane-1)*roadHalf(z)*0.62;
+
+/* ================= game state ================= */
+const ITEMS=['🍅','🥒','🫓','🧀','🫒','🍆','🍋','🌶️'];
+const LOWS=['📦','🍉','👵'];       // jump over (👵 sits low on a stool)
+const HIGHS=['🥙','🏮'];           // slide under (hanging)
+const BLOCKS=['🛒','🧔'];          // full-block: switch lanes
+let G=null, raf=0, last=0, running=false;
+const best=(()=>{try{return JSON.parse(localStorage.getItem('ss_best')||'{"baskets":0,"shekels":0}');}catch(e){return{baskets:0,shekels:0};}})();
+let beatTarget=0;
+try{ beatTarget=Math.max(0,parseInt(new URLSearchParams(location.search).get('beat')||'0',10)||0); }catch(e){}
+
+function newList(){
+  const pool=[...ITEMS].sort(()=>Math.random()-0.5);
+  return pool.slice(0,4).map(it=>({it,got:false}));
+}
+function reset(){
+  G={
+    t:0, dist:0, speed:0.34, lane:1, laneF:1,
+    jy:0, vy:0, sliding:0,
+    shekels:0, baskets:0, list:newList(),
+    ents:[], spawnAt:0, safeLane:1,
+    vendor:0,            // >0 = vendor on your heels (seconds left of danger)
+    inv:0, magnet:0, cart:0,
+    shake:0, flash:0, beaten:false
+  };
+}
+
+/* ================= input: 4 swipes + keys ================= */
+let tx=0,ty=0,tt=0;
+function go(dir){
+  if(!running)return;
+  if(dir==='l'&&G.lane>0)G.lane--;
+  else if(dir==='r'&&G.lane<2)G.lane++;
+  else if(dir==='u'&&G.jy===0&&!G.sliding){G.vy=2.6;}
+  else if(dir==='d'){ if(G.jy>0){G.vy=-4;} else G.sliding=0.55; }
+}
+const stage=document.getElementById('stage');
+stage.addEventListener('touchstart',e=>{const t=e.changedTouches[0];tx=t.clientX;ty=t.clientY;tt=performance.now();},{passive:true});
+stage.addEventListener('touchend',e=>{
+  const t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;
+  if(performance.now()-tt>600)return;
+  const ax=Math.abs(dx),ay=Math.abs(dy);
+  if(Math.max(ax,ay)<24){ if(running)go('u'); return; }   // tap = jump (one-thumb promise)
+  if(ax>ay) go(dx>0?'r':'l');
+  else go(dy<0?'u':'d');
+},{passive:true});
+window.addEventListener('keydown',e=>{
+  const k=e.key;
+  if(k==='ArrowLeft'||k==='a')go('l'); else if(k==='ArrowRight'||k==='d')go('r');
+  else if(k==='ArrowUp'||k==='w'||k===' ')go('u'); else if(k==='ArrowDown'||k==='s')go('d');
+});
+
+/* ================= spawning: always one safe lane, list items breadcrumb it ================= */
+function spawnRow(){
+  const d=Math.min(1,G.dist/2200);                 // 0→1 difficulty
+  const move=Math.random();
+  if(move<0.4) G.safeLane=Math.max(0,Math.min(2,G.safeLane+(Math.random()<0.5?-1:1)));
+  for(let l=0;l<3;l++){
+    if(l===G.safeLane) continue;
+    const p=0.45+0.4*d;
+    if(Math.random()<p){
+      const r=Math.random();
+      const kind=r<0.4?'low':r<0.7?'high':'block';
+      const set=kind==='low'?LOWS:kind==='high'?HIGHS:BLOCKS;
+      G.ents.push({z:0.02,lane:l,kind,it:set[(Math.random()*set.length)|0]});
+    }
+  }
+  const r=Math.random();
+  if(r<0.62){
+    G.ents.push({z:0.02,lane:G.safeLane,kind:'shekel',it:'🪙'});
+  }else if(r<0.86){
+    const need=G.list.filter(x=>!x.got);
+    if(need.length) G.ents.push({z:0.02,lane:G.safeLane,kind:'item',it:need[(Math.random()*need.length)|0].it});
+    else G.ents.push({z:0.02,lane:G.safeLane,kind:'shekel',it:'🪙'});
+  }else if(r<0.93){
+    G.ents.push({z:0.02,lane:G.safeLane,kind:'magnet',it:'🧲'});
+  }else{
+    G.ents.push({z:0.02,lane:G.safeLane,kind:'cart',it:'🛒'});
+  }
+}
+
+/* ================= collisions & progression ================= */
+function hit(){
+  if(G.inv>0||G.cart>0)return;
+  if(G.vendor>0){ gameOver(); return; }
+  G.vendor=6; G.inv=1.2; G.magnet=0; G.shake=0.4; G.flash=0.5;
+  toast(T().stumble); if(navigator.vibrate)try{navigator.vibrate(80);}catch(e){}
+}
+function collect(e){
+  if(e.kind==='shekel'){G.shekels+=1;}
+  else if(e.kind==='item'){
+    const slot=G.list.find(x=>x.it===e.it&&!x.got);
+    if(slot){slot.got=true;
+      if(G.list.every(x=>x.got)){
+        G.baskets++; G.shekels+=10; G.speed+=0.025;
+        toast(T().basketDone); track('basket');
+        if(beatTarget&&!G.beaten&&G.baskets>beatTarget){G.beaten=true;toast(T().beatWin);}
+        setTimeout(()=>{if(running){G.list=newList();toast(T().listNew);}},900);
+      }
+    } else G.shekels+=2;
+  }
+  else if(e.kind==='magnet'){G.magnet=8;toast(T().magnet);}
+  else if(e.kind==='cart'){G.cart=5;toast(T().cart);}
+}
+
+/* ================= update ================= */
+function update(dt){
+  G.t+=dt;
+  G.speed=Math.min(1.05,G.speed+dt*0.0048);
+  const zv=G.speed*dt;
+  G.dist+=zv*1000;
+  G.laneF+=(G.lane-G.laneF)*Math.min(1,dt*14);
+  if(G.jy>0||G.vy>0){G.vy-=dt*7.2;G.jy=Math.max(0,G.jy+G.vy*dt);if(G.jy===0)G.vy=0;}
+  if(G.sliding>0)G.sliding=Math.max(0,G.sliding-dt);
+  if(G.inv>0)G.inv-=dt; if(G.magnet>0)G.magnet-=dt; if(G.cart>0)G.cart-=dt;
+  if(G.vendor>0)G.vendor=Math.max(0,G.vendor-dt);
+  if(G.shake>0)G.shake-=dt; if(G.flash>0)G.flash-=dt;
+
+  G.spawnAt-=zv;
+  if(G.spawnAt<=0){spawnRow();G.spawnAt=0.16+0.05*Math.random();}
+
+  for(let i=G.ents.length-1;i>=0;i--){
+    const e=G.ents[i];
+    e.z+=zv*(G.cart>0?1.25:1);
+    const isPickup=e.kind==='shekel'||e.kind==='item'||e.kind==='magnet'||e.kind==='cart';
+    if(G.magnet>0&&isPickup&&e.z>0.7) e.lane+=(G.laneF-e.lane)*Math.min(1,dt*8);
+    if(e.z>1.12){G.ents.splice(i,1);continue;}
+    if(e.z>0.965&&e.z<1.045&&Math.abs(e.lane-G.laneF)<0.45){
+      if(isPickup){collect(e);G.ents.splice(i,1);continue;}
+      const cleared=(e.kind==='low'&&G.jy>0.32)||(e.kind==='high'&&G.sliding>0);
+      if(!cleared){hit();G.ents.splice(i,1);}
+    }
+  }
+}
+
+/* ================= draw ================= */
+function draw(){
+  const shx=G&&G.shake>0?(Math.random()-0.5)*10*G.shake:0;
+  ctx.save();ctx.translate(shx,0);
+  // sky — hot Friday afternoon
+  const sky=ctx.createLinearGradient(0,0,0,HORIZON());
+  sky.addColorStop(0,'#7ec8ff');sky.addColorStop(1,'#ffe2b0');
+  ctx.fillStyle=sky;ctx.fillRect(-12,0,W+24,HORIZON());
+  ctx.font=`${W*0.07}px sans-serif`;ctx.textAlign='center';
+  ctx.fillText('☀️',W*0.82,H*0.08);
+  ctx.fillText('🕍',W*0.18,HORIZON()-6);ctx.fillText('🏢',W*0.5,HORIZON()-4);
+
+  // market street
+  ctx.fillStyle='#c9a26b';ctx.fillRect(-12,HORIZON(),W+24,H-HORIZON());
+  const rg=ctx.createLinearGradient(0,HORIZON(),0,H);
+  rg.addColorStop(0,'#9a7a4e');rg.addColorStop(1,'#6e5230');
+  ctx.fillStyle=rg;
+  ctx.beginPath();
+  ctx.moveTo(W/2-roadHalf(0),roadY(0));ctx.lineTo(W/2+roadHalf(0),roadY(0));
+  ctx.lineTo(W/2+roadHalf(1),H);ctx.lineTo(W/2-roadHalf(1),H);ctx.closePath();ctx.fill();
+  // lane dividers (scrolling dashes)
+  ctx.strokeStyle='rgba(253,243,227,.35)';ctx.lineWidth=2;
+  for(const b of [0.5,1.5]){
+    const off=G?(G.dist*0.004)%0.12:0;
+    for(let z=off;z<1;z+=0.12){
+      const x1=W/2+(b-1)*roadHalf(z)*0.62, x2=W/2+(b-1)*roadHalf(z+0.05)*0.62;
+      ctx.beginPath();ctx.moveTo(x1,roadY(z));ctx.lineTo(x2,roadY(Math.min(1,z+0.05)));ctx.stroke();
+    }
+  }
+  // stall awnings flanking the road
+  for(let z=0.06;z<1;z+=0.16){
+    const s=persp(z), y=roadY(z), aw=W*0.16*s;
+    for(const side of [-1,1]){
+      const x=W/2+side*(roadHalf(z)+aw*0.55);
+      ctx.fillStyle=(Math.round(z/0.16)%2===0)?'rgba(214,69,69,.85)':'rgba(240,240,230,.85)';
+      ctx.beginPath();ctx.moveTo(x-aw*0.5,y);ctx.lineTo(x+aw*0.5,y);ctx.lineTo(x,y-aw*0.5);ctx.closePath();ctx.fill();
+    }
+  }
+  if(!G){ctx.restore();return;}
+
+  // entities back→front
+  const sorted=[...G.ents].sort((a,b)=>a.z-b.z);
+  for(const e of sorted){
+    const s=persp(e.z), y=roadY(e.z), x=laneX(e.lane,e.z);
+    const fs=Math.max(10,64*s);
+    ctx.font=`${fs}px sans-serif`;
+    const lift=e.kind==='high'?fs*0.9:0;     // hanging things hang
+    ctx.fillText(e.it,x,y-lift);
+    if(e.kind==='high'){ctx.strokeStyle='rgba(60,40,20,.7)';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(x,y-lift-fs*0.8);ctx.lineTo(x,HORIZON());ctx.stroke();}
+  }
+
+  // player
+  const px=laneX(G.laneF,1), py=PLAYY()-G.jy*H*0.13;
+  const pf=W*0.155;
+  ctx.font=`${pf}px sans-serif`;
+  if(G.inv>0&&Math.floor(G.t*12)%2===0){/* blink */}
+  else{
+    if(G.cart>0)ctx.fillText('🛒',px,py+4);
+    ctx.fillText(G.sliding>0?'🤸':'🏃',px,py-(G.cart>0?pf*0.5:0));
+    ctx.font=`${pf*0.5}px sans-serif`;ctx.fillText('🧺',px+pf*0.42,py-pf*0.55);
+  }
+  // vendor on your heels
+  if(G.vendor>0){
+    const vf=pf*(0.8+0.25*(G.vendor/6));
+    ctx.font=`${vf}px sans-serif`;ctx.globalAlpha=0.95;
+    ctx.fillText('👨‍🍳',px-pf*0.7,PLAYY()+pf*0.34);
+    ctx.globalAlpha=1;
+  }
+
+  // HUD
+  ctx.textAlign='left';
+  const hudY=Math.max(54,H*0.075);
+  ctx.font=`800 ${Math.max(15,W*0.045)}px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.fillStyle='#fdf3e3';
+  ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=6;
+  ctx.fillText(`🧺 ${G.baskets}   ₪ ${G.shekels}`,12,hudY+26);
+  // Ima's list
+  ctx.textAlign='right';
+  let lx=W-12;
+  for(let i=G.list.length-1;i>=0;i--){
+    const li=G.list[i];
+    ctx.globalAlpha=li.got?1:0.35;
+    ctx.font=`${Math.max(18,W*0.06)}px sans-serif`;
+    ctx.fillText(li.got?'✅':li.it,lx,hudY+26);
+    lx-=Math.max(22,W*0.075);
+    ctx.globalAlpha=1;
+  }
+  // powerup timers
+  ctx.textAlign='left';ctx.font=`700 ${Math.max(12,W*0.035)}px sans-serif`;
+  let puY=hudY+52;
+  if(G.magnet>0){ctx.fillText(`🧲 ${G.magnet.toFixed(0)}s`,12,puY);puY+=22;}
+  if(G.cart>0){ctx.fillText(`🛒 ${G.cart.toFixed(0)}s`,12,puY);}
+  ctx.shadowBlur=0;
+  if(G.flash>0){ctx.fillStyle=`rgba(255,93,115,${G.flash*0.5})`;ctx.fillRect(-12,0,W+24,H);}
+  ctx.restore();
+}
+
+/* ================= loop & lifecycle ================= */
+function frame(ts){
+  raf=requestAnimationFrame(frame);
+  const dt=Math.min(0.05,(ts-last)/1000||0.016);last=ts;
+  try{ if(running)update(dt); draw(); }
+  catch(err){ /* contain: never freeze the thread on a frame error */ }
+}
+function show(id){for(const o of ['menu','over','paused'])document.getElementById(o).classList.toggle('hidden',o!==id);}
+function hideAll(){for(const o of ['menu','over','paused'])document.getElementById(o).classList.add('hidden');}
+function start(){reset();hideAll();running=true;track('start');}
+function gameOver(){
+  running=false;track('death');
+  document.getElementById('ovBaskets').textContent=G.baskets;
+  document.getElementById('ovShekels').textContent=G.shekels;
+  const ob=document.getElementById('ovBeat');
+  if(beatTarget){ob.style.display='';ob.textContent=G.baskets>beatTarget?T().beatWin:T().beatBanner(beatTarget);}
+  if(G.baskets>best.baskets||(G.baskets===best.baskets&&G.shekels>best.shekels)){
+    best.baskets=G.baskets;best.shekels=G.shekels;
+    try{localStorage.setItem('ss_best',JSON.stringify(best));}catch(e){}
+  }
+  document.getElementById('ovBest').textContent=T().best(best.baskets,best.shekels);
+  show('over');
+}
+document.getElementById('startBtn').addEventListener('click',start);
+document.getElementById('againBtn').addEventListener('click',start);
+document.getElementById('resumeBtn').addEventListener('click',()=>{hideAll();running=true;last=performance.now();});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden&&running){running=false;show('paused');}
+});
+document.getElementById('shareBtn').addEventListener('click',async()=>{
+  const txt=T().shareTxt(G?G.baskets:best.baskets,G?G.shekels:best.shekels);
+  try{
+    if(navigator.share){await navigator.share({text:txt});track('share');}
+    else{await navigator.clipboard.writeText(txt);toast(T().copied);track('share-copy');}
+  }catch(e){}
+});
+/* arcade link must not register as a game tap */
+try{const ab=document.getElementById('arcadeBack');
+  ab.addEventListener('touchend',e=>e.stopPropagation());}catch(e){}
+
+applyLang();
+if(beatTarget){const b=document.getElementById('beatBanner');b.style.display='';b.textContent=T().beatBanner(beatTarget);}
+if(best.baskets>0)document.getElementById('menuBest').textContent=T().best(best.baskets,best.shekels);
+requestAnimationFrame(frame);
+if('serviceWorker' in navigator)
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+<script data-goatcounter="https://miklat-games.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

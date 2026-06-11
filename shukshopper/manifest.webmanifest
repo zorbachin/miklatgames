@@ -1,0 +1,13 @@
+{
+  "name": "SHUK SHOPPER",
+  "short_name": "SHUK SHOPPER",
+  "description": "Friday rush at the shuk. Fill Ima's list before the vendor catches you.",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a0f08",
+  "theme_color": "#1a0f08",
+  "icons": [
+    { "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231a0f08'/><text x='50' y='68' font-size='60' text-anchor='middle'>🧺</text></svg>", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
