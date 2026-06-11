@@ -360,7 +360,7 @@ function sleeves(c,len){ // len: 'none' 'short' 'long'
   if(len==='long') return stroke(ARM_L,c,26)+stroke(ARM_R,c,26);
   return '';
 }
-function top(){
+function topPiece(){
   const c=state.topColor;
   switch(state.top){
     case 'bare': return state.base==='young'?'':'<path d="M150 250 q6 10 12 0 M198 250 q6 10 12 0" stroke="#b98a64" stroke-width="2" fill="none" opacity=".5"/>';
@@ -500,7 +500,7 @@ function render(){
     body() +
     tattoo() +
     bottom() +
-    top() +
+    topPiece() +
     robe() +
     earrings() + necklace() + noseRing() +
     head() +
