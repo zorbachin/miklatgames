@@ -169,9 +169,18 @@
         </div>
       </a>
 
+      <a class="gcard" href="miklatdigger/" id="cardDigger" style="--accent:#fcc419" data-game="miklatdigger">
+        <div class="coverwrap"><img class="cover" src="assets/miklatdigger-cover.png" alt="Blocky pixel-art MIKLAT DIGGER title over dirt strata, with a hard-hat digger in a tunnel" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
+        <div class="body">
+          <div class="ttl"><span class="name">Miklat Digger</span><span class="name-he">מקלט דיגר</span></div>
+          <div class="hook" data-i18n="diggerHook">Dig them out. Get them to Ein Kerem.</div>
+          <div class="meta"><span class="pill" data-i18n="offline">📵 No reception needed</span></div>
+        </div>
+      </a>
+
       <div class="ghost">
         <div class="q">❔</div>
-        <span data-i18n="soon">More games loading… two doors open next.</span>
+        <span data-i18n="soon">More games loading… the next door opens soon.</span>
       </div>
     </div>
 
@@ -207,7 +216,8 @@ const I18N={
   play:'PLAY ▶',daily:'📅 Today’s Siren',offline:'📵 No reception needed',
   mamadHook:'Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.',
   ironHook:'Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.',
-  soon:'More games loading… two doors open next.',
+  diggerHook:'Dig them out. Get them to Ein Kerem.',
+  soon:'More games loading… the next door opens soon.',
   whyTitle:'Why we exist',
   why:'Built for morale. Open it once with internet — after that it works with zero signal. Free, no ads, no sign-up, nothing to install.',
   safety:'During a real alert, follow Home Front Command instructions only.',
@@ -220,7 +230,8 @@ const I18N={
   play:'שחקו ▶',daily:'📅 האזעקה של היום',offline:'📵 עובד בלי קליטה',
   mamadHook:'רוצו לממ״ד לפני הבום. קופצים מעל הסבתות, מתכופפים מתחת ליונים.',
   ironHook:'מיירטים רקטות עם האצבע. עשרה שלבים משדרות ועד אילת. עובד בלי קליטה.',
-  soon:'עוד משחקים בדרך… שתי דלתות נפתחות בקרוב.',
+  diggerHook:'חופרים לעין כרם',
+  soon:'עוד משחקים בדרך… הדלת הבאה נפתחת בקרוב.',
   whyTitle:'למה אנחנו קיימים',
   why:'בנוי בשביל המורל. פותחים פעם אחת עם אינטרנט — אחר כך זה עובד בלי שום קליטה. חינם, בלי פרסומות, בלי הרשמה.',
   safety:'באזעקה אמיתית פועלים רק לפי הנחיות פיקוד העורף.',
@@ -292,6 +303,7 @@ function track(name){
 }
 document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
 document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
+document.getElementById('cardDigger').addEventListener('click',()=>track('play-miklatdigger'));
 
 applyLang(); applyAudio();
 </script>
