@@ -147,6 +147,19 @@
 
   <main class="main">
     <div class="cards">
+      <a class="gcard" href="fabatollah/" id="cardFab" style="--accent:#ff5db1" data-game="fabatollah">
+        <img class="cover" src="fabatollah/cover.svg" alt="Cartoon ayatollah in a rainbow turban and heart-shaped sunglasses getting a Pride makeover" loading="eager">
+        <span class="play" data-i18n="play">PLAY ▶</span>
+        <div class="body">
+          <div class="ttl"><span class="name">Fabatollah</span><span class="name-he">פבאטולה</span></div>
+          <div class="hook" data-i18n="fabHook">Pride Month dress-up: give the Supreme Leader a glow-up. 10+ tops, drag, makeup, boas — make him fabulous.</div>
+          <div class="meta">
+            <span class="pill" data-i18n="pride">🏳️‍🌈 Pride Month</span>
+            <span class="pill" data-i18n="offline">📵 No reception needed</span>
+          </div>
+        </div>
+      </a>
+
       <a class="gcard" href="mamaddash/" id="cardMamad" style="--accent:#7ee8c7" data-game="mamaddash">
         <img class="cover" src="mamaddash/art/hero.webp" alt="Cartoon runner leaping over a savta on the Tel Aviv promenade" loading="eager">
         <span class="play" data-i18n="play">PLAY ▶</span>
@@ -205,10 +218,11 @@ if(/[?&](beat|daily)=/.test(qs)) location.replace('mamaddash/'+qs);
 const I18N={
  en:{dir:'ltr',brand:'MIKLAT GAMES',brandAlt:'משחקים למקלט',
   promise:'Free browser games that work in the shelter — no signal, no download, no ads.',
-  play:'PLAY ▶',daily:'📅 Today’s Siren',offline:'📵 No reception needed',
+  play:'PLAY ▶',daily:'📅 Today’s Siren',offline:'📵 No reception needed',pride:'🏳️‍🌈 Pride Month',
+  fabHook:'Pride Month dress-up: give the Supreme Leader a glow-up. 10+ tops, drag, makeup, boas — make him fabulous.',
   mamadHook:'Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.',
   ironHook:'Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.',
-  soon:'More games loading… two doors open next.',
+  soon:'More games loading… one more door opens next.',
   whyTitle:'Why we exist',
   why:'Built for morale. Open it once with internet — after that it works with zero signal. Free forever, no ads, no sign-up, nothing to install.',
   safety:'During a real alert, follow Home Front Command instructions only.',
@@ -218,10 +232,11 @@ const I18N={
   copied:'✅ Copied'},
  he:{dir:'rtl',brand:'משחקים למקלט',brandAlt:'MIKLAT GAMES',
   promise:'משחקי דפדפן חינמיים שעובדים בממ״ד — בלי קליטה, בלי הורדה, בלי פרסומות.',
-  play:'שחקו ▶',daily:'📅 האזעקה של היום',offline:'📵 עובד בלי קליטה',
+  play:'שחקו ▶',daily:'📅 האזעקה של היום',offline:'📵 עובד בלי קליטה',pride:'🏳️‍🌈 חודש הגאווה',
+  fabHook:'משחק התלבשות לחודש הגאווה: שדרגו את המנהיג העליון. עשר עליוניות, דראג, איפור, בואות — תהפכו אותו לפאבולוס.',
   mamadHook:'רוצו לממ״ד לפני הבום. קופצים מעל הסבתות, מתכופפים מתחת ליונים.',
   ironHook:'מיירטים רקטות עם האצבע. עשרה שלבים משדרות ועד אילת. עובד בלי קליטה.',
-  soon:'עוד משחקים בדרך… שתי דלתות נפתחות בקרוב.',
+  soon:'עוד משחקים בדרך… עוד דלת אחת נפתחת בקרוב.',
   whyTitle:'למה אנחנו קיימים',
   why:'בנוי בשביל המורל. פותחים פעם אחת עם אינטרנט — אחר כך זה עובד בלי שום קליטה. חינם לתמיד, בלי פרסומות, בלי הרשמה.',
   safety:'באזעקה אמיתית פועלים רק לפי הנחיות פיקוד העורף.',
@@ -291,6 +306,7 @@ document.getElementById('shareSite').addEventListener('click',async()=>{
 function track(name){
   try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'evt-'+name,event:true}); }catch(e){}
 }
+document.getElementById('cardFab').addEventListener('click',()=>track('play-fabatollah'));
 document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
 document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
 
