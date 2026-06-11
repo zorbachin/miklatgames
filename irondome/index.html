@@ -315,7 +315,7 @@ if (!save.cal || typeof save.cal !== 'object') save.cal = { x: 0, y: 0, done: fa
 if (save.lang !== 'he' && save.lang !== 'en') save.lang = 'he';
 if (!['easy', 'normal', 'commando'].includes(save.diff)) save.diff = 'normal';
 save.cal.x = +save.cal.x || 0; save.cal.y = +save.cal.y || 0;
-save.coins = +save.coins || 0; save.best = +save.best || 0; save.unlocked = +save.unlocked || 0;
+save.coins = +save.coins || 0; save.best = +save.best || 0; save.unlocked = Math.max(0, +save.unlocked || 0);
 
 /* ---- the Miklat Wallet: ₪ shared across ALL games on this origin ----
    key 'miklat.wallet' = {"sh": <int>}. The lore: it's the unemployment
@@ -2290,6 +2290,8 @@ let trackedPlay = false;
 window.addEventListener('appinstalled', () => track('pwa-install'));   // "download"
 if (window.matchMedia && matchMedia('(display-mode: standalone)').matches)
   track('app-open');                                          // opened from home screen
+
+menuMusicUpdate();   // arm menu music at boot (first-tap unlock path needs the flag set)
 
 /* ---------- PWA ---------- */
 if ('serviceWorker' in navigator)

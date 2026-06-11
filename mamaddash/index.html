@@ -376,7 +376,7 @@ function startWave(){
   // speed carries over between sirens (14% relief dip, never a full reset)
   if(G.wave>1) c.v0=clamp(G.vCarry*.86,c.v0,c.v1-60);
   G.prog=0; G.goal=c.goal; G.obs=[]; G.picks=[]; G.pows=[]; G.rockets=[];
-  G.scoots=[]; G.scootDist=0; G.nextScoot=c.goal*wrandC(.3,.62);
+  G.scoots=[]; G.scootDist=0;
   clearTimeout(G.deathTimer);
   G.nextOb=(G.tutorial&&!G.daily)?420:520; G.nextCoin=750;   // dailies: identical spacing for everyone
   if(G.daily){
@@ -390,6 +390,7 @@ function startWave(){
     G.powKind=irand(0,2); G.powLift=irand(0,1);
     G.nextPow=c.goal*rand(.3,.55);          // one power-up per wave, mid-run
   }
+  G.nextScoot=c.goal*wrandC(.3,.62);        // after reseed: dailies get the same scooter
   G.hits=0; G.stumble=0; G.invuln=0; G.star=0; G.magnet=0; G.sirenOn=false; G.freeze=0;
   G.jbuf=0; G.combo=0; G.starHits=0; G.confetti.length=0; G.fly.length=0;
   G.nextPulse=G.t+1.2;
@@ -477,13 +478,20 @@ function primary(){          // any tap: start / jump / skip cam / restart
   else if(G.state==='run') jump();
   else if(G.state==='deathcam'&&G.deathT>.8) showDeathPanel();
   else if(G.state==='dead'&&G.t-G.deadAt>.45){ $('dead').classList.add('hidden'); resetRun(G.daily); }
+  Music.update();   // first play() must happen inside the gesture stack (iOS)
 }
+/* hidden tab: silence everything — rAF freezes the game but audio would keep going */
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden) return;
+  try{ Sound.sirenStop(); }catch(e){}
+  try{ for(const a of Object.values(Music.tracks)) a.pause(); }catch(e){}
+});
 /* jump fires on touch DOWN (zero perceived latency). A tap that turns out
    to be a swipe-down self-heals: duck() slams an airborne player straight
    into the crouch, which reads as one intentional move. */
 let touchY0=null,swiped=false;
 window.addEventListener('touchstart',e=>{
-  if(e.target.closest('button')) return;
+  if(e.target.closest('button,a')) return;
   e.preventDefault();
   touchY0=e.touches[0].clientY; swiped=false;
   primary();
@@ -495,7 +503,7 @@ window.addEventListener('touchmove',e=>{
 },{passive:false});
 window.addEventListener('touchend',()=>{ touchY0=null; },{passive:false});
 window.addEventListener('mousedown',e=>{
-  if(e.target.closest('button')) return;
+  if(e.target.closest('button,a')) return;
   if(e.button===2){ if(G.state==='run') duck(); return; }
   primary();
 });

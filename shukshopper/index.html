@@ -215,10 +215,23 @@ function keyMagenta(img){
   const x=c.getContext('2d');x.drawImage(img,0,0);
   try{
     const d=x.getImageData(0,0,c.width,c.height);
+    // key out the flat magenta, then crop to the sprite's bounding box —
+    // generated 1:1 images carry margins that would render the character tiny
+    let minX=c.width,minY=c.height,maxX=0,maxY=0;
     for(let i=0;i<d.data.length;i+=4){
-      if(d.data[i]>170&&d.data[i+2]>170&&d.data[i+1]<110) d.data[i+3]=0;
+      if(d.data[i]>170&&d.data[i+2]>170&&d.data[i+1]<110){d.data[i+3]=0;continue;}
+      if(d.data[i+3]>8){
+        const p=i/4,px=p%c.width,py=(p/c.width)|0;
+        if(px<minX)minX=px;if(px>maxX)maxX=px;if(py<minY)minY=py;if(py>maxY)maxY=py;
+      }
     }
     x.putImageData(d,0,0);
+    if(maxX>minX&&maxY>minY){
+      const pad=2,w=Math.min(c.width,maxX-minX+1+pad*2),h=Math.min(c.height,maxY-minY+1+pad*2);
+      const c2=document.createElement('canvas');c2.width=w;c2.height=h;
+      c2.getContext('2d').drawImage(c,Math.max(0,minX-pad),Math.max(0,minY-pad),w,h,0,0,w,h);
+      return c2;
+    }
   }catch(e){}
   return c;
 }
@@ -284,6 +297,7 @@ function advanceZone(){
   else toast(T().zoneNew(zoneName(Z)));
 }
 function reset(){
+  if(G&&G.zoneTimer)clearTimeout(G.zoneTimer);
   G={
     t:0, dist:0, speed:0.34, lane:1, laneF:1,
     jy:0, vy:0, sliding:0,
@@ -324,7 +338,7 @@ window.addEventListener('keydown',e=>{
 
 /* ================= spawning: always one safe lane, list items breadcrumb it ================= */
 function spawnRow(){
-  const d=Math.min(1,G.dist/2200);                 // 0→1 difficulty
+  const d=Math.min(1,G.dist/12000);                // 0→1 difficulty over ~35s, not 6
   const move=Math.random();
   if(move<0.4) G.safeLane=Math.max(0,Math.min(2,G.safeLane+(Math.random()<0.5?-1:1)));
   for(let l=0;l<3;l++){
@@ -368,7 +382,8 @@ function collect(e){
         G.baskets++; G.shekels+=10; G.speed+=0.025;
         toast(T().basketDone); track('basket');
         if(beatTarget&&!G.beaten&&G.baskets>beatTarget){G.beaten=true;toast(T().beatWin);}
-        setTimeout(()=>{if(running){advanceZone();G.list=newList();}},900);
+        const run=G;   // bind to THIS run: a fast restart must not advance the next one
+        G.zoneTimer=setTimeout(()=>{if(running&&G===run){advanceZone();G.list=newList();}},900);
       }
     } else G.shekels+=2;
   }
