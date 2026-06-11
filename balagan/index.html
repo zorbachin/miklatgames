@@ -102,7 +102,8 @@
   <div class="controls"><span><b>DRAG / TAP</b> to stroll</span><span><b>TAP</b> a spot to enter</span></div>
   <div class="big" id="titleBtn">START THE DAY ▶</div>
   <div class="best" id="titleHustle" style="color:#ffd166;"></div>
-  <div class="best" id="titleBest"></div>
+  <div class="best" id="titleSeason" style="color:#ff8ad4;margin-top:8px;"></div>
+  <div class="best" id="titleBest" style="margin-top:8px;"></div>
 </div>
 
 <!-- MINIGAME RESULT -->
@@ -125,6 +126,7 @@
   <div class="stat">🎁 Bonus banked: <b id="ddBonus">+0₪</b></div>
   <div class="stat">💰 Wallet: <b id="ddWallet">0₪</b></div>
   <div class="best" id="ddNext" style="color:#ffd166;"></div>
+  <div class="best" id="ddLadder" style="color:#8ad2ff;"></div>
   <button class="btn teal" id="ddNextBtn">START TOMORROW ▶</button>
   <button class="btn ghost" id="ddShare">📤 FLEX ON A FRIEND</button>
 </div>
@@ -324,6 +326,7 @@ function earnMult(kind){
   if(c.mult){ if(c.mult.all) m+=c.mult.all; if(c.mult[kind]) m+=c.mult[kind]; }
   m+=upLv('tips')*UPS[0].step;
   m+=upLv('apt')*.05;
+  if(isFriday()) m+=.25;        // 🕯️ pre-Shabbat rush: everyone tips better
   return m;
 }
 function payout(raw,kind){ const v=Math.round(raw*earnMult(kind));
@@ -405,6 +408,29 @@ function todaysHustle(){
 }
 function ensureHustle(){ const d=dayIndex();
   if(!S.hustle||S.hustle.day!==d){ S.hustle={day:d,done:false}; save(); } }
+/* =================== seasonal moments + weekly ladder ===================
+   Real-calendar flavor, zero backend. */
+const isFriday=()=>new Date().getDay()===5;            // pre-Shabbat rush
+const isHeatwave=()=>{const m=new Date().getMonth();return m===6||m===7;}; // Jul/Aug
+const GHOST_NAMES=['Shuki','Savta Rivka','Moti Hi-Tech','Babushka Lena',
+  'Beach Adi','Mendy','Falafel Dudu','Yossi Taxi'];
+function weekLadder(){            // 8 seeded ghost rivals, fixed for the week
+  const wk=Math.floor(dayIndex()/7), r=mulberry32(wk*977731+7);
+  const gs=GHOST_NAMES.map(n=>({n,w:Math.round(300*Math.pow(60,r())/10)*10}));
+  gs.sort((a,b)=>b.w-a.w);
+  return gs;
+}
+function ladderInfo(){
+  const gs=weekLadder(), me=S.best.topWallet;
+  const rank=1+gs.filter(g=>g.w>me).length;
+  const next=[...gs].reverse().find(g=>g.w>me);
+  return {rank,total:gs.length+1,next,me};
+}
+function ladderLine(){
+  const L=ladderInfo();
+  return `🏆 Shuk Ladder: #${L.rank}/${L.total} this week`
+    + (L.next?` · ${money(L.next.w-L.me+10)} to pass ${L.next.n}`:' · 👑 TOP OF THE SHUK');
+}
 function checkHustle(id,value){
   ensureHustle(); if(S.hustle.done) return;
   const h=todaysHustle(); if(h.id!==id || value<h.target) return;
@@ -765,6 +791,7 @@ function clearDay(){
   $('ddNext').innerHTML=`Tomorrow's double-up: earn <b>${money(dayGoal())}</b>.`
     + (shieldNote?`<br><span style="color:#7ee8c7">${shieldNote}</span>`:'')
     + (crossUnlocked()&&!owned('mamadmom')?'<br><span style="color:#ffd166">🛡️ MAMAD MOM unlocked — claim her in the shop!</span>':'');
+  $('ddLadder').textContent=ladderLine();
   syncPassport(); save(); panel('dayDone');
 }
 $('ddNextBtn').addEventListener('click',()=>{ panel(null); G.state='hub';
@@ -812,14 +839,15 @@ function charCard(c){
       S.shekels-=c.cost; S.chars.push(c.id); S.equip=c.id; Sound.cash(); save(); renderShop(); }; }
   el.appendChild(b); return el;
 }
+function itemCost(it){ return it.id==='goldstar'&&isHeatwave()?30:it.cost; }   // ☀️ heatwave sale
 function itemCard(it){
-  const cnt=S.items[it.id]||0;
-  const el=cardShell(it.ico,null,it.name,it.perk,cnt>0?'×'+cnt:'');
+  const cnt=S.items[it.id]||0, cost=itemCost(it), sale=cost<it.cost;
+  const el=cardShell(it.ico,null,it.name,it.perk+(sale?' 🔥 HEATWAVE SALE':''),cnt>0?'×'+cnt:'');
   if(cnt>0) el.classList.add('owned');
   const b=document.createElement('button'); b.className='buy';
-  b.textContent='BUY '+money(it.cost);
-  b.onclick=()=>{ if(S.shekels<it.cost){ Sound.no(); flashCard(el); return; }
-    S.shekels-=it.cost; S.items[it.id]=(S.items[it.id]||0)+1; S['ever_'+it.id]=1; Sound.buy(); save(); renderShop(); };
+  b.textContent='BUY '+money(cost)+(sale?' (was '+money(it.cost)+')':'');
+  b.onclick=()=>{ if(S.shekels<cost){ Sound.no(); flashCard(el); return; }
+    S.shekels-=cost; S.items[it.id]=(S.items[it.id]||0)+1; S['ever_'+it.id]=1; Sound.buy(); save(); renderShop(); };
   el.appendChild(b); return el;
 }
 function upCard(u){
@@ -1158,6 +1186,12 @@ function hud(){
     const hw=cx.measureText(ht).width+22, hy=py+46;
     cx.fillStyle='rgba(13,17,32,.7)';rr(W/2-hw/2,hy-13,hw,26,13);
     cx.fillStyle=done?'#7ee8c7':'#ffd166';cx.fillText(ht,W/2,hy);
+    if(isFriday()){           // 🕯️ pre-Shabbat rush banner
+      const ft='🕯️ SHABBAT RUSH +25%';
+      const fw=cx.measureText(ft).width+22;
+      cx.fillStyle='rgba(13,17,32,.7)';rr(W/2-fw/2,hy+19,fw,26,13);
+      cx.fillStyle='#ff8ad4';cx.fillText(ft,W/2,hy+32);
+    }
   }
 }
 function rr(x,y,w,h,rad){ cx.beginPath();
@@ -1203,6 +1237,11 @@ $('titleBtn').addEventListener('click',startDay);
     : (S.shekels!==500?`💰 Wallet ${money(S.shekels)} — welcome back`:'');
   ensureHustle(); const h=todaysHustle();
   $('titleHustle').innerHTML = `🎯 Today's Hustle: <b>${h.desc}</b> · +${HUSTLE_REWARD}₪ ${S.hustle.done?'✅':''}`;
+  const season=[];
+  if(isFriday()) season.push('🕯️ PRE-SHABBAT RUSH — +25% on everything today!');
+  if(isHeatwave()) season.push('☀️ Heatwave: Goldstar half price at the shuk');
+  if(b.daysCleared>0) season.push(ladderLine());
+  $('titleSeason').innerHTML=season.join('<br>');
 })();
 
 let lastT=performance.now();
