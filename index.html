@@ -74,8 +74,9 @@
     background:var(--c-panel);border:1px solid var(--c-cyan-border);box-shadow:var(--shadow-card);
     transition:transform .12s var(--ease);}
   .gcard:active{transform:scale(.98);}
+  .gcard .coverwrap{position:relative;}
   .gcard .cover{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--c-panel-2);}
-  .gcard .play{position:absolute;top:12px;inset-inline-end:12px;background:linear-gradient(180deg,#ffd166,#e9a23b);
+  .gcard .play{position:absolute;bottom:10px;inset-inline-end:10px;background:linear-gradient(180deg,#ffd166,#e9a23b);
     color:#1a1405;font-weight:900;font-size:14px;padding:9px 16px;border-radius:11px;
     box-shadow:0 6px 18px rgba(233,162,59,.45);}
   .gcard .body{padding:13px 15px 15px;border-top:2px solid var(--accent,var(--c-cyan));}
@@ -148,8 +149,7 @@
   <main class="main">
     <div class="cards">
       <a class="gcard" href="mamaddash/" id="cardMamad" style="--accent:#7ee8c7" data-game="mamaddash">
-        <img class="cover" src="mamaddash/art/hero.webp" alt="Cartoon runner leaping over a savta on the Tel Aviv promenade" loading="eager">
-        <span class="play" data-i18n="play">PLAY ▶</span>
+        <div class="coverwrap"><img class="cover" src="mamaddash/art/hero.webp" alt="Cartoon runner leaping over a savta on the Tel Aviv promenade" loading="eager"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
           <div class="ttl"><span class="name">Mamad Dash</span><span class="name-he">מקלט דאש</span></div>
           <div class="hook" data-i18n="mamadHook">Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.</div>
@@ -161,8 +161,7 @@
       </a>
 
       <a class="gcard" href="irondome/" id="cardIron" style="--accent:#3ee6ff" data-game="irondome">
-        <img class="cover" src="assets/irondome-cover.webp" alt="Pixel-art Iron Dome intercepting rockets over a glowing city skyline" loading="lazy">
-        <span class="play" data-i18n="play">PLAY ▶</span>
+        <div class="coverwrap"><img class="cover" src="assets/irondome-cover.webp" alt="Pixel-art Iron Dome intercepting rockets over a glowing city skyline" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
           <div class="ttl"><span class="name">Iron Dome</span><span class="name-he">כיפת ברזל</span></div>
           <div class="hook" data-i18n="ironHook">Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.</div>
