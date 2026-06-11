@@ -1,0 +1,31 @@
+{
+  "game": "Shuk Shopper",
+  "style": "Vibrant 3D cartoon, Subway Surfers energy. Israeli shuk (Machane Yehuda) setting. Palette: cream #fdf3e3, golden yellow #ffd166, amber #e9a23b, coral red #ff5d73, deep brown #1a0f08. Thick outlines, punchy saturation, app-store polish.",
+  "images": [
+    {
+      "file": "keyart-16x9.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Mobile game key art, vibrant 3D cartoon style like Subway Surfers. A cheeky 10-year-old kid sprinting toward camera down a crowded Israeli shuk (Machane Yehuda market) lane, clutching an overflowing wicker shopping basket, fruit flying out. Behind: an angry mustachioed vendor in an apron mid-chase, knocking over a spice pyramid. Market stalls with oranges, pomegranates, hanging fabrics, string lights overhead. Warm palette: cream #fdf3e3, golden yellow #ffd166, amber #e9a23b, coral red #ff5d73, deep brown shadows #1a0f08. Bold chunky game-logo title text 'SHUK SHOPPER' at top, hand-painted market-sign style. High-energy, polished, app-store quality."
+    },
+    {
+      "file": "icon-1x1.png",
+      "aspect_ratio": "1:1",
+      "prompt": "App icon for a mobile game, 3D cartoon style. A single overflowing wicker shopping basket bursting with oranges, a pomegranate, a baguette and green herbs, with motion speed-lines, centered on a warm golden-yellow #ffd166 radial background with subtle market-awning stripes in coral red #ff5d73 and cream #fdf3e3. Bold, readable at small size, thick outlines, glossy game-icon finish. No text."
+    },
+    {
+      "file": "poster-9x16.png",
+      "aspect_ratio": "9:16",
+      "prompt": "Vertical mobile game poster, vibrant 3D cartoon style like Subway Surfers. Low-angle shot: a kid leaping over a crate of oranges in a narrow Israeli shuk market lane, wicker basket in hand, angry vendor with mustache far behind shaking his fist, three running lanes visible on the cobblestone ground. Hanging market lights, fabric awnings in coral red #ff5d73 and cream stripes, golden hour glow #ffd166. Bold chunky title 'SHUK SHOPPER' at top, tagline banner at bottom reading 'GRAB IMA'S LIST. DODGE THE VENDOR.' High-energy, polished app-store quality."
+    },
+    {
+      "file": "itchcover-4x3.png",
+      "aspect_ratio": "4:3",
+      "prompt": "Game cover art for itch.io, vibrant 3D cartoon style. Close crop: a grinning kid mid-sprint through an Israeli shuk market, overflowing wicker basket under one arm, a shopping list paper flying in the wind, vendor's grabbing hand entering frame from the left edge. Market stall colors: golden yellow #ffd166, amber #e9a23b, coral red #ff5d73, cream #fdf3e3, deep brown #1a0f08. Bold chunky hand-painted title 'SHUK SHOPPER' across the top third. Thick outlines, punchy saturated colors, readable as a small thumbnail."
+    },
+    {
+      "file": "banner-notext-16x9.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Wide promotional banner for a mobile game, vibrant 3D cartoon style. Side-scrolling composition: on the right, a kid sprinting with an overflowing wicker basket; center, flying oranges, pomegranates and a fluttering handwritten shopping list; on the left, an angry mustachioed market vendor in apron chasing. Background: blurred Israeli shuk market stalls with striped awnings and string lights, golden-hour warmth. Palette: cream #fdf3e3, golden yellow #ffd166, amber #e9a23b, coral red #ff5d73, deep brown #1a0f08. Clean negative space at top-center for overlay text, no title text in image. Polished, high-energy."
+    }
+  ]
+}

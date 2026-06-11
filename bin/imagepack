@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# imagepack — batch-generate a game's press image pack with the FREE Gemini API.
+#
+# Usage:
+#   GEMINI_API_KEY=... bin/imagepack <game-dir>        # e.g. bin/imagepack shukshopper
+#
+# Reads  <game-dir>/press/prompts.json  (the pack spec: one prompt per asset)
+# Writes <game-dir>/press/<file>        (PNG per entry)
+#
+# Get a free key at https://aistudio.google.com/apikey — the free tier covers
+# a full pack. Re-run anytime; tweak prompts.json and only delete the files
+# you want regenerated (existing files are skipped).
+set -euo pipefail
+
+GAME_DIR="${1:?usage: bin/imagepack <game-dir>}"
+SPEC="$GAME_DIR/press/prompts.json"
+MODEL="${IMAGEPACK_MODEL:-gemini-2.5-flash-image}"
+: "${GEMINI_API_KEY:?set GEMINI_API_KEY (free key: https://aistudio.google.com/apikey)}"
+[ -f "$SPEC" ] || { echo "no spec at $SPEC" >&2; exit 1; }
+command -v jq >/dev/null || { echo "jq is required" >&2; exit 1; }
+
+n=$(jq '.images | length' "$SPEC")
+echo "🎨 $n assets → $GAME_DIR/press/ (model: $MODEL)"
+
+for i in $(seq 0 $((n - 1))); do
+  file=$(jq -r ".images[$i].file" "$SPEC")
+  out="$GAME_DIR/press/$file"
+  if [ -f "$out" ]; then echo "⏭  $file exists, skipping"; continue; fi
+
+  jq -c --argjson i "$i" '{
+    contents: [{parts: [{text: .images[$i].prompt}]}],
+    generationConfig: {
+      responseModalities: ["IMAGE"],
+      imageConfig: {aspectRatio: .images[$i].aspect_ratio}
+    }
+  }' "$SPEC" > /tmp/imagepack-req.json
+
+  echo "⏳ $file ..."
+  if curl -sf "https://generativelanguage.googleapis.com/v1beta/models/$MODEL:generateContent" \
+      -H "x-goog-api-key: $GEMINI_API_KEY" -H "Content-Type: application/json" \
+      -d @/tmp/imagepack-req.json \
+    | jq -r '.candidates[0].content.parts[] | select(.inlineData) | .inlineData.data' \
+    | base64 -d > "$out" && [ -s "$out" ]; then
+    echo "✅ $file"
+  else
+    rm -f "$out"
+    echo "❌ $file failed (rate limit? bad key?) — re-run to retry" >&2
+  fi
+done
+echo "done."
