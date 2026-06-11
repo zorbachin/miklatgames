@@ -86,6 +86,8 @@
     </div>
     <div class="beatbanner" id="beatBanner" style="display:none"></div>
     <button class="bigbtn" id="startBtn" data-i18n="start">RUN! ▶</button>
+    <button class="ghostbtn" id="dailyBtn">📅 DAILY SHUK</button>
+    <div class="best-line" id="menuDaily"></div>
     <div class="best-line" id="menuBest"></div>
   </div>
 
@@ -122,6 +124,8 @@ const I18N={
   start:'RUN! ▶',again:'RUN AGAIN ▶',resume:'KEEP RUNNING ▶',pausedT:'PAUSED',
   caught:'CAUGHT BY THE VENDOR!',baskets:'Baskets for Ima',shekels:'Shekels pocketed',
   share:'📤 Challenge the Group Chat',copied:'✅ Copied — paste it in the chat',
+  daily:'DAILY SHUK',dailyStreak:n=>`🔥 daily streak: ${n}`,
+  shareDaily:(n,b,st)=>`📅 SHUK DAILY #${n} — ${b} basket${b===1?'':'s'}${st>1?` · 🔥${st}`:''}. Same shuk for everyone, once a day: https://miklatgames.fun/shukshopper/?daily=1`,
   best:(b,s)=>`🏆 Your best: ${b} basket${b===1?'':'s'} · ${s}₪`,
   beatBanner:b=>`⚔️ Your friend filled ${b} basket${b===1?'':'s'} — beat that!`,
   beatWin:'🎉 You beat the challenge!',
@@ -138,6 +142,8 @@ const I18N={
   start:'רוץ! ▶',again:'עוד פעם ▶',resume:'ממשיכים ▶',pausedT:'הפסקה',
   caught:'המוכר תפס אותך!',baskets:'סלסלות לאמא',shekels:'שקלים בכיס',
   share:'📤 אתגרו את הקבוצה',copied:'✅ הועתק — הדביקו בקבוצה',
+  daily:'שוק יומי',dailyStreak:n=>`🔥 רצף יומי: ${n}`,
+  shareDaily:(n,b,st)=>`📅 שוק יומי #${n} — ${b} סלסלות${st>1?` · 🔥${st}`:''}. אותו שוק לכולם, פעם ביום: https://miklatgames.fun/shukshopper/?daily=1`,
   best:(b,s)=>`🏆 השיא שלכם: ${b} סלסלות · ${s}₪`,
   beatBanner:b=>`⚔️ חבר מילא ${b} סלסלות — תנצחו!`,
   beatWin:'🎉 ניצחתם את האתגר!',
@@ -286,7 +292,7 @@ let beatTarget=0;
 try{ beatTarget=Math.max(0,parseInt(new URLSearchParams(location.search).get('beat')||'0',10)||0); }catch(e){}
 
 function newList(){
-  const pool=[...curZone().items].sort(()=>Math.random()-0.5);
+  const pool=[...curZone().items].sort(()=>RNG()-0.5);
   return pool.slice(0,4).map(it=>({it,got:false}));
 }
 function advanceZone(){
@@ -296,9 +302,36 @@ function advanceZone(){
   if(Z.shuk!==prev){toast(T().shukEnter(shukName(Z)));track('shuk-'+(G.zone%ZONES.length));}
   else toast(T().zoneNew(zoneName(Z)));
 }
-function reset(){
+/* ================= sound: tiny synth, sibling-style, first-gesture init ================= */
+const SND={ctx:null,on:(localStorage.getItem('ss_snd')??'1')==='1',
+  init(){if(!this.ctx)try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}},
+  b(f0,f1,dur,type,vol){if(!this.on||!this.ctx)return;try{
+    const c=this.ctx,o=c.createOscillator(),g=c.createGain();
+    o.type=type;o.frequency.setValueAtTime(f0,c.currentTime);
+    o.frequency.exponentialRampToValueAtTime(Math.max(1,f1),c.currentTime+dur);
+    g.gain.setValueAtTime(vol,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dur);
+    o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+dur);}catch(e){}},
+  tick(){this.b(420,520,.05,'square',.06);},
+  jump(){this.b(240,520,.12,'sine',.1);},
+  pop(){this.b(660,990,.08,'sine',.12);},
+  ding(){this.b(880,1320,.22,'triangle',.16);this.b(1100,1650,.3,'sine',.08);},
+  thud(){this.b(160,60,.18,'sawtooth',.2);},
+  over(){this.b(330,82,.6,'sawtooth',.16);}
+};
+/* ================= daily shuk: same gauntlet for everyone (seeded) ================= */
+let RNG=Math.random;
+const dayNum=()=>Math.floor(Date.now()/864e5)-20580;   // counts from the arcade's launch era (mamaddash convention)
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+let daily={};try{daily=JSON.parse(localStorage.getItem('ss_daily')||'{}');}catch(e){}
+function saveDaily(){try{localStorage.setItem('ss_daily',JSON.stringify(daily));}catch(e){}}
+
+function reset(dailyMode){
   if(G&&G.zoneTimer)clearTimeout(G.zoneTimer);
+  const dn=dailyMode?dayNum():null;
+  RNG=dn?mulberry32(dn*2654435761):Math.random;
   G={
+    daily:dn,
     t:0, dist:0, speed:0.34, lane:1, laneF:1,
     jy:0, vy:0, sliding:0,
     zone:0, zoneDist:0,
@@ -315,9 +348,9 @@ function reset(){
 let tx=0,ty=0,tt=0;
 function go(dir){
   if(!running)return;
-  if(dir==='l'&&G.lane>0)G.lane--;
-  else if(dir==='r'&&G.lane<2)G.lane++;
-  else if(dir==='u'&&G.jy===0&&!G.sliding){G.vy=2.6;}
+  if(dir==='l'&&G.lane>0){G.lane--;SND.tick();}
+  else if(dir==='r'&&G.lane<2){G.lane++;SND.tick();}
+  else if(dir==='u'&&G.jy===0&&!G.sliding){G.vy=2.6;SND.jump();}
   else if(dir==='d'){ if(G.jy>0){G.vy=-4;} else G.sliding=0.55; }
 }
 const stage=document.getElementById('stage');
@@ -339,25 +372,25 @@ window.addEventListener('keydown',e=>{
 /* ================= spawning: always one safe lane, list items breadcrumb it ================= */
 function spawnRow(){
   const d=Math.min(1,G.dist/12000);                // 0→1 difficulty over ~35s, not 6
-  const move=Math.random();
-  if(move<0.4) G.safeLane=Math.max(0,Math.min(2,G.safeLane+(Math.random()<0.5?-1:1)));
+  const move=RNG();
+  if(move<0.4) G.safeLane=Math.max(0,Math.min(2,G.safeLane+(RNG()<0.5?-1:1)));
   for(let l=0;l<3;l++){
     if(l===G.safeLane) continue;
     const p=0.45+0.4*d;
-    if(Math.random()<p){
-      const r=Math.random();
+    if(RNG()<p){
+      const r=RNG();
       const kind=r<0.4?'low':r<0.7?'high':'block';
       const Z=curZone();
       const set=kind==='low'?Z.lows:kind==='high'?Z.highs:Z.blocks;
-      G.ents.push({z:0.02,lane:l,kind,it:set[(Math.random()*set.length)|0]});
+      G.ents.push({z:0.02,lane:l,kind,it:set[(RNG()*set.length)|0]});
     }
   }
-  const r=Math.random();
+  const r=RNG();
   if(r<0.62){
     G.ents.push({z:0.02,lane:G.safeLane,kind:'shekel',it:'🪙'});
   }else if(r<0.86){
     const need=G.list.filter(x=>!x.got);
-    if(need.length) G.ents.push({z:0.02,lane:G.safeLane,kind:'item',it:need[(Math.random()*need.length)|0].it});
+    if(need.length) G.ents.push({z:0.02,lane:G.safeLane,kind:'item',it:need[(RNG()*need.length)|0].it});
     else G.ents.push({z:0.02,lane:G.safeLane,kind:'shekel',it:'🪙'});
   }else if(r<0.93){
     G.ents.push({z:0.02,lane:G.safeLane,kind:'magnet',it:'🧲'});
@@ -370,17 +403,17 @@ function spawnRow(){
 function hit(){
   if(G.inv>0||G.cart>0)return;
   if(G.vendor>0){ gameOver(); return; }
-  G.vendor=6; G.inv=1.2; G.magnet=0; G.shake=0.4; G.flash=0.5;
+  G.vendor=6; G.inv=1.2; G.magnet=0; G.shake=0.4; G.flash=0.5; SND.thud();
   toast(T().stumble); if(navigator.vibrate)try{navigator.vibrate(80);}catch(e){}
 }
 function collect(e){
-  if(e.kind==='shekel'){G.shekels+=1;}
+  if(e.kind==='shekel'){G.shekels+=1;SND.pop();}
   else if(e.kind==='item'){
     const slot=G.list.find(x=>x.it===e.it&&!x.got);
-    if(slot){slot.got=true;
+    if(slot){slot.got=true;SND.pop();
       if(G.list.every(x=>x.got)){
         G.baskets++; G.shekels+=10; G.speed+=0.025;
-        toast(T().basketDone); track('basket');
+        toast(T().basketDone); track('basket'); SND.ding();
         if(beatTarget&&!G.beaten&&G.baskets>beatTarget){G.beaten=true;toast(T().beatWin);}
         const run=G;   // bind to THIS run: a fast restart must not advance the next one
         G.zoneTimer=setTimeout(()=>{if(running&&G===run){advanceZone();G.list=newList();}},900);
@@ -407,7 +440,7 @@ function update(dt){
   if(G.shake>0)G.shake-=dt; if(G.flash>0)G.flash-=dt;
 
   G.spawnAt-=zv;
-  if(G.spawnAt<=0){spawnRow();G.spawnAt=0.16+0.05*Math.random();}
+  if(G.spawnAt<=0){spawnRow();G.spawnAt=0.16+0.05*RNG();}
 
   for(let i=G.ents.length-1;i>=0;i--){
     const e=G.ents[i];
@@ -559,9 +592,17 @@ function frame(ts){
 }
 function show(id){for(const o of ['menu','over','paused'])document.getElementById(o).classList.toggle('hidden',o!==id);}
 function hideAll(){for(const o of ['menu','over','paused'])document.getElementById(o).classList.add('hidden');}
-function start(){reset();hideAll();running=true;track('start');}
+function start(dailyMode){
+  reset(dailyMode===true);hideAll();running=true;SND.init();
+  track(G.daily?'start-daily':'start');
+}
+function paintDaily(){
+  const dn=dayNum(),el=document.getElementById('dailyBtn');
+  el.textContent=`📅 ${T().daily} #${dn}`+(daily.day===dn?` — 🧺${daily.baskets}`:'');
+  document.getElementById('menuDaily').textContent=(daily.streak||0)>0?T().dailyStreak(daily.streak):'';
+}
 function gameOver(){
-  running=false;track('death');
+  running=false;track(G&&G.daily?'death-daily':'death');SND.over();
   document.getElementById('ovBaskets').textContent=G.baskets;
   document.getElementById('ovShekels').textContent=G.shekels;
   const ob=document.getElementById('ovBeat');
@@ -571,16 +612,30 @@ function gameOver(){
     try{localStorage.setItem('ss_best',JSON.stringify(best));}catch(e){}
   }
   document.getElementById('ovBest').textContent=T().best(best.baskets,best.shekels);
+  if(G.daily){   // daily record + streak (streak = played dailies on consecutive days)
+    if(daily.day!==G.daily){
+      daily.streak=(daily.day===G.daily-1)?(daily.streak||0)+1:1;
+      daily.day=G.daily;daily.baskets=G.baskets;daily.shekels=G.shekels;
+    }else if(G.baskets>daily.baskets){daily.baskets=G.baskets;daily.shekels=G.shekels;}
+    saveDaily();paintDaily();
+  }
   show('over');
 }
-document.getElementById('startBtn').addEventListener('click',start);
-document.getElementById('againBtn').addEventListener('click',start);
+document.getElementById('startBtn').addEventListener('click',()=>start(false));
+document.getElementById('dailyBtn').addEventListener('click',()=>start(true));
+document.getElementById('againBtn').addEventListener('click',()=>start(!!(G&&G.daily)));   // replay stays in the mode you died in
+paintDaily();
+if(new URLSearchParams(location.search).get('daily')){   // daily links land on the daily button
+  const db=document.getElementById('dailyBtn');
+  db.classList.remove('ghostbtn');db.classList.add('bigbtn');
+}
 document.getElementById('resumeBtn').addEventListener('click',()=>{hideAll();running=true;last=performance.now();});
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden&&running){running=false;show('paused');}
 });
 document.getElementById('shareBtn').addEventListener('click',async()=>{
-  const txt=T().shareTxt(G?G.baskets:best.baskets,G?G.shekels:best.shekels);
+  const txt=(G&&G.daily)?T().shareDaily(G.daily,G.baskets,daily.streak||0)
+    :T().shareTxt(G?G.baskets:best.baskets,G?G.shekels:best.shekels);
   try{
     if(navigator.share){await navigator.share({text:txt});track('share');}
     else{await navigator.clipboard.writeText(txt);toast(T().copied);track('share-copy');}
