@@ -1,0 +1,46 @@
+{
+  "game": "Shuk Shopper — gameplay art pack",
+  "style": "Vibrant 3D cartoon, Subway Surfers energy, thick outlines, warm palette: cream #fdf3e3, gold #ffd166, amber #e9a23b, coral #ff5d73, deep brown #1a0f08. CHARACTER BIBLE — the kid: 10 years old, curly dark-brown hair, orange t-shirt, blue shorts, sandals, wicker basket. Sprites go on FLAT MAGENTA #ff00ff (the game chroma-keys it out); backdrops need no transparency. Generate with bin/imagepack shukshopper/assets",
+  "images": [
+    {
+      "file": "bg-carmel.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Painted game background, vibrant 3D cartoon style, for an endless-runner set in Shuk HaCarmel, Tel Aviv: dense market lane of stalls with red-and-white striped awnings, hanging t-shirts and tote bags, juice stands with orange pyramids, crowded color everywhere, distant Tel Aviv towers and bright Mediterranean sky, hot golden afternoon light. Composition: all detail in the upper two-thirds; the bottom third fades to plain flat warm tan ground #c9a26b with NO objects (the game's road is drawn over it). Warm palette: cream #fdf3e3, gold #ffd166, amber #e9a23b, coral #ff5d73. No people, no animals, no text."
+    },
+    {
+      "file": "bg-levinsky.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Painted game background, vibrant 3D cartoon style, for an endless-runner set in Shuk Levinsky, Tel Aviv: intimate spice-market street, old shopfronts with shelves of glass spice jars, burlap sacks of paprika and turmeric, hanging dried herb bundles and sausages, crates of nuts and dried fruit, amber late-afternoon light, Bauhaus building hints above the shops. Composition: all detail in the upper two-thirds; bottom third fades to plain flat warm tan ground #c9a26b with NO objects (the game's road is drawn over it). Warm amber palette: #e9a23b, #ffd166, cream #fdf3e3, deep brown #1a0f08. No people, no animals, no text."
+    },
+    {
+      "file": "bg-yehuda.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Painted game background, vibrant 3D cartoon style, for an endless-runner set in Mahane Yehuda market, Jerusalem: golden Jerusalem-stone arches and the iron market roof, strings of glowing lights overhead, halva and rugelach stands, hanging challah, dusk sky shifting purple-warm as Shabbat approaches, lanterns lit. Composition: all detail in the upper two-thirds; bottom third fades to plain flat warm tan ground #c9a26b with NO objects (the game's road is drawn over it). Palette: gold #ffd166, amber #e9a23b, purple dusk #5e3c8f, cream #fdf3e3. No people, no animals, no text."
+    },
+    {
+      "file": "player-run.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character sprite, full body, vibrant 3D cartoon style with thick outlines: a cheeky 10-year-old kid with curly dark-brown hair, orange t-shirt, blue shorts and sandals, in a dynamic mid-run stride facing the viewer at a slight three-quarter angle, holding a wicker basket overflowing with vegetables under one arm, determined grin. Centered, feet near the bottom edge. The ENTIRE background is one flat solid magenta color #ff00ff, edge to edge — no shadow on the ground, no gradient, no text."
+    },
+    {
+      "file": "player-slide.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character sprite, full body, vibrant 3D cartoon style with thick outlines: the SAME cheeky 10-year-old kid with curly dark-brown hair, orange t-shirt, blue shorts and sandals, now in a low knee power-slide pose leaning back, hugging the wicker basket of vegetables tight to the chest, gritted excited expression. Centered, low in frame. The ENTIRE background is one flat solid magenta color #ff00ff, edge to edge — no ground shadow, no gradient, no text."
+    },
+    {
+      "file": "vendor-carmel.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character sprite, full body, vibrant 3D cartoon style with thick outlines: a burly mustachioed Tel Aviv market vendor in a green apron over a white tank top, sprinting angrily toward the viewer waving a wooden spoon, comically furious, sweat drops flying. Centered, feet near bottom edge. The ENTIRE background is one flat solid magenta color #ff00ff, edge to edge — no ground shadow, no gradient, no text."
+    },
+    {
+      "file": "vendor-levinsky.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character sprite, full body, vibrant 3D cartoon style with thick outlines: a wiry elderly spice merchant with a white beard, flat cap and amber-stained apron, surprisingly fast angry run toward the viewer, waving a brass spice scoop, cloud of paprika dust behind him. Centered, feet near bottom edge. The ENTIRE background is one flat solid magenta color #ff00ff, edge to edge — no ground shadow, no gradient, no text."
+    },
+    {
+      "file": "vendor-yehuda.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character sprite, full body, vibrant 3D cartoon style with thick outlines: a young bearded Jerusalem market vendor in a black t-shirt and bar apron with a small towel on the shoulder, sprinting angrily toward the viewer waving a long baguette like a sword, comically dramatic. Centered, feet near bottom edge. The ENTIRE background is one flat solid magenta color #ff00ff, edge to edge — no ground shadow, no gradient, no text."
+    }
+  ]
+}

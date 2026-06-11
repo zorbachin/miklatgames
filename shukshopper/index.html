@@ -190,10 +190,36 @@ const laneX=(lane,z)=>W/2+(lane-1)*roadHalf(z)*0.62;
    A district owns its list items, obstacles, awnings and vendor.
    lows = jump over · highs = slide under (hanging) · blocks = switch lanes */
 const SHUKS={
-  carmel:{en:'Shuk HaCarmel',he:'שוק הכרמל'},
-  levinsky:{en:'Shuk Levinsky',he:'שוק לוינסקי'},
-  yehuda:{en:'Mahane Yehuda',he:'מחנה יהודה'}
+  carmel:{id:'carmel',en:'Shuk HaCarmel',he:'שוק הכרמל'},
+  levinsky:{id:'levinsky',en:'Shuk Levinsky',he:'שוק לוינסקי'},
+  yehuda:{id:'yehuda',en:'Mahane Yehuda',he:'מחנה יהודה'}
 };
+
+/* ============ gameplay art: PNGs dropped into assets/ upgrade the visuals;
+   missing files = emoji fallback, so the game never depends on them.
+   Sprites are generated on flat magenta (#ff00ff) and chroma-keyed here,
+   because image models can't output real transparency. ============ */
+const ART={};
+function keyMagenta(img){
+  const c=document.createElement('canvas');c.width=img.width;c.height=img.height;
+  const x=c.getContext('2d');x.drawImage(img,0,0);
+  try{
+    const d=x.getImageData(0,0,c.width,c.height);
+    for(let i=0;i<d.data.length;i+=4){
+      if(d.data[i]>170&&d.data[i+2]>170&&d.data[i+1]<110) d.data[i+3]=0;
+    }
+    x.putImageData(d,0,0);
+  }catch(e){}
+  return c;
+}
+[['bg-carmel'],['bg-levinsky'],['bg-yehuda'],
+ ['player-run',1],['player-slide',1],
+ ['vendor-carmel',1],['vendor-levinsky',1],['vendor-yehuda',1]
+].forEach(([n,key])=>{
+  const i=new Image();
+  i.onload=()=>{ART[n]=key?keyMagenta(i):i;};
+  i.src='assets/'+n+'.png';
+});
 const ZONES=[
  /* —— SHUK HACARMEL: loud, crowded, everything at once —— */
  {shuk:SHUKS.carmel,en:'Produce Row',he:'שוק הירקות',v:'🧑‍🌾',aw:['rgba(214,69,69,.85)','rgba(240,240,230,.85)'],
@@ -376,13 +402,21 @@ function update(dt){
 function draw(){
   const shx=G&&G.shake>0?(Math.random()-0.5)*10*G.shake:0;
   ctx.save();ctx.translate(shx,0);
-  // sky — hot Friday afternoon
-  const sky=ctx.createLinearGradient(0,0,0,HORIZON());
-  sky.addColorStop(0,'#7ec8ff');sky.addColorStop(1,'#ffe2b0');
-  ctx.fillStyle=sky;ctx.fillRect(-12,0,W+24,HORIZON());
-  ctx.font=`${W*0.07}px sans-serif`;ctx.textAlign='center';
-  ctx.fillText('☀️',W*0.82,H*0.08);
-  ctx.fillText('🕍',W*0.18,HORIZON()-6);ctx.fillText('🏢',W*0.5,HORIZON()-4);
+  const Z=G?curZone():ZONES[0];
+  // sky — painted shuk backdrop when art exists, hot Friday afternoon otherwise
+  const bg=ART['bg-'+Z.shuk.id];
+  if(bg){
+    const h=HORIZON(), sc=Math.max((W+24)/bg.width,h/bg.height);
+    ctx.drawImage(bg,W/2-bg.width*sc/2,h-bg.height*sc,bg.width*sc,bg.height*sc);
+  }else{
+    const sky=ctx.createLinearGradient(0,0,0,HORIZON());
+    sky.addColorStop(0,'#7ec8ff');sky.addColorStop(1,'#ffe2b0');
+    ctx.fillStyle=sky;ctx.fillRect(-12,0,W+24,HORIZON());
+    ctx.font=`${W*0.07}px sans-serif`;ctx.textAlign='center';
+    ctx.fillText('☀️',W*0.82,H*0.08);
+    ctx.fillText('🕍',W*0.18,HORIZON()-6);ctx.fillText('🏢',W*0.5,HORIZON()-4);
+  }
+  ctx.textAlign='center';
 
   // market street
   ctx.fillStyle='#c9a26b';ctx.fillRect(-12,HORIZON(),W+24,H-HORIZON());
@@ -402,7 +436,6 @@ function draw(){
     }
   }
   // stall awnings flanking the road — colors belong to the current district
-  const Z=G?curZone():ZONES[0];
   for(let z=0.06;z<1;z+=0.16){
     const s=persp(z), y=roadY(z), aw=W*0.16*s;
     for(const side of [-1,1]){
@@ -432,14 +465,29 @@ function draw(){
   if(G.inv>0&&Math.floor(G.t*12)%2===0){/* blink */}
   else{
     if(G.cart>0)ctx.fillText('🛒',px,py+4);
-    ctx.fillText(G.sliding>0?'🤸':'🏃',px,py-(G.cart>0?pf*0.5:0));
-    ctx.font=`${pf*0.5}px sans-serif`;ctx.fillText('🧺',px+pf*0.42,py-pf*0.55);
+    const ps=ART[G.sliding>0?'player-slide':'player-run'];
+    const pyo=py-(G.cart>0?pf*0.5:0);
+    if(ps){
+      const w=pf*1.15,h=w*(ps.height/ps.width);
+      const bob=G.jy===0&&G.sliding===0?Math.sin(G.t*14)*h*0.02:0;
+      ctx.drawImage(ps,px-w/2,pyo-h*0.85+bob,w,h);   // sprite includes the basket
+    }else{
+      ctx.fillText(G.sliding>0?'🤸':'🏃',px,pyo);
+      ctx.font=`${pf*0.5}px sans-serif`;ctx.fillText('🧺',px+pf*0.42,py-pf*0.55);
+    }
   }
   // vendor on your heels
   if(G.vendor>0){
     const vf=pf*(0.8+0.25*(G.vendor/6));
-    ctx.font=`${vf}px sans-serif`;ctx.globalAlpha=0.95;
-    ctx.fillText(Z.v,px-pf*0.7,PLAYY()+pf*0.34);
+    ctx.globalAlpha=0.95;
+    const vs=ART['vendor-'+Z.shuk.id];
+    if(vs){
+      const w=vf*1.1,h=w*(vs.height/vs.width);
+      ctx.drawImage(vs,px-pf*0.7-w/2,PLAYY()+pf*0.34-h*0.85,w,h);
+    }else{
+      ctx.font=`${vf}px sans-serif`;
+      ctx.fillText(Z.v,px-pf*0.7,PLAYY()+pf*0.34);
+    }
     ctx.globalAlpha=1;
   }
 
