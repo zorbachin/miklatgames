@@ -744,6 +744,14 @@ const SCRIPT={
       'My regular! The bowl knows your name now, motek. Same as always?',
       'NU, baali — your chair, your bowl, your Savta. Home. Now eat.'],
     landlord:'A LANDLORD in the family! Wait till I tell the mahjong table. 🏠',
+    advice:['The babushka KNOWS which game pays today. ₪20. Worth every agora.',
+      'The Chabadnik\'s bracha is +20% on your next game. Wrap the straps, motek.',
+      'My soup is a whole extra life at the net. Eat before you rally.',
+      'Three days in a row and you get a Shabbat Shield. Don\'t break the chain.',
+      'Three splats in a row and the pita is GONE. Breathe between throws.',
+      'The map, baali. Tap where you want to be. Your legs aren\'t the bus.',
+      'Buy the apartment when you can. Rent is theft and I\'ve said it for 60 years.',
+      'Friday everything pays extra. Pre-Shabbat money is the sweetest money.'],
   },
   chabad:{
     invite:['Achi! One wrap, one bracha, and the falafel will FLY today. Roll up that sleeve!',
@@ -775,6 +783,11 @@ const SCRIPT={
       'Havdalah\'s done, the week is fresh — first mitzvah of the week is the sweetest. Wrap!',
       'Babushka took my LAST cigarette for the havdalah candle again. A tzadeket! Worth it.'],
     tzedakah:'A little tzedakah goes a long way. Here — ₪30, pass it on. 🙏',
+    bless:['"May your falafel always land and your bus always wait." Amen, achi!',
+      '"May Bituach Leumi never learn your new address." AMEN.',
+      '"May your streak outlive your excuses." Beautiful, no? Go hustle.',
+      '"May the pita be soft and the hummus be deep." The deepest bracha there is.',
+      '"May your savta brag about you with REASON." Now make it true, achi!'],
   },
   babushka:{
     idle:['Zolotse. You again. I know everything, zolotse.',
@@ -894,13 +907,20 @@ function openChat(who){
   // every NPC has a VERB, not just text+OK
   const A=$('chatAct'), A2=$('chatAct2');
   A.classList.add('hidden'); A2.classList.add('hidden');
-  if(who==='chabad' && S.bracha<today){
-    A.textContent='🙏 WRAP TEFILLIN'; A.onclick=tefStart; A.classList.remove('hidden');
+  if(who==='chabad'){
+    if(S.bracha<today){ A.textContent='🙏 WRAP TEFILLIN'; A.onclick=tefStart; }
+    else { A.textContent='🕯️ ASK FOR A BLESSING'; A.onclick=()=>{ Sound.chat(); burstConfetti(6);
+      $('chatLine').textContent=rline(SCRIPT.chabad.bless); $('chatReward').textContent=''; }; }
+    A.classList.remove('hidden');
   }
-  if(who==='savta' && (S.gift.savta||0)<today){
-    $('chatLine').textContent=rline(SCRIPT.savta.soup);
-    A.textContent='🍲 EAT THE SOUP'; A.onclick=soupEat; A.classList.remove('hidden');
-    A2.textContent='🙅 "Savta, I ate" (+40₪)'; A2.onclick=soupDecline; A2.classList.remove('hidden');
+  if(who==='savta'){
+    if((S.gift.savta||0)<today){
+      $('chatLine').textContent=rline(SCRIPT.savta.soup);
+      A.textContent='🍲 EAT THE SOUP'; A.onclick=soupEat;
+      A2.textContent='🙅 "Savta, I ate" (+40₪)'; A2.onclick=soupDecline; A2.classList.remove('hidden');
+    } else { A.textContent='🤲 ASK HER ADVICE'; A.onclick=()=>{ Sound.chat();
+      $('chatLine').textContent=rline(SCRIPT.savta.advice); $('chatReward').textContent=''; }; }
+    A.classList.remove('hidden');
   }
   if(who==='babushka'){
     A.textContent=(S.gossip&&S.gossip.day===today)?'🗣️ WHAT WAS IT AGAIN?':'🗣️ BUY GOSSIP −20₪';
@@ -1010,10 +1030,9 @@ function vbStart(){
   gameIntro('🏐','VOLLEYBALL','Keep the rally with Savta — every bump pays',
     'TAP when the ball drops\ninto the gold ring','TAP = bump','3 drops and she packs the cooler');
 }
-function vbTap(){
-  const v=G.vb; if(!v||v.over) return;
-  if(v.hold){ v.hold=false; v.tut=false; S.taught.volley=1; save(); }   // tutorial freeze: this tap connects
-  if(v.hittable){
+function vbHit(){
+  const v=G.vb;
+  {
     v.rally++;
     const got=payout(8+v.rally*2, 'volley'); v.earn+=got;
     pop(v.ball.x,v.ball.y-30,`+${got}₪`,POP_COLS[v.rally%4]); flyCoin(v.ball.x,v.ball.y);
@@ -1023,8 +1042,15 @@ function vbTap(){
     // back to Savta, faster each rally and a touch faster every replay
     const sp=v.df*(1+Math.min(1.0,v.rally*.07))*(v.slow?.7:1);
     v.ball.vx=Math.abs(rand(150,200))*sp; v.ball.vy=-rand(380,440)*sp;
-    v.side='opp'; v.hittable=false;
-  } else { pop(W*.18,groundY-180,'too early!','#aab4c8'); Sound.no(); }   // whiff: no penalty, just timing
+    v.side='opp'; v.hittable=false; v.buf=0;
+  }
+}
+function vbTap(){
+  const v=G.vb; if(!v||v.over) return;
+  if(v.hold){ v.hold=false; v.tut=false; S.taught.volley=1; save(); }   // tutorial freeze: this tap connects
+  if(v.hittable) vbHit();
+  else if(v.side==='player'&&v.ball.vy>0){ v.buf=G.t; }   // a beat early? buffered — it'll connect
+  else { pop(W*.18,groundY-180,'too early!','#aab4c8'); Sound.no(); }
 }
 function vbUpdate(dt){
   const v=G.vb; if(!v||v.over) return;
@@ -1046,7 +1072,8 @@ function vbUpdate(dt){
     const was=v.hittable;
     v.hittable = b.vy>0 && b.y>floorY-zone && b.x<cxn+40;
     if(v.hittable && !was){ if(v.tut){ v.hold=true; pop(b.x,b.y-60,'👇 TAP NOW!','#ffd166',true); return; }
-      Sound.beep(880,.05,'square',.03); }   // a tick the instant it's tappable
+      Sound.beep(880,.05,'square',.03);
+      if(v.buf&&G.t-v.buf<.18){ v.buf=0; vbHit(); return; } }   // early tap lands anyway
     if(b.y>=floorY){
       b.y=floorY; v.lives--; Sound.miss(); shake(); buzz(80);
       pop(b.x,groundY-60,'💢 '+rline(BARK.vbMiss),'#ff5d5d',true);
@@ -1055,7 +1082,7 @@ function vbUpdate(dt){
     }
   } else { // opponent's half — Savta auto-returns near the top of the arc
     v.hittable=false;
-    if(b.x>cxn && b.vy>0 && b.y>groundY-300){
+    if(b.x>cxn && b.vy>0 && b.y>groundY-360){
       const sp=v.df*(1+Math.min(1.0,v.rally*.07))*(v.slow?.7:1);
       b.vx=-rand(150,200)*sp; b.vy=-rand(360,420)*sp; v.side='player'; v.pball++; Sound.bump();
     }
@@ -1084,10 +1111,9 @@ function mkStart(){
   gameIntro('🏓','MATKOT','Don\'t let the ball drop — rallies pay',
     'TAP the moment the ball\ncrosses your glowing line','TAP = smack');
 }
-function mkTap(){
-  const m=G.mk; if(!m||m.over) return;
-  if(m.hold){ m.hold=false; m.tut=false; S.taught.matkot=1; save(); }
-  if(m.hittable){
+function mkHit(){
+  const m=G.mk;
+  {
     m.rally++; m.swing=.16;
     const got=payout(7+m.rally*2,'matkot'); m.earn+=got;
     pop(m.ball.x,m.ball.y-30,`+${got}₪`,POP_COLS[m.rally%4]); flyCoin(m.ball.x,m.ball.y);
@@ -1095,8 +1121,15 @@ function mkTap(){
     if(m.rally===5||m.rally===10||m.rally===15){ burstConfetti(12);
       pop(W/2,groundY-150,rline(BARK.mkRally),POP_COLS[m.rally%4],true); }
     const sp=m.df*(1+Math.min(1.0,m.rally*.06));
-    m.ball.vx=rand(280,340)*sp; m.ball.vy=-rand(180,250); m.dir='out';
-  } else { pop(W*.16,groundY-180,'too early!','#aab4c8'); Sound.no(); }
+    m.ball.vx=rand(280,340)*sp; m.ball.vy=-rand(180,250); m.dir='out'; m.buf=0;
+  }
+}
+function mkTap(){
+  const m=G.mk; if(!m||m.over) return;
+  if(m.hold){ m.hold=false; m.tut=false; S.taught.matkot=1; save(); }
+  if(m.hittable) mkHit();
+  else if(m.dir==='in'){ m.buf=G.t; }                      // incoming: buffer it
+  else { pop(W*.16,groundY-180,'too early!','#aab4c8'); Sound.no(); }
 }
 function mkUpdate(dt){
   const m=G.mk; if(!m||m.over) return;
@@ -1110,7 +1143,8 @@ function mkUpdate(dt){
     const was=m.hittable;
     m.hittable = b.vx<0 && Math.abs(b.x-hx)<66;
     if(m.hittable&&!was){ if(m.tut){ m.hold=true; pop(b.x,b.y-50,'👇 TAP!','#ffd166',true); return; }
-      Sound.beep(880,.05,'square',.03); }
+      Sound.beep(880,.05,'square',.03);
+      if(m.buf&&G.t-m.buf<.18){ m.buf=0; mkHit(); return; } }
     if(b.x<W*.05){ // passed you — into the sand
       m.lives--; Sound.miss(); shake(); buzz(80);
       pop(W*.12,groundY-60,'💢 '+rline(BARK.mkMiss),'#ff5d5d',true);
@@ -1170,7 +1204,7 @@ function swStart(){
   Sound.enter(); G.state='shawarma'; G.pops.length=0;
   if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; pop(W/2,groundY-210,'🙏 bracha +20%','#8ad2ff',true); } else G.runBracha=0;
   G.sw={ time:20, m:.5, dir:1, zc:rand(.25,.75), zw:.11, hits:0, combo:0, earn:0,
-    over:false, df:diff('shawarma'), tut:!S.taught.shawarma, thrown:false, flash:0 };
+    over:false, df:diff('shawarma'), tut:!S.taught.shawarma, thrown:false, flash:0, slices:[] };
   if(G.sw.tut) G.sw.zw=.16;
   gameIntro('🌯','SHAWARMA CARVE','Carve clean slices — combos pay',
     'TAP when the knife is\ninside the green band','TAP = slice');
@@ -1183,6 +1217,7 @@ function swTap(){
     s.hits++; s.combo++;
     const got=payout(8+Math.min(s.combo,8)*2,'shawarma'); s.earn+=got;
     pop(W*.3,groundY-160-s.m*120,`+${got}₪`,POP_COLS[s.combo%4]); flyCoin(W*.3,groundY-180);
+    s.slices.push({t:0,y0:G.sw.m});                       // a slice arcs to the plate
     Sound.cash(); G.freeze=.04; buzz(18);
     if(s.combo===4||s.combo===7||s.combo===10){ burstConfetti(12);
       pop(W/2,groundY-150,rline(BARK.swCombo),POP_COLS[s.combo%4],true); }
@@ -1193,6 +1228,8 @@ function swTap(){
 function swUpdate(dt){
   const s=G.sw; if(!s||s.over) return;
   if(s.flash>0) s.flash-=dt;
+  for(const sl of s.slices) sl.t+=dt*2.4;
+  s.slices=s.slices.filter(sl=>sl.t<1);
   if(!(s.tut&&!s.thrown)){ s.time-=dt; if(s.time<=0){ s.time=0; swEnd(); return; } }
   s.m+=s.dir*dt*1.05*s.df*(s.tut?.5:1);
   if(s.m>1){ s.m=1; s.dir=-1; } if(s.m<0){ s.m=0; s.dir=1; }
@@ -1210,9 +1247,20 @@ function drawShawarma(){
   // the stand counter + you
   drawPlayer(W*.78,groundY,{dir:-1,walk:0});
   cx.fillStyle='#8a5a2b';cx.fillRect(sx-6,top-26,12,L+40);            // pole
-  // the meat cone (procedural, tasty-ish)
-  for(let i=0;i<10;i++){ const yy=top+18+i*(L-30)/10, w2=34-(i*1.4);
-    cx.fillStyle=i%2?'#b9762e':'#a35f1d'; rr(sx-w2,yy,w2*2,(L-30)/10+1,6); }
+  drawEmoji('🍅',sx-8,top-18,20); drawEmoji('🧅',sx+9,top-22,18);      // the crown
+  // the meat cone: shaded slabs, carved thinner where you've been slicing
+  const carve=Math.min(10,G.sw?G.sw.hits:0);
+  for(let i=0;i<11;i++){ const yy=top+14+i*(L-26)/11, hh=(L-26)/11+1;
+    const w2=(36-i*1.2)*(1-carve*.018);
+    const g3=cx.createLinearGradient(sx-w2,0,sx+w2,0);
+    g3.addColorStop(0,'#8a5320');g3.addColorStop(.42,'#c98a39');g3.addColorStop(.65,'#b06f24');g3.addColorStop(1,'#7c4716');
+    cx.fillStyle=g3; rr(sx-w2,yy,w2*2,hh,7);
+    if(i%3===1){ cx.fillStyle='rgba(255,220,140,.25)'; rr(sx-w2*.6,yy+2,w2*.9,3,2); }  // glisten
+  }
+  // juices dripping
+  cx.fillStyle='rgba(150,90,20,.7)';
+  for(let i=0;i<3;i++){ const dy=(G.t*38+i*47)%(L*.8);
+    cx.beginPath();cx.ellipse(sx-20+i*18,top+30+dy,2.2,5,0,0,7);cx.fill(); }
   drawEmoji('🔥',sx,bot+18,26);
   // the juicy green zone
   const zy1=top+(s.zc-s.zw)*L, zy2=top+(s.zc+s.zw)*L;
@@ -1226,8 +1274,17 @@ function drawShawarma(){
   if(inZone){ cx.font='900 24px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
     cx.lineWidth=6;cx.strokeStyle='rgba(15,20,40,.85)';cx.strokeText('SLICE!',sx+108,by);
     cx.fillStyle='#7ee8c7';cx.fillText('SLICE!',sx+108,by); }
-  // laffa plate
-  drawEmoji('🫓',W*.78,groundY-66,40); drawEmoji('🍽️',W*.78,groundY-40,34);
+  // slices arcing onto the laffa — the pile is the scoreboard
+  const plx=W*.78, ply=groundY-66;
+  drawEmoji('🍽️',plx,groundY-40,38); drawEmoji('🫓',plx,ply,44);
+  const pile=Math.min(12,s.hits);
+  for(let i=0;i<pile;i++){ const a2=i*2.4, r2=4+i*1.1;
+    cx.fillStyle=i%2?'#c98a39':'#a96a22';
+    cx.beginPath();cx.ellipse(plx+Math.cos(a2)*r2,ply-4-i*1.6,9,4,a2,0,7);cx.fill(); }
+  for(const sl of s.slices){ const e=sl.t*sl.t*(3-2*sl.t);
+    const x2=lerp(sx+30,plx,e), y2=lerp(top+sl.y0*L,ply-10,e)-Math.sin(e*Math.PI)*46;
+    cx.fillStyle='#c98a39';cx.save();cx.translate(x2,y2);cx.rotate(sl.t*5);
+    cx.beginPath();cx.ellipse(0,0,10,4.5,0,0,7);cx.fill();cx.restore(); }
   // hud
   cx.font='900 16px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
   hudPill(W/2,SAFE_TOP+30,`⏱️ ${Math.ceil(s.time)}s · 🌯 ${s.hits}`, s.time<5?'#ff5d5d':'#ffd166');
@@ -1240,7 +1297,7 @@ function arStart(){
   Sound.enter(); G.state='aroma'; G.pops.length=0;
   if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; pop(W/2,groundY-210,'🙏 bracha +20%','#8ad2ff',true); } else G.runBracha=0;
   G.ar={ time:20, f:0, pouring:false, good:0, cups:0, spills:0, combo:0, earn:0,
-    over:false, df:diff('aroma'), tut:!S.taught.aroma, poured:false };
+    over:false, df:diff('aroma'), tut:!S.taught.aroma, poured:false, lo:.74 };
   gameIntro('☕','ICED AROMA','Fill each cup to the gold band',
     'HOLD to pour\nRELEASE inside the gold','',
     'fill it to the top = spill');
@@ -1251,11 +1308,12 @@ function arUp(){
   a.pouring=false;
   if(a.f<.1){ a.f=0; return; }                       // a splash, not a pour
   a.cups++;
-  const lo=a.tut?.68:.74, hi=.92;
+  const lo=a.tut?.68:a.lo, hi=.90;
   if(a.f>=lo&&a.f<=hi){
     if(a.tut){ a.tut=false; S.taught.aroma=1; save(); }
     a.good++; a.combo++;
-    const acc=1-Math.abs(a.f-.84)/(hi-lo), bonus=Math.round(18*clamp(acc,0,1));
+    a.lo=Math.min(.83,a.lo+.018);                    // the band tightens as you prove yourself
+    const acc=1-Math.abs(a.f-(lo+hi)/2)/(hi-lo), bonus=Math.round(18*clamp(acc,0,1));
     const got=payout(10+bonus+a.combo*2,'aroma'); a.earn+=got;
     pop(W/2,groundY-200,`+${got}₪${acc>.8?' PERFECT ❄️':''}`,POP_COLS[a.combo%4],acc>.8);
     flyCoin(W/2,groundY-180); Sound.cash(); buzz(18);
@@ -1270,7 +1328,7 @@ function arUpdate(dt){
   const a=G.ar; if(!a||a.over) return;
   if(!(a.tut&&!a.poured)){ a.time-=dt; if(a.time<=0){ a.time=0; arEnd(); return; } }
   if(a.pouring){
-    a.f+=dt*.48*a.df*(a.tut?.55:1);
+    a.f+=dt*(.48+.035*a.cups)*a.df*(a.tut?.55:1);   // each cup pours a little faster
     if(a.f>=1){ a.f=0; a.pouring=false; a.combo=0; a.spills++; a.cups++;
       Sound.miss(); shake(); pop(W/2,groundY-200,rline(BARK.arSpill),'#ff5d5d',true); }
   }
@@ -1291,7 +1349,7 @@ function drawAroma(){
   // the cup
   const cw=86, ch=150, cxp=W*.58, cy=groundY-60;
   // gold target band
-  const lo=(a.tut?.68:.74), hi=.92;
+  const lo=(a.tut?.68:a.lo), hi=.90;
   cx.fillStyle='rgba(255,209,102,.25)';
   cx.fillRect(cxp-cw/2-14,cy-hi*ch,cw+28,(hi-lo)*ch);
   cx.strokeStyle='#ffd166';cx.lineWidth=2;
