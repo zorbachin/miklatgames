@@ -276,13 +276,14 @@ const CHARS=[
 ];
 const ITEMS=[
   {id:'falafel', ico:'🥙', name:'Falafel Pack', cost:80,  perk:'+5s on your next mini-game.'},
-  {id:'hummus',  ico:'🫓', name:'Hummus Bowl',  cost:130, perk:'Auto-saves one volleyball miss.'},
+  {id:'hummus',  ico:'🫓', name:'Hummus Bowl',  cost:130, perk:'+1 life in your next volleyball game.'},
   {id:'goldstar',ico:'🍺', name:'Cold Goldstar',cost:60,  perk:'Slows the next game down a touch.'},
 ];
 const UPS=[
   {id:'tips',  ico:'💸', name:'Bigger Tips',  base:200, name2:'earnings', max:5, step:.12, perk:lv=>`+${lv*12}% all earnings (Lv ${lv}/5)`},
   {id:'walk',  ico:'👟', name:'Faster Walk',  base:150, max:4, step:30,  perk:lv=>`Stroll +${lv*30} speed (Lv ${lv}/4)`},
-  {id:'lucky', ico:'🍀', name:'Lucky Charm',  base:300, max:3, step:1,   perk:lv=>`Combos build faster (Lv ${lv}/3)`},
+  {id:'lucky', ico:'🍀', name:'Lucky Charm',  base:300, max:3, step:1,
+   perk:lv=>lv?`${lv} splat${lv===1?'':'s'}/run won't break your combo (Lv ${lv}/3)`:'Splats forgive your falafel combo (Lv 0/3)'},
 ];
 
 /* =================== save / economy =================== */
@@ -550,10 +551,11 @@ function vbStart(){
   let slow=(S.items.goldstar||0)>0?1:0; if(slow){ S.items.goldstar--; used.push('🍺 slow-mo'); }
   if(used.length){ save(); pop(W/2,groundY-210,used.join('  '),'#8ad2ff',true); }
   G.vb={ ball:{x:W*.3,y:groundY-260,vx:40,vy:-200}, side:'player', rally:0, lives, maxLives:Math.max(1,lives),
-    over:false, t:0, hittable:false, slow, earn:0 };
+    over:false, t:0, hittable:false, slow, earn:0, lockout:0 };
 }
 function vbTap(){
   const v=G.vb; if(!v||v.over) return;
+  if(G.t<v.lockout) return;        // brief lockout after a whiff — no mashing through the window
   if(v.hittable){
     v.rally++;
     const got=payout(8+v.rally*2, 'volley'); v.earn+=got;
@@ -565,8 +567,9 @@ function vbTap(){
     const sp=1+Math.min(1.4,v.rally*.08)*(v.slow?.7:1);
     v.ball.vx=Math.abs(rand(150,210))*sp; v.ball.vy=-rand(360,430)*sp;
     v.side='opp'; v.hittable=false; v.served=true;
-  } else { // early/whiff tap — tiny visual nudge, no penalty
-    pop(G.player.x-G.camX,groundY-180,'too early!','#aab4c8'); Sound.no();
+  } else { // early/whiff tap — no damage, but a 1/4s lockout so timing matters
+    v.lockout=G.t+.25;
+    pop(W*.18,groundY-180,'too early!','#aab4c8'); Sound.no();
   }
 }
 function vbUpdate(dt){
@@ -578,8 +581,10 @@ function vbUpdate(dt){
   if(b.x<W*.08){ b.x=W*.08; b.vx=Math.abs(b.vx); }
   if(b.x>W*.92){ b.x=W*.92; b.vx=-Math.abs(b.vx); }
   if(v.side==='player'){
-    // hittable when descending into the lower zone on the player's half
-    v.hittable = b.vy>0 && b.y>groundY-200 && b.x<cxn+40;
+    // hittable when descending into the lower zone on the player's half;
+    // the zone tightens as the rally climbs — wins get earned (target ~6-8 median)
+    const zone=200-Math.min(90,v.rally*10);
+    v.hittable = b.vy>0 && b.y>groundY-zone && b.x<cxn+40;
     if(b.y>=groundY-26){ // hit the sand on your side
       b.y=groundY-26;
       v.lives--; Sound.miss(); shake(); buzz(80);
@@ -617,7 +622,7 @@ function faStart(){
   let slow=(S.items.goldstar||0)>0?1:0; if(slow){ S.items.goldstar--; used.push('🍺 slow-mo'); }
   if(used.length){ save(); pop(W/2,groundY-210,used.join('  '),'#8ad2ff',true); }
   G.fa={ time:20+extra, pita:{x:W*.66,dir:1}, falafels:[], power:0, pdir:1, combo:0, maxCombo:0,
-    hits:0, earn:0, over:false, slow };
+    hits:0, earn:0, over:false, slow, missRow:0, luckyLeft:upLv('lucky'), bust:false };
 }
 function faTap(){
   const f=G.fa; if(!f||f.over) return;
@@ -631,8 +636,8 @@ function faUpdate(dt){
   const f=G.fa; if(!f||f.over) return;
   if(f.slow) dt*=.82;
   f.time-=dt; if(f.time<=0){ f.time=0; faEnd(); return; }
-  // power meter ping-pongs
-  f.power+=f.pdir*dt*1.5*(1+upLv('lucky')*.12);
+  // power meter ping-pongs — and speeds up a touch as your combo climbs
+  f.power+=f.pdir*dt*1.5*(1+Math.min(.5,f.combo*.06));
   if(f.power>1){ f.power=1; f.pdir=-1; } if(f.power<0){ f.power=0; f.pdir=1; }
   // pita drifts
   const pita=f.pita; pita.x+=pita.dir*90*dt;
@@ -642,14 +647,25 @@ function faUpdate(dt){
     if(fl.done) continue;
     fl.vy+=g*dt; fl.x+=fl.vx*dt; fl.y+=fl.vy*dt;
     if(fl.y>=groundY-40){ fl.y=groundY-40; fl.done=true;
-      if(Math.abs(fl.x-pita.x)<46){           // in the pita!
-        f.combo++; f.hits++; f.maxCombo=Math.max(f.maxCombo,f.combo);
+      if(Math.abs(fl.x-pita.x)<40){           // in the pita!
+        f.combo++; f.hits++; f.maxCombo=Math.max(f.maxCombo,f.combo); f.missRow=0;
         const got=payout(12+f.combo*4,'falafel'); f.earn+=got;
         pop(pita.x,groundY-120,`+${got}₪${f.combo>1?` ×${f.combo}`:''}`,POP_COLS[f.combo%4],f.combo>2);
         flyCoin(pita.x,groundY-80); Sound.cash(); G.freeze=.04; buzz(15);   // hit-stop on the catch
         if(f.combo===3||f.combo===5||f.combo===8){ burstConfetti(12);
           pop(W/2,groundY-160,`×${f.combo} STREAK! 🔥`,POP_COLS[f.combo%4],true); }
-      } else { f.combo=0; Sound.miss(); shake(); pop(fl.x,groundY-50,'splat 🫠','#aab4c8'); }
+      } else if(f.luckyLeft>0){               // 🍀 lucky charm: this splat is forgiven
+        f.luckyLeft--; Sound.no();
+        pop(fl.x,groundY-70,'🍀 combo saved!','#7ee8c7',true);
+      } else {
+        f.combo=0; f.missRow++; Sound.miss(); shake();
+        pop(fl.x,groundY-50,f.missRow===2?'splat 🫠 — careful!':'splat 🫠','#aab4c8');
+        if(f.missRow>=3){                     // three straight splats: she's done with you
+          f.bust=true;
+          pop(W/2,groundY-180,'SAVTA TOOK THE PITA BACK 😤','#ff5d5d',true);
+          faEnd(); return;
+        }
+      }
     }
   }
   f.falafels=f.falafels.filter(fl=>!fl.done&&fl.x<W+60);
@@ -670,8 +686,10 @@ function showResult(){
     $('rSub').textContent=`You kept a ${G.vb.rally}-rally going with Savta.`;
     $('rBestLine').innerHTML=`🏐 Best rally: <b>${S.best.volley}</b>`;
   } else {
-    $('rTitle').textContent=G.fa.hits>=10?'SHUK LEGEND! 🥙':G.fa.hits>=5?'TASTY!':'MESSY.';
-    $('rSub').textContent=`${G.fa.hits} falafels in the pita. The street is fed.`;
+    $('rTitle').textContent=G.fa.bust?'OY VEY. 😤':G.fa.hits>=10?'SHUK LEGEND! 🥙':G.fa.hits>=5?'TASTY!':'MESSY.';
+    $('rSub').textContent=G.fa.bust
+      ? `Three splats in a row — Savta took the pita back. Still landed ${G.fa.hits}.`
+      : `${G.fa.hits} falafels in the pita. The street is fed.`;
     $('rBestLine').innerHTML=`🥙 Best batch: <b>${S.best.falafel}</b>`;
   }
   const earned=S.earnedToday;
