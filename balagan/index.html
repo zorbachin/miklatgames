@@ -483,20 +483,38 @@ function checkHustle(id,value){
 }
 
 /* =================== world / state =================== */
-/* a longer street for 12 stations; the MAP is fast-travel, walking is flavor */
+/* the city is LEVEL COMPONENTS — four districts, each its own ground, its own
+   stations. The MAP shows them as panels (fast-travel); walking crosses them. */
 const WORLD_W=3600;
+const DISTRICTS=[
+  {id:'beach', name:'🏖 THE BEACH',  x0:0,    x1:1160, deck:'sand'},
+  {id:'street',name:'🌴 THE STREET', x0:1160, x1:2000, deck:'wood'},
+  {id:'shuk',  name:'🛍 THE SHUK',   x0:2000, x1:3040, deck:'cobble'},
+  {id:'city',  name:'🚌 THE CITY',   x0:3040, x1:3600, deck:'asphalt'},
+];
+const districtAt=x=>DISTRICTS.find(d=>x>=d.x0&&x<d.x1)||DISTRICTS[0];
+/* future levels — the universe grows city by city */
+const CITIES=[
+  {id:'telaviv',name:'TEL AVIV',live:true},
+  {id:'jerusalem',ico:'🕍',name:'JERUSALEM',hint:'Old City · Ben Yehuda',unlock:'opens at 7🔥 streak'},
+  {id:'haifa',ico:'🚋',name:'HAIFA',hint:'the Carmelit ride',unlock:'opens on day 14'},
+];
 const STATIONS=[
+  // 🏖 the beach: where you live and play
   {id:'home',    x:140,  ico:'🏠', art:'home',          label:'HOME',      sub:'sleep / new day'},
-  {id:'matkot',  x:420,  ico:'🏓', art:'matkot',        label:'MATKOT',    sub:'paddle rally'},
-  {id:'chat_savta',x:700,ico:'🧓', label:'SAVTA',       sub:'a word of advice', npc:true},
-  {id:'falafel', x:990,  ico:'🥙', art:'stand-falafel', label:'FALAFEL',   sub:'toss for tips'},
-  {id:'shawarma',x:1280, ico:'🌯', art:'shawarma',      label:'SHAWARMA',  sub:'carve the spit'},
-  {id:'chat_chabad',x:1570,ico:'🧔',label:'CHABAD',     sub:'tefillin?',   npc:true},
-  {id:'shop',    x:1870, ico:'🛍️', art:'shop-front',    label:'SHUK SHOP', sub:'spend your shekels'},
-  {id:'aroma',   x:2160, ico:'☕', art:'aroma',          label:'ICED AROMA',sub:'pour the cold brew'},
-  {id:'kiosk',   x:2450, ico:'👵', art:'kiosk',         label:'KIOSK',     sub:'gossip & goralot', npc:true},
-  {id:'cats',    x:2740, ico:'🐈', art:'cats',          label:'STREET CATS',sub:'pet the council'},
-  {id:'volley',  x:3030, ico:'🏐', art:'net-volley',    label:'VOLLEYBALL',sub:'bump for cash'},
+  {id:'matkot',  x:430,  ico:'🏓', art:'matkot',        label:'MATKOT',    sub:'paddle rally'},
+  {id:'volley',  x:720,  ico:'🏐', art:'net-volley',    label:'VOLLEYBALL',sub:'bump for cash'},
+  {id:'chat_savta',x:990,ico:'🧓', label:'SAVTA',       sub:'a word of advice', npc:true, dep:.16},
+  // 🌴 the street: the food strip
+  {id:'falafel', x:1300, ico:'🥙', art:'stand-falafel', label:'FALAFEL',   sub:'toss for tips'},
+  {id:'chat_chabad',x:1580,ico:'🧔',label:'CHABAD',     sub:'tefillin?',   npc:true, dep:.16},
+  {id:'shawarma',x:1860, ico:'🌯', art:'shawarma',      label:'SHAWARMA',  sub:'carve the spit'},
+  // 🛍 the shuk: commerce & gossip
+  {id:'shop',    x:2150, ico:'🛍️', art:'shop-front',    label:'SHUK SHOP', sub:'spend your shekels'},
+  {id:'aroma',   x:2430, ico:'☕', art:'aroma',          label:'ICED AROMA',sub:'pour the cold brew'},
+  {id:'kiosk',   x:2700, ico:'👵', art:'kiosk',         label:'KIOSK',     sub:'gossip & goralot', npc:true, dep:.2},
+  {id:'cats',    x:2930, ico:'🐈', art:'cats',          label:'STREET CATS',sub:'pet the council'},
+  // 🚌 the city: where the traffic lives (more coming)
   {id:'allenby', x:3330, ico:'🚌', art:'allenby',       label:'ALLENBY',   sub:'cross the traffic'},
 ];
 const MINI=['volley','falafel','matkot','shawarma','aroma','cats','allenby'];
@@ -576,9 +594,9 @@ function panel(id){ for(const p of ['title','result','dayDone','chat','shop','mo
    The street is a walkable plaza seen from above-and-behind (classic JRPG
    town view): buildings line the back edge, the player roams x AND depth.
    d=0 is the storefront line, d=1 the bottom of the screen. */
-const TOWN=()=>({top:Math.round(H*.42), bot:Math.round(H*.78)});   // tighter plaza: no dead bottom half
+const TOWN=()=>({top:Math.round(H*.36), bot:Math.round(H*.86)});   // deeper plaza: aerial, not side-on
 const townY=d=>{const t=TOWN();return t.top+26+d*(t.bot-t.top-26);};
-const townScale=d=>.85+.6*d;           // closer = noticeably bigger: depth actually reads
+const townScale=d=>.78+.75*d;          // strong near-scale: over-the-shoulder depth
 
 /* =================== input — tap anywhere to walk, tap a building to enter =================== */
 let ptDown=null, ptMoved=false, dragX=0;
@@ -619,8 +637,9 @@ function onUp(sx){
     const mp=G.mapPill;
     if(mp&&sx>=mp.x&&sx<=mp.x+mp.w&&sy>=mp.y&&sy<=mp.y+mp.h){
       ptDown=null; Sound.enter(); G.state='map'; return; }
-    // tapping a building (its sprite sits on the back edge, above the plaza)
-    const st=STATIONS.find(s=>Math.abs(s.x-wx)<75 && sy<t.top+90);
+    // tapping a building (back edge) or a mid-plaza NPC (at their depth)
+    const st=STATIONS.find(s=>Math.abs(s.x-wx)<75 &&
+      (s.dep?Math.abs(sy-townY(s.dep))<80:sy<t.top+90));
     if(st){
       if(Math.abs(st.x-G.player.x)<110 && G.player.d<.38) enterStation(st);   // close: walk in
       else { G.target={x:st.x, d:.14}; G.pendingEnter=st.id; }                // far: walk there & enter
@@ -1023,7 +1042,7 @@ function vbUpdate(dt){
   v.landT=disc>0?(-b.vy+Math.sqrt(disc))/g:9; v.landX=b.x+b.vx*v.landT;
   if(v.side==='player'){
     // hittable late in the descent — generous window; the ring shows the moment
-    const zone=(240-Math.min(80,v.rally*7))/Math.max(1,(v.df*.9));
+    const zone=(260-Math.min(80,v.rally*7))/Math.max(1,(v.df*.9));
     const was=v.hittable;
     v.hittable = b.vy>0 && b.y>floorY-zone && b.x<cxn+40;
     if(v.hittable && !was){ if(v.tut){ v.hold=true; pop(b.x,b.y-60,'👇 TAP NOW!','#ffd166',true); return; }
@@ -1089,7 +1108,7 @@ function mkUpdate(dt){
   if(b.y>groundY-30){ b.y=groundY-30; b.vy=-Math.abs(b.vy)*.62; }   // skips along the sand
   if(m.dir==='in'){
     const was=m.hittable;
-    m.hittable = b.vx<0 && Math.abs(b.x-hx)<58;
+    m.hittable = b.vx<0 && Math.abs(b.x-hx)<66;
     if(m.hittable&&!was){ if(m.tut){ m.hold=true; pop(b.x,b.y-50,'👇 TAP!','#ffd166',true); return; }
       Sound.beep(880,.05,'square',.03); }
     if(b.x<W*.05){ // passed you — into the sand
@@ -1251,7 +1270,7 @@ function arUpdate(dt){
   const a=G.ar; if(!a||a.over) return;
   if(!(a.tut&&!a.poured)){ a.time-=dt; if(a.time<=0){ a.time=0; arEnd(); return; } }
   if(a.pouring){
-    a.f+=dt*.55*a.df*(a.tut?.55:1);
+    a.f+=dt*.48*a.df*(a.tut?.55:1);
     if(a.f>=1){ a.f=0; a.pouring=false; a.combo=0; a.spills++; a.cups++;
       Sound.miss(); shake(); pop(W/2,groundY-200,rline(BARK.arSpill),'#ff5d5d',true); }
   }
@@ -1422,7 +1441,7 @@ function alUpdate(dt){
   if(a.hop<=0&&a.row>=1&&a.row<=4){
     const l=a.lanes[a.row-1];
     for(const cr of l.cars){
-      if(Math.abs(cr.x-W/2)<cr.w/2+16){
+      if(Math.abs(cr.x-W/2)<cr.w/2+14){
         a.lives--; a.row=0; Sound.miss(); shake(); flash(.25); buzz(120);
         pop(W/2,AL_ROWY(2),'💢 '+rline(BARK.alHit),'#ff5d5d',true);
         if(a.lives<0){ alEnd(); return; }
@@ -1827,9 +1846,13 @@ function hubUpdate(dt){
   const want=clamp(p.x-W*.42,0,Math.max(0,WORLD_W-W));
   G.camX+=(want-G.camX)*Math.min(1,dt*7);
   if(Math.abs(want-G.camX)<.5) G.camX=want;
-  // nearest station prompt — only when up by the storefront line
-  G.near=STATIONS.find(s=>Math.abs(s.x-p.x)<90&&p.d<.38)||null;
+  // nearest station prompt — by the storefront line, or near a mid-plaza NPC
+  G.near=STATIONS.find(s=>Math.abs(s.x-p.x)<90&&(s.dep?Math.abs(p.d-s.dep)<.3:p.d<.38))||null;
   G.prompt=clamp(G.prompt+(G.near?dt*6:-dt*6),0,1);
+  // crossing into a new district gets a banner — the level announces itself
+  const dz=districtAt(p.x);
+  if(G.lastDist&&G.lastDist!==dz.id){ pop(W/2,H*.3,dz.name,'#ffd166',true); Sound.enter(); }
+  G.lastDist=dz.id;
 }
 
 /* =================== draw =================== */
@@ -1920,77 +1943,85 @@ function drawMap(){
   const sub=prog>=1?'🌅 DOUBLED! Walk home and sleep.':
     `earn ${money(Math.max(0,dayGoal()-S.earnedToday))} more before sundown · 💰${money(S.shekels)}${S.streak?` · 🔥${S.streak}`:''}`;
   cx.strokeText(sub,W/2,hy+30);cx.fillStyle='#fff';cx.fillText(sub,W/2,hy+30);
-  // sun arc — the day clock
-  const arcY=hy+96;
-  cx.strokeStyle='rgba(255,255,255,.55)';cx.lineWidth=2;cx.setLineDash([4,7]);
-  cx.beginPath();cx.ellipse(W/2,arcY+40,W*.38,58,0,Math.PI,0);cx.stroke();cx.setLineDash([]);
-  const sunX=lerp(W*.12,W*.88,clamp(prog,0,1)), sunY=arcY+40-Math.sin(clamp(prog,0,1)*Math.PI)*58;
-  cx.drawImage(glow('rgba(255,235,150,.9)',40),sunX-40,sunY-40);
-  drawEmoji(prog>=1?'🌅':'☀️',sunX,sunY,34);
-  // the city itself
-  let py=arcY+90;
-  if(artOk('bg-city')){ const bg=ART['bg-city'], bh=Math.min(150,W/3);
-    cx.drawImage(bg,0,py,W,bh); py+=bh+6; } else py+=10;
-  // zones
-  const zx=v=>lerp(30,W-30,v);
-  cx.font='800 11px sans-serif';
-  for(const [zt,zv] of [['🏖 BEACH',.13],['🌴 PROMENADE',.5],['🛍 SHUK',.85]]){
-    const zw=cx.measureText(zt).width+16;
-    cx.fillStyle='rgba(13,17,32,.66)';rr(zx(zv)-zw/2,py-2,zw,20,10);
-    cx.fillStyle='#fff';cx.fillText(zt,zx(zv),py+8);
-  }
-  // route + golden progress trail
-  const ry=py+70;
-  cx.setLineDash([3,8]);cx.strokeStyle='rgba(13,17,32,.45)';cx.lineWidth=3;
-  cx.beginPath();cx.moveTo(zx(0),ry);cx.lineTo(zx(1),ry);cx.stroke();cx.setLineDash([]);
-  cx.strokeStyle='#ffd166';cx.lineWidth=4;
-  cx.beginPath();cx.moveTo(zx(0),ry);cx.lineTo(lerp(zx(0),zx(1),clamp(prog,0,1)),ry);cx.stroke();
-  // nodes — 12 of them on a phone: smaller discs, three-step label stagger
+  // sun on a thin day-track (compact day clock)
+  const sy0=hy+60;
+  cx.strokeStyle='rgba(255,255,255,.5)';cx.lineWidth=2;cx.setLineDash([4,7]);
+  cx.beginPath();cx.moveTo(40,sy0);cx.lineTo(W-40,sy0);cx.stroke();cx.setLineDash([]);
+  cx.strokeStyle='#ffd166';cx.lineWidth=3;
+  cx.beginPath();cx.moveTo(40,sy0);cx.lineTo(lerp(40,W-40,clamp(prog,0,1)),sy0);cx.stroke();
+  const sunX=lerp(40,W-40,clamp(prog,0,1));
+  cx.drawImage(glow('rgba(255,235,150,.9)',26),sunX-26,sy0-26);
+  drawEmoji(prog>=1?'🌅':'☀️',sunX,sy0,26);
+  // TEL AVIV — four district panels, each a level component
   G.mapNodes=[];
   const today=dayIndex(), h=todaysHustle();
   const HUST2ST={vol_rally:'volley',mk_rally:'matkot',sw_slices:'shawarma',
     ar_pours:'aroma',ct_pets:'cats',al_cross:'allenby'};
   const hustStation=HUST2ST[h.id]||((h.id==='earn'||h.id==='double')?'home':'falafel');
-  STATIONS.forEach((s,i)=>{
-    const nx=zx(s.x/WORLD_W), ny=ry;
-    let pulse=false, dim=false;
-    if(!S.tutorialDone){ pulse=(s.id==='falafel'); dim=!pulse; }
-    if(s.id==='home'&&prog>=1) pulse=true;
-    cx.globalAlpha=dim?.45:1;
-    cx.fillStyle='rgba(13,17,32,.78)';cx.beginPath();cx.arc(nx,ny,15,0,7);cx.fill();
-    cx.strokeStyle='#ffd166';cx.lineWidth=2;cx.stroke();
-    if(pulse){ const pr=1+.25*Math.sin(G.t*5);
-      cx.strokeStyle='rgba(255,209,102,.85)';cx.lineWidth=3;
-      cx.beginPath();cx.arc(nx,ny,19*pr,0,7);cx.stroke(); }
-    drawEmoji(s.ico,nx,ny,19);
-    // badges: what's waiting here
-    let badge=null;
-    if(s.id==='home') badge=prog>=1?'🌅':'🔒';
-    else if(s.id==='chat_savta'&&(S.gift.savta||0)<today) badge='🎁';
-    else if(s.id==='chat_chabad'&&(S.bracha<today||(S.gift.chabad||0)<today)) badge='🎁';
-    else if(s.id==='kiosk'&&!(S.gossip&&S.gossip.day===today)) badge='🎁';
-    if(badge) drawEmoji(badge,nx+12,ny-12,14);
-    if(s.id===hustStation&&!(S.hustle&&S.hustle.done)) drawEmoji('🎯',nx-12,ny-12,14);
-    cx.globalAlpha=1;
-    // label: 4-step stagger keeps 12 plates readable on 390px
-    const stag=[-56,-34,34,56][i%4];
-    cx.font='800 9.5px sans-serif';
-    const lw=cx.measureText(s.label).width+10;
-    cx.fillStyle='rgba(13,17,32,.7)';rr(nx-lw/2,ny+stag-9,lw,17,8);
-    cx.fillStyle='#fff';cx.fillText(s.label,nx,ny+stag);
-    cx.strokeStyle='rgba(255,255,255,.25)';cx.lineWidth=1;          // leader line
-    cx.beginPath();cx.moveTo(nx,ny+(stag>0?15:-15));cx.lineTo(nx,ny+stag+(stag>0?-9:9));cx.stroke();
-    G.mapNodes.push({id:s.id,x:nx,y:ny,r:26});
+  const DECKCOL={sand:'rgba(238,215,162,.30)',wood:'rgba(202,162,106,.30)',
+    cobble:'rgba(201,173,132,.30)',asphalt:'rgba(122,126,138,.32)'};
+  let py=sy0+24;
+  const ph=clamp((H-py-216)/4,84,110), pw=W-24;
+  DISTRICTS.forEach(dz=>{
+    cx.fillStyle='rgba(13,17,32,.74)';rr(12,py,pw,ph,14);
+    cx.fillStyle=DECKCOL[dz.deck];rr(12,py,pw,ph,14);               // ground tint = the level's material
+    // district name + YOU chip
+    cx.font='900 13px sans-serif';cx.textAlign='left';cx.textBaseline='middle';
+    cx.fillStyle='#ffd166';cx.fillText(dz.name,26,py+19);
+    if(districtAt(G.player.x).id===dz.id){
+      cx.font='800 10px sans-serif';const yw=cx.measureText('YOU').width+14;
+      cx.fillStyle='rgba(126,232,199,.2)';rr(pw-yw-2,py+10,yw,18,9);
+      cx.fillStyle='#7ee8c7';cx.textAlign='center';cx.fillText('YOU',pw-yw/2-2+5,py+19);
+    }
+    // its stations as nodes
+    const sts=STATIONS.filter(s=>s.x>=dz.x0&&s.x<dz.x1);
+    const ny=py+ph-30;
+    sts.forEach((s,i)=>{
+      const nx=sts.length===1?W/2:lerp(58,W-58,i/(sts.length-1));
+      let pulse=false, dim=false;
+      if(!S.tutorialDone){ pulse=(s.id==='falafel'); dim=!pulse; }
+      if(s.id==='home'&&prog>=1) pulse=true;
+      cx.globalAlpha=dim?.45:1;
+      cx.fillStyle='rgba(13,17,32,.85)';cx.beginPath();cx.arc(nx,ny,16,0,7);cx.fill();
+      cx.strokeStyle='#ffd166';cx.lineWidth=2;cx.stroke();
+      if(pulse){ const pr=1+.22*Math.sin(G.t*5);
+        cx.strokeStyle='rgba(255,209,102,.85)';cx.lineWidth=3;
+        cx.beginPath();cx.arc(nx,ny,20*pr,0,7);cx.stroke(); }
+      drawEmoji(s.ico,nx,ny,20);
+      let badge=null;
+      if(s.id==='home') badge=prog>=1?'🌅':'🔒';
+      else if(s.id==='chat_savta'&&(S.gift.savta||0)<today) badge='🎁';
+      else if(s.id==='chat_chabad'&&(S.bracha<today||(S.gift.chabad||0)<today)) badge='🎁';
+      else if(s.id==='kiosk'&&!(S.gossip&&S.gossip.day===today)) badge='🎁';
+      if(badge) drawEmoji(badge,nx+13,ny-13,14);
+      if(s.id===hustStation&&!(S.hustle&&S.hustle.done)) drawEmoji('🎯',nx-13,ny-13,14);
+      cx.globalAlpha=1;
+      cx.font='800 9px sans-serif';cx.textAlign='center';
+      cx.fillStyle='rgba(255,255,255,.9)';cx.fillText(s.label,nx,ny-26);
+      G.mapNodes.push({id:s.id,x:nx,y:ny,r:26});
+    });
+    py+=ph+8;
   });
-  // you, on the route
-  const pmx=zx(G.player.x/WORLD_W);
-  drawEmoji(equipped().ico,pmx,ry-30+Math.sin(G.t*2.5)*3,24);
+  // future levels: the universe grows city by city
+  G.mapLocked=[];
+  const lw2=(W-32)/2;
+  CITIES.filter(c=>!c.live).forEach((c,i)=>{
+    const lx=12+i*(lw2+8);
+    cx.fillStyle='rgba(13,17,32,.6)';rr(lx,py,lw2,54,12);
+    cx.globalAlpha=.8;
+    cx.font='900 12px sans-serif';cx.textAlign='left';cx.textBaseline='middle';
+    cx.fillStyle='#cdd6e8';cx.fillText(`${c.ico} ${c.name} 🔒`,lx+12,py+18);
+    cx.font='700 9.5px sans-serif';cx.fillStyle='#8b95ad';cx.fillText(c.hint,lx+12,py+37);
+    cx.globalAlpha=1;
+    G.mapLocked.push({x:lx,y:py,w:lw2,h:54,city:c});
+  });
+  py+=62;
   // hustle reminder strip
-  cx.font='800 12px sans-serif';
+  cx.font='800 12px sans-serif';cx.textAlign='center';
   const ht=`🎯 ${S.hustle&&S.hustle.done?'Hustle done ✓':h.desc+'  (+'+HUSTLE_REWARD+'₪)'}`;
   const hw=cx.measureText(ht).width+22;
-  cx.fillStyle='rgba(13,17,32,.72)';rr(W/2-hw/2,ry+58,hw,26,13);
-  cx.fillStyle=S.hustle&&S.hustle.done?'#7ee8c7':'#ffd166';cx.fillText(ht,W/2,ry+71);
+  cx.fillStyle='rgba(13,17,32,.72)';rr(W/2-hw/2,py,hw,26,13);
+  cx.fillStyle=S.hustle&&S.hustle.done?'#7ee8c7':'#ffd166';cx.fillText(ht,W/2,py+13);
   // down to the street
   const btxt='🚶 WALK THE STREET'; cx.font='900 15px sans-serif';
   const bw2=cx.measureText(btxt).width+36;
@@ -2004,6 +2035,8 @@ function mapTap(sx,sy){
     Sound.enter(); G.state='hub';
     G.camX=clamp(G.player.x-W*.42,0,Math.max(0,WORLD_W-W)); return;
   }
+  const lk=(G.mapLocked||[]).find(l=>sx>=l.x&&sx<=l.x+l.w&&sy>=l.y&&sy<=l.y+l.h);
+  if(lk){ Sound.no(); pop(W/2,H*.35,`${lk.city.ico} ${lk.city.name} — ${lk.city.unlock}`,'#cdd6e8',true); return; }
   const n=(G.mapNodes||[]).find(n=>Math.hypot(n.x-sx,n.y-sy)<n.r);
   if(!n) return;
   Sound.enter();
@@ -2053,18 +2086,43 @@ function drawTown(){
   cx.fillStyle='rgba(150,110,60,.18)';
   for(let i=0;i<26;i++){ const sx=((i*137.5-G.camX*.6)%W+W)%W, sy=sandTop+((i*53)%(sandBot-sandTop));
     cx.fillRect(sx,sy,2,2); }
-  // boardwalk
-  let wood=SKYG.get('wood'); if(!wood){ wood=cx.createLinearGradient(0,sandBot,0,H);
-    wood.addColorStop(0,'#caa26a');wood.addColorStop(1,'#b07f48');SKYG.set('wood',wood); }
-  cx.fillStyle=wood;cx.fillRect(0,sandBot,W,H-sandBot);
-  // plank seams in perspective (fan out toward the viewer)
-  cx.strokeStyle='rgba(90,60,30,.28)';cx.lineWidth=2;
-  for(let x=-((G.camX)%96);x<W+96;x+=96){
-    cx.beginPath();cx.moveTo(x,sandBot);cx.lineTo(x+(x-W/2)*.22,H);cx.stroke(); }
-  // a couple of cross-plank highlights for grain
-  cx.strokeStyle='rgba(255,240,210,.12)';cx.lineWidth=3;
-  for(let i=1;i<=3;i++){ const fy=sandBot+Math.pow(i/3,1.6)*(H-sandBot);
-    cx.beginPath();cx.moveTo(0,fy);cx.lineTo(W,fy);cx.stroke(); }
+  // the deck: each district is its own ground — a different LEVEL component
+  const deck=districtAt(G.camX+W/2).deck;
+  if(deck==='sand'){
+    let s2=SKYG.get('deck-sand'); if(!s2){ s2=cx.createLinearGradient(0,sandBot,0,H);
+      s2.addColorStop(0,'#eed7a2');s2.addColorStop(1,'#dec182');SKYG.set('deck-sand',s2); }
+    cx.fillStyle=s2;cx.fillRect(0,sandBot,W,H-sandBot);
+    cx.fillStyle='rgba(150,110,60,.16)';
+    for(let i=0;i<34;i++){ const sx=((i*149.3-G.camX)%W+W)%W, sy=sandBot+((i*71)%(H-sandBot));
+      cx.beginPath();cx.ellipse(sx,sy,3,1.6,0,0,7);cx.fill(); }
+    drawEmoji('🐚',((300-G.camX)%W+W)%W,sandBot+(H-sandBot)*.6,16);
+  } else if(deck==='cobble'){
+    let c2=SKYG.get('deck-cob'); if(!c2){ c2=cx.createLinearGradient(0,sandBot,0,H);
+      c2.addColorStop(0,'#c9ad84');c2.addColorStop(1,'#b3946a');SKYG.set('deck-cob',c2); }
+    cx.fillStyle=c2;cx.fillRect(0,sandBot,W,H-sandBot);
+    cx.strokeStyle='rgba(90,70,45,.30)';cx.lineWidth=1.5;
+    for(let r=0;r<7;r++){ const fy=sandBot+Math.pow((r+1)/7,1.4)*(H-sandBot);
+      const sz=14+r*5, off=(r%2?sz/2:0)-((G.camX*(0.6+r*.06))%sz);
+      for(let x=off-sz;x<W+sz;x+=sz){ cx.beginPath();cx.arc(x,fy,sz*.46,Math.PI,0);cx.stroke(); } }
+  } else if(deck==='asphalt'){
+    let a2=SKYG.get('deck-asp'); if(!a2){ a2=cx.createLinearGradient(0,sandBot,0,H);
+      a2.addColorStop(0,'#7a7e8a');a2.addColorStop(1,'#5d6170');SKYG.set('deck-asp',a2); }
+    cx.fillStyle=a2;cx.fillRect(0,sandBot,W,H-sandBot);
+    cx.fillStyle='rgba(244,236,221,.5)';cx.fillRect(0,sandBot,W,5);   // curb
+    cx.setLineDash([18,16]);cx.strokeStyle='rgba(255,255,255,.25)';cx.lineWidth=4;
+    const my=sandBot+(H-sandBot)*.55;
+    cx.beginPath();cx.moveTo(-(G.camX%34),my);cx.lineTo(W,my);cx.stroke();cx.setLineDash([]);
+  } else { // wood boardwalk
+    let wood=SKYG.get('wood'); if(!wood){ wood=cx.createLinearGradient(0,sandBot,0,H);
+      wood.addColorStop(0,'#caa26a');wood.addColorStop(1,'#b07f48');SKYG.set('wood',wood); }
+    cx.fillStyle=wood;cx.fillRect(0,sandBot,W,H-sandBot);
+    cx.strokeStyle='rgba(90,60,30,.28)';cx.lineWidth=2;
+    for(let x=-((G.camX)%96);x<W+96;x+=96){
+      cx.beginPath();cx.moveTo(x,sandBot);cx.lineTo(x+(x-W/2)*.22,H);cx.stroke(); }
+    cx.strokeStyle='rgba(255,240,210,.12)';cx.lineWidth=3;
+    for(let i=1;i<=3;i++){ const fy=sandBot+Math.pow(i/3,1.6)*(H-sandBot);
+      cx.beginPath();cx.moveTo(0,fy);cx.lineTo(W,fy);cx.stroke(); }
+  }
   // promenade railing along the shoreline (posts + rail)
   cx.strokeStyle='rgba(40,80,90,.55)';cx.lineWidth=3;
   cx.beginPath();cx.moveTo(0,sandBot-4);cx.lineTo(W,sandBot-4);cx.stroke();
@@ -2100,8 +2158,9 @@ const WALKERS=[
 ];
 function drawHub(){
   const t=TOWN(), base=t.top+26;
-  // buildings/NPCs along the back edge of the plaza
+  // buildings on the back edge; NPCs with a `dep` stand IN the plaza (y-sorted below)
   for(const s of STATIONS){
+    if(s.dep) continue;
     const sx=s.x-G.camX; if(sx<-130||sx>W+130) continue;
     drawStation(s,sx,base);
   }
@@ -2120,6 +2179,14 @@ function drawHub(){
       cx.save();cx.translate(sx,townY(wk.d)-wk.s*.44*sc+Math.sin(G.t*9+wk.x)*1.6);
       if(wk.vx<0) cx.scale(-1,1);
       drawEmoji(wk.e,0,0,wk.s*sc);cx.restore();}}); }
+  // mid-plaza NPC stations: scaled and sorted with everything else
+  for(const s of STATIONS){
+    if(!s.dep) continue;
+    const sx=s.x-G.camX; if(sx<-130||sx>W+130) continue;
+    ents.push({d:s.dep,draw:()=>{const sc=townScale(s.dep), by=townY(s.dep);
+      cx.save();cx.translate(sx,by);cx.scale(sc,sc);cx.translate(-sx,-by);
+      drawStation(s,sx,by);cx.restore();}});
+  }
   ents.push({d:p.d,draw:()=>drawPlayer(p.x-G.camX,townY(p.d),p,townScale(p.d))});
   ents.sort((a,b)=>a.d-b.d);
   for(const e of ents) e.draw();
@@ -2377,7 +2444,7 @@ function startDay(){
   syncPassport(); save();
   G.target=null; G.player.d=.3;
   if(!S.tutorialDone){           // first session: spawn right at the falafel stand so
-    G.player.x=920; G.walletShown=S.shekels;          // earning starts in <10s, not after a long walk
+    G.player.x=1230; G.walletShown=S.shekels;         // earning starts in <10s, not after a long walk
   } else { G.player.x=300; }
   G.camX=clamp(G.player.x-W*.42,0,Math.max(0,WORLD_W-W));
   G.state='map';                 // the map is home base: where am I, why am I hustling
