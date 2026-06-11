@@ -137,8 +137,20 @@
   <div class="logo" id="chatName" style="font-size:clamp(22px,6vw,32px);"></div>
   <div class="tag" id="chatLine" style="margin-top:14px;font-size:clamp(15px,4.2vw,19px);color:#f4ecdd;"></div>
   <div class="best" id="chatReward" style="color:#7ee8c7;"></div>
+  <button class="btn hidden" id="chatAct"></button>
+  <button class="btn ghost hidden" id="chatAct2"></button>
   <button class="btn teal hidden" id="chatScratch">🎟️ GORAL −50₪</button>
-  <button class="btn" id="chatBtn">OK 🤙</button>
+  <button class="btn ghost" id="chatBtn">OK 🤙</button>
+</div>
+
+<!-- MORNING MISSION CARD -->
+<div class="panel hidden" id="morning">
+  <div style="font-size:54px">🌞</div>
+  <div class="logo" id="mDay" style="font-size:clamp(26px,8vw,44px);">DAY 1</div>
+  <div class="tag" id="mGoal"></div>
+  <div class="best" id="mHustle" style="color:#ffd166;"></div>
+  <div class="best" id="mWhy" style="color:#7ee8c7;"></div>
+  <button class="btn" id="mGo">LET'S HUSTLE ▶</button>
 </div>
 
 <!-- SHOP -->
@@ -299,14 +311,15 @@ const DEF={ shekels:500, day:1, dayStart:500, earnedToday:0, streak:0,
   chars:['avtali'], equip:'avtali', items:{}, ups:{}, lastClaim:0,
   shields:0, lastClearedDay:0, tutorialDone:false,
   hustle:{day:0,done:false}, hustleTotal:0,
-  login:{last:0,run:0}, met:{}, gift:{},
+  login:{last:0,run:0}, met:{}, gift:{}, taught:{},
+  bracha:0, brachaBuff:0, soupLife:0, gossip:null,
   best:{volley:0,falafel:0,daysCleared:0,topWallet:500}, lastSeen:0 };
 let S=load();
 function load(){
   try{ const s=JSON.parse(localStorage.getItem('bg_save')); if(s&&typeof s.shekels==='number'){
     return Object.assign({},DEF,s,{best:Object.assign({},DEF.best,s.best),
       items:s.items||{},ups:s.ups||{},chars:s.chars||['avtali'],
-      login:s.login||{last:0,run:0},met:s.met||{},gift:s.gift||{}}); }
+      login:s.login||{last:0,run:0},met:s.met||{},gift:s.gift||{},taught:s.taught||{}}); }
   }catch(e){}
   return JSON.parse(JSON.stringify(DEF));
 }
@@ -329,6 +342,10 @@ function earnMult(kind){
   m+=upLv('tips')*UPS[0].step;
   m+=upLv('apt')*.05;
   if(isFriday()) m+=.25;        // 🕯️ pre-Shabbat rush: everyone tips better
+  // 🗣️ babushka's gossip: the named hustle pays +15% today
+  if(S.gossip&&S.gossip.day===dayIndex()&&S.gossip.kind===kind) m+=.15;
+  // 🙏 the bracha rides the current run only
+  if(G.runBracha&&(G.state==='volley'||G.state==='falafel')) m+=G.runBracha;
   return m;
 }
 function payout(raw,kind){ const v=Math.round(raw*earnMult(kind));
@@ -474,7 +491,7 @@ function burstConfetti(n){ for(let i=0;i<n;i++) G.confetti.push({x:rand(0,W),y:r
 function flash(o){ const f=$('flash');f.style.transition='none';f.style.opacity=o;
   requestAnimationFrame(()=>{f.style.transition='opacity .5s';f.style.opacity=0;}); }
 function shake(){ const w=$('wrap');w.classList.remove('shake');void w.offsetWidth;w.classList.add('shake'); }
-function panel(id){ for(const p of ['title','result','dayDone','chat','shop'])
+function panel(id){ for(const p of ['title','result','dayDone','chat','shop','morning'])
   $(p).classList.toggle('hidden',p!==id); }
 
 /* =================== 3/4 town projection ===================
@@ -496,6 +513,7 @@ function onDown(sx,sy){
   userActed=true; Sound.init();
   if(panelOpen()) return;        // a DOM panel owns the screen — no world taps through it
   if(G.state==='hub'){ ptDown={sx,sy}; ptMoved=false; dragX=sx; lastTapY=sy; }
+  else if(G.state==='map') mapTap(sx,sy);
   else if(G.state==='volley') vbTap();
   else if(G.state==='falafel') faTap();
 }
@@ -513,6 +531,10 @@ function onUp(sx){
   if(ptDown && !ptMoved){            // a tap: walk there, or enter a tapped building
     const wx=worldFromScreen(sx), sy=lastTapY;
     const t=TOWN();
+    // the 🗺️ MAP pill in the HUD
+    const mp=G.mapPill;
+    if(mp&&sx>=mp.x&&sx<=mp.x+mp.w&&sy>=mp.y&&sy<=mp.y+mp.h){
+      ptDown=null; Sound.enter(); G.state='map'; return; }
     // tapping a building (its sprite sits on the back edge, above the plaza)
     const st=STATIONS.find(s=>Math.abs(s.x-wx)<75 && sy<t.top+90);
     if(st){
@@ -523,7 +545,8 @@ function onUp(sx){
   }
   ptDown=null;
 }
-window.addEventListener('touchstart',e=>{ if(e.target.closest('button')) return;
+window.addEventListener('touchstart',e=>{
+  if(e.target.closest('button,#tefDots')||panelOpen()) return;   // DOM panels own their taps
   e.preventDefault(); const t=e.touches[0]; onDown(t.clientX,t.clientY); },{passive:false});
 window.addEventListener('touchmove',e=>{ if(ptDown===null&&G.state==='hub') return;
   e.preventDefault(); if(e.touches[0]) onMove(e.touches[0].clientX); },{passive:false});
@@ -559,9 +582,9 @@ function enterStation(st){
 function goHome(){
   Sound.enter();
   if(dayProg()>=1){ clearDay(); }
-  else { Sound.no(); const py=townY(G.player.d);
-    pop(G.player.x-G.camX,py-130,`🌅 Double up first — ${Math.round(dayProg()*100)}%`,'#ffd166',true);
-    pop(G.player.x-G.camX,py-94,'🏐 rally · 🥙 toss','#9fe7d4'); }
+  else { Sound.no(); const py=townY(G.player.d), gap=dayGoal()-S.earnedToday;
+    pop(G.player.x-G.camX,py-130,`🌅 Not yet — ${money(gap)} short of the double-up`,'#ffd166',true);
+    pop(G.player.x-G.camX,py-94,'🏐 rally · 🥙 toss · 🙏 bracha helps','#9fe7d4'); }
 }
 
 /* =================== chat / NPCs — memory, gossip & reactive lines =================== */
@@ -580,11 +603,13 @@ function chatLines(who){
     else if(eq==='hightech') L.push('Exit, shmexit. Call your mother. Then double your money.');
     else if(eq==='mamadmom') L.push('Now THAT is a woman who runs the shelter. Proud of you, motek. 🛡️');
     if(upLv('apt')>0) L.push(`A LANDLORD in the family! Wait till I tell the mahjong table. 🏠`);
-    L.push('You look thin. Take ₪40 — don\'t tell your mother. 🤍');
+    if(prog<1) L.push(`₪${dayGoal()-S.earnedToday} short of the double-up, motek. The net pays better after lunch.`);
+    L.push('NU, BAALI… you\'ll rally on an empty stomach? Over my dead body. SIT.');
     L.push('The shuk has new looks. Stop dressing like a student.');
   } else if(who==='chabad'){
     if(eq==='chabad') L.push('Achi! Look at you — a real mensch. Free ₪60 every morning, enjoy. 🙏');
-    else L.push('Achi, did you lay tefillin today? Buy the Chabad Guy skin — free ₪60 every morning. 🙏');
+    else L.push('Achi! One wrap, one bracha — the falafel will literally fly today. 🙏');
+    if(prog<1) L.push(`You're ₪${dayGoal()-S.earnedToday} short of the double-up? HaShem helps those who toss falafel. 🙏`);
     if(S.streak>=7) L.push('Seven days strong — that is a Shabbat kind of dedication. 🕯️');
     L.push('A little tzedakah goes a long way. Here — ₪30, pass it on. 🙏');
     L.push('Shabbat is coming. Make your shekels now, rest later.');
@@ -604,15 +629,88 @@ function openChat(who){
   S.met[who]=(S.met[who]||0)+1;
   $('chatIco').textContent=c.ico; $('chatName').textContent=c.name;
   const L=chatLines(who); let line=L[irand(0,L.length-1)], reward='';
-  // gifts are once per real day per NPC — a reason to visit, not a faucet to farm
   const today=dayIndex();
-  const g=line.includes('₪40')?40:line.includes('₪30')?30:0;
+  // chabad's tzedakah line still pays, once per day
+  const g=(who==='chabad'&&line.includes('₪30'))?30:0;
   if(g && (S.gift[who]||0)<today){ S.gift[who]=today; S.shekels+=g; S.earnedToday+=g;
-    reward=`+${g}₪ ${who==='savta'?'from Savta 🤍':'tzedakah 🙏'}`; flyCoin(W/2,H*.45); Sound.cash(); }
+    reward='+30₪ tzedakah 🙏'; flyCoin(W/2,H*.45); Sound.cash(); }
   else if(g) reward='(already took your gift today — chutzpah!)';
   $('chatLine').textContent=line; $('chatReward').textContent=reward;
+  // every NPC has a VERB, not just text+OK
+  const A=$('chatAct'), A2=$('chatAct2');
+  A.classList.add('hidden'); A2.classList.add('hidden');
+  if(who==='chabad' && S.bracha<today){
+    A.textContent='🙏 WRAP TEFILLIN'; A.onclick=tefStart; A.classList.remove('hidden');
+  }
+  if(who==='savta' && (S.gift.savta||0)<today){
+    $('chatLine').textContent='"NU, BAALI… you\'ll rally on an empty stomach? Over my dead body. SIT. Soup."';
+    A.textContent='🍲 EAT THE SOUP'; A.onclick=soupEat; A.classList.remove('hidden');
+    A2.textContent='🙅 "Savta, I ate" (+40₪)'; A2.onclick=soupDecline; A2.classList.remove('hidden');
+  }
+  if(who==='babushka'){
+    A.textContent=(S.gossip&&S.gossip.day===today)?'🗣️ WHAT WAS IT AGAIN?':'🗣️ BUY GOSSIP −20₪';
+    A.onclick=gossipBuy; A.classList.remove('hidden');
+  }
   $('chatScratch').classList.toggle('hidden',who!=='babushka');
   save(); panel('chat');
+}
+/* —— Chabad: wrap the tefillin (daily). 7 glows up the arm; tap each. 5+ = bracha. —— */
+let tefT=null;
+function tefStart(){
+  $('chatAct').classList.add('hidden'); $('chatAct2').classList.add('hidden');
+  $('chatReward').textContent='';
+  $('chatLine').innerHTML='Tap each wrap as it glows! 💪<div id="tefDots" style="margin-top:14px;font-size:34px;letter-spacing:6px;user-select:none;"></div>';
+  const dots=$('tefDots'); let hits=0, idx=-1; const spans=[];
+  for(let i=0;i<7;i++){ const s=document.createElement('span'); s.textContent='⚫'; spans.push(s); dots.appendChild(s); }
+  clearInterval(tefT);
+  tefT=setInterval(()=>{
+    if(idx>=0 && spans[idx].textContent==='🟡') spans[idx].textContent='⚫';
+    idx++;
+    if(idx>=7){ clearInterval(tefT); tefT=null; tefEnd(hits); return; }
+    const s=spans[idx]; s.textContent='🟡';
+    s.onclick=()=>{ if(s.textContent==='🟡'){ s.textContent='🟣'; hits++; Sound.bump(hits); buzz(20); } };
+  },620);
+}
+function tefEnd(hits){
+  S.bracha=dayIndex();
+  if(hits>=5){ S.brachaBuff=1; burstConfetti(20); Sound.win();
+    $('chatLine').textContent='"Kol hakavod, achi!"';
+    $('chatReward').textContent=`🙏 BRACHA — ${hits}/7 wraps. Your next mini-game pays +20%!`;
+  } else {
+    $('chatLine').textContent='"Missed a wrap? Nu, it still counts. It always counts."';
+    $('chatReward').textContent=`${hits}/7 wraps — the bracha needs 5. Tomorrow, achi.`;
+  }
+  save();
+}
+/* —— Savta: the soup dilemma (daily) —— */
+function soupEat(){
+  S.gift.savta=dayIndex(); S.soupLife=1; Sound.buy();
+  $('chatAct').classList.add('hidden'); $('chatAct2').classList.add('hidden');
+  $('chatLine').textContent='"Good. GOOD. Now go bump that ball like your saba, alav hashalom."';
+  $('chatReward').textContent='🍲 +1 life in your next volleyball game';
+  save();
+}
+function soupDecline(){
+  S.gift.savta=dayIndex(); S.shekels+=40; S.earnedToday+=40; flyCoin(W/2,H*.45); Sound.cash();
+  $('chatAct').classList.add('hidden'); $('chatAct2').classList.add('hidden');
+  $('chatLine').textContent='"You ATE? Fine. FINE. Take ₪40, you clearly need it more than my soup."';
+  $('chatReward').textContent='+40₪ guilt money. She is MIFFED.';
+  save();
+}
+/* —— Babushka: gossip intel — today's best-paying hustle, seeded like the daily —— */
+function gossipBuy(){
+  const today=dayIndex();
+  if(S.gossip&&S.gossip.day===today){
+    $('chatReward').textContent=`"${S.gossip.kind==='volley'?'🏐 The net':'🥙 The falafel'} pays +15% today, zolotse. I told you."`;
+    return;
+  }
+  if(S.shekels<20){ Sound.no(); $('chatReward').textContent='"₪20, zolotse. Even secrets have rent."'; return; }
+  S.shekels-=20;
+  const kind=mulberry32(today*7919+3)()<.5?'volley':'falafel';
+  S.gossip={day:today,kind}; Sound.cash();
+  $('chatAct').textContent='🗣️ WHAT WAS IT AGAIN?';
+  $('chatReward').textContent=`🗣️ "${kind==='volley'?'🏐 Volleyball pays +15% before the streetlights':'🥙 Falafel tips are +15% today — tourists'}, zolotse."`;
+  save();
 }
 /* goralot (scratch cards): ₪50 a pull, slight house edge — a fun infinite sink.
    Winnings go to the WALLET only (never earnedToday): no gambling your way
@@ -629,24 +727,31 @@ function scratchCard(){
   }
   save();
 }
-$('chatBtn').addEventListener('click',()=>{ panel(null); G.state='hub'; });
+$('chatBtn').addEventListener('click',()=>{ clearInterval(tefT); tefT=null; panel(null); G.state='hub'; });
 $('chatScratch').addEventListener('click',scratchCard);
 
 /* =================== VOLLEYBALL — timing rally vs Savta =================== */
 function vbStart(){
   Sound.enter(); G.state='volley'; G.pops.length=0;
   let lives=2 + (equipped().vlife||0);
-  // items are consumed at the start — their benefit (a life, slow-mo) lands now
+  // items & blessings are consumed at the start — their benefit lands now
   let used=[];
   if((S.items.hummus||0)>0){ S.items.hummus--; lives++; used.push('🫓 +1 life'); }
+  if(S.soupLife){ S.soupLife=0; lives++; used.push('🍲 soup +1 life'); }
   let slow=(S.items.goldstar||0)>0?1:0; if(slow){ S.items.goldstar--; used.push('🍺 slow-mo'); }
+  if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; used.push('🙏 bracha +20%'); } else G.runBracha=0;
   if(used.length){ save(); pop(W/2,groundY-210,used.join('  '),'#8ad2ff',true); }
-  G.vb={ ball:{x:W*.3,y:groundY-260,vx:40,vy:-200}, side:'player', rally:0, lives, maxLives:Math.max(1,lives),
-    over:false, t:0, hittable:false, slow, earn:0, lockout:0 };
+  // opening serve is a slow lob (~1.45s airborne) — a human can actually react
+  G.vb={ ball:{x:W*.3,y:groundY-300,vx:30,vy:-520}, side:'player', rally:0, lives, maxLives:Math.max(1,lives),
+    over:false, t:0, hittable:false, slow, earn:0, lockout:0,
+    pball:1,                       // player-side ball count: first 3 ride a gravity grace ramp
+    tut:!S.taught.volley, hold:false };
+  if(G.vb.tut) pop(W/2,groundY-250,'TAP when the ball drops low on YOUR side 👇','#fff',true);
 }
 function vbTap(){
   const v=G.vb; if(!v||v.over) return;
-  if(G.t<v.lockout) return;        // brief lockout after a whiff — no mashing through the window
+  if(v.hold){ v.hold=false; v.tut=false; S.taught.volley=1; save(); }   // tutorial freeze: this tap connects
+  else if(G.t<v.lockout) return;   // brief lockout after a whiff — no mashing through the window
   if(v.hittable){
     v.rally++;
     const got=payout(8+v.rally*2, 'volley'); v.earn+=got;
@@ -658,14 +763,19 @@ function vbTap(){
     const sp=(1+Math.min(1.4,v.rally*.08))*(v.slow?.7:1);
     v.ball.vx=Math.abs(rand(150,210))*sp; v.ball.vy=-rand(360,430)*sp;
     v.side='opp'; v.hittable=false;
-  } else { // early/whiff tap — no damage, but a 1/4s lockout so timing matters
-    v.lockout=G.t+.25;
+  } else { // early/whiff tap — no damage; a short lockout only once you're warmed up
+    if(v.rally>=2) v.lockout=G.t+.15;
     pop(W*.18,groundY-180,'too early!','#aab4c8'); Sound.no();
   }
 }
 function vbUpdate(dt){
   const v=G.vb; if(!v||v.over) return;
-  v.t+=dt; const g=2000*(v.slow?.78:1);
+  if(v.hold) return;                       // tutorial freeze-frame: world waits for the tap
+  if(v.tut) dt*=.35;                       // first-ever ball runs in slow motion
+  v.t+=dt;
+  // grace ramp: the first 3 player-side balls fall lighter (×.72/.85/1)
+  const grace=v.pball<=1?.72:v.pball===2?.85:1;
+  const g=2000*(v.slow?.78:1)*grace;
   const b=v.ball, cxn=W*.5;
   b.vy+=g*dt; b.x+=b.vx*dt; b.y+=b.vy*dt;
   // walls
@@ -673,27 +783,34 @@ function vbUpdate(dt){
   if(b.x>W*.92){ b.x=W*.92; b.vx=-Math.abs(b.vx); }
   if(v.side==='player'){
     // hittable when descending into the lower zone on the player's half;
-    // the zone tightens as the rally climbs — wins get earned (target ~6-8 median)
-    const zone=200-Math.min(90,v.rally*10);
+    // generous at rally 0 (~480ms), tight by rally 8 (~100ms): wins get earned
+    const zone=240-Math.min(120,v.rally*15);
+    const was=v.hittable;
     v.hittable = b.vy>0 && b.y>groundY-zone && b.x<cxn+40;
+    if(v.tut && v.hittable && !was){       // tutorial: freeze at the perfect moment
+      v.hold=true;
+      pop(b.x,b.y-60,'👇 TAP NOW!','#ffd166',true);
+      return;
+    }
     if(b.y>=groundY-26){ // hit the sand on your side
       b.y=groundY-26;
       v.lives--; Sound.miss(); shake(); buzz(80);
       pop(b.x,groundY-60,'MISSED! 💢','#ff5d5d',true);
       if(v.lives<0){ vbEnd(); return; }
-      // re-serve from player
-      b.x=W*.3; b.y=groundY-240; b.vx=rand(80,140); b.vy=-rand(120,180); v.hittable=false;
+      // re-serve from player — also a lob, also rides the grace ramp
+      v.pball++;
+      b.x=W*.3; b.y=groundY-280; b.vx=rand(20,60); b.vy=-rand(460,540); v.hittable=false;
     }
   } else { // opponent's half — Savta auto-returns near the top of the arc
     v.hittable=false;
     if(b.x>cxn && b.vy>0 && b.y>groundY-300){
       // Savta bumps it back toward the player
       const sp=(1+Math.min(1.4,v.rally*.08))*(v.slow?.7:1);
-      b.vx=-rand(150,210)*sp; b.vy=-rand(330,400)*sp; v.side='player';
+      b.vx=-rand(150,210)*sp; b.vy=-rand(330,400)*sp; v.side='player'; v.pball++;
       Sound.bump();
     }
     if(b.y>=groundY-26){ // shouldn't usually happen — treat as a point for you
-      b.y=groundY-26; b.x=W*.3; b.vx=rand(80,140); b.vy=-rand(150,200); v.side='player';
+      b.y=groundY-26; b.x=W*.3; b.vx=rand(20,60); b.vy=-rand(460,540); v.side='player'; v.pball++;
     }
   }
 }
@@ -711,9 +828,12 @@ function faStart(){
   let used=[];
   let extra=(S.items.falafel||0)>0?5:0; if(extra){ S.items.falafel--; used.push('🥙 +5s'); }
   let slow=(S.items.goldstar||0)>0?1:0; if(slow){ S.items.goldstar--; used.push('🍺 slow-mo'); }
+  if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; used.push('🙏 bracha +20%'); } else G.runBracha=0;
   if(used.length){ save(); pop(W/2,groundY-210,used.join('  '),'#8ad2ff',true); }
   G.fa={ time:20+extra, pita:{x:W*.66,dir:1}, falafels:[], power:0, pdir:1, combo:0, maxCombo:0,
-    hits:0, earn:0, over:false, slow, missRow:0, luckyLeft:upLv('lucky'), bust:false };
+    hits:0, earn:0, over:false, slow, missRow:0, luckyLeft:upLv('lucky'), bust:false,
+    tut:!S.taught.falafel, thrown:false };
+  if(G.fa.tut) pop(W/2,groundY-250,'TAP when the bar hits the 🥙 mark!','#fff',true);
 }
 function faTap(){
   const f=G.fa; if(!f||f.over) return;
@@ -721,14 +841,23 @@ function faTap(){
   const minV=W*.34, maxV=W*.92;
   const vx=lerp(minV,maxV,p);
   f.falafels.push({x:W*.12,y:groundY-40,vx,vy:-rand(560,640),done:false});
+  f.thrown=true;
   Sound.serve(f.combo);
+}
+// tutorial aid: the meter power that would land in the pita right now
+function faIdealPower(){
+  const f=G.fa, tF=2*600/1700;                      // avg flight time
+  const vx=(f.pita.x-W*.12)/tF, minV=W*.34, maxV=W*.92;
+  return clamp((vx-minV)/(maxV-minV),0,1);
 }
 function faUpdate(dt){
   const f=G.fa; if(!f||f.over) return;
   if(f.slow) dt*=.82;
-  f.time-=dt; if(f.time<=0){ f.time=0; faEnd(); return; }
-  // power meter ping-pongs — and speeds up a touch as your combo climbs
-  f.power+=f.pdir*dt*1.5*(1+Math.min(.5,f.combo*.06));
+  if(!(f.tut&&!f.thrown)){                          // tutorial: clock waits for your first throw
+    f.time-=dt; if(f.time<=0){ f.time=0; faEnd(); return; }
+  }
+  // power meter ping-pongs — slow while learning, speeds up as your combo climbs
+  f.power+=f.pdir*dt*1.5*(f.tut?.5:1)*(1+Math.min(.5,f.combo*.06));
   if(f.power>1){ f.power=1; f.pdir=-1; } if(f.power<0){ f.power=0; f.pdir=1; }
   // pita drifts
   const pita=f.pita; pita.x+=pita.dir*90*dt;
@@ -739,12 +868,15 @@ function faUpdate(dt){
     fl.vy+=g*dt; fl.x+=fl.vx*dt; fl.y+=fl.vy*dt;
     if(fl.y>=groundY-40){ fl.y=groundY-40; fl.done=true;
       if(Math.abs(fl.x-pita.x)<40){           // in the pita!
+        if(f.tut){ f.tut=false; S.taught.falafel=1; save(); }
         f.combo++; f.hits++; f.maxCombo=Math.max(f.maxCombo,f.combo); f.missRow=0;
         const got=payout(12+f.combo*4,'falafel'); f.earn+=got;
         pop(pita.x,groundY-120,`+${got}₪${f.combo>1?` ×${f.combo}`:''}`,POP_COLS[f.combo%4],f.combo>2);
         flyCoin(pita.x,groundY-80); Sound.cash(); G.freeze=.04; buzz(15);   // hit-stop on the catch
         if(f.combo===3||f.combo===5||f.combo===8){ burstConfetti(12);
           pop(W/2,groundY-160,`×${f.combo} STREAK! 🔥`,POP_COLS[f.combo%4],true); }
+      } else if(f.tut){                       // learning splats are free
+        Sound.no(); pop(fl.x,groundY-60,'almost! watch the 🥙 mark','#9fe7d4');
       } else if(f.luckyLeft>0){               // 🍀 lucky charm: this splat is forgiven
         f.luckyLeft--; Sound.no();
         pop(fl.x,groundY-70,'🍀 combo saved!','#7ee8c7',true);
@@ -820,8 +952,9 @@ function clearDay(){
   $('ddLadder').textContent=ladderLine();
   syncPassport(); save(); panel('dayDone');
 }
-$('ddNextBtn').addEventListener('click',()=>{ panel(null); G.state='hub';
+$('ddNextBtn').addEventListener('click',()=>{ panel(null); G.state='map';
   G.player.x=300; G.player.d=.3; G.target=null; G.camX=0; });
+$('mGo').addEventListener('click',()=>{ panel(null); G.state='map'; });
 $('ddShare').addEventListener('click',shareFlex);
 
 /* =================== shop =================== */
@@ -1014,7 +1147,8 @@ function hubUpdate(dt){
 /* =================== draw =================== */
 function draw(){
   cx.clearRect(0,0,W,H);
-  if(G.state==='hub'||G.state==='title'){ drawTown(); if(G.state==='hub') drawHub(); }
+  if(G.state==='map') drawMap();
+  else if(G.state==='hub'||G.state==='title'){ drawTown(); if(G.state==='hub') drawHub(); }
   else { drawSky(); drawStreet();
     if(G.state==='volley') drawVolley();
     else if(G.state==='falafel') drawFalafel(); }
@@ -1073,6 +1207,114 @@ function drawStreet(){
   cx.strokeStyle='rgba(120,80,40,.25)';cx.lineWidth=3;
   for(let x=-((G.camX)%70);x<W;x+=70){ cx.beginPath();cx.moveTo(x,groundY+14);cx.lineTo(x,H);cx.stroke(); }
 }
+/* =================== THE MAP — one glance: where you are, why you're here ===================
+   Mario-style ribbon of the whole street: sun arc = the day clock ("double up
+   before sundown", literally), golden trail = today's progress, nodes = the
+   experiences, badges = what's waiting for you at each. */
+function drawMap(){
+  let sky=SKYG.get('mapsky');
+  if(!sky){ sky=cx.createLinearGradient(0,0,0,H);
+    sky.addColorStop(0,'#37b6ff');sky.addColorStop(.5,'#8fd8ff');sky.addColorStop(1,'#ffd9a8');
+    SKYG.set('mapsky',sky); }
+  cx.fillStyle=sky;cx.fillRect(0,0,W,H);
+  const hy=SAFE_TOP+30, prog=dayProg();
+  // header: the mission, always
+  cx.textAlign='center';cx.textBaseline='middle';
+  cx.font='900 30px sans-serif';cx.lineWidth=7;cx.strokeStyle='rgba(15,20,40,.85)';
+  cx.strokeText('DAY '+S.day,W/2,hy);cx.fillStyle='#ffd166';cx.fillText('DAY '+S.day,W/2,hy);
+  cx.font='800 14px sans-serif';cx.lineWidth=4;
+  const sub=prog>=1?'🌅 DOUBLED! Walk home and sleep.':
+    `earn ${money(Math.max(0,dayGoal()-S.earnedToday))} more before sundown · 💰${money(S.shekels)}${S.streak?` · 🔥${S.streak}`:''}`;
+  cx.strokeText(sub,W/2,hy+30);cx.fillStyle='#fff';cx.fillText(sub,W/2,hy+30);
+  // sun arc — the day clock
+  const arcY=hy+96;
+  cx.strokeStyle='rgba(255,255,255,.55)';cx.lineWidth=2;cx.setLineDash([4,7]);
+  cx.beginPath();cx.ellipse(W/2,arcY+40,W*.38,58,0,Math.PI,0);cx.stroke();cx.setLineDash([]);
+  const sunX=lerp(W*.12,W*.88,clamp(prog,0,1)), sunY=arcY+40-Math.sin(clamp(prog,0,1)*Math.PI)*58;
+  cx.drawImage(glow('rgba(255,235,150,.9)',40),sunX-40,sunY-40);
+  drawEmoji(prog>=1?'🌅':'☀️',sunX,sunY,34);
+  // the city itself
+  let py=arcY+90;
+  if(artOk('bg-city')){ const bg=ART['bg-city'], bh=Math.min(150,W/3);
+    cx.drawImage(bg,0,py,W,bh); py+=bh+6; } else py+=10;
+  // zones
+  const zx=v=>lerp(30,W-30,v);
+  cx.font='800 11px sans-serif';
+  for(const [zt,zv] of [['🏖 BEACH',.13],['🌴 PROMENADE',.5],['🛍 SHUK',.85]]){
+    const zw=cx.measureText(zt).width+16;
+    cx.fillStyle='rgba(13,17,32,.66)';rr(zx(zv)-zw/2,py-2,zw,20,10);
+    cx.fillStyle='#fff';cx.fillText(zt,zx(zv),py+8);
+  }
+  // route + golden progress trail
+  const ry=py+70;
+  cx.setLineDash([3,8]);cx.strokeStyle='rgba(13,17,32,.45)';cx.lineWidth=3;
+  cx.beginPath();cx.moveTo(zx(0),ry);cx.lineTo(zx(1),ry);cx.stroke();cx.setLineDash([]);
+  cx.strokeStyle='#ffd166';cx.lineWidth=4;
+  cx.beginPath();cx.moveTo(zx(0),ry);cx.lineTo(lerp(zx(0),zx(1),clamp(prog,0,1)),ry);cx.stroke();
+  // nodes
+  G.mapNodes=[];
+  const today=dayIndex(), h=todaysHustle();
+  const hustStation=h.id==='vol_rally'?'volley':(h.id==='earn'||h.id==='double')?'home':'falafel';
+  STATIONS.forEach((s,i)=>{
+    const nx=zx(s.x/WORLD_W), ny=ry;
+    let pulse=false, dim=false;
+    if(!S.tutorialDone){ pulse=(s.id==='falafel'); dim=!pulse; }
+    if(s.id==='home'&&prog>=1) pulse=true;
+    cx.globalAlpha=dim?.45:1;
+    cx.fillStyle='rgba(13,17,32,.78)';cx.beginPath();cx.arc(nx,ny,21,0,7);cx.fill();
+    cx.strokeStyle='#ffd166';cx.lineWidth=2;cx.stroke();
+    if(pulse){ const pr=1+.25*Math.sin(G.t*5);
+      cx.strokeStyle='rgba(255,209,102,.85)';cx.lineWidth=3;
+      cx.beginPath();cx.arc(nx,ny,25*pr,0,7);cx.stroke(); }
+    drawEmoji(s.ico,nx,ny,26);
+    // badges: what's waiting here
+    let badge=null;
+    if(s.id==='home') badge=prog>=1?'🌅':'🔒';
+    else if(s.id==='chat_savta'&&(S.gift.savta||0)<today) badge='🎁';
+    else if(s.id==='chat_chabad'&&(S.bracha<today||(S.gift.chabad||0)<today)) badge='🎁';
+    else if(s.id==='kiosk'&&!(S.gossip&&S.gossip.day===today)) badge='🎁';
+    if(badge) drawEmoji(badge,nx+17,ny-16,17);
+    if(s.id===hustStation&&!(S.hustle&&S.hustle.done)) drawEmoji('🎯',nx-17,ny-16,17);
+    cx.globalAlpha=1;
+    // label, zigzag so seven of them fit a phone
+    const ly=ny+(i%2?40:-40);
+    cx.font='800 10.5px sans-serif';
+    const lw=cx.measureText(s.label).width+12;
+    cx.fillStyle='rgba(13,17,32,.7)';rr(nx-lw/2,ly-9,lw,18,9);
+    cx.fillStyle='#fff';cx.fillText(s.label,nx,ly);
+    G.mapNodes.push({id:s.id,x:nx,y:ny,r:36});
+  });
+  // you, on the route
+  const pmx=zx(G.player.x/WORLD_W);
+  drawEmoji(equipped().ico,pmx,ry-30+Math.sin(G.t*2.5)*3,24);
+  // hustle reminder strip
+  cx.font='800 12px sans-serif';
+  const ht=`🎯 ${S.hustle&&S.hustle.done?'Hustle done ✓':h.desc+'  (+'+HUSTLE_REWARD+'₪)'}`;
+  const hw=cx.measureText(ht).width+22;
+  cx.fillStyle='rgba(13,17,32,.72)';rr(W/2-hw/2,ry+58,hw,26,13);
+  cx.fillStyle=S.hustle&&S.hustle.done?'#7ee8c7':'#ffd166';cx.fillText(ht,W/2,ry+71);
+  // down to the street
+  const btxt='🚶 WALK THE STREET'; cx.font='900 15px sans-serif';
+  const bw2=cx.measureText(btxt).width+36;
+  G.mapWalk={x:W/2-bw2/2,y:H-86-SAFE_TOP*0,w:bw2,h:44};
+  cx.fillStyle='rgba(13,17,32,.82)';rr(G.mapWalk.x,G.mapWalk.y,bw2,44,14);
+  cx.fillStyle='#7ee8c7';cx.fillText(btxt,W/2,G.mapWalk.y+22);
+}
+function mapTap(sx,sy){
+  const mw=G.mapWalk;
+  if(mw&&sx>=mw.x&&sx<=mw.x+mw.w&&sy>=mw.y&&sy<=mw.y+mw.h){
+    Sound.enter(); G.state='hub';
+    G.camX=clamp(G.player.x-W*.42,0,Math.max(0,WORLD_W-W)); return;
+  }
+  const n=(G.mapNodes||[]).find(n=>Math.hypot(n.x-sx,n.y-sy)<n.r);
+  if(!n) return;
+  Sound.enter();
+  G.state='hub'; G.camX=clamp(G.player.x-W*.42,0,Math.max(0,WORLD_W-W));
+  const st=STATIONS.find(s=>s.id===n.id);
+  if(Math.abs(st.x-G.player.x)<110&&G.player.d<.38) enterStation(st);
+  else { G.target={x:st.x,d:.14}; G.pendingEnter=st.id; }   // walk over & enter on arrival
+}
+
 /* the town: painted horizon band, then the plaza receding toward the viewer */
 function drawTown(){
   const t=TOWN();
@@ -1219,8 +1461,9 @@ function drawVolley(){
   else { cx.save();cx.translate(W*.84,groundY-30);cx.scale(-1,1);drawEmoji('🧓',0,0,52);cx.restore(); }
   // ball + hittable ring
   const b=v.ball;
-  if(v.hittable){ cx.strokeStyle=`rgba(255,209,102,${.5+.4*Math.sin(G.t*9)})`;cx.lineWidth=4;
-    cx.beginPath();cx.arc(b.x,b.y,38,0,7);cx.stroke();
+  if(v.hittable){ const pr=v.hold?1+.18*Math.sin(G.t*6):1;   // tutorial freeze: ring breathes big
+    cx.strokeStyle=`rgba(255,209,102,${.5+.4*Math.sin(G.t*9)})`;cx.lineWidth=v.hold?6:4;
+    cx.beginPath();cx.arc(b.x,b.y,38*pr,0,7);cx.stroke();
     drawEmoji('👆',b.x,b.y+54,26); }
   cx.drawImage(glow('rgba(255,255,255,.4)',26),b.x-26,b.y-26);
   drawEmoji('🏐',b.x,b.y,40);
@@ -1259,6 +1502,9 @@ function drawFalafel(){
     pg.addColorStop(0,'#7ee8c7');pg.addColorStop(.5,'#ffd166');pg.addColorStop(1,'#ff5d5d');SKYG.set('pmeter',pg); }
   cx.fillStyle=pg;rr(bx,by,bw*f.power,12,6);
   cx.fillStyle='#fff';cx.fillRect(bx+bw*f.power-2,by-3,4,18);
+  if(f.tut){ const ip=faIdealPower();          // 🥙 mark: where to release, right now
+    drawEmoji('🥙',bx+bw*ip,by-16,24);
+    cx.fillStyle='#ffd166';cx.fillRect(bx+bw*ip-1.5,by-4,3,20); }
   cx.font='800 13px sans-serif';cx.textAlign='center';cx.fillStyle='#cdd6e8';
   cx.fillText('TAP to toss',W/2,by+34);
   // timer + combo
@@ -1286,6 +1532,12 @@ function hud(){
     if(S.streak>0){ const stxt='🔥 '+S.streak; const sw=cx.measureText(stxt).width+20;
       cx.fillStyle='rgba(13,17,32,.66)';rr(12+ww+8,py,sw,30,15);
       cx.fillStyle='#ff8ad4';cx.fillText(stxt,12+ww+8+10,py+15); }
+    // 🗺️ back to the map — always one tap away (bottom-left, opposite the mute)
+    const mtxt='🗺️ MAP'; const mw=cx.measureText(mtxt).width+24;
+    const my=H-SAFE_TOP-54;
+    G.mapPill={x:12,y:my,w:mw,h:36};
+    cx.fillStyle='rgba(13,17,32,.75)';rr(12,my,mw,36,12);
+    cx.fillStyle='#8ad2ff';cx.fillText(mtxt,24,my+18);
   }
   // doubling goal bar — on the street only, so mini-games keep a clean top
   // (the result screen reports double-up progress between games)
@@ -1307,11 +1559,17 @@ function hud(){
     const hw=cx.measureText(ht).width+22, hy=py+46;
     cx.fillStyle='rgba(13,17,32,.7)';rr(W/2-hw/2,hy-13,hw,26,13);
     cx.fillStyle=done?'#7ee8c7':'#ffd166';cx.fillText(ht,W/2,hy);
+    // next-best-action: the WHY, quantified, always on screen
+    if(dayProg()<1){ const gap=dayGoal()-S.earnedToday;
+      const at=`💡 ${money(gap)} to go · ~${Math.max(1,Math.ceil(gap/150))} good runs`;
+      const aw=cx.measureText(at).width+22;
+      cx.fillStyle='rgba(13,17,32,.7)';rr(W/2-aw/2,hy+19,aw,26,13);
+      cx.fillStyle='#9fe7d4';cx.fillText(at,W/2,hy+32); }
     if(isFriday()){           // 🕯️ pre-Shabbat rush banner
       const ft='🕯️ SHABBAT RUSH +25%';
       const fw=cx.measureText(ft).width+22;
-      cx.fillStyle='rgba(13,17,32,.7)';rr(W/2-fw/2,hy+19,fw,26,13);
-      cx.fillStyle='#ff8ad4';cx.fillText(ft,W/2,hy+32);
+      cx.fillStyle='rgba(13,17,32,.7)';rr(W/2-fw/2,hy+51,fw,26,13);
+      cx.fillStyle='#ff8ad4';cx.fillText(ft,W/2,hy+64);
     }
   }
 }
@@ -1341,13 +1599,24 @@ function startDay(){
   loginReward();                 // 7-day calendar gift on first launch of a real day
   // a reload on the SAME real day resumes the day in progress — earnedToday
   // survives. Only a new real day (or first run) re-locks the target.
-  if(S.lastSeen!==dayIndex()){ S.lastSeen=dayIndex(); newDay(); }
+  const fresh=S.lastSeen!==dayIndex();
+  if(fresh){ S.lastSeen=dayIndex(); newDay(); }
   syncPassport(); save();
-  panel(null); G.state='hub'; G.target=null; G.player.d=.3;
+  G.target=null; G.player.d=.3;
   if(!S.tutorialDone){           // first session: spawn right at the falafel stand so
     G.player.x=830; G.walletShown=S.shekels;          // earning starts in <10s, not after a long walk
   } else { G.player.x=300; }
   G.camX=clamp(G.player.x-W*.42,0,Math.max(0,WORLD_W-W));
+  G.state='map';                 // the map is home base: where am I, why am I hustling
+  if(fresh){                     // morning mission card: the day's WHY, up front
+    $('mDay').textContent='DAY '+S.day;
+    $('mGoal').innerHTML=`Double up: earn <b style="color:#ffd166">${money(dayGoal())}</b> before sundown 🌅`;
+    const h=todaysHustle();
+    $('mHustle').innerHTML=`🎯 Today's Hustle: ${h.desc} <b>(+${HUSTLE_REWARD}₪)</b>`;
+    const nx=[3,7,14,30,60].find(m=>m>S.streak);
+    $('mWhy').textContent=nx?`🔥 streak ${S.streak} — ${nx-S.streak} more day${nx-S.streak===1?'':'s'} to a Shabbat Shield 🛡️`:'';
+    panel('morning');
+  } else panel(null);
 }
 $('title').addEventListener('click',e=>{ if(e.target.closest('#mute'))return; startDay(); });
 $('titleBtn').addEventListener('click',startDay);
