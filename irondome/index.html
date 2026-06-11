@@ -263,6 +263,7 @@
   <div class="stat" id="overGap" style="color:var(--gold)"></div>
   <div class="sub" id="overStats"></div>
   <div class="statstrip" id="overStrip"></div>
+  <a id="tipJar" hidden target="_blank" rel="noopener" style="margin-top:8px;font-size:14px;color:var(--gold);text-decoration:none;opacity:.85">☕ Keep the arcade free · תשאירו את המקלט חינם</a>
   <button class="shopToggle" id="btnShopT2"></button>
   <div id="coinsOver" style="display:none;font-family:'Courier New',monospace;color:var(--gold);font-size:16px;font-weight:700"></div>
   <div id="shopOver" class="shoplist" style="display:none"></div>
@@ -2271,6 +2272,10 @@ function track(event){
   }catch(e){}
 }
 track();                                                      // visit
+/* tip jar — set TIP_URL once (Buy Me a Coffee / Ko-fi) and it goes live */
+const TIP_URL='';
+if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
+  tj.hidden=false;tj.style.display='block';tj.addEventListener('click',()=>track('evt-tip'));}
 { // D1/D7 retention measurement (cookieless, the metric this is all about)
   const today = new Date().toISOString().slice(0, 10);
   if (!save.firstSeen){ save.firstSeen = today; }

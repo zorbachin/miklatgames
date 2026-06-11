@@ -110,6 +110,7 @@
   <button class="btn hidden" id="reviveBtn">🪙 CONTINUE −100₪</button>
   <button class="btn" id="againBtn">RUN AGAIN ▶</button>
   <button class="btn ghost" id="shareBtn">📤 CHALLENGE A FRIEND</button>
+  <a id="tipJar" hidden target="_blank" rel="noopener" style="margin-top:10px;font-size:14px;color:#ffd166;text-decoration:none;opacity:.85">☕ Keep the arcade free · תשאירו את המקלט חינם</a>
 </div>
 
 <script>
@@ -420,6 +421,7 @@ const DEATH_LINES=['NU, BAALI…','Your savta made it. You didn\'t.',
 function die(){
   Sound.sirenStop(); Sound.boom(); flash(.85); shake();
   buzz([60,40,220]);
+  track('evt-md-death');if(G.wave>1&&G.wave<=10)track('evt-md-siren-'+(G.wave-1));
   G.state='deathcam'; G.deathT=0;
   G.obs=G.obs.filter(o=>Math.abs(o.x-PLAYER_X())>240);   // no photobombing savtas
   G.deathLine=DEATH_LINES[irand(0,DEATH_LINES.length-1)];
@@ -453,7 +455,7 @@ function showDeathPanel(){
   $('dead').classList.remove('hidden');
 }
 function resetRun(daily){ G.wave=0;G.dist=0;G.coins=0;G.revived=false;
-  G.daily=daily||null;startWave(); }
+  G.daily=daily||null;track(daily?'evt-md-start-daily':'evt-md-start');startWave(); }
 function flash(o){ const f=$('flash');f.style.transition='none';f.style.opacity=o;
   requestAnimationFrame(()=>{f.style.transition='opacity .5s';f.style.opacity=0;}); }
 function shake(){ const w=$('wrap');w.classList.remove('shake');void w.offsetWidth;w.classList.add('shake'); }
@@ -537,10 +539,25 @@ $('reviveBtn').addEventListener('click',()=>{
 });
 
 /* ---------------- challenge card share loop ---------------- */
+/* per-game funnel events (GoatCounter: cookieless, fails silently;
+   pageview comes from count.js — these are events only) */
+function track(event){
+  try{
+    if(location.protocol==='file:'||location.hostname==='localhost')return;
+    const img=new Image(1,1);
+    img.src='https://miklat-games.goatcounter.com/count?p='+encodeURIComponent('/'+event)+
+      '&e=true&r='+encodeURIComponent(document.referrer)+'&rnd='+Date.now();
+  }catch(e){}
+}
+/* tip jar — set TIP_URL once (Buy Me a Coffee / Ko-fi) and it goes live */
+const TIP_URL='';
+if(TIP_URL){const tj=$('tipJar');tj.href=TIP_URL;
+  tj.hidden=false;tj.style.display='block';tj.addEventListener('click',()=>track('evt-md-tip'));}
 const QS=new URLSearchParams(location.search);
 const CHAL=QS.get('beat')!==null?{beat:parseInt(QS.get('beat'))||0,c:parseInt(QS.get('c'))||0}:null;
 const WANT_DAILY=QS.get('daily')!==null;
 const dayNum=()=>Math.floor(Date.now()/864e5)-20580;   // daily # counts from launch era
+if(CHAL)track('evt-md-challenged');
 if(CHAL){
   $('titleTag').innerHTML=`👊 Someone survived <b style="color:#ffd166">${CHAL.beat} siren${CHAL.beat===1?'':'s'}</b> and stacked ${CHAL.c}₪.<br>Think you can do better?`;
   $('title').querySelector('.big').textContent='ACCEPT THE CHALLENGE ▶';
@@ -582,6 +599,7 @@ function renderCard(s,coins,hood,line){
 }
 const SITE=location.protocol.startsWith('http')?location.origin+location.pathname:'https://miklatgames.fun/mamaddash/';
 $('shareBtn').addEventListener('click',async()=>{
+  track('evt-md-share');
   const s=G.wave-1;
   const link=G.daily?`${SITE}?daily=1`:`${SITE}?beat=${s}&c=${G.coins}&v=2`;
   let txt;

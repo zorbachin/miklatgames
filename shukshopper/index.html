@@ -11,6 +11,11 @@
 <meta property="og:title" content="SHUK SHOPPER 🧺 — outrun the vendor, fill the basket">
 <meta property="og:description" content="Friday rush at the shuk. Swipe through 3 lanes, grab Ima's list, dodge the savtas — before Shabbat closes the market. No app. One thumb.">
 <meta property="og:url" content="https://miklatgames.fun/shukshopper/">
+<!-- placeholder: swap for press/keyart once the pack is generated -->
+<meta property="og:image" content="https://miklatgames.fun/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="Endless market runner from the MIKLAT GAMES shelter arcade. Works offline.">
 <title>SHUK SHOPPER 🧺 — מרוץ השוק</title>
 <style>
@@ -95,6 +100,7 @@
     <div class="best-line" id="ovBest"></div>
     <button class="bigbtn" id="againBtn" data-i18n="again">RUN AGAIN ▶</button>
     <button class="ghostbtn" id="shareBtn" data-i18n="share">📤 Challenge the Group Chat</button>
+    <a id="tipJar" hidden target="_blank" rel="noopener" style="margin-top:10px;font-size:14px;color:var(--c-gold,#ffd166);text-decoration:none;opacity:.85">☕ Keep the arcade free · תשאירו את המקלט חינם</a>
   </div>
 
   <div class="overlay hidden" id="paused">
@@ -159,6 +165,10 @@ function applyLang(){
 function track(name){
   try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'evt-ss-'+name,event:true}); }catch(e){}
 }
+/* tip jar — set TIP_URL once (Buy Me a Coffee / Ko-fi) and it goes live */
+const TIP_URL='';
+if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
+  tj.hidden=false;tj.style.display='block';tj.addEventListener('click',()=>track('tip'));}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1800);}
 

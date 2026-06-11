@@ -221,6 +221,7 @@
 
   <footer>
     <span>miklatgames.fun</span>
+    <a id="tipJar" hidden target="_blank" rel="noopener" style="color:var(--c-gold,#ffd166);text-decoration:none">☕ keep it free</a>
     <span data-i18n="footer">made in a miklat 🚨</span>
   </footer>
 </div>
@@ -334,6 +335,10 @@ document.getElementById('shareSite').addEventListener('click',async()=>{
 function track(name){
   try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'evt-'+name,event:true}); }catch(e){}
 }
+/* tip jar — set TIP_URL once (Buy Me a Coffee / Ko-fi) and it goes live */
+const TIP_URL='';
+if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
+  tj.hidden=false;tj.addEventListener('click',()=>track('tip'));}
 document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
 document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
 document.getElementById('cardShuk').addEventListener('click',()=>track('play-shukshopper'));
