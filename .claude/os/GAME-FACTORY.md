@@ -79,10 +79,13 @@ House invariants (copy from Shuk Shopper, the cleanest reference):
 | 6 Portal submissions | ❌ | ❌ | ❌ |
 | 7 Live + watched | ✅ live | ✅ live | branch |
 
-**Backfill queue (tonight):** Mamad Dash events · og tags (MD+SS) · tip-jar
-hooks (all 3 + shelf, dormant until account exists) · press specs (ID+MD) ·
-WORLD.md (ID+MD) · Shuk Shopper runtime asset caching.
-**Blocked on Zorba:** Buy Me a Coffee account (flips tip jars live) · Gemini
-key (generates art packs) · portal submissions need final art.
+**Backfill — DONE 2026-06-11 night shift:** ✅ Mamad Dash events · ✅ SS og
+tags (MD already had them) · ✅ tip-jar hooks everywhere (dormant: set TIP_URL)
+· ✅ press specs ID+MD · ✅ WORLD.md ID+MD · ✅ SS SW already runtime-caches
+assets (no change needed) · ✅ MIKLAT ACADEMY course (/academy/) · ✅ research
+corpus (.claude/os/research/, 8 sourced fact sheets).
+**Blocked on Zorba:** Ko-fi account (0% fees — flips tip jars live) · working
+Gemini key, new project (first key's project suspended) · portal submissions
+need generated art.
 **Decision needed:** Balagan + Fabatollah — spec them through stage 1 or keep
 as teaser doors.
