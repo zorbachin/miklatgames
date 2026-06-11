@@ -278,12 +278,12 @@ const CHARS=[
    perk:'+10% on everything. Earned across the whole Miklat universe. 🛡️', mult:{all:.10}},
 ];
 const ITEMS=[
-  {id:'falafel', ico:'🥙', name:'Falafel Pack', cost:80,  perk:'+5s on your next mini-game.'},
+  {id:'falafel', ico:'🥙', name:'Falafel Pack', cost:80,  perk:'+5s on your next falafel toss.'},
   {id:'hummus',  ico:'🫓', name:'Hummus Bowl',  cost:130, perk:'+1 life in your next volleyball game.'},
   {id:'goldstar',ico:'🍺', name:'Cold Goldstar',cost:60,  perk:'Slows the next game down a touch.'},
 ];
 const UPS=[
-  {id:'tips',  ico:'💸', name:'Bigger Tips',  base:200, name2:'earnings', max:5, step:.12, perk:lv=>`+${lv*12}% all earnings (Lv ${lv}/5)`},
+  {id:'tips',  ico:'💸', name:'Bigger Tips',  base:200, max:5, step:.12, perk:lv=>`+${lv*12}% all earnings (Lv ${lv}/5)`},
   {id:'walk',  ico:'👟', name:'Faster Walk',  base:150, max:4, step:30,  perk:lv=>`Stroll +${lv*30} speed (Lv ${lv}/4)`},
   {id:'lucky', ico:'🍀', name:'Lucky Charm',  base:300, max:3, step:1,
    perk:lv=>lv?`${lv} splat${lv===1?'':'s'}/run won't break your combo (Lv ${lv}/3)`:'Splats forgive your falafel combo (Lv 0/3)'},
@@ -309,7 +309,8 @@ function load(){
   }catch(e){}
   return JSON.parse(JSON.stringify(DEF));
 }
-function save(){ try{ localStorage.setItem('bg_save',JSON.stringify(S)); }catch(e){} }
+function save(){ if(S.shekels>S.best.topWallet) S.best.topWallet=S.shekels;   // every money path funnels here
+  try{ localStorage.setItem('bg_save',JSON.stringify(S)); }catch(e){} }
 const owned=id=>S.chars.includes(id);
 function ownedPct(){ const total=CHARS.length+ITEMS.length+UPS.length;
   let have=S.chars.length;
@@ -342,7 +343,7 @@ function newDay(){            // start (or restart) a day
   S.dayStart=S.shekels; S.earnedToday=0;
   // Chabad mitzvah: free shekels once per real day if he's equipped
   const c=equipped();
-  if(c.mitzvah && S.lastClaim!==dayIndex()){
+  if(c.mitzvah && dayIndex()>S.lastClaim){          // > : clock-rollback proof
     S.lastClaim=dayIndex(); S.shekels+=c.mitzvah;
     G.mitzvahPending=c.mitzvah;
   }
@@ -355,7 +356,8 @@ const dayGoal=()=>Math.round(500*Math.pow(1.15,S.day-1));
 const dayProg=()=>clamp(S.earnedToday/Math.max(1,dayGoal()),0,1);
 
 /* streak with stakes: miss a real day and the streak resets — unless you banked
-   a Shabbat Shield (earned at 3/7/14-day milestones). */
+   a Shabbat Shield (earned at 3/7/14-day milestones). One shield absorbs a gap
+   of ANY length — intentionally generous: a vacation costs one shield, not five. */
 function checkStreakLapse(){
   if(S.streak<=0) return;
   const gap=dayIndex()-S.lastClearedDay;
@@ -476,8 +478,11 @@ function panel(id){ for(const p of ['title','result','dayDone','chat','shop'])
 /* =================== input — drag/tap to stroll, tap a spot to enter =================== */
 let ptDown=null, ptMoved=false, dragX=0;
 function worldFromScreen(sx){ return sx+G.camX; }
+const panelOpen=()=>['title','result','dayDone','chat','shop']
+  .some(p=>!$(p).classList.contains('hidden'));
 function onDown(sx,sy){
   userActed=true; Sound.init();
+  if(panelOpen()) return;        // a DOM panel owns the screen — no world taps through it
   if(G.state==='hub'){ ptDown={sx,sy}; ptMoved=false; dragX=sx; }
   else if(G.state==='volley') vbTap();
   else if(G.state==='falafel') faTap();
@@ -574,14 +579,14 @@ function chatLines(who){
 }
 function openChat(who){
   const c=NPC[who]; if(!c) return;
-  Sound.chat(); G.chatWho=who;
+  Sound.chat();
   S.met[who]=(S.met[who]||0)+1;
   $('chatIco').textContent=c.ico; $('chatName').textContent=c.name;
   const L=chatLines(who); let line=L[irand(0,L.length-1)], reward='';
   // gifts are once per real day per NPC — a reason to visit, not a faucet to farm
   const today=dayIndex();
   const g=line.includes('₪40')?40:line.includes('₪30')?30:0;
-  if(g && S.gift[who]!==today){ S.gift[who]=today; S.shekels+=g; S.earnedToday+=g;
+  if(g && (S.gift[who]||0)<today){ S.gift[who]=today; S.shekels+=g; S.earnedToday+=g;
     reward=`+${g}₪ ${who==='savta'?'from Savta 🤍':'tzedakah 🙏'}`; flyCoin(W/2,H*.45); Sound.cash(); }
   else if(g) reward='(already took your gift today — chutzpah!)';
   $('chatLine').textContent=line; $('chatReward').textContent=reward;
@@ -628,10 +633,10 @@ function vbTap(){
     Sound.bump(v.rally); G.freeze=.05; flash(.12); buzz(20);   // hit-stop: the bump connects
     if(v.rally===5||v.rally===10||v.rally===15){ burstConfetti(14);
       pop(W/2,groundY-150,`RALLY ×${v.rally} 🔥`,POP_COLS[v.rally%4],true); }
-    // send it back to Savta, faster each rally
-    const sp=1+Math.min(1.4,v.rally*.08)*(v.slow?.7:1);
+    // send it back to Savta, faster each rally (🍺 slow-mo damps the whole speed)
+    const sp=(1+Math.min(1.4,v.rally*.08))*(v.slow?.7:1);
     v.ball.vx=Math.abs(rand(150,210))*sp; v.ball.vy=-rand(360,430)*sp;
-    v.side='opp'; v.hittable=false; v.served=true;
+    v.side='opp'; v.hittable=false;
   } else { // early/whiff tap — no damage, but a 1/4s lockout so timing matters
     v.lockout=G.t+.25;
     pop(W*.18,groundY-180,'too early!','#aab4c8'); Sound.no();
@@ -662,7 +667,7 @@ function vbUpdate(dt){
     v.hittable=false;
     if(b.x>cxn && b.vy>0 && b.y>groundY-300){
       // Savta bumps it back toward the player
-      const sp=1+Math.min(1.4,v.rally*.08)*(v.slow?.7:1);
+      const sp=(1+Math.min(1.4,v.rally*.08))*(v.slow?.7:1);
       b.vx=-rand(150,210)*sp; b.vy=-rand(330,400)*sp; v.side='player';
       Sound.bump();
     }
@@ -869,7 +874,8 @@ const SITE=location.protocol.startsWith('http')?location.origin+location.pathnam
 // ?stack=X&day=N — a friend's flex becomes your challenge ('stack', not 'beat',
 // so links never collide with Mamad Dash's ?beat= forwarding on the homepage)
 const QS=new URLSearchParams(location.search);
-const CHAL=QS.get('stack')!==null?{stack:parseInt(QS.get('stack'))||0,day:parseInt(QS.get('day'))||1}:null;
+const CHAL=QS.get('stack')!==null?{stack:Math.max(0,parseInt(QS.get('stack'))||0),
+  day:Math.max(1,parseInt(QS.get('day'))||1)}:null;
 if(CHAL){
   $('titleTag').innerHTML=`👊 Someone turned ₪500 of avtala into <b style="color:#ffd166">${money(CHAL.stack)}</b> by day ${CHAL.day}.<br>Think you can hustle harder?`;
   $('titleBtn').textContent='ACCEPT THE HUSTLE ▶';
@@ -1146,7 +1152,7 @@ function drawFalafel(){
   if(f.combo>1){ cx.fillStyle='#ff8ad4';cx.font='900 20px sans-serif';cx.fillText(`🔥 ${f.combo} combo`,W/2,SAFE_TOP+62); }
 }
 function hudPill(cxp,cyp,txt,col){
-  cx.font=cx.font||'900 16px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+  cx.textAlign='center';cx.textBaseline='middle';
   const w=cx.measureText(txt).width+24;
   cx.fillStyle='rgba(13,17,32,.62)';rr(cxp-w/2,cyp-15,w,30,15);
   cx.fillStyle=col;cx.fillText(txt,cxp,cyp);
@@ -1202,7 +1208,7 @@ function rr(x,y,w,h,rad){ cx.beginPath();
    Consecutive days walk the ladder; day 7 banks a Shabbat Shield; then it cycles. */
 const LOGIN_GIFTS=[50,75,100,125,150,200,'shield'];
 function loginReward(){
-  const d=dayIndex(); if(S.login.last===d) return;
+  const d=dayIndex(); if(d<=S.login.last) return;   // <= : a backwards clock can't re-farm gifts
   S.login.run=(d-S.login.last===1)?S.login.run+1:1;
   S.login.last=d;
   const idx=(S.login.run-1)%7, gift=LOGIN_GIFTS[idx];
@@ -1215,12 +1221,13 @@ function loginReward(){
 function startDay(){
   if(G.state!=='title') return;
   Sound.init(); userActed=true;
-  if(S.lastSeen!==dayIndex()){ S.lastSeen=dayIndex(); }
   checkStreakLapse();            // punish a missed real day (unless a shield saves it)
   ensureHustle();                // refresh today's seeded objective
   loginReward();                 // 7-day calendar gift on first launch of a real day
-  newDay();
-  syncPassport();
+  // a reload on the SAME real day resumes the day in progress — earnedToday
+  // survives. Only a new real day (or first run) re-locks the target.
+  if(S.lastSeen!==dayIndex()){ S.lastSeen=dayIndex(); newDay(); }
+  syncPassport(); save();
   panel(null); G.state='hub'; G.target=null;
   if(!S.tutorialDone){           // first session: spawn right at the falafel stand so
     G.player.x=970; G.walletShown=S.shekels;          // earning starts in <10s, not after a 1000px walk
