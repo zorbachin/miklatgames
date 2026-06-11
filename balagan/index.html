@@ -458,7 +458,7 @@ const STATIONS=[
 ];
 const G={
   state:'title', t:0, freeze:0,
-  camX:0, player:{x:300,y:0,vy:0,dir:1,walk:0}, target:null,
+  camX:0, player:{x:300,d:.5,dir:1,walk:0}, target:null,   // d = depth into the plaza (0 back → 1 front)
   near:null, prompt:0, mitzvahPending:0, walletShown:S.shekels,
   streakLost:0, shieldUsed:false,
   pops:[], confetti:[], coins:[],
@@ -476,15 +476,25 @@ function shake(){ const w=$('wrap');w.classList.remove('shake');void w.offsetWid
 function panel(id){ for(const p of ['title','result','dayDone','chat','shop'])
   $(p).classList.toggle('hidden',p!==id); }
 
-/* =================== input — drag/tap to stroll, tap a spot to enter =================== */
+/* =================== 3/4 town projection ===================
+   The street is a walkable plaza seen from above-and-behind (classic JRPG
+   town view): buildings line the back edge, the player roams x AND depth.
+   d=0 is the storefront line, d=1 the bottom of the screen. */
+const TOWN=()=>({top:Math.round(H*.34), bot:Math.round(H*.88)});
+const townY=d=>{const t=TOWN();return t.top+26+d*(t.bot-t.top-26);};
+const townScale=d=>.82+.38*d;          // closer = bigger: cheap, effective depth
+
+/* =================== input — tap anywhere to walk, tap a building to enter =================== */
 let ptDown=null, ptMoved=false, dragX=0;
 function worldFromScreen(sx){ return sx+G.camX; }
+function depthFromScreen(sy){ const t=TOWN();
+  return clamp((sy-t.top-26)/(t.bot-t.top-26),0,1); }
 const panelOpen=()=>['title','result','dayDone','chat','shop']
   .some(p=>!$(p).classList.contains('hidden'));
 function onDown(sx,sy){
   userActed=true; Sound.init();
   if(panelOpen()) return;        // a DOM panel owns the screen — no world taps through it
-  if(G.state==='hub'){ ptDown={sx,sy}; ptMoved=false; dragX=sx; }
+  if(G.state==='hub'){ ptDown={sx,sy}; ptMoved=false; dragX=sx; lastTapY=sy; }
   else if(G.state==='volley') vbTap();
   else if(G.state==='falafel') faTap();
 }
@@ -496,13 +506,19 @@ function onMove(sx){
     G.player.x=clamp(G.player.x, G.camX+60, G.camX+W-60);
   }
 }
+let lastTapY=0;
 function onUp(sx){
   if(G.state!=='hub'){ ptDown=null; return; }
-  if(ptDown && !ptMoved){            // a tap: walk there, or enter a nearby spot
-    const wx=worldFromScreen(sx);
-    const st=STATIONS.find(s=>Math.abs(s.x-wx)<70 && Math.abs(s.x-G.player.x)<120);
-    if(st) enterStation(st);
-    else G.target=clamp(wx,60,WORLD_W-60);
+  if(ptDown && !ptMoved){            // a tap: walk there, or enter a tapped building
+    const wx=worldFromScreen(sx), sy=lastTapY;
+    const t=TOWN();
+    // tapping a building (its sprite sits on the back edge, above the plaza)
+    const st=STATIONS.find(s=>Math.abs(s.x-wx)<75 && sy<t.top+90);
+    if(st){
+      if(Math.abs(st.x-G.player.x)<110 && G.player.d<.38) enterStation(st);   // close: walk in
+      else G.target={x:st.x, d:.14};                                          // far: walk to the door
+    }
+    else G.target={x:clamp(wx,60,WORLD_W-60), d:depthFromScreen(sy)};
   }
   ptDown=null;
 }
@@ -518,9 +534,12 @@ window.addEventListener('contextmenu',e=>e.preventDefault());
 window.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase();
   if(G.state==='hub'){
-    if(k==='arrowleft'||k==='a') G.target=G.player.x-260;
-    if(k==='arrowright'||k==='d') G.target=G.player.x+260;
-    if(k===' '||k==='enter'){ const st=STATIONS.find(s=>Math.abs(s.x-G.player.x)<110); if(st) enterStation(st); }
+    const p=G.player;
+    if(k==='arrowleft'||k==='a') G.target={x:p.x-260,d:p.d};
+    if(k==='arrowright'||k==='d') G.target={x:p.x+260,d:p.d};
+    if(k==='arrowup'||k==='w') G.target={x:p.x,d:clamp(p.d-.4,0,1)};
+    if(k==='arrowdown'||k==='s') G.target={x:p.x,d:clamp(p.d+.4,0,1)};
+    if(k===' '||k==='enter'){ const st=STATIONS.find(s=>Math.abs(s.x-p.x)<110&&p.d<.38); if(st) enterStation(st); }
   } else if((k===' '||k==='arrowup')&&(G.state==='volley'||G.state==='falafel')){
     e.preventDefault(); G.state==='volley'?vbTap():faTap();
   }
@@ -539,9 +558,9 @@ function enterStation(st){
 function goHome(){
   Sound.enter();
   if(dayProg()>=1){ clearDay(); }
-  else { Sound.no();
-    pop(G.player.x-G.camX,groundY-200,`🌅 Double up first — ${Math.round(dayProg()*100)}%`,'#ffd166',true);
-    pop(G.player.x-G.camX,groundY-160,'🏐 rally · 🥙 toss','#9fe7d4'); }
+  else { Sound.no(); const py=townY(G.player.d);
+    pop(G.player.x-G.camX,py-130,`🌅 Double up first — ${Math.round(dayProg()*100)}%`,'#ffd166',true);
+    pop(G.player.x-G.camX,py-94,'🏐 rally · 🥙 toss','#9fe7d4'); }
 }
 
 /* =================== chat / NPCs — memory, gossip & reactive lines =================== */
@@ -801,7 +820,7 @@ function clearDay(){
   syncPassport(); save(); panel('dayDone');
 }
 $('ddNextBtn').addEventListener('click',()=>{ panel(null); G.state='hub';
-  G.player.x=300; G.target=null; G.camX=0; });
+  G.player.x=300; G.player.d=.3; G.target=null; G.camX=0; });
 $('ddShare').addEventListener('click',shareFlex);
 
 /* =================== shop =================== */
@@ -967,28 +986,33 @@ function hubUpdate(dt){
   ensureHustle();                 // keeps today's objective in sync if midnight passes mid-session
   const p=G.player, sp=140+upLv('walk')*30;
   if(G.target!=null){
-    const dx=G.target-p.x;
-    if(Math.abs(dx)<6){ p.x=G.target; G.target=null; p.walk=0; }
-    else { p.dir=dx<0?-1:1; p.x+=p.dir*Math.min(Math.abs(dx),sp*dt); p.walk+=dt*10;
-      if(Math.floor(p.walk*2)!==Math.floor((p.walk-dt*10)*2)) Sound.step(); }
+    const t=TOWN(), dSpan=Math.max(1,t.bot-t.top-26);
+    const dx=G.target.x-p.x, dd=G.target.d-p.d;
+    const distPx=Math.hypot(dx, dd*dSpan);
+    if(distPx<7){ p.x=G.target.x; p.d=G.target.d; G.target=null; p.walk=0; }
+    else {
+      const step=Math.min(distPx,sp*dt)/distPx;     // straight line across the plaza
+      if(Math.abs(dx)>2) p.dir=dx<0?-1:1;
+      p.x+=dx*step; p.d+=dd*step; p.walk+=dt*10;
+      if(Math.floor(p.walk*2)!==Math.floor((p.walk-dt*10)*2)) Sound.step();
+    }
   } else p.walk=0;
-  p.x=clamp(p.x,60,WORLD_W-60);
+  p.x=clamp(p.x,60,WORLD_W-60); p.d=clamp(p.d,0,1);
   // camera eases to keep the player roughly centered
   const want=clamp(p.x-W*.42,0,Math.max(0,WORLD_W-W));
   G.camX+=(want-G.camX)*Math.min(1,dt*6);
-  // nearest station prompt
-  G.near=STATIONS.find(s=>Math.abs(s.x-p.x)<90)||null;
+  // nearest station prompt — only when up by the storefront line
+  G.near=STATIONS.find(s=>Math.abs(s.x-p.x)<90&&p.d<.38)||null;
   G.prompt=clamp(G.prompt+(G.near?dt*6:-dt*6),0,1);
 }
 
 /* =================== draw =================== */
 function draw(){
   cx.clearRect(0,0,W,H);
-  drawSky();
-  drawStreet();
-  if(G.state==='hub') drawHub();
-  else if(G.state==='volley') drawVolley();
-  else if(G.state==='falafel') drawFalafel();
+  if(G.state==='hub'||G.state==='title'){ drawTown(); if(G.state==='hub') drawHub(); }
+  else { drawSky(); drawStreet();
+    if(G.state==='volley') drawVolley();
+    else if(G.state==='falafel') drawFalafel(); }
   // shared FX
   for(const q of G.pops){ const a=1-q.t, rise=q.t*54;
     cx.globalAlpha=a;cx.font=`900 ${q.big?24:18}px sans-serif`;cx.textAlign='center';cx.textBaseline='middle';
@@ -1044,57 +1068,102 @@ function drawStreet(){
   cx.strokeStyle='rgba(120,80,40,.25)';cx.lineWidth=3;
   for(let x=-((G.camX)%70);x<W;x+=70){ cx.beginPath();cx.moveTo(x,groundY+14);cx.lineTo(x,H);cx.stroke(); }
 }
-function drawHub(){
-  // stations
-  for(const s of STATIONS){
-    const sx=s.x-G.camX; if(sx<-120||sx>W+120) continue;
-    drawStation(s,sx);
+/* the town: painted horizon band, then the plaza receding toward the viewer */
+function drawTown(){
+  const t=TOWN();
+  // horizon: the painted promenade panorama (sky→skyline→sea), parallax-scrolled
+  if(artOk('bg-city')){
+    const bg=ART['bg-city'], bh=t.top+34, bw=bh*bg.naturalWidth/bg.naturalHeight;
+    for(let x=-((G.camX*.4)%bw);x<W;x+=bw) cx.drawImage(bg,x,0,bw+1,bh);
+  } else {
+    let sky=SKYG.get('tsky');
+    if(!sky){ sky=cx.createLinearGradient(0,0,0,t.top+34);
+      sky.addColorStop(0,'#37b6ff');sky.addColorStop(.6,'#8fd8ff');sky.addColorStop(1,'#ffd9a8');
+      SKYG.set('tsky',sky); }
+    cx.fillStyle=sky;cx.fillRect(0,0,W,t.top+34);
+    cx.drawImage(glow('rgba(255,235,150,.95)',70),W*.8-70,H*.08-70);
+    drawEmoji('☀️',W*.8,H*.08,34);
+    skyline(G.camX*.25,'#cfe0f0',t.top*.5,170);
   }
-  // player
-  drawPlayer(G.player.x-G.camX, groundY, G.player);
-  // proximity prompt
+  // the plaza: warm boardwalk receding downward; rows pack tighter toward the back
+  let g=SKYG.get('plaza');
+  if(!g){ g=cx.createLinearGradient(0,t.top,0,H);
+    g.addColorStop(0,'#d9b97e');g.addColorStop(1,'#e9cf9a');SKYG.set('plaza',g); }
+  cx.fillStyle=g;cx.fillRect(0,t.top,W,H-t.top);
+  cx.fillStyle='rgba(0,0,0,.16)';cx.fillRect(0,t.top,W,5);   // back curb
+  cx.strokeStyle='rgba(120,80,40,.22)';
+  for(let i=1;i<=9;i++){ const fy=t.top+Math.pow(i/9,1.5)*(H-t.top);
+    cx.lineWidth=1+i*.28; cx.beginPath();cx.moveTo(0,fy);cx.lineTo(W,fy);cx.stroke(); }
+  for(let x=-((G.camX)%84);x<W;x+=84){ cx.lineWidth=2;
+    cx.beginPath();cx.moveTo(x,t.top);cx.lineTo(x+(x-W/2)*.10,H);cx.stroke(); }   // joints fan slightly
+}
+/* street furniture scattered across the plaza — drawn in depth order with the player */
+const PROPS=[
+  {e:'⛱️',x:330, d:.62,s:44},{e:'🪴',x:700, d:.18,s:30},{e:'🐈',x:870, d:.74,s:26},
+  {e:'🕊️',x:1190,d:.40,s:22},{e:'🛴',x:1330,d:.66,s:30},{e:'🪑',x:1620,d:.30,s:26},
+  {e:'⛱️',x:1750,d:.78,s:46},{e:'🕊️',x:2050,d:.55,s:22},{e:'🐕',x:2300,d:.70,s:28},
+  {e:'🪴',x:2620,d:.22,s:30},
+];
+function drawHub(){
+  const t=TOWN(), base=t.top+26;
+  // buildings/NPCs along the back edge of the plaza
+  for(const s of STATIONS){
+    const sx=s.x-G.camX; if(sx<-130||sx>W+130) continue;
+    drawStation(s,sx,base);
+  }
+  // props + player share the plaza — painter's order by depth
+  const p=G.player;
+  const ents=PROPS.filter(pr=>{const sx=pr.x-G.camX;return sx>-60&&sx<W+60;})
+    .map(pr=>({d:pr.d,draw:()=>{const sc=townScale(pr.d);
+      cx.fillStyle='rgba(0,0,0,.16)';cx.beginPath();
+      cx.ellipse(pr.x-G.camX,townY(pr.d)+6*sc,pr.s*.42*sc,4*sc,0,0,7);cx.fill();
+      drawEmoji(pr.e,pr.x-G.camX,townY(pr.d)-pr.s*.38*sc,pr.s*sc);}}));
+  ents.push({d:p.d,draw:()=>drawPlayer(p.x-G.camX,townY(p.d),p,townScale(p.d))});
+  ents.sort((a,b)=>a.d-b.d);
+  for(const e of ents) e.draw();
+  // proximity prompt above the near station
   if(G.near&&G.prompt>0.02){
     const sx=G.near.x-G.camX;
     cx.globalAlpha=G.prompt;
     const txt='TAP TO ENTER';
     cx.font='900 15px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
-    const w=cx.measureText(txt).width+24, bx=sx, by=groundY-200-Math.sin(G.t*4)*4;
+    const w=cx.measureText(txt).width+24, bx=sx, by=base-152-Math.sin(G.t*4)*4;
     cx.fillStyle='rgba(13,17,32,.8)'; rr(bx-w/2,by-16,w,30,8);
     cx.fillStyle='#ffd166';cx.fillText(txt,bx,by);
     cx.fillStyle='rgba(13,17,32,.8)';cx.beginPath();cx.moveTo(bx-8,by+13);cx.lineTo(bx+8,by+13);cx.lineTo(bx,by+24);cx.fill();
     cx.globalAlpha=1;
   }
 }
-function drawStation(s,sx){
-  // shadow
-  cx.fillStyle='rgba(0,0,0,.18)';cx.beginPath();cx.ellipse(sx,groundY+10,46,9,0,0,7);cx.fill();
-  if(s.art&&artOk(s.art)){ drawArt(s.art,sx,groundY-58,128); }
-  else if(s.id==='chat_savta'&&artOk('savta-nu')){   // painted savta on her corner
-    drawArt('savta-nu',sx,groundY-44,84);
-    if(G.t%2<1) drawEmoji('💬',sx+34,groundY-96,26);
+function drawStation(s,sx,base){
+  // contact shadow on the plaza
+  cx.fillStyle='rgba(0,0,0,.18)';cx.beginPath();cx.ellipse(sx,base+8,46,9,0,0,7);cx.fill();
+  if(s.art&&artOk(s.art)){ drawArt(s.art,sx,base-60,128); }   // 3/4-view buildings sit on the back edge
+  else if(s.id==='chat_savta'&&artOk('savta-nu')){            // painted savta on her corner
+    drawArt('savta-nu',sx,base-44,84);
+    if(G.t%2<1) drawEmoji('💬',sx+34,base-96,26);
   }
   else {
     // a little procedural stall so it isn't a lone floating emoji
     if(!s.npc){
-      cx.fillStyle='rgba(214,168,99,.45)';rr(sx-52,groundY-44,104,44,8);          // stall body
-      cx.fillStyle='#e35d5d';                                                      // striped awning
-      for(let i=0;i<6;i++){ cx.fillStyle=i%2?'#e35d5d':'#f4ecdd'; rr(sx-54+i*18,groundY-72,18,16,2); }
+      cx.fillStyle='rgba(177,141,90,.8)';rr(sx-52,base-46,104,46,8);              // stall body
+      for(let i=0;i<6;i++){ cx.fillStyle=i%2?'#e35d5d':'#f4ecdd'; rr(sx-54+i*18,base-74,18,16,2); }  // awning
     }
-    drawEmoji(s.ico,sx,s.npc?groundY-44:groundY-92,s.npc?52:48);
-    if(s.npc&&G.t%2<1) drawEmoji('💬',sx+30,groundY-92,26);
+    drawEmoji(s.ico,sx,s.npc?base-44:base-94,s.npc?52:48);
+    if(s.npc&&G.t%2<1) drawEmoji('💬',sx+30,base-94,26);
   }
   // label plate
   cx.font='900 14px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
   const w=cx.measureText(s.label).width+20;
-  cx.fillStyle='rgba(13,17,32,.72)';rr(sx-w/2,groundY-150,w,26,8);
-  cx.fillStyle='#fff';cx.fillText(s.label,sx,groundY-137);
-  cx.font='700 11px sans-serif';cx.fillStyle='#9fe7d4';cx.fillText(s.sub,sx,groundY-119);
+  cx.fillStyle='rgba(13,17,32,.72)';rr(sx-w/2,base-152,w,26,8);
+  cx.fillStyle='#fff';cx.fillText(s.label,sx,base-139);
+  cx.font='700 11px sans-serif';cx.fillStyle='#9fe7d4';cx.fillText(s.sub,sx,base-121);
 }
-function drawPlayer(sx,by,p){
+function drawPlayer(sx,by,p,sc){
+  sc=sc||1;
   const bob=p&&p.walk?Math.sin(p.walk*1.4)*3:0;
-  cx.fillStyle='rgba(0,0,0,.28)';cx.beginPath();cx.ellipse(sx,by+8,20,6,0,0,7);cx.fill();
+  cx.fillStyle='rgba(0,0,0,.28)';cx.beginPath();cx.ellipse(sx,by+8*sc,20*sc,6*sc,0,0,7);cx.fill();
   const c=equipped();
-  cx.save();cx.translate(sx,by-34+bob);
+  cx.save();cx.translate(sx,by-34*sc+bob);cx.scale(sc,sc);
   if(p&&p.dir<0) cx.scale(-1,1);
   if(c.artFlip) cx.scale(-1,1);            // sprites drawn facing left get pre-mirrored
   if(artOk('char-'+c.id)) drawArt('char-'+c.id,0,0,64);
@@ -1238,7 +1307,7 @@ function startDay(){
   // survives. Only a new real day (or first run) re-locks the target.
   if(S.lastSeen!==dayIndex()){ S.lastSeen=dayIndex(); newDay(); }
   syncPassport(); save();
-  panel(null); G.state='hub'; G.target=null;
+  panel(null); G.state='hub'; G.target=null; G.player.d=.3;
   if(!S.tutorialDone){           // first session: spawn right at the falafel stand so
     G.player.x=970; G.walletShown=S.shekels;          // earning starts in <10s, not after a 1000px walk
   } else { G.player.x=300; }

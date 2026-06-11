@@ -28,7 +28,10 @@ currently uses a single sprite with a bob — wire the frames in `drawPlayer`
 if/when they exist.)
 
 ## Stations (the street furniture)
-Wider pieces, ~420px tall, sit on the boardwalk.
+Wider pieces, ~420px tall. **The street is a 3/4 top-down town view** — draw
+buildings/stalls front-on in 3/4 perspective (like a JRPG town); they sit on
+the back edge of the walkable plaza. (Generated stall/storefront art in 3/4
+view drops in perfectly.)
 
 | file | what |
 |------|------|
