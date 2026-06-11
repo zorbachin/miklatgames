@@ -253,6 +253,7 @@
   <button class="shopToggle" id="btnShopT2"></button>
   <div id="coinsOver" style="display:none;font-family:'Courier New',monospace;color:var(--gold);font-size:16px;font-weight:700"></div>
   <div id="shopOver" class="shoplist" style="display:none"></div>
+  <button class="btn" id="btnContinue" style="display:none;border-color:rgba(93,255,168,.6);color:var(--green);box-shadow:0 0 16px rgba(93,255,168,.3)"></button>
   <div class="btnrow">
     <button class="btn primary" id="btnRetry2"></button>
     <button class="btn small" id="btnShare2"></button>
@@ -278,7 +279,7 @@
    ========================================================= */
 
 const $ = id => document.getElementById(id);
-const GAME_VERSION = 'v18';
+const GAME_VERSION = 'v21';
 const INBOUND = new URLSearchParams(location.search);
 const REF = INBOUND.get('ref') || '';
 console.log('Iron Dome ' + GAME_VERSION);
@@ -301,6 +302,27 @@ if (save.lang !== 'he' && save.lang !== 'en') save.lang = 'he';
 if (!['easy', 'normal', 'commando'].includes(save.diff)) save.diff = 'normal';
 save.cal.x = +save.cal.x || 0; save.cal.y = +save.cal.y || 0;
 save.coins = +save.coins || 0; save.best = +save.best || 0; save.unlocked = +save.unlocked || 0;
+
+/* ---- the Miklat Wallet: ₪ shared across ALL games on this origin ----
+   key 'miklat.wallet' = {"sh": <int>}. The lore: it's the unemployment
+   money (ביטוח לאומי) — and you need it to CONTINUE when the city falls. */
+const WALLET_KEY = 'miklat.wallet';
+function walletGet(){
+  try{ return Math.max(0, +((JSON.parse(localStorage.getItem(WALLET_KEY) || '{}') || {}).sh) || 0); }
+  catch(e){ return 0; }
+}
+function walletSet(v){
+  try{ localStorage.setItem(WALLET_KEY, JSON.stringify({ sh: Math.max(0, Math.round(v)) })); }catch(e){}
+}
+function walletAdd(n){ walletSet(walletGet() + n); }
+function walletSpend(n){
+  const w = walletGet();
+  if (w < n) return false;
+  walletSet(w - n);
+  return true;
+}
+// one-time migration: legacy per-game coins join the shared pool
+if (save.coins > 0){ walletAdd(save.coins); save.coins = 0; persist(); }
 function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
 
 /* ---------- i18n ---------- */
@@ -332,6 +354,7 @@ const T = {
     daily: 'DAILY ALERT', dailyDone: '📅 DAILY ALERT — DONE!',
     practiceNote: 'practice — today already counted', todayW: 'today',
     streakW: 'streak', raLocked: '🚨 RED ALERT — clear Ashdod to unlock', upgrades: 'Upgrades', hitsW: 'hits taken',
+    walletName: 'Bituach Leumi fund', contBtn: 'CONTINUE (the unemployment money)', contMsg: '💸 Bituach Leumi came through!',
     slingHint: '🪨 Pileup? Tap the SLING →',
     upSling: 'Iron Sling', upSlingD: 'Volley button 🪨: +1 charge per level',
     waveOf: 'Rockets', comboX: 'COMBO x', tapHint: '👆 TAP THE ROCKETS!', direct: 'DIRECT HIT!',
@@ -412,6 +435,7 @@ const T = {
     daily: 'אזעקת היום', dailyDone: '📅 אזעקת היום — הושלם!',
     practiceNote: 'אימון — התוצאה של היום כבר נספרה', todayW: 'היום',
     streakW: 'רצף', raLocked: '🚨 צבע אדום — נפתח אחרי אשדוד', upgrades: 'שדרוגים', hitsW: 'פגיעות',
+    walletName: 'קרן ביטוח לאומי', contBtn: 'המשך (כספי האבטלה)', contMsg: '💸 ביטוח לאומי אישר!',
     slingHint: '🪨 עומס? לחצו על הקלע ←',
     upSling: 'קלע ברזל', upSlingD: 'כפתור מטח 🪨: מטען נוסף לכל שלב',
     waveOf: 'רקטות', comboX: 'קומבו ×', tapHint: '👆 לחצו על הרקטות!', direct: 'פגיעה ישירה!',
@@ -705,7 +729,7 @@ function newGame(levelIdx, endless, bonus, daily){
     buildings: [], shake: 0,
     timeScale: 1, slowT: 0, megaT: 0, shieldT: 0,
     sling: 1 + save.up.sling,       // volley charges this level (the 🪨 button)
-    over: false, won: false, doneT: 0, hitStop: 0, heat: 0,
+    over: false, won: false, doneT: 0, hitStop: 0, heat: 0, continued: false,
     beamFx: 0
   };
   buildSkyline();
@@ -737,6 +761,24 @@ function buildSkyline(){
    Rendered once per level/resize into an offscreen canvas, then blitted
    each frame — keeps the scenery rich without costing mobile framerate. */
 const BD = document.createElement('canvas');
+/* per-level world art (cut from the full-res retro panoramas).
+   Loads lazily; the procedural scene paints until the art arrives. */
+const bgCache = {};
+const FALAFEL_IMGS = [1, 2, 3].map(n => {
+  const im = new Image();
+  try{ im.src = 'bg/falafel' + n + '.png'; }catch(e){}
+  return im;
+});
+function levelBg(idx){
+  const key = 'bg/bg' + (Math.max(0, Math.min(9, idx)) + 1) + '.jpg';
+  if (!bgCache[key]){
+    const im = new Image();
+    bgCache[key] = im;
+    im.onload = () => { if (G) renderBackdrop(); };
+    try{ im.src = key; }catch(e){}
+  }
+  return bgCache[key];
+}
 function hexA(h, a){
   return 'rgba(' + parseInt(h.slice(1,3),16) + ',' + parseInt(h.slice(3,5),16) + ',' +
          parseInt(h.slice(5,7),16) + ',' + a + ')';
@@ -746,6 +788,26 @@ function renderBackdrop(){
   BD.width = W * DPR; BD.height = H * DPR;
   const b = BD.getContext('2d');
   b.setTransform(DPR, 0, 0, DPR, 0, 0);
+  // the real world art: band capped at 40% of the screen, CENTER-cropped so
+  // the dome apex sits dead center, bottom-anchored, pixel-crisp
+  const art = levelBg(G.levelIdx);
+  if (art && art.complete && art.naturalWidth){
+    const iw = art.naturalWidth, ih = art.naturalHeight;
+    const bandH = Math.min(H * 0.40, W * ih / iw < H * 0.28 ? H * 0.28 : H * 0.40);
+    const scale = bandH / ih;
+    let sw2 = W / scale, sx2 = (iw - sw2) / 2;
+    if (sx2 < 0){ sx2 = 0; sw2 = iw; }        // narrow source: width-fit instead
+    const drawH = sw2 === iw ? W * ih / iw : bandH;
+    b.imageSmoothingEnabled = false;
+    b.drawImage(art, sx2, 0, sw2, ih, 0, H - drawH, W, drawH);
+    b.imageSmoothingEnabled = true;
+    const seam = b.createLinearGradient(0, Math.max(0, H - drawH - 2), 0, Math.max(0, H - drawH) + 70);
+    seam.addColorStop(0, 'rgba(12,22,48,1)');
+    seam.addColorStop(1, 'rgba(12,22,48,0)');
+    b.fillStyle = seam;
+    b.fillRect(0, Math.max(0, H - drawH - 2), W, 72);
+    return;                                   // art replaces the procedural scene
+  }
   const acc = G.L.accent;
   const FAR = '#1b2f60', MID = '#24407e', NEAR = '#2f519c';
   const topoH = Math.min(H * 0.30, 300);   // scenery fills the bottom third
@@ -1183,7 +1245,8 @@ function falafelBurst(x, n){
     G.parts.push({
       f: true, x: x + (Math.random() - 0.5) * 18, y: GROUND - 8,
       vx: Math.cos(a) * v * 0.6, vy: Math.sin(a) * v,
-      r: 7 + Math.random() * 5, col: shades[i % shades.length],
+      r: 8 + Math.random() * 5, col: shades[i % shades.length],
+      img: FALAFEL_IMGS[i % 3],
       spin: Math.random() * 6.28, t: 0, life: 2.2 + Math.random() * 0.6
     });
   }
@@ -1636,17 +1699,19 @@ function drawEntities(){
   for (const p of G.parts){
     cx.globalAlpha = Math.min(1, (1 - p.t / p.life) * 1.4);
     if (p.f){
-      cx.fillStyle = p.col;
-      cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 6.29); cx.fill();
-      cx.strokeStyle = '#7a5a22'; cx.lineWidth = 1.5;
-      cx.stroke();
-      cx.fillStyle = 'rgba(70,48,18,0.8)';           // crispy speckles
-      cx.beginPath();
-      cx.arc(p.x + Math.cos(p.spin) * p.r * 0.4, p.y + Math.sin(p.spin) * p.r * 0.4, p.r * 0.22, 0, 6.29);
-      cx.arc(p.x - Math.cos(p.spin * 1.7) * p.r * 0.35, p.y - Math.sin(p.spin * 1.7) * p.r * 0.35, p.r * 0.18, 0, 6.29);
-      cx.fill();
-      cx.fillStyle = 'rgba(120,220,120,0.6)';        // parsley fleck
-      cx.fillRect(p.x + Math.sin(p.spin) * p.r * 0.3, p.y - p.r * 0.3, 1.6, 1.6);
+      // the REAL falafel, cut from the art — tumbling on collision
+      if (p.img && p.img.complete && p.img.naturalWidth){
+        const s = p.r * 1.6;
+        cx.save();
+        cx.translate(p.x, p.y);
+        cx.rotate(p.spin);
+        cx.imageSmoothingEnabled = false;
+        cx.drawImage(p.img, -s, -s, s * 2, s * 2);
+        cx.restore();
+      } else {
+        cx.fillStyle = p.col;
+        cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 6.29); cx.fill();
+      }
     } else {
       cx.fillStyle = p.col;
       cx.fillRect(p.x - 2, p.y - 2, 4, 4);
@@ -1735,7 +1800,7 @@ function fillStrip(id){
     '<span>🚀 <b>' + G.killed + '/' + tot + '</b></span>' +
     '<span class="bad">💥 <b>' + G.cityHits + '</b> ' + t('hitsW') + '</span>' +
     '<span>🎯 <b>' + (G.directs || 0) + '</b></span>' +
-    (G.combo || G.score ? '<span>🪙 <b>' + save.coins + '</b></span>' : '');
+    (G.combo || G.score ? '<span>₪ <b>' + walletGet() + '</b></span>' : '');
 }
 function endLevel(won){
   G.over = true; G.won = won;
@@ -1775,7 +1840,7 @@ function endLevel(won){
     renderShop();
     fillStrip('endStrip');
     $('shop').style.display = 'none'; $('coins').style.display = 'none';
-    $('btnShopT1').textContent = '🛒 ' + t('upgrades') + ' · 🪙 ' + save.coins;
+    $('btnShopT1').textContent = '🛒 ' + t('upgrades') + ' · ₪' + walletGet();
     $('btnNext').textContent = t('menu');
     dailyEnded = true;
     show('scrEnd');
@@ -1786,7 +1851,7 @@ function endLevel(won){
     if (G.endless) save.bestRA = Math.max(save.bestRA || 0, G.score);
     else if (!G.daily) save.best = Math.max(save.best, G.score);
     const consolation = Math.min(G.endless ? 1500 : 1e9, Math.round(G.score * 0.3));
-    save.coins += consolation;
+    walletAdd(consolation);
     persist();
     $('overScore').textContent = G.score;
     $('overStats').textContent = pick(t('overLines')) + ' ' + t('overStats').replace('{n}', G.killed) +
@@ -1797,10 +1862,28 @@ function endLevel(won){
       ? t('soClose').replace('{d}', gapD)               // only when genuinely close
       : (isBest ? t('newBest') : '');
     $('btnShare2').className = isBest ? 'btn primary' : 'btn small';   // peak moment = loud CTA
+    // CONTINUE: spend the unemployment money to get back in (once per run, not in Daily)
+    const cPrice = Math.max(300, Math.round(walletGet() * 0.25));
+    const canCont = !G.continued && !G.daily && walletGet() >= cPrice;
+    $('btnContinue').style.display = canCont ? '' : 'none';
+    if (canCont) $('btnContinue').textContent = '🆘 ' + t('contBtn') + ' · ₪' + cPrice;
+    $('btnContinue').onclick = () => {
+      if (G.continued || !walletSpend(cPrice)) return;
+      G.continued = true;
+      track('continue');
+      G.over = false; G.won = false; G.dyingT = 0;
+      G.rockets.length = 0; G.warns.length = 0;
+      let revived = 0;
+      for (const b of G.buildings){ if (!b.alive && revived < 2){ b.alive = true; b.hp = 1; revived++; } }
+      G.shieldT = 2.5;                            // a breath of grace
+      sfx.power(); buzz([30, 30, 60]);
+      addFloat(W / 2, H * 0.3, t('contMsg'), '#5dffa8', 18, 2.5);
+      show('play');
+    };
     renderShop($('shopOver'), $('coinsOver'));     // the stuck player needs the shop MOST
     fillStrip('overStrip');
     $('shopOver').style.display = 'none'; $('coinsOver').style.display = 'none';
-    $('btnShopT2').textContent = '🛒 ' + t('upgrades') + ' · 🪙 ' + save.coins;
+    $('btnShopT2').textContent = '🛒 ' + t('upgrades') + ' · ₪' + walletGet();
     show('scrOver');
     return;
   }
@@ -1808,16 +1891,16 @@ function endLevel(won){
   if (won) sfx.fanfare(G.bonus);
   if (G.bonus){    // bonus rounds always 'win': bank the haul, never touch records
     const bGain = Math.round(G.score * 0.25);
-    save.coins += bGain; persist();
+    walletAdd(bGain); persist();
     $('endStars').textContent = '🎁🎁🎁';
     $('endTitle').textContent = t('bonusDone');
     $('endQuip').textContent = pick(t('lvlDone')).replace('{c}', t('levels')[curLevel]);
     $('mkQuote').textContent = pick(t('mkQuotes'));
-    $('endStats').innerHTML = t('scoreW') + ': <b>' + G.score + '</b> (+' + bGain + ' 🪙)';
+    $('endStats').innerHTML = t('scoreW') + ': <b>' + G.score + '</b> (+₪' + bGain + ')';
     fillStrip('endStrip');
     renderShop();
     $('shop').style.display = 'none'; $('coins').style.display = 'none';
-    $('btnShopT1').textContent = '🛒 ' + t('upgrades') + ' · 🪙 ' + save.coins;
+    $('btnShopT1').textContent = '🛒 ' + t('upgrades') + ' · ₪' + walletGet();
     $('btnNext').textContent = t('next');
     show('scrEnd');
     return;
@@ -1825,7 +1908,7 @@ function endLevel(won){
   const st = pct >= 0.9 && alive === G.buildings.length ? 3 : pct >= 0.75 ? 2 : 1;
   const replay = save.unlocked > curLevel;          // re-clearing an old level pays a quarter
   const coinGain = Math.round((G.score + alive * 20) * (replay ? 0.25 : 1) * 0.4);
-  save.coins += coinGain;
+  walletAdd(coinGain);
   save.best = Math.max(save.best, G.score);
   save.unlocked = Math.max(save.unlocked, curLevel + 1);
   if (!replay && [2, 5, 8].includes(curLevel)) bonusDue = true;   // first clears only — no bonus farming
@@ -1835,11 +1918,11 @@ function endLevel(won){
   $('endTitle').textContent = t('cleared') + ' — ' + t('levels')[curLevel];
   $('endQuip').textContent = pick(t('lvlDone')).replace('{c}', t('levels')[curLevel]);
   $('mkQuote').textContent = pick(t('mkQuotes'));
-  $('endStats').innerHTML = t('scoreW') + ': <b>' + G.score + '</b> (+' + coinGain + ' 🪙)';
+  $('endStats').innerHTML = t('scoreW') + ': <b>' + G.score + '</b> (+₪' + coinGain + ')';
   fillStrip('endStrip');
   renderShop();
   $('shop').style.display = 'none'; $('coins').style.display = 'none';
-  $('btnShopT1').textContent = '🛒 ' + t('upgrades') + ' · 🪙 ' + save.coins;
+  $('btnShopT1').textContent = '🛒 ' + t('upgrades') + ' · ₪' + walletGet();
   if (curLevel + 1 >= LEVELS.length){
     $('btnNext').textContent = '🏆';
     $('winScore').textContent = t('scoreW') + ': ' + G.score + ' · ' + t('bestW') + ': ' + save.best;
@@ -1852,7 +1935,7 @@ function endLevel(won){
 function renderShop(container, coinsEl){
   const shop = container || $('shop');
   const cEl = coinsEl || $('coins');
-  cEl.textContent = '🪙 ' + save.coins + ' ' + t('coinsW');
+  cEl.textContent = '₪' + walletGet() + ' · ' + t('walletName');
   shop.innerHTML = '';
   for (const u of UPGRADES){
     const lvl = save.up[u.key];
@@ -1864,12 +1947,12 @@ function renderShop(container, coinsEl){
       '<div class="info"><div class="nm">' + t(u.nm) + '</div>' +
       '<div class="ds">' + t(u.ds) + '</div>' +
       '<div class="tiers">' + '◆'.repeat(lvl) + '◇'.repeat(u.max - lvl) + '</div></div>' +
-      '<button ' + (cost === null || cost > save.coins ? 'disabled' : '') + '>' +
-      (cost === null ? t('maxed') : '🪙 ' + cost) + '</button>';
+      '<button ' + (cost === null || cost > walletGet() ? 'disabled' : '') + '>' +
+      (cost === null ? t('maxed') : '₪' + cost) + '</button>';
     row.querySelector('button').onclick = () => {
       const cur = save.up[u.key];                      // re-derive: never trust render-time cost
-      if (cur < u.max && save.coins >= u.cost[cur]){
-        save.coins -= u.cost[cur]; save.up[u.key]++; persist(); sfx.power();
+      if (cur < u.max && walletSpend(u.cost[cur])){
+        save.up[u.key]++; persist(); sfx.power();
         renderShop(shop, cEl);
       }
     };
@@ -1920,7 +2003,7 @@ function applyLang(){
   $('btnShare1').textContent = $('btnShare2').textContent = $('btnShare3').textContent = t('share');
   $('btnMenu2').textContent = t('menu');
   $('btnMenu3').textContent = t('menu');
-  $('menuBest').textContent = save.best > 0 ? (t('bestW') + ': ' + save.best + ' · 🪙 ' + save.coins) : '';
+  $('menuBest').textContent = (save.best > 0 ? t('bestW') + ': ' + save.best + ' · ' : '') + '₪' + walletGet() + ' ' + t('walletName');
 }
 
 /* ---------- touch calibration ----------
@@ -2005,7 +2088,7 @@ function toggleShop(shopId, coinsId, btn){
   const open = $(shopId).style.display !== 'none';
   $(shopId).style.display = open ? 'none' : '';
   $(coinsId).style.display = open ? 'none' : '';
-  btn.textContent = open ? ('🛒 ' + t('upgrades') + ' · 🪙 ' + save.coins) : ('▲ ' + t('upgrades'));
+  btn.textContent = open ? ('🛒 ' + t('upgrades') + ' · ₪' + walletGet()) : ('▲ ' + t('upgrades'));
   sfx.click();
 }
 $('btnShopT1').onclick = e => toggleShop('shop', 'coins', e.target);
@@ -2067,7 +2150,7 @@ $('btnResume').onclick = () => { sfx.click(); show('play'); };
 $('btnQuit').onclick = () => {
   sfx.click();
   if (G && !G.over && G.score > 0){               // leaving mid-level still banks your coins
-    save.coins += Math.round(G.score * 0.3);
+    walletAdd(Math.round(G.score * 0.3));
     save.best = Math.max(save.best, G.score);
     persist();
   }
