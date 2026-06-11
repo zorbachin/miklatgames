@@ -8,6 +8,16 @@
 <meta property="og:title" content="MIKLAT DIGGER">
 <meta property="og:description" content="Dig tunnels, rescue the neighbors, get them to Ein Kerem.">
 <meta property="og:url" content="https://miklatgames.fun/miklatdigger/">
+<meta property="og:image" content="https://miklatgames.fun/assets/miklatdigger-cover.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0b0e1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MIKLAT DIGGER">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
   html,body{margin:0;padding:0;height:100%;background:#0b0e1a;overflow:hidden;
     font-family:'Courier New',monospace;-webkit-user-select:none;user-select:none;}
@@ -39,10 +49,14 @@ const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
 const cellCX=c=>c*TILE+TILE/2, cellCY=r=>r*TILE+TILE/2;
 const cellOf=(x,y)=>[clamp(Math.floor(x/TILE),0,COLS-1), clamp(Math.floor(y/TILE),0,ROWS-1)];
 const dist=(ax,ay,bx,by)=>Math.hypot(ax-bx,ay-by);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},
+             set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function track(name){ try{ if(window.goatcounter&&window.goatcounter.count)
+  window.goatcounter.count({path:'evt-'+name,event:true}); }catch(e){} }
 
 /* ---------------- sound (synth only, no assets) ---------------- */
 const Snd={
-  ac:null, on:localStorage.getItem('dig_mute')!=='1', digT:0,
+  ac:null, on:store.get('dig_mute')!=='1', digT:0,
   ctx(){ if(!this.ac){ try{this.ac=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
     if(this.ac&&this.ac.state==='suspended') this.ac.resume(); return this.ac; },
   beep(f,dur,type,vol,slide){
@@ -61,7 +75,7 @@ const Snd={
   hurt(){ this.beep(300,0.4,'sawtooth',0.1,70); },
   thud(){ this.beep(60,0.25,'sine',0.18,35); },
   sirenBeat(){ this.beep(700,0.22,'triangle',0.07,950); },
-  toggle(){ this.on=!this.on; localStorage.setItem('dig_mute',this.on?'0':'1'); }
+  toggle(){ this.on=!this.on; store.set('dig_mute',this.on?'0':'1'); }
 };
 
 /* ---------------- input ---------------- */
@@ -131,7 +145,7 @@ cv.addEventListener('mousedown',e=>{
 /* ---------------- game state ---------------- */
 const G={
   state:'title', level:1, score:0, hearts:3, time:100, rescued:0, totalRes:3,
-  best:+(localStorage.getItem('dig_best')||0),
+  best:+(store.get('dig_best')||0),
   passable:null, rocks:[], critters:[], residents:[], supplies:[], falafels:[],
   chain:[], trail:[], parts:[], toasts:[],
   clearT:0, overReason:'', sirenT:0, shake:0
@@ -172,9 +186,9 @@ function genLevel(){
   // level plan: deeper rescues, more of everything, cats from L2
   const plan={
     res:Math.min(3+((lv-1)>>1),6),            // 3,3,4,4,5,5,6
-    critters:Math.min(2+lv,7),
+    critters:Math.min(1+lv,6),
     resMin:Math.min(5+lv,10), resMax:Math.min(9+lv*2,ROWS-2),
-    rocks:4+Math.min(lv,6),
+    rocks:4+Math.min(lv,4),
     corridors:lv>=2?ri(1,2):0
   };
   G.totalRes=plan.res;
@@ -221,6 +235,7 @@ function genLevel(){
       }
     }
   }
+  G.totalRes=G.residents.length; // placement can fail on crowded boards; count real humans only
   // critter pockets (1 cell)
   const N=plan.critters;
   for(let i=0;i<N;i++){
@@ -228,10 +243,11 @@ function genLevel(){
       const c=ri(1,COLS-2), r=ri(5,ROWS-2);
       if(free(c,r)&&farFromUsed(c,r,3)){
         take(c,r); openCell(c,r);
-        G.critters.push({kind:(lv>1&&i%2)?'cat':'shafan', x:cellCX(c),y:cellCY(r),
+        const kind=(lv>1&&i%2)?'cat':'shafan';
+        G.critters.push({kind, x:cellCX(c),y:cellCY(r),
           tc:c,tr:r, state:'walk', dirX:1,dirY:0,
-          ghostT:rnd(5,11)*(lv===1?1.6:1), ghostDur:0, anim:rnd(0,6),
-          spd:(i%2?52:44)*(1+0.06*(G.level-1))});
+          ghostT:rnd(5,11)*(lv===1?1.3:1), ghostDur:0, anim:rnd(0,6),
+          spd:(kind==='cat'?52:44)*Math.min(1+0.05*(G.level-1),1.35)});
         break;
       }
     }
@@ -282,14 +298,15 @@ function genLevel(){
   }
   // player to surface
   P.x=cellCX(3); P.y=cellCY(SURFROW); P.dir=null; P.face='R'; P.invuln=0;
-  G.time=Math.max(70,Math.min(130,105-6*(lv-1)+10*(plan.res-3)));
+  G.demand=Math.random()<0.5&&G.residents.some(f=>f.dog); G.dogSafe=false; G.refuseCd=0; G.chainGrace=0;
+  G.time=Math.max(80,Math.min(125,95-3*(lv-1)+14*(G.totalRes-3)));
+  if(G.demand) G.time+=12; // Savta's dog demand adds a mandatory detour
   G.sirenT=0;
-  G.demand=Math.random()<0.5; G.dogSafe=false; G.refuseCd=0;
-  toast('Level '+lv+' — rescue '+plan.res+' neighbors!');
+  toast('Level '+lv+' — rescue '+G.totalRes+' neighbors!');
 }
 
 /* ---------------- helpers ---------------- */
-function toast(msg){ G.toasts.push({msg,t:2.4,y:H*0.32+G.toasts.length*30}); }
+function toast(msg){ G.toasts.push({msg,t:2.4}); }
 function puff(x,y,col,n){
   for(let i=0;i<(n||8);i++)
     G.parts.push({x,y,vx:rnd(-90,90),vy:rnd(-120,30),t:rnd(0.3,0.7),col:col||'#d9c9a8'});
@@ -305,6 +322,7 @@ function updatePlayer(dt){
   P.fireCd=Math.max(0,P.fireCd-dt);
   P.invuln=Math.max(0,P.invuln-dt);
   G.refuseCd=Math.max(0,(G.refuseCd||0)-dt);
+  G.chainGrace=Math.max(0,(G.chainGrace||0)-dt);
   P.digging=false;
   const want=Inp.want;
   const [c,r]=cellOf(P.x,P.y);
@@ -316,7 +334,7 @@ function updatePlayer(dt){
     if(!P.dir || want===P.dir ||
        (horizNow===wantHoriz) || // reverse along same axis
        (Math.abs(P.x-ccx)<7 && Math.abs(P.y-ccy)<7)){
-      if(horizNow!==wantHoriz && P.dir){ P.x=ccx; P.y=ccy; } // snap on turn
+      if(wantHoriz) P.y=ccy; else P.x=ccx; // stay on the new axis' grid line
       P.dir=want; P.face=want;
     }
   } else P.dir=null;
@@ -330,7 +348,7 @@ function updatePlayer(dt){
     const minY=cellCY(SURFROW), maxY=cellCY(ROWS-1);
     const minX=cellCX(0), maxX=cellCX(COLS-1);
     const targetOpen=isOpen(ac,ar)||(ar===SURFROW);
-    const digSp=ar<7?94:ar<11?80:ar<15?68:56;
+    const digSp=ar<7?94:ar<11?80:ar<15?68:60;
     let sp=targetOpen?140:digSp;
     if(blockedRock) sp=0;
     let nx=P.x+dx*sp*dt, ny=P.y+dy*sp*dt;
@@ -366,7 +384,7 @@ function updatePlayer(dt){
   for(let i=G.residents.length-1;i>=0;i--){
     const res=G.residents[i];
     if(dist(P.x,P.y,res.x,res.y)<26){
-      G.residents.splice(i,1); G.chain.push(res);
+      G.residents.splice(i,1); G.chain.push(res); G.chainGrace=1.0;
       if(res.dog) toast(res.name+' the dog is following you! 🐶');
       else toast(res.name+' is with you! To Ein Kerem! ⬆');
       if(res.name==='Savta Rivka'&&G.demand&&!G.dogSafe)
@@ -398,7 +416,7 @@ function updatePlayer(dt){
       if(dogs) toast('Woof! Dog safe at Ein Kerem! +750 🐾');
       if(keep.length) toast('Savta Rivka: «Not without the dog!» 🐕');
       if(G.rescued>=G.totalRes){
-        G.state='clear'; G.clearT=2.0;
+        G.state='clear'; G.clearT=2.0; track('digger-clear');
         const bonus=Math.ceil(G.time)*10;
         addScore(bonus); toast('ALL SAFE! Time bonus +'+bonus);
       }
@@ -414,19 +432,20 @@ function followerPos(i){
   if(idx<0) return G.trail[0]||{x:P.x,y:P.y};
   return G.trail[idx];
 }
-function scatterChain(){
-  if(!G.chain.length)return;
-  for(let i=0;i<G.chain.length;i++){
+function scatterChain(from=0){
+  if(G.chain.length<=from)return;
+  for(let i=from;i<G.chain.length;i++){
     const f=G.chain[i], p=followerPos(i);
     puff(p.x,p.y,'#fff',10);
     f.x=cellCX(f.homeC)+10; f.y=cellCY(f.homeR);
     G.residents.push(f);
   }
-  G.chain.length=0;
-  toast('Oy! They ran back to the miklat!');
+  G.chain.length=from;
+  G.chainGrace=1.0;
+  toast(from?'Some ran back to the miklat!':'Oy! They ran back to the miklat!');
 }
 function hitPlayer(){
-  if(P.invuln>0)return;
+  if(P.invuln>0||G.state!=='play')return;
   G.hearts--; P.invuln=2.5; G.shake=0.4;
   Snd.hurt(); puff(P.x,P.y,'#ffb0b0',14);
   scatterChain();
@@ -434,8 +453,9 @@ function hitPlayer(){
   P.x=cellCX(3); P.y=cellCY(SURFROW); P.dir=null; G.trail.length=0;
 }
 function gameOver(reason){
-  G.state='over'; G.overReason=reason;
-  if(G.score>G.best){ G.best=G.score; localStorage.setItem('dig_best',G.best); }
+  G.state='over'; G.overReason=reason; G.toasts.length=0;
+  track('digger-over');
+  if(G.score>G.best){ G.best=G.score; store.set('dig_best',G.best); }
 }
 
 /* ---------------- critters ---------------- */
@@ -482,7 +502,7 @@ function updateCritters(dt){
         k.x+=Math.cos(ang)*k.spd*dt; k.y+=Math.sin(ang)*k.spd*dt;
       }
       k.ghostT-=dt;
-      if(k.ghostT<=0&&dist(k.x,k.y,P.x,P.y)>TILE*1.5&&P.y>cellCY(SURFROW)+10){
+      if(k.ghostT<=0&&dist(k.x,k.y,P.x,P.y)>TILE*1.5&&(P.y>cellCY(SURFROW)+10||G.chain.length)){
         k.state='ghost'; k.ghostDur=rnd(4,7); k.gTrav=0;
       }
     } else if(k.state==='ghost'){
@@ -491,18 +511,19 @@ function updateCritters(dt){
       k.x+=Math.cos(ang)*gs*dt; k.y+=Math.sin(ang)*gs*dt; k.gTrav+=gs*dt;
       k.ghostDur-=dt;
       const [c,r]=cellOf(k.x,k.y);
-      if(k.gTrav>TILE*0.9&&isOpen(c,r)&&!rockAt(c,r)&&dist(k.x,k.y,cellCX(c),cellCY(r))<13){
+      if((k.gTrav>TILE*0.9||k.ghostDur<=0)&&isOpen(c,r)&&!rockAt(c,r)&&(dist(k.x,k.y,cellCX(c),cellCY(r))<13||k.ghostDur<=0)){
         k.x=cellCX(c); k.y=cellCY(r); k.tc=c; k.tr=r;
-        k.state='walk'; k.ghostT=rnd(6,12)/(1+0.08*(G.level-1));
+        k.state='walk'; k.ghostT=Math.max(5,rnd(6,12)/(1+0.05*(G.level-1)));
       }
     }
     // collisions
     if(k.state==='walk'||k.state==='ghost'){
       if(dist(k.x,k.y,P.x,P.y)<25) hitPlayer();
-      for(let i=0;i<G.chain.length;i++){
-        const p=followerPos(i);
-        if(dist(k.x,k.y,p.x,p.y)<24){ scatterChain(); break; }
-      }
+      if(G.chainGrace<=0)
+        for(let i=0;i<G.chain.length;i++){
+          const p=followerPos(i);
+          if(dist(k.x,k.y,p.x,p.y)<18){ scatterChain(i); break; }
+        }
     }
   }
   G.critters=G.critters.filter(k=>!k.gone);
@@ -516,7 +537,7 @@ function updateFalafels(dt){
     const sp=open?260:70;
     f.x+=f.dx*sp*dt; f.y+=f.dy*sp*dt; f.trav+=sp*dt;
     if(!open){
-      carve(f.x,f.y,9);
+      carve(f.x,f.y,6);
       if(Math.random()<0.35) G.parts.push({x:f.x+rnd(-6,6),y:f.y+rnd(-6,6),
         vx:rnd(-40,40),vy:rnd(-60,10),t:rnd(0.2,0.45),col:'#8a6a40'});
     }
@@ -525,7 +546,8 @@ function updateFalafels(dt){
     for(const k of G.critters){
       if((k.state==='walk'||k.state==='ghost')&&dist(f.x,f.y,k.x,k.y)<22){
         f.dead=true;
-        if(k.state==='ghost'){ k.state='stun'; k.stunT=2; addScore(100,k.x,k.y-22); }
+        if(k.state==='ghost'){ k.state='stun'; k.stunT=2;
+          if(!k.stunScored){ k.stunScored=true; addScore(100,k.x,k.y-22); } }
         else { k.state='pacified'; addScore(200,k.x,k.y-22); }
         Snd.pop(); puff(k.x,k.y,'#ffd166',10);
         break;
@@ -767,12 +789,13 @@ function drawHUD(){
   ctx.fillText(Snd.on?'♪':'∅',W-12,21);
   // toasts
   ctx.textAlign='center'; ctx.font='bold 16px Courier New';
-  for(const t of G.toasts){
+  G.toasts.forEach((t,i)=>{
+    const y=H*0.32+i*30;
     ctx.fillStyle='rgba(10,14,26,.7)';
     const w=ctx.measureText(t.msg).width+24;
-    ctx.fillRect(W/2-w/2,t.y-18,w,26);
-    ctx.fillStyle='#fff'; ctx.fillText(t.msg,W/2,t.y);
-  }
+    ctx.fillRect(W/2-w/2,y-18,w,26);
+    ctx.fillStyle='#fff'; ctx.fillText(t.msg,W/2,y);
+  });
 }
 function drawPads(){
   if(!Inp.touchSeen)return;
@@ -834,7 +857,7 @@ function drawTitle(){
     ctx.fillText('TAP / PRESS ANY KEY',W/2,H*0.8);
   }
   ctx.fillStyle='#6b7a99'; ctx.font='11px Courier New';
-  ctx.fillText('miklatgames.fun — v1 test build',W/2,H-16);
+  ctx.fillText('miklatgames.fun',W/2,H-16);
 }
 function drawOver(){
   ctx.fillStyle='rgba(8,10,20,.78)'; ctx.fillRect(0,0,W,H);
@@ -864,6 +887,7 @@ let paused=false;
 function togglePause(){ if(G.state==='play'||paused){ paused=!paused; } }
 function startGame(){
   G.level=1; G.score=0; G.hearts=3; G.state='play'; paused=false;
+  Inp.fire=false; track('digger-start');
   genLevel(); Snd.fanfare();
 }
 function uiKey(key){
@@ -892,11 +916,11 @@ function loop(now){
     G.time-=dt;
     if(G.time<=0){ gameOver('The siren ended before everyone reached Ein Kerem.'); }
     if(G.time<13&&G.time>0){ G.sirenT-=dt; if(G.sirenT<=0){ G.sirenT=1.0; Snd.sirenBeat(); } }
-    updatePlayer(dt);
-    updateCritters(dt);
-    updateFalafels(dt);
-    updateRocks(dt);
-    for(const t of G.toasts){ t.t-=dt; t.y-=8*dt; }
+    if(G.state==='play') updatePlayer(dt);
+    if(G.state==='play') updateCritters(dt);
+    if(G.state==='play') updateFalafels(dt);
+    if(G.state==='play') updateRocks(dt);
+    for(const t of G.toasts){ t.t-=dt; }
     G.toasts=G.toasts.filter(t=>t.t>0);
     G.shake=Math.max(0,G.shake-dt);
   }
@@ -922,7 +946,7 @@ function loop(now){
   for(const k of G.critters) drawCritter(k);
   drawChain();
   drawPlayer();
-  drawParts(dt);
+  drawParts(paused?0:dt);
   ctx.restore();
 
   // siren tint
