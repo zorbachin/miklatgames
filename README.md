@@ -35,10 +35,16 @@ miklatgames.goatcounter.com). Dashboard shows arcade + game pageviews
 immediately; per-game event wiring lands in the next iteration.
 
 ## What's inside
-- `index.html` — the arcade shelf (featured MAMAD DASH, two coming-soon doors,
-  best-score memory, challenge-link forwarding, share button)
-- `mamaddash/` — the full game, canonical URLs already flipped to
-  miklatgames.fun
+- `index.html` — the arcade shelf (featured MAMAD DASH, BALAGAN + IRON DOME
+  tiles, one coming-soon door, best-score/wallet memory, challenge-link
+  forwarding, share button)
+- `mamaddash/` — the siren runner, canonical URLs on miklatgames.fun
+- `balagan/` — the Tel Aviv life-sim: stroll the street, work volleyball &
+  falafel mini-games for shekels, double your money to clear the day (streak +
+  escalating goal), spend in a shop of characters / items / upgrades. Wallet
+  persists in `localStorage` (`bg_save`). Runs on emoji today; drop PNGs into
+  `balagan/art/` (see `balagan/art/README.md`) to swap in a real image pack.
+- `irondome/` — tap the rockets
 - `CNAME`, `manifest.webmanifest`, `og.jpg`
 
 ## Still pending

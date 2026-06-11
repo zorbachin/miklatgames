@@ -1,0 +1,13 @@
+{
+  "name": "BALAGAN",
+  "short_name": "BALAGAN",
+  "description": "Tel Aviv on ₪500 of avtala. Double your money before sundown.",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0e1a",
+  "theme_color": "#0b0e1a",
+  "icons": [
+    { "src": "../mamaddash/art/icon.png", "sizes": "256x256", "type": "image/png", "purpose": "any" }
+  ]
+}
