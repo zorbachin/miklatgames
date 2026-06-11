@@ -1,0 +1,31 @@
+{
+  "game": "IRON DOME — press pack",
+  "style": "Vibrant 3D cartoon with dramatic night-sky lighting. Israeli city skyline defended by glowing interceptor batteries. Palette: deep navy night #0a1228, gold #ffd166, interceptor cyan #3ee6ff, alert red #ff5d73, warm window-light amber. Thick outlines, app-store polish. Generate: bin/imagepack irondome",
+  "images": [
+    {
+      "file": "keyart-16x9.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Mobile game key art, vibrant 3D cartoon style: night sky over a warm-lit Israeli coastal city, a glowing Iron Dome battery launching a bright cyan interceptor that arcs toward incoming red rocket streaks, explosion bloom mid-sky like fireworks, kids watching from a rooftop with popsicles. Heroic but lighthearted, zero gore. Palette: deep navy #0a1228, gold #ffd166, cyan #3ee6ff, red #ff5d73. Bold chunky title 'IRON DOME' in glowing letters at top. App-store quality."
+    },
+    {
+      "file": "icon-1x1.png",
+      "aspect_ratio": "1:1",
+      "prompt": "App icon, 3D cartoon style: a single stylized Iron Dome interceptor battery glowing cyan on a deep navy radial background, one bright interception starburst above it in gold, thick outlines, glossy game-icon finish, readable at small size. No text."
+    },
+    {
+      "file": "poster-9x16.png",
+      "aspect_ratio": "9:16",
+      "prompt": "Vertical mobile game poster, vibrant 3D cartoon style: low-angle dramatic shot up at a night sky full of crossing interceptor trails over a glowing Israeli city skyline, one Iron Dome battery in the foreground mid-launch, falafel ball power-ups floating like collectibles. Bold chunky glowing title 'IRON DOME' at top, banner at bottom reading 'DEFEND EVERY CITY. SDEROT TO EILAT.' Palette: navy #0a1228, gold #ffd166, cyan #3ee6ff, red #ff5d73. App-store quality."
+    },
+    {
+      "file": "itchcover-4x3.png",
+      "aspect_ratio": "4:3",
+      "prompt": "Game cover art for itch.io, vibrant 3D cartoon style, close crop: an Iron Dome battery hero-posed against the night sky, interceptor streaking up-right toward a red rocket, golden city lights below, one falafel power-up glinting. Bold chunky title 'IRON DOME' across the top third, thick outlines, punchy colors, readable as a small thumbnail. Palette: navy #0a1228, gold #ffd166, cyan #3ee6ff, red #ff5d73."
+    },
+    {
+      "file": "banner-notext-16x9.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Wide promotional banner, vibrant 3D cartoon style, no text anywhere: panoramic Israeli city skyline at night from Sderot rooftops to Eilat beach hotels, multiple Iron Dome interception starbursts lighting the sky gold and cyan, clean negative space in the upper-center for overlay copy. Palette: deep navy #0a1228, gold #ffd166, cyan #3ee6ff, red #ff5d73. Polished, hopeful, high-energy."
+    }
+  ]
+}

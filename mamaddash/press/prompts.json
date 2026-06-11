@@ -1,0 +1,31 @@
+{
+  "game": "MAMAD DASH — press pack",
+  "style": "Vibrant 3D cartoon, urgent-but-funny. An Israeli street at siren time: runner dashing to the mamad (shelter room), savtas with shopping carts, doves, shekel coins. Palette: dusk indigo #1a2040, siren red #ff5d73, gold #ffd166, mint #7ee8c7, warm streetlight amber. Thick outlines, app-store polish. Generate: bin/imagepack mamaddash",
+  "images": [
+    {
+      "file": "keyart-16x9.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Mobile game key art, vibrant 3D cartoon style: a determined runner sprinting down an Israeli residential street at dusk while a siren light tints the sky red, leaping over a surprised savta (grandma) with a shopping cart, ducking under doves taking flight, gold shekel coins floating like collectibles, the open glowing door of a mamad (reinforced shelter room) visible at the street's end like a finish line. Comic urgency, zero gore. Palette: indigo #1a2040, siren red #ff5d73, gold #ffd166, mint #7ee8c7. Bold chunky title 'MAMAD DASH' at top. App-store quality."
+    },
+    {
+      "file": "icon-1x1.png",
+      "aspect_ratio": "1:1",
+      "prompt": "App icon, 3D cartoon style: a single running-figure silhouette mid-leap toward a glowing open mamad door, siren-red sky burst behind, one gold shekel coin spinning above, on an indigo radial background. Thick outlines, glossy game-icon finish, readable at small size. No text."
+    },
+    {
+      "file": "poster-9x16.png",
+      "aspect_ratio": "9:16",
+      "prompt": "Vertical mobile game poster, vibrant 3D cartoon style: low-angle shot of the runner mid-jump over a savta's shopping cart on an Israeli street, siren-red sky, doves scattering, shekels trailing, the glowing mamad door far ahead. Bold chunky title 'MAMAD DASH' at top, banner at bottom reading 'OUTRUN THE SIREN.' Palette: indigo #1a2040, red #ff5d73, gold #ffd166, mint #7ee8c7. App-store quality."
+    },
+    {
+      "file": "itchcover-4x3.png",
+      "aspect_ratio": "4:3",
+      "prompt": "Game cover art for itch.io, vibrant 3D cartoon style, close crop: the runner's determined face and pumping arms in the foreground, savta with raised wooden spoon blurred behind, siren glow rim-lighting everything, one dove flapping past. Bold chunky title 'MAMAD DASH' across the top third. Thick outlines, punchy colors, readable as a small thumbnail. Palette: indigo #1a2040, red #ff5d73, gold #ffd166."
+    },
+    {
+      "file": "banner-notext-16x9.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Wide promotional banner, vibrant 3D cartoon style, no text anywhere: side-scrolling composition of an Israeli street at siren time — runner sprinting right-to-left, savtas and doves and shekel coins in the middle, glowing mamad door on the far left, red siren sky above with clean negative space top-center for overlay copy. Palette: indigo #1a2040, red #ff5d73, gold #ffd166, mint #7ee8c7. Urgent, funny, polished."
+    }
+  ]
+}
