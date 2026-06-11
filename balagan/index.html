@@ -592,13 +592,16 @@ function onDown(sx,sy){
   if(panelOpen()) return;        // a DOM panel owns the screen — no world taps through it
   if(G.state==='hub'){ ptDown={sx,sy}; ptMoved=false; dragX=sx; lastTapY=sy; }
   else if(G.state==='map') mapTap(sx,sy);
-  else if(G.state==='volley') vbTap();
-  else if(G.state==='falafel') faTap();
-  else if(G.state==='matkot') mkTap();
-  else if(G.state==='shawarma') swTap();
-  else if(G.state==='aroma') arDown();
-  else if(G.state==='cats') ctTap(sx,sy);
-  else if(G.state==='allenby') alTap();
+  else if(MINI.includes(G.state)){
+    if(G.intro&&G.intro.on){ G.intro.on=false; Sound.enter(); return; }   // first tap = "I'm ready"
+    if(G.state==='volley') vbTap();
+    else if(G.state==='falafel') faTap();
+    else if(G.state==='matkot') mkTap();
+    else if(G.state==='shawarma') swTap();
+    else if(G.state==='aroma') arDown();
+    else if(G.state==='cats') ctTap(sx,sy);
+    else if(G.state==='allenby') alTap();
+  }
 }
 function onMove(sx){
   // top-down: no drag-scroll (it fought the camera-follow). A drag just cancels
@@ -647,6 +650,7 @@ window.addEventListener('keydown',e=>{
     if(k===' '||k==='enter'){ const st=STATIONS.find(s=>Math.abs(s.x-p.x)<110&&p.d<.38); if(st) enterStation(st); }
   } else if((k===' '||k==='arrowup')&&MINI.includes(G.state)){
     e.preventDefault();
+    if(G.intro&&G.intro.on){ G.intro.on=false; Sound.enter(); return; }
     ({volley:vbTap,matkot:mkTap,shawarma:swTap,allenby:alTap,falafel:faTap,
       aroma:arDown,cats:()=>ctTap(W/2,groundY-H*.15)}[G.state])();
   }
@@ -984,7 +988,8 @@ function vbStart(){
   G.vb={ ball:{x:W*.3,y:groundY-300,vx:30,vy:-560}, side:'player', rally:0, lives, maxLives:Math.max(1,lives),
     over:false, t:0, hittable:false, slow, earn:0, df:diff('volley'),
     pball:1, landX:W*.3, landT:9, tut:!S.taught.volley, hold:false };
-  if(G.vb.tut) pop(W/2,groundY-250,rline(BARK.vbTeach),'#fff',true);
+  gameIntro('🏐','VOLLEYBALL','Keep the rally with Savta — every bump pays',
+    'TAP when the ball drops\ninto the gold ring','TAP = bump','3 drops and she packs the cooler');
 }
 function vbTap(){
   const v=G.vb; if(!v||v.over) return;
@@ -1057,7 +1062,8 @@ function mkStart(){
   G.mk={ ball:{x:W*.8,y:groundY-150,vx:-280,vy:-140}, dir:'in', rally:0, lives, maxLives:lives,
     over:false, df:diff('matkot'), earn:0, hittable:false, swing:0,
     tut:!S.taught.matkot, hold:false };
-  if(G.mk.tut) pop(W/2,groundY-250,rline(BARK.mkTeach),'#fff',true);
+  gameIntro('🏓','MATKOT','Don\'t let the ball drop — rallies pay',
+    'TAP the moment the ball\ncrosses your glowing line','TAP = smack');
 }
 function mkTap(){
   const m=G.mk; if(!m||m.over) return;
@@ -1146,7 +1152,9 @@ function swStart(){
   if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; pop(W/2,groundY-210,'🙏 bracha +20%','#8ad2ff',true); } else G.runBracha=0;
   G.sw={ time:20, m:.5, dir:1, zc:rand(.25,.75), zw:.11, hits:0, combo:0, earn:0,
     over:false, df:diff('shawarma'), tut:!S.taught.shawarma, thrown:false, flash:0 };
-  if(G.sw.tut){ G.sw.zw=.16; pop(W/2,groundY-250,rline(BARK.swTeach),'#fff',true); }
+  if(G.sw.tut) G.sw.zw=.16;
+  gameIntro('🌯','SHAWARMA CARVE','Carve clean slices — combos pay',
+    'TAP when the knife is\ninside the green band','TAP = slice');
 }
 function swTap(){
   const s=G.sw; if(!s||s.over) return;
@@ -1214,7 +1222,9 @@ function arStart(){
   if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; pop(W/2,groundY-210,'🙏 bracha +20%','#8ad2ff',true); } else G.runBracha=0;
   G.ar={ time:20, f:0, pouring:false, good:0, cups:0, spills:0, combo:0, earn:0,
     over:false, df:diff('aroma'), tut:!S.taught.aroma, poured:false };
-  if(G.ar.tut) pop(W/2,groundY-250,rline(BARK.arTeach),'#fff',true);
+  gameIntro('☕','ICED AROMA','Fill each cup to the gold band',
+    'HOLD to pour\nRELEASE inside the gold','',
+    'fill it to the top = spill');
 }
 function arDown(){ const a=G.ar; if(!a||a.over) return; a.pouring=true; a.poured=true; }
 function arUp(){
@@ -1297,7 +1307,8 @@ function ctStart(){
   if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; pop(W/2,groundY-210,'🙏 bracha +20%','#8ad2ff',true); } else G.runBracha=0;
   G.ct={ time:20, cats:[], nextSpawn:0, pets:0, combo:0, earn:0, over:false,
     df:diff('cats'), tut:!S.taught.cats };
-  if(G.ct.tut) pop(W/2,groundY-260,rline(BARK.ctTeach),'#fff',true);
+  gameIntro('🐈','STREET CATS','Pet every cat before it leaves',
+    'TAP each cat while\nits ring still glows','TAP the cats');
 }
 function ctTap(sx,sy){
   const c=G.ct; if(!c||c.over) return;
@@ -1381,7 +1392,8 @@ function alStart(){
   }
   G.al={ time:25, lanes, row:0, hop:0, lives:2, crossings:0, earn:0, over:false,
     df:diff('allenby'), tut:!S.taught.allenby };
-  if(G.al.tut) pop(W/2,groundY-260,rline(BARK.alTeach),'#fff',true);
+  gameIntro('🚌','CROSS ALLENBY','Reach the kiosk on the other side',
+    'TAP to dash one lane\ngo when you see GO!','TAP = dash','the buses do not brake');
 }
 const AL_ROWY=r=>groundY-30-r*54;            // row 0 = start curb … 5 = far curb
 function alTap(){
@@ -1468,7 +1480,8 @@ function faStart(){
   G.fa={ time:20+extra, pita:{x:W*.66,dir:1}, falafels:[], power:0, pdir:1, combo:0, maxCombo:0,
     hits:0, earn:0, over:false, slow, missRow:0, luckyLeft:upLv('lucky'), bust:false,
     tut:!S.taught.falafel, thrown:false };
-  if(G.fa.tut) pop(W/2,groundY-250,rline(BARK.faTeach),'#fff',true);
+  gameIntro('🥙','FALAFEL TOSS','Land falafel in the moving pita',
+    'TAP to throw — the meter\nsets how far it flies','TAP = throw','3 splats in a row = Savta takes the pita');
 }
 function faTap(){
   const f=G.fa; if(!f||f.over) return;
@@ -1779,13 +1792,16 @@ function update(dt){
   if(G.shieldUsed){ pop(W/2,H*.36,'🛡️ Shabbat Shield saved your streak!','#7ee8c7',true);
     Sound.cash(); G.shieldUsed=false; }
   if(G.state==='hub') hubUpdate(dt);
-  else if(G.state==='volley') vbUpdate(dt);
-  else if(G.state==='falafel') faUpdate(dt);
-  else if(G.state==='matkot') mkUpdate(dt);
-  else if(G.state==='shawarma') swUpdate(dt);
-  else if(G.state==='aroma') arUpdate(dt);
-  else if(G.state==='cats') ctUpdate(dt);
-  else if(G.state==='allenby') alUpdate(dt);
+  else if(MINI.includes(G.state)){
+    if(G.intro&&G.intro.on) return;          // frozen until the player says go
+    if(G.state==='volley') vbUpdate(dt);
+    else if(G.state==='falafel') faUpdate(dt);
+    else if(G.state==='matkot') mkUpdate(dt);
+    else if(G.state==='shawarma') swUpdate(dt);
+    else if(G.state==='aroma') arUpdate(dt);
+    else if(G.state==='cats') ctUpdate(dt);
+    else if(G.state==='allenby') alUpdate(dt);
+  }
 }
 function hubUpdate(dt){
   ensureHustle();                 // keeps today's objective in sync if midnight passes mid-session
@@ -1828,7 +1844,8 @@ function draw(){
     else if(G.state==='shawarma') drawShawarma();
     else if(G.state==='aroma') drawAroma();
     else if(G.state==='cats') drawCats();
-    else if(G.state==='allenby') drawAllenby(); }
+    else if(G.state==='allenby') drawAllenby();
+    if(MINI.includes(G.state)) drawIntro(); }
   // shared FX
   for(const q of G.pops){ const a=1-q.t, rise=q.t*54;
     cx.globalAlpha=a;cx.font=`900 ${q.big?24:18}px sans-serif`;cx.textAlign='center';cx.textBaseline='middle';
@@ -2234,6 +2251,39 @@ function drawFalafel(){
   cx.font='900 16px sans-serif';
   hudPill(W/2,SAFE_TOP+30,`⏱️ ${Math.ceil(f.time)}s`, f.time<5?'#ff5d5d':'#ffd166');
   if(f.combo>1){ cx.fillStyle='#ff8ad4';cx.font='900 20px sans-serif';cx.fillText(`🔥 ${f.combo} combo`,W/2,SAFE_TOP+62); }
+}
+/* =================== game intro card — every mini-game opens frozen & explained ===================
+   Name + goal + the control verb in big type. First tap dismisses; game starts
+   on YOUR schedule. A small control-hint strip stays on screen during play. */
+function gameIntro(icon,title,goal,how,hint,warn){
+  G.intro={icon,title,goal,how,hint:hint||'',warn:warn||'',on:true};
+}
+function drawIntro(){
+  const I=G.intro; if(!I) return;
+  if(!I.on){            // playing: keep the control verb on screen, small
+    if(I.hint){ cx.font='800 13px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+      const w=cx.measureText(I.hint).width+26, y=H-SAFE_TOP-40;
+      cx.fillStyle='rgba(13,17,32,.7)';rr(W/2-w/2,y-15,w,30,15);
+      cx.fillStyle='#9fe7d4';cx.fillText(I.hint,W/2,y); }
+    return;
+  }
+  cx.fillStyle='rgba(11,14,26,.66)';cx.fillRect(0,0,W,H);
+  const cw=Math.min(W*.88,350), hows=I.how.split('\n'),
+        chh=178+hows.length*22+(I.warn?24:0), cxp=W/2, cy=H*.42;
+  cx.fillStyle='rgba(18,24,46,.97)';rr(cxp-cw/2,cy-chh/2,cw,chh,18);
+  cx.strokeStyle='rgba(255,209,102,.7)';cx.lineWidth=2;
+  cx.beginPath();if(cx.roundRect)cx.roundRect(cxp-cw/2,cy-chh/2,cw,chh,18);else cx.rect(cxp-cw/2,cy-chh/2,cw,chh);cx.stroke();
+  let y=cy-chh/2+44;
+  drawEmoji(I.icon,cxp,y,46); y+=44;
+  cx.textAlign='center';cx.textBaseline='middle';
+  cx.font='900 22px sans-serif';cx.fillStyle='#ffd166';cx.fillText(I.title,cxp,y); y+=28;
+  cx.font='700 14px sans-serif';cx.fillStyle='#fff';cx.fillText(I.goal,cxp,y); y+=26;
+  cx.font='900 15px sans-serif';cx.fillStyle='#7ee8c7';
+  for(const hl of hows){ cx.fillText(hl,cxp,y); y+=22; }
+  if(I.warn){ cx.font='700 12px sans-serif';cx.fillStyle='#ff8a8a';cx.fillText(I.warn,cxp,y); y+=24; }
+  const a=.7+.3*Math.sin(G.t*5);
+  cx.font='900 17px sans-serif';cx.globalAlpha=a;cx.fillStyle='#ffd166';
+  cx.fillText('TAP TO START ▶',cxp,cy+chh/2-26);cx.globalAlpha=1;
 }
 function hudPill(cxp,cyp,txt,col){
   cx.textAlign='center';cx.textBaseline='middle';
