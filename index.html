@@ -315,6 +315,8 @@ document.getElementById('cardMamad').addEventListener('click',()=>track('play-ma
 document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
 
 applyLang(); applyAudio();
+if ('serviceWorker' in navigator)
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 </script>
 <script data-goatcounter="https://miklat-games.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
