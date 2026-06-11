@@ -484,6 +484,28 @@ const G={
   result:{kind:'',earn:0,best:false},
 };
 const POP_COLS=['#ffd166','#7ee8c7','#ff8ad4','#8ad2ff'];
+/* mini-game barks — the room wrote these too */
+const BARK={
+  vbTeach:['Savta serves. Bump it back, achi.','Hands ready. Savta doesn\'t wait twice.','Tap to bump. Don\'t embarrass us.'],
+  vbRally:['SAVTA\'S SWEATING','TOURISTS ARE FILMING','THE NET RESPECTS YOU','SAVTA TOOK OFF HER VISOR','LIFEGUARD STOPPED WHISTLING','THIS IS HISTORY, ACHI'],
+  vbMiss:['Eat, you\'re weak.','My grandson.','The sand thanks you.','Tourists saw that.','Oy. Again.'],
+  faTeach:['Land it in the pita. Aim for the mark.','Time the meter. The pita moves, achi.','Tap when it\'s green. Don\'t feed the sand.'],
+  faCombo:['PITA PERFECT','THE TOURISTS WANT SELFIES','HOT AND IN THE POCKET','SHUK\'S WATCHING','SAVTA STOPPED FRYING TO LOOK','TAHINI APPROVED'],
+  faSplat:['SPLAT','On the floor, achi.','Cats eat good.','WASTED. TRAGEDY.','Tahini cried.'],
+  faBust:['Savta took the pita back. You\'re done, achi.','Three on the floor. She\'s calling your mother.','Pita reclaimed. The cats are full. You are not.','That\'s it. Hands off the falafel, boobaleh.'],
+  vbRes:{lo:[['OOF, ACHI','Savta\'s already packing the cooler.'],['THE SAND WON','She\'ll let you try again. After tea.']],
+    mid:[['NOT BAD, BOOBALEH','The net saw potential. So did three tourists.'],['SAVTA NODDED','That\'s basically a medal in this family.']],
+    hi:[['BEACH BALLER','Savta\'s sweating and she\'s proud. Both.'],['KING OF THE NET','The whole beach is filming you now.']]},
+  faRes:{lo:[['FLOOR FALAFEL','The cats give you five stars.'],['OY, THE MESS','Savta\'s mopping and muttering.']],
+    mid:[['NICE POCKETS','Tahini\'s flowing, achi. Respectable.'],['THE SHUK NODDED','Not legend yet. But they remember your face.']],
+    hi:[['SHUK LEGEND','They\'re naming a stall after you.'],['PITA WHISPERER','Savta\'s frying faster just to keep up.']]},
+  faBustTitle:['OY VEY. 😤','THE PITA IS GONE'],
+  selfie:['"You\'re seeing it live, achi. The comeback starts on a beach."',
+    '"Day forty-something. Savta still can\'t beat me. Like and subscribe."',
+    '"₪500 by sundown. This pita is step one."',
+    '"Film this. Nobody believed the broke kid from the shuk."',
+    '"Mom, if you\'re watching — I\'m basically a mogul now."'],
+};
 function pop(x,y,txt,col,big){ G.pops.push({x,y,txt,col:col||'#ffd166',t:0,big:!!big}); }
 function flyCoin(x,y){ G.coins.push({x,y,t:0}); }
 function burstConfetti(n){ for(let i=0;i<n;i++) G.confetti.push({x:rand(0,W),y:rand(-H*.2,H*.3),
@@ -590,37 +612,175 @@ function goHome(){
 /* =================== chat / NPCs — memory, gossip & reactive lines =================== */
 const NPC={ savta:{ico:'🧓',name:'Savta Mizrahi'}, chabad:{ico:'🧔',name:'Chabad Guy'},
   babushka:{ico:'👵',name:'Kiosk Babushka'} };
+/* =================== the writers' room — every line vetted by the room ===================
+   {X} = shekels short of today's double-up, filled at display time. */
+const rline=a=>a[irand(0,a.length-1)];
+const SCRIPT={
+  savta:{
+    soup:['NU, BAALI… sit. The soup is already in the bowl — what, I\'m a prophet?',
+      'Before the falafel, before Bituach Leumi — first you eat my soup. SIT.',
+      'Motek, I made enough for an army and a half. Choose wisely.',
+      'The chicken died for you today. You will honor it with a spoon.',
+      'NU. One bowl. Then go double your money or whatever it is you do.',
+      'Sit, baali. The whole street is watching. Don\'t embarrass the soup.'],
+    eat:['THERE. Now you have a life. Two, if you ask for seconds.',
+      'See? Garlic, love, and an extra life. Go win, motek.',
+      'Eat by Savta, play like a lion. NU — GO.',
+      'The hummus survived. NOW so will you.',
+      'This is why you\'ll win. Not the app — the soup. Off you go, baali.'],
+    decline:['"I ate." He says "I ate." Take ₪40 and your little lie, GO.',
+      'Fine. ₪40. But your mother will hear about this.',
+      'You ate? WHERE? Show me the bowl. …Here, ₪40, traitor.',
+      'Insulted. Devastated. Here\'s ₪40 for the funeral. Mine.',
+      'NU. Money I have, a grandson with an appetite I do not. ₪40, go.'],
+    streak:['First time by Savta? I\'m watching you, motek. Sit anyway.',
+      'Three days he comes. The Babushka next door is SO jealous.',
+      'A week! Bituach Leumi cannot help you now — but I can.',
+      'Two weeks, baali. You\'re basically family. There\'s cake after.'],
+    gap:['₪{X} short?? That\'s two falafel and a head off. EAT and go hustle.',
+      'NU, baali, ₪{X} away and you\'re sitting? The net is RIGHT THERE.',
+      '₪{X}. I have it in my bra. But you\'ll earn it — at the net, GO.',
+      'So close — only ₪{X}! Soup first, then you spike like a man possessed.'],
+    skin:{chabad:'Suddenly so frum! A hat now? Did you call your mother, tzaddik?',
+      bro:'Put on a SHIRT, baali. This is soup, not a beach. Cover the gym.',
+      hightech:'Exit shmexit. Your startup can wait — your mother cannot. Sit.',
+      mamadmom:'A working mother who still visits Savta? THIS is my grandchild. Proud.'},
+    arc:['So YOU\'RE the one Babushka warned me about. Sit, let me look at you.',
+      'My regular! The bowl knows your name now, motek. Same as always?',
+      'NU, baali — your chair, your bowl, your Savta. Home. Now eat.'],
+    landlord:'A LANDLORD in the family! Wait till I tell the mahjong table. 🏠',
+  },
+  chabad:{
+    invite:['Achi! One wrap, one bracha, and the falafel will FLY today. Roll up that sleeve!',
+      'Tefillin takes 30 seconds. The blessing takes all day. Come, come!',
+      'HaShem already booked your win. We\'re just signing the paperwork. Left arm!',
+      'Sefardi, Ashkenazi, atheist on Tuesdays — doesn\'t matter. Arm\'s an arm! Wrap!',
+      'You, my friend, are ONE mitzvah away from a beautiful day. Let\'s go!',
+      'Box on the head, strap on the arm, money in the pocket. That\'s the order!'],
+    during:['Up the arm, up the arm, beautiful!','One… two… HaShem is watching, keep going!',
+      'Wrap it like Savta wraps a sandwich — tight!','Each dot is a little light, achi. Tap, tap, tap!'],
+    bracha:['KOL HAKAVOD ACHI!! That bracha is locked, loaded, and +20% gorgeous!',
+      'The angels just high-fived. Go make your money, mensch!',
+      'Wrapped like a champion! The next game? HaShem\'s got your back, +20%!',
+      'THIS is what a blessed forearm looks like. Now FLY, my friend, fly!',
+      'Amen and amen! Today the falafel obeys YOU. Go collect.'],
+    partial:['Missed a few? It still counts. It ALWAYS counts. Tomorrow we wrap again!',
+      'Achi, HaShem sees the EFFORT, not the dots. Beautiful try, beautiful soul.',
+      'No buff today, but no shame ever. The mitzvah is already in the books!',
+      'You showed up and rolled the sleeve — that\'s a win HaShem already wrote down.',
+      'Hands shaky? The heart was steady. It counts. It always counts. Come back!'],
+    gap:['₪{X} short? HaShem helps those who toss the falafel. Now go toss!',
+      'Only ₪{X} to go, achi — that\'s not a gap, that\'s a warm-up. Wrap and run!',
+      '₪{X} between you and the dream. HaShem closes gaps; you just hustle, mensch!',
+      '₪{X}? Please. I\'ve seen Him do more before the bus came. Have faith, go!'],
+    skin:{chabad:'You became me, achi?! Look at you — a full MENSCH! It counts double!',
+      hightech:'Crypto, schmypto. Real aliyah is to the falafel stand. Wrap first, mister CEO!',
+      mamadmom:'Blessings on the shelter and all inside it. HaShem guards your mamad, achi.'},
+    shabbat:['It\'s Friday, achi! Wrap NOW — the bracha works overtime before Shabbat. Hurry!',
+      'Havdalah\'s done, the week is fresh — first mitzvah of the week is the sweetest. Wrap!',
+      'Babushka took my LAST cigarette for the havdalah candle again. A tzadeket! Worth it.'],
+    tzedakah:'A little tzedakah goes a long way. Here — ₪30, pass it on. 🙏',
+  },
+  babushka:{
+    idle:['Zolotse. You again. I know everything, zolotse.',
+      'Savta called. You owe her a visit. I told her you\'re busy losing money.',
+      'The Chabadnik wants to wrap you tefillin. I told him bring change, you\'re broke.',
+      'Sit. Don\'t sit. The streetlights know your name now.',
+      'I saw what you did by the volleyball. The whole street saw. Only I\'ll tell you the price.',
+      'Savta says her kreplach is better. It is. But I have the gossip.'],
+    revealVolley:['Twenty shekel. The street whispers, I translate. Today: 🏐 the net pays. Go.',
+      'I don\'t guess, zolotse. I know. 🏐 Volleyball, plus fifteen, before the light comes on.',
+      'For you, the truth: 🏐 the net is hot today. Don\'t tell Savta I told you.'],
+    revealFalafel:['Twenty shekel. The street whispers, I translate. Today: 🥙 falafel pays. Go.',
+      'Numbers don\'t lie, people do. Numbers say 🥙 falafel. Plus fifteen. Move.',
+      'For you, the truth: 🥙 tourists tip the falafel today. Don\'t tell Savta.'],
+    again:['I already told you, zolotse. The gossip doesn\'t reheat.',
+      'Same twenty, same secret. I\'m a kiosk, not a fool.',
+      'You forgot already? Go ask Savta, she remembers everything too.'],
+    jackpot:['TWO HUNDRED FIFTY! …the whole street heard me. Now they want a loan.',
+      'Zolotse. Either you cheated or God is bored. Two-fifty. Take it and run.',
+      'I scream once a year. This was it. Don\'t make a habit, it\'s bad for the pension.'],
+    win:['A little win. Enough for tea, not for ego. Sit down.',
+      'Eighty shekel? Don\'t celebrate, the next card is mine again.',
+      'Coffee money. The street is impressed. I am not.'],
+    gornisht:['Gornisht. Thank you, that\'s my pension. Come again.',
+      'Nothing. The next one is the winner, zolotse. There\'s always a next one.',
+      'Zero. I felt it before you scratched. I feel everything.',
+      'Empty. Don\'t cry. Savta would cry. You\'re stronger than Savta.'],
+    broke:['Fifty shekel you don\'t have. Even secrets pay rent, zolotse.',
+      'Twenty shekel and I\'ll say it out loud. You have less. So, quiet.',
+      'No money, no gossip. Go double something first. Then come back rich.'],
+    skin:{hightech:'Hightech. My nephew did crypto. Now he sleeps on my couch. Sit, zolotse.',
+      streak:'Winning streak. Bituach Leumi is taking notes. So am I.',
+      savta:'Savta brags about you on the bench. I take your money. We\'re both happy.'},
+  },
+};
+function gapTxt(s){ return s.replace('{X}', Math.round(Math.max(0,dayGoal()-S.earnedToday))); }   // lines already print ₪
+/* meta beats — the spine, in voice. tiered by day/streak so the world's
+   reaction escalates from "I'm watching you" to "there's cake". */
+const META={
+  morning:[ // [minDay, headline, why]
+    [21,'Double ₪{G} — quietly, before Bituach Leumi finishes its coffee.','You\'re a known quantity now. Known quantities get watched.'],
+    [14,'₪{G}, doubled, before the cholent goes on.','Shabbat is coming and a man who rests must first hustle.'],
+    [9,'Turn ₪{G} around before the light goes orange over the sea.','Savta added you to the WhatsApp group. There is no leaving the WhatsApp group.'],
+    [5,'₪{G} by sundown. The streak is young but it has your mother\'s eyes.','Don\'t be the guy who blinks on day five.'],
+    [1,'Double ₪{G} before the muezzin and the church bells finish arguing.','Everybody starts somewhere. Today, somewhere is a folding chair outside the makolet.'],
+  ],
+  cleared:[ // by streak threshold
+    [30,'The makolet has your photo by the register now. Above the lottery winners. Below Savta.'],
+    [21,'A tourist asked for a photo with you. You let him. He tipped.'],
+    [14,'The beach bro paused his set to say "achi." Just "achi." It was enough.'],
+    [7,'Someone on the second floor closed their shutters slower than usual. That\'s applause.'],
+    [3,'The makolet guy nodded. He nods at maybe four people.'],
+    [0,'Nobody saw that. Just you and Savta — and Savta never sleeps.'],
+  ],
+  milestone:{3:'Three days. The plastic-chair brigade outside the kiosk accepts you as one of their own.',
+    7:'A full week. Even the cat that owns this street now waits for you. That cat waits for no one.',
+    14:'Two weeks. Savta defends you at the makolet unprompted. You weren\'t even there.',
+    30:'Thirty days. They\'re baking a cake. Nobody decided this. The cake simply began.',
+    60:'Sixty days. Even God took the seventh off — you\'re in good company, achi.'},
+  nudge:['Bituach Leumi is watching, and it doesn\'t blink.','The net pays after lunch. Be where the ball lands.',
+    'Savta can see this from her balcony.','Sundown\'s the buzzer. The sea doesn\'t do overtime.',
+    'The street already knows. Don\'t make it awkward.','The makolet\'s rooting. Quietly. Loudly.'],
+  login:['Savta left this taped to your door. The note is just a phone number and "CALL."',
+    'A tourist tipped you and ran for the 480 bus. He\'s near Eilat by now.',
+    'Found shekels in your old army jeans. Also sand and one staple. Take the shekels.',
+    'The makolet guy "forgot" the bottle deposit again. He knows what he\'s doing.'],
+  mamadmom:['You survived the siren in MAMAD DASH. You sat in the safe room and did not panic. Somebody noticed.',
+    'One figure was always there across the Miklat universe — making coffee in the dark, counting heads, calm.',
+    'MAMAD MOM is now playable. She doesn\'t double ₪500 — she makes ₪500 feel like enough. Offer her a chair.'],
+};
+const BIOS={ avtali:'Doubled ₪500 once, never recovered, films everything.',
+  savta:'Survived three wars, two husbands, and one bad falafel; will survive your decisions too.',
+  bro:'Sells matkot, wisdom, and slightly warm Goldstar; tans on company time.',
+  chabad:'Has tefillin and a strong opinion on your soul\'s portfolio.',
+  hightech:'Exited a startup that did nothing for an amount that means nothing.',
+  mamadmom:'Ran a household through a siren with a smile and a tray of cut fruit. Fears nothing.'};
+const tier=(arr,key)=>arr.find(r=>key>=r[0]);
 function chatLines(who){
   const eq=S.equip, prog=dayProg(), n=S.met[who]||0, L=[];
   if(who==='savta'){
-    if(n<=1) L.push('So YOU\'RE the new one on the street. I\'m watching you, motek. Eat something.');
-    if(n>=10) L.push(`${n} visits. You're basically family now. Sit. SIT. There's cake.`);
-    if(S.streak>=3) L.push(`${S.streak} days you doubled it?? Who ARE you. I told the whole makolet.`);
-    if(prog>=1) L.push('NU! You doubled it already! Go home, sleep — don\'t spend it all on kishkush.');
-    else if(prog>=.4) L.push('Halfway and the sun\'s still up. In my day we were faster… but not bad, motek.');
-    if(eq==='chabad') L.push('Suddenly so frum? Your savta is Mizrahi — don\'t forget the tradition. 🕯️');
-    else if(eq==='bro') L.push('A beach bum?? Put on a shirt and go make money like a mensch.');
-    else if(eq==='hightech') L.push('Exit, shmexit. Call your mother. Then double your money.');
-    else if(eq==='mamadmom') L.push('Now THAT is a woman who runs the shelter. Proud of you, motek. 🛡️');
-    if(upLv('apt')>0) L.push(`A LANDLORD in the family! Wait till I tell the mahjong table. 🏠`);
-    if(prog<1) L.push(`₪${dayGoal()-S.earnedToday} short of the double-up, motek. The net pays better after lunch.`);
-    L.push('NU, BAALI… you\'ll rally on an empty stomach? Over my dead body. SIT.');
-    L.push('The shuk has new looks. Stop dressing like a student.');
-  } else if(who==='chabad'){
-    if(eq==='chabad') L.push('Achi! Look at you — a real mensch. Free ₪60 every morning, enjoy. 🙏');
-    else L.push('Achi! One wrap, one bracha — the falafel will literally fly today. 🙏');
-    if(prog<1) L.push(`You're ₪${dayGoal()-S.earnedToday} short of the double-up? HaShem helps those who toss falafel. 🙏`);
-    if(S.streak>=7) L.push('Seven days strong — that is a Shabbat kind of dedication. 🕯️');
-    L.push('A little tzedakah goes a long way. Here — ₪30, pass it on. 🙏');
-    L.push('Shabbat is coming. Make your shekels now, rest later.');
-  } else { // kiosk babushka — the street's social web, and the goralot dealer
-    if(n<=1) L.push('New face. I know everything on this street, zolotse. EVERYTHING. Ask Savta.');
-    L.push('Savta says you owe her a visit. Pay before Shabbat or I hear about it.');
-    L.push('The Chabadnik? Heart of gold. Took my last cigarette though. For "havdalah," he said.');
-    if(S.streak>=3) L.push(`${S.streak}-day streak? The whole kiosk line is talking about you.`);
-    if(eq==='hightech') L.push('Hi-tech, shmy-tech. My nephew did "crypto." Now he sleeps on my couch.');
-    L.push('Feeling lucky? A goral is ₪50. Sometimes you win big. Sometimes… you fund my pension. 🎟️');
+    const S2=SCRIPT.savta;
+    L.push(n<=1?S2.arc[0]:n>=10?S2.arc[1]:S2.arc[2]);
+    L.push(S2.streak[S.streak>=14?3:S.streak>=7?2:S.streak>=3?1:0]);
+    if(S2.skin[eq]) L.push(S2.skin[eq]);
+    if(upLv('apt')>0) L.push(S2.landlord);
+    if(prog<1) L.push(gapTxt(rline(S2.gap)));
+    return L;
   }
+  if(who==='chabad'){
+    const C=SCRIPT.chabad;
+    if(eq==='chabad'||eq==='hightech'||eq==='mamadmom') return [C.skin[eq]];
+    if(isFriday()) L.push(C.shabbat[0]);
+    if(prog<1) L.push(gapTxt(rline(C.gap)));
+    L.push(rline(C.invite));
+    return L;
+  }
+  // kiosk babushka
+  const B=SCRIPT.babushka;
+  L.push(...B.idle);
+  if(B.skin[eq]) L.push(B.skin[eq]);
+  if(S.streak>=3) L.push(B.skin.streak);
   return L;
 }
 function openChat(who){
@@ -643,7 +803,7 @@ function openChat(who){
     A.textContent='🙏 WRAP TEFILLIN'; A.onclick=tefStart; A.classList.remove('hidden');
   }
   if(who==='savta' && (S.gift.savta||0)<today){
-    $('chatLine').textContent='"NU, BAALI… you\'ll rally on an empty stomach? Over my dead body. SIT. Soup."';
+    $('chatLine').textContent=rline(SCRIPT.savta.soup);
     A.textContent='🍲 EAT THE SOUP'; A.onclick=soupEat; A.classList.remove('hidden');
     A2.textContent='🙅 "Savta, I ate" (+40₪)'; A2.onclick=soupDecline; A2.classList.remove('hidden');
   }
@@ -659,14 +819,15 @@ let tefT=null;
 function tefStart(){
   $('chatAct').classList.add('hidden'); $('chatAct2').classList.add('hidden');
   $('chatReward').textContent='';
-  $('chatLine').innerHTML='Tap each wrap as it glows! 💪<div id="tefDots" style="margin-top:14px;font-size:34px;letter-spacing:6px;user-select:none;"></div>';
-  const dots=$('tefDots'); let hits=0, idx=-1; const spans=[];
+  $('chatLine').innerHTML=`${rline(SCRIPT.chabad.during)}<div id="tefDots" style="margin-top:14px;font-size:34px;letter-spacing:6px;user-select:none;"></div>`;
+  const dots=$('tefDots'); let hits=0, idx=-1, step=0; const spans=[];
   for(let i=0;i<7;i++){ const s=document.createElement('span'); s.textContent='⚫'; spans.push(s); dots.appendChild(s); }
   clearInterval(tefT);
   tefT=setInterval(()=>{
     if(idx>=0 && spans[idx].textContent==='🟡') spans[idx].textContent='⚫';
     idx++;
     if(idx>=7){ clearInterval(tefT); tefT=null; tefEnd(hits); return; }
+    if(++step%2===0) $('chatLine').childNodes[0].nodeValue=rline(SCRIPT.chabad.during);  // he keeps cheering
     const s=spans[idx]; s.textContent='🟡';
     s.onclick=()=>{ if(s.textContent==='🟡'){ s.textContent='🟣'; hits++; Sound.bump(hits); buzz(20); } };
   },620);
@@ -674,10 +835,10 @@ function tefStart(){
 function tefEnd(hits){
   S.bracha=dayIndex();
   if(hits>=5){ S.brachaBuff=1; burstConfetti(20); Sound.win();
-    $('chatLine').textContent='"Kol hakavod, achi!"';
-    $('chatReward').textContent=`🙏 BRACHA — ${hits}/7 wraps. Your next mini-game pays +20%!`;
+    $('chatLine').textContent=rline(SCRIPT.chabad.bracha);
+    $('chatReward').textContent=`🙏 BRACHA (${hits}/7) — your next mini-game pays +20%!`;
   } else {
-    $('chatLine').textContent='"Missed a wrap? Nu, it still counts. It always counts."';
+    $('chatLine').textContent=rline(SCRIPT.chabad.partial);
     $('chatReward').textContent=`${hits}/7 wraps — the bracha needs 5. Tomorrow, achi.`;
   }
   save();
@@ -686,44 +847,44 @@ function tefEnd(hits){
 function soupEat(){
   S.gift.savta=dayIndex(); S.soupLife=1; Sound.buy();
   $('chatAct').classList.add('hidden'); $('chatAct2').classList.add('hidden');
-  $('chatLine').textContent='"Good. GOOD. Now go bump that ball like your saba, alav hashalom."';
+  $('chatLine').textContent=rline(SCRIPT.savta.eat);
   $('chatReward').textContent='🍲 +1 life in your next volleyball game';
   save();
 }
 function soupDecline(){
   S.gift.savta=dayIndex(); S.shekels+=40; S.earnedToday+=40; flyCoin(W/2,H*.45); Sound.cash();
   $('chatAct').classList.add('hidden'); $('chatAct2').classList.add('hidden');
-  $('chatLine').textContent='"You ATE? Fine. FINE. Take ₪40, you clearly need it more than my soup."';
+  $('chatLine').textContent=rline(SCRIPT.savta.decline);
   $('chatReward').textContent='+40₪ guilt money. She is MIFFED.';
   save();
 }
 /* —— Babushka: gossip intel — today's best-paying hustle, seeded like the daily —— */
 function gossipBuy(){
-  const today=dayIndex();
+  const today=dayIndex(), B=SCRIPT.babushka;
   if(S.gossip&&S.gossip.day===today){
-    $('chatReward').textContent=`"${S.gossip.kind==='volley'?'🏐 The net':'🥙 The falafel'} pays +15% today, zolotse. I told you."`;
-    return;
+    $('chatReward').textContent=rline(B.again); return;
   }
-  if(S.shekels<20){ Sound.no(); $('chatReward').textContent='"₪20, zolotse. Even secrets have rent."'; return; }
+  if(S.shekels<20){ Sound.no(); $('chatReward').textContent=rline(B.broke); return; }
   S.shekels-=20;
   const kind=mulberry32(today*7919+3)()<.5?'volley':'falafel';
   S.gossip={day:today,kind}; Sound.cash();
   $('chatAct').textContent='🗣️ WHAT WAS IT AGAIN?';
-  $('chatReward').textContent=`🗣️ "${kind==='volley'?'🏐 Volleyball pays +15% before the streetlights':'🥙 Falafel tips are +15% today — tourists'}, zolotse."`;
+  $('chatReward').textContent=rline(kind==='volley'?B.revealVolley:B.revealFalafel);
   save();
 }
 /* goralot (scratch cards): ₪50 a pull, slight house edge — a fun infinite sink.
    Winnings go to the WALLET only (never earnedToday): no gambling your way
    through the double-up goal. */
 function scratchCard(){
-  if(S.shekels<50){ Sound.no(); $('chatReward').textContent='Come back with ₪50, zolotse.'; return; }
+  const B=SCRIPT.babushka;
+  if(S.shekels<50){ Sound.no(); $('chatReward').textContent=rline(B.broke); return; }
   S.shekels-=50;
   const r=Math.random(), win=r<.45?0:r<.75?30:r<.9?80:250;
-  if(win===0){ Sound.miss(); $('chatReward').textContent='🎟️ Gornisht. "Next one is the winner," she says.'; }
+  if(win===0){ Sound.miss(); $('chatReward').textContent='🎟️ '+rline(B.gornisht); }
   else{ Sound.cash(); flyCoin(W/2,H*.45);
     if(win===250){ burstConfetti(26); Sound.win(); }
     S.shekels+=win;
-    $('chatReward').textContent=win===250?'🎟️💥 JACKPOT +250₪!! The whole street heard her scream.':`🎟️ +${win}₪. Not bad, zolotse.`;
+    $('chatReward').textContent=`🎟️ +${win}₪ — `+rline(win===250?B.jackpot:B.win);
   }
   save();
 }
@@ -746,7 +907,7 @@ function vbStart(){
     over:false, t:0, hittable:false, slow, earn:0, lockout:0,
     pball:1,                       // player-side ball count: first 3 ride a gravity grace ramp
     tut:!S.taught.volley, hold:false };
-  if(G.vb.tut) pop(W/2,groundY-250,'TAP when the ball drops low on YOUR side 👇','#fff',true);
+  if(G.vb.tut) pop(W/2,groundY-250,rline(BARK.vbTeach),'#fff',true);
 }
 function vbTap(){
   const v=G.vb; if(!v||v.over) return;
@@ -758,7 +919,7 @@ function vbTap(){
     pop(v.ball.x,v.ball.y-30,`+${got}₪`,POP_COLS[v.rally%4]); flyCoin(v.ball.x,v.ball.y);
     Sound.bump(v.rally); G.freeze=.05; flash(.12); buzz(20);   // hit-stop: the bump connects
     if(v.rally===5||v.rally===10||v.rally===15){ burstConfetti(14);
-      pop(W/2,groundY-150,`RALLY ×${v.rally} 🔥`,POP_COLS[v.rally%4],true); }
+      pop(W/2,groundY-150,rline(BARK.vbRally),POP_COLS[v.rally%4],true); }
     // send it back to Savta, faster each rally (🍺 slow-mo damps the whole speed)
     const sp=(1+Math.min(1.4,v.rally*.08))*(v.slow?.7:1);
     v.ball.vx=Math.abs(rand(150,210))*sp; v.ball.vy=-rand(360,430)*sp;
@@ -795,7 +956,7 @@ function vbUpdate(dt){
     if(b.y>=groundY-26){ // hit the sand on your side
       b.y=groundY-26;
       v.lives--; Sound.miss(); shake(); buzz(80);
-      pop(b.x,groundY-60,'MISSED! 💢','#ff5d5d',true);
+      pop(b.x,groundY-60,'💢 '+rline(BARK.vbMiss),'#ff5d5d',true);
       if(v.lives<0){ vbEnd(); return; }
       // re-serve from player — also a lob, also rides the grace ramp
       v.pball++;
@@ -833,7 +994,7 @@ function faStart(){
   G.fa={ time:20+extra, pita:{x:W*.66,dir:1}, falafels:[], power:0, pdir:1, combo:0, maxCombo:0,
     hits:0, earn:0, over:false, slow, missRow:0, luckyLeft:upLv('lucky'), bust:false,
     tut:!S.taught.falafel, thrown:false };
-  if(G.fa.tut) pop(W/2,groundY-250,'TAP when the bar hits the 🥙 mark!','#fff',true);
+  if(G.fa.tut) pop(W/2,groundY-250,rline(BARK.faTeach),'#fff',true);
 }
 function faTap(){
   const f=G.fa; if(!f||f.over) return;
@@ -874,7 +1035,7 @@ function faUpdate(dt){
         pop(pita.x,groundY-120,`+${got}₪${f.combo>1?` ×${f.combo}`:''}`,POP_COLS[f.combo%4],f.combo>2);
         flyCoin(pita.x,groundY-80); Sound.cash(); G.freeze=.04; buzz(15);   // hit-stop on the catch
         if(f.combo===3||f.combo===5||f.combo===8){ burstConfetti(12);
-          pop(W/2,groundY-160,`×${f.combo} STREAK! 🔥`,POP_COLS[f.combo%4],true); }
+          pop(W/2,groundY-160,rline(BARK.faCombo),POP_COLS[f.combo%4],true); }
       } else if(f.tut){                       // learning splats are free
         Sound.no(); pop(fl.x,groundY-60,'almost! watch the 🥙 mark','#9fe7d4');
       } else if(f.luckyLeft>0){               // 🍀 lucky charm: this splat is forgiven
@@ -882,10 +1043,10 @@ function faUpdate(dt){
         pop(fl.x,groundY-70,'🍀 combo saved!','#7ee8c7',true);
       } else {
         f.combo=0; f.missRow++; Sound.miss(); shake();
-        pop(fl.x,groundY-50,f.missRow===2?'splat 🫠 — careful!':'splat 🫠','#aab4c8');
+        pop(fl.x,groundY-50,(f.missRow===2?'⚠️ ':'')+rline(BARK.faSplat),'#aab4c8');
         if(f.missRow>=3){                     // three straight splats: she's done with you
           f.bust=true;
-          pop(W/2,groundY-180,'SAVTA TOOK THE PITA BACK 😤','#ff5d5d',true);
+          pop(W/2,groundY-180,rline(BARK.faBust),'#ff5d5d',true);
           faEnd(); return;
         }
       }
@@ -905,14 +1066,14 @@ function faEnd(){
 function showResult(){
   const r=G.result;
   if(r.kind==='volley'){
-    $('rTitle').textContent=G.vb.rally>=8?'BALLER! 🏐':G.vb.rally>=4?'NOT BAD!':'OOF.';
-    $('rSub').textContent=`You kept a ${G.vb.rally}-rally going with Savta.`;
+    const t=rline(BARK.vbRes[G.vb.rally>=8?'hi':G.vb.rally>=4?'mid':'lo']);
+    $('rTitle').textContent=t[0]; $('rSub').textContent=`${t[1]} (${G.vb.rally}-rally)`;
     $('rBestLine').innerHTML=`🏐 Best rally: <b>${S.best.volley}</b>`;
   } else {
-    $('rTitle').textContent=G.fa.bust?'OY VEY. 😤':G.fa.hits>=10?'SHUK LEGEND! 🥙':G.fa.hits>=5?'TASTY!':'MESSY.';
-    $('rSub').textContent=G.fa.bust
-      ? `Three splats in a row — Savta took the pita back. Still landed ${G.fa.hits}.`
-      : `${G.fa.hits} falafels in the pita. The street is fed.`;
+    if(G.fa.bust){ $('rTitle').textContent=rline(BARK.faBustTitle);
+      $('rSub').textContent=`Three on the floor — pita reclaimed. Still landed ${G.fa.hits}.`; }
+    else { const t=rline(BARK.faRes[G.fa.hits>=10?'hi':G.fa.hits>=5?'mid':'lo']);
+      $('rTitle').textContent=t[0]; $('rSub').textContent=`${t[1]} (${G.fa.hits} in the pita)`; }
     $('rBestLine').innerHTML=`🥙 Best batch: <b>${S.best.falafel}</b>`;
   }
   const earned=S.earnedToday;
@@ -921,6 +1082,7 @@ function showResult(){
     ? '🌅 You DOUBLED your money — go HOME to sleep & bank the streak!'
     : `Double-up: ${money(S.earnedToday)} / ${money(dayGoal())} earned today (${Math.round(dayProg()*100)}%)`;
   if(r.best) $('rBestLine').innerHTML+=' &nbsp;🏆 <b style="color:#ffd166">NEW BEST!</b>';
+  $('rGoal').innerHTML+=`<br><span style="color:#aab4c8;font-style:italic">${rline(BARK.selfie)}</span>`;
   if(!S.tutorialDone){ S.tutorialDone=true; save(); }
   syncPassport();
   panel('result');
@@ -940,15 +1102,16 @@ function clearDay(){
   S.shekels+=bonus;
   for(let i=0;i<10;i++) setTimeout(()=>flyCoin(rand(W*.3,W*.7),H*.5),i*60);
   let shieldNote='';
-  if([3,7,14,30,60].includes(S.streak)){ S.shields++;
-    shieldNote=`🛡️ Shabbat Shield earned (×${S.shields}) — it survives one missed day.`; }
+  if(META.milestone[S.streak]){ S.shields++;
+    shieldNote=`🛡️ Shabbat Shield (×${S.shields}) — ${META.milestone[S.streak]}`; }
+  $('ddSub').textContent=tier(META.cleared,S.streak)[1];
   $('ddStreak').textContent=S.streak; $('ddS').textContent=S.streak===1?'':'s';
   $('ddBonus').textContent='+'+money(bonus);
   $('ddWallet').textContent=money(S.shekels);
   newDay();
   $('ddNext').innerHTML=`Tomorrow's double-up: earn <b>${money(dayGoal())}</b>.`
     + (shieldNote?`<br><span style="color:#7ee8c7">${shieldNote}</span>`:'')
-    + (crossUnlocked()&&!owned('mamadmom')?'<br><span style="color:#ffd166">🛡️ MAMAD MOM unlocked — claim her in the shop!</span>':'');
+    + (crossUnlocked()&&!owned('mamadmom')?`<br><span style="color:#ffd166">🛡️ ${META.mamadmom[0]} MAMAD MOM is in the shop.</span>`:'');
   $('ddLadder').textContent=ladderLine();
   syncPassport(); save(); panel('dayDone');
 }
@@ -982,6 +1145,7 @@ function cardShell(ico,art,nm,pk,cntTxt){
 function charCard(c){
   const have=owned(c.id), eq=S.equip===c.id;
   const el=cardShell(c.ico,'char-'+c.id,c.name,c.perk);
+  if(BIOS[c.id]) el.querySelector('.pk').innerHTML+=`<br><span style="color:#8b95ad;font-style:italic">${BIOS[c.id]}</span>`;
   if(have) el.classList.add('owned'); if(eq) el.classList.add('equipped');
   const b=document.createElement('button'); b.className='buy';
   if(eq){ b.textContent='EQUIPPED ✓'; b.classList.add('eq'); b.disabled=true; }
@@ -1072,11 +1236,16 @@ function renderCard(){
 }
 async function shareFlex(){
   const link=`${SITE}?stack=${S.shekels}&day=${S.day}`;
+  const flex=S.streak>=30
+    ? `Day ${S.day} streak in BALAGAN. There is a cake. The cake has my face on it. I'm not even mad.`
+    : S.streak>=7
+    ? `Bituach Leumi: 0. Me: a ${S.streak}-day streak and a folding chair with my name on it. Come get yours, achi.`
+    : `Turned ₪500 into ${money(S.shekels)} before sundown. The makolet knows my name now. Your move.`;
   const txt=CHAL
     ? (S.shekels>CHAL.stack
       ? `🤌 You said ${money(CHAL.stack)}. I'm at ${money(S.shekels)} on day ${S.day}. Your move: ${link}`
       : `They stacked ${money(CHAL.stack)}, I'm at ${money(S.shekels)}. This isn't over: ${link}`)
-    : `🌴 BALAGAN day ${S.day}: turned ₪500 of avtala into ${money(S.shekels)} — ${S.streak}🔥 streak. Double your money in Tel Aviv: ${link}`;
+    : `🌴 BALAGAN — ${flex} ${link}`;
   try{
     let shared=false;
     try{
@@ -1561,7 +1730,7 @@ function hud(){
     cx.fillStyle=done?'#7ee8c7':'#ffd166';cx.fillText(ht,W/2,hy);
     // next-best-action: the WHY, quantified, always on screen
     if(dayProg()<1){ const gap=dayGoal()-S.earnedToday;
-      const at=`💡 ${money(gap)} to go · ~${Math.max(1,Math.ceil(gap/150))} good runs`;
+      const at=`💡 ${money(gap)} to go — ${META.nudge[Math.floor(G.t/4)%META.nudge.length]}`;
       const aw=cx.measureText(at).width+22;
       cx.fillStyle='rgba(13,17,32,.7)';rr(W/2-aw/2,hy+19,aw,26,13);
       cx.fillStyle='#9fe7d4';cx.fillText(at,W/2,hy+32); }
@@ -1586,9 +1755,9 @@ function loginReward(){
   S.login.last=d;
   const idx=(S.login.run-1)%7, gift=LOGIN_GIFTS[idx];
   if(gift==='shield'){ S.shields++;
-    G.loginPop=`📅 Day ${idx+1} gift: 🛡️ SHABBAT SHIELD!`; }
+    G.loginPop=`📅 Day ${idx+1}: 🛡️ SHABBAT SHIELD! ${rline(META.login)}`; }
   else{ S.shekels+=gift;        // wallet-only: gifts don't clear your double-up
-    G.loginPop=`📅 Day ${idx+1} gift: +${gift}₪`; }
+    G.loginPop=`📅 +${gift}₪ — ${rline(META.login)}`; }
   save();
 }
 function startDay(){
@@ -1610,11 +1779,11 @@ function startDay(){
   G.state='map';                 // the map is home base: where am I, why am I hustling
   if(fresh){                     // morning mission card: the day's WHY, up front
     $('mDay').textContent='DAY '+S.day;
-    $('mGoal').innerHTML=`Double up: earn <b style="color:#ffd166">${money(dayGoal())}</b> before sundown 🌅`;
+    const m=tier(META.morning,S.day);
+    $('mGoal').innerHTML=m[1].replace('₪{G}',`<b style="color:#ffd166">${money(dayGoal())}</b>`);
     const h=todaysHustle();
     $('mHustle').innerHTML=`🎯 Today's Hustle: ${h.desc} <b>(+${HUSTLE_REWARD}₪)</b>`;
-    const nx=[3,7,14,30,60].find(m=>m>S.streak);
-    $('mWhy').textContent=nx?`🔥 streak ${S.streak} — ${nx-S.streak} more day${nx-S.streak===1?'':'s'} to a Shabbat Shield 🛡️`:'';
+    $('mWhy').textContent=m[2];
     panel('morning');
   } else panel(null);
 }
