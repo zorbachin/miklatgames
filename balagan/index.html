@@ -312,13 +312,16 @@ const DEF={ shekels:500, day:1, dayStart:500, earnedToday:0, streak:0,
   shields:0, lastClearedDay:0, tutorialDone:false,
   hustle:{day:0,done:false}, hustleTotal:0,
   login:{last:0,run:0}, met:{}, gift:{}, taught:{},
-  bracha:0, brachaBuff:0, soupLife:0, gossip:null,
+  bracha:0, brachaBuff:0, soupLife:0, gossip:null, plays:{},
   best:{volley:0,falafel:0,daysCleared:0,topWallet:500}, lastSeen:0 };
+// medium baseline that creeps up the more you've played a game (caps ~+55%)
+function diff(game){ return 1+Math.min(.55,(S.plays[game]||0)*.045); }
+function bumpPlays(game){ S.plays[game]=(S.plays[game]||0)+1; }
 let S=load();
 function load(){
   try{ const s=JSON.parse(localStorage.getItem('bg_save')); if(s&&typeof s.shekels==='number'){
     return Object.assign({},DEF,s,{best:Object.assign({},DEF.best,s.best),
-      items:s.items||{},ups:s.ups||{},chars:s.chars||['avtali'],
+      items:s.items||{},ups:s.ups||{},chars:s.chars||['avtali'],plays:s.plays||{},
       login:s.login||{last:0,run:0},met:s.met||{},gift:s.gift||{},taught:s.taught||{}}); }
   }catch(e){}
   return JSON.parse(JSON.stringify(DEF));
@@ -540,12 +543,9 @@ function onDown(sx,sy){
   else if(G.state==='falafel') faTap();
 }
 function onMove(sx){
-  if(G.state==='hub'&&ptDown){ const dx=sx-dragX;
-    if(Math.abs(sx-ptDown.sx)>8) ptMoved=true;
-    G.camX=clamp(G.camX-dx,0,Math.max(0,WORLD_W-W)); dragX=sx;
-    // drag scrolls the world; player walks toward the drag too
-    G.player.x=clamp(G.player.x, G.camX+60, G.camX+W-60);
-  }
+  // top-down: no drag-scroll (it fought the camera-follow). A drag just cancels
+  // the tap; the camera always follows the player.
+  if(G.state==='hub'&&ptDown&&Math.abs(sx-ptDown.sx)>10) ptMoved=true;
 }
 let lastTapY=0;
 function onUp(sx){
@@ -902,17 +902,16 @@ function vbStart(){
   let slow=(S.items.goldstar||0)>0?1:0; if(slow){ S.items.goldstar--; used.push('🍺 slow-mo'); }
   if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; used.push('🙏 bracha +20%'); } else G.runBracha=0;
   if(used.length){ save(); pop(W/2,groundY-210,used.join('  '),'#8ad2ff',true); }
-  // opening serve is a slow lob (~1.45s airborne) — a human can actually react
-  G.vb={ ball:{x:W*.3,y:groundY-300,vx:30,vy:-520}, side:'player', rally:0, lives, maxLives:Math.max(1,lives),
-    over:false, t:0, hittable:false, slow, earn:0, lockout:0,
-    pball:1,                       // player-side ball count: first 3 ride a gravity grace ramp
-    tut:!S.taught.volley, hold:false };
+  // a high, slow lob with lots of hangtime — and a landing-ring telegraph so it's
+  // obvious WHERE and WHEN to tap. Medium baseline; creeps up the more you play.
+  G.vb={ ball:{x:W*.3,y:groundY-300,vx:30,vy:-560}, side:'player', rally:0, lives, maxLives:Math.max(1,lives),
+    over:false, t:0, hittable:false, slow, earn:0, df:diff('volley'),
+    pball:1, landX:W*.3, landT:9, tut:!S.taught.volley, hold:false };
   if(G.vb.tut) pop(W/2,groundY-250,rline(BARK.vbTeach),'#fff',true);
 }
 function vbTap(){
   const v=G.vb; if(!v||v.over) return;
   if(v.hold){ v.hold=false; v.tut=false; S.taught.volley=1; save(); }   // tutorial freeze: this tap connects
-  else if(G.t<v.lockout) return;   // brief lockout after a whiff — no mashing through the window
   if(v.hittable){
     v.rally++;
     const got=payout(8+v.rally*2, 'volley'); v.earn+=got;
@@ -920,63 +919,50 @@ function vbTap(){
     Sound.bump(v.rally); G.freeze=.05; flash(.12); buzz(20);   // hit-stop: the bump connects
     if(v.rally===5||v.rally===10||v.rally===15){ burstConfetti(14);
       pop(W/2,groundY-150,rline(BARK.vbRally),POP_COLS[v.rally%4],true); }
-    // send it back to Savta, faster each rally (🍺 slow-mo damps the whole speed)
-    const sp=(1+Math.min(1.4,v.rally*.08))*(v.slow?.7:1);
-    v.ball.vx=Math.abs(rand(150,210))*sp; v.ball.vy=-rand(360,430)*sp;
+    // back to Savta, faster each rally and a touch faster every replay
+    const sp=v.df*(1+Math.min(1.0,v.rally*.07))*(v.slow?.7:1);
+    v.ball.vx=Math.abs(rand(150,200))*sp; v.ball.vy=-rand(380,440)*sp;
     v.side='opp'; v.hittable=false;
-  } else { // early/whiff tap — no damage; a short lockout only once you're warmed up
-    if(v.rally>=2) v.lockout=G.t+.15;
-    pop(W*.18,groundY-180,'too early!','#aab4c8'); Sound.no();
-  }
+  } else { pop(W*.18,groundY-180,'too early!','#aab4c8'); Sound.no(); }   // whiff: no penalty, just timing
 }
 function vbUpdate(dt){
   const v=G.vb; if(!v||v.over) return;
   if(v.hold) return;                       // tutorial freeze-frame: world waits for the tap
-  if(v.tut) dt*=.35;                       // first-ever ball runs in slow motion
+  if(v.tut) dt*=.4;                        // first-ever ball runs in slow motion
   v.t+=dt;
-  // grace ramp: the first 3 player-side balls fall lighter (×.72/.85/1)
-  const grace=v.pball<=1?.72:v.pball===2?.85:1;
-  const g=2000*(v.slow?.78:1)*grace;
-  const b=v.ball, cxn=W*.5;
+  const grace=v.pball<=1?.78:v.pball===2?.9:1;     // first couple of balls float gently
+  const g=1250*(v.slow?.78:1)*grace;
+  const b=v.ball, cxn=W*.5, floorY=groundY-26;
   b.vy+=g*dt; b.x+=b.vx*dt; b.y+=b.vy*dt;
-  // walls
   if(b.x<W*.08){ b.x=W*.08; b.vx=Math.abs(b.vx); }
   if(b.x>W*.92){ b.x=W*.92; b.vx=-Math.abs(b.vx); }
+  // predict the landing spot + time-to-land (the telegraph the draw uses)
+  const c=b.y-floorY, disc=b.vy*b.vy-2*g*c;
+  v.landT=disc>0?(-b.vy+Math.sqrt(disc))/g:9; v.landX=b.x+b.vx*v.landT;
   if(v.side==='player'){
-    // hittable when descending into the lower zone on the player's half;
-    // generous at rally 0 (~480ms), tight by rally 8 (~100ms): wins get earned
-    const zone=240-Math.min(120,v.rally*15);
+    // hittable late in the descent — generous window; the ring shows the moment
+    const zone=(240-Math.min(80,v.rally*7))/Math.max(1,(v.df*.9));
     const was=v.hittable;
-    v.hittable = b.vy>0 && b.y>groundY-zone && b.x<cxn+40;
-    if(v.tut && v.hittable && !was){       // tutorial: freeze at the perfect moment
-      v.hold=true;
-      pop(b.x,b.y-60,'👇 TAP NOW!','#ffd166',true);
-      return;
-    }
-    if(b.y>=groundY-26){ // hit the sand on your side
-      b.y=groundY-26;
-      v.lives--; Sound.miss(); shake(); buzz(80);
+    v.hittable = b.vy>0 && b.y>floorY-zone && b.x<cxn+40;
+    if(v.hittable && !was){ if(v.tut){ v.hold=true; pop(b.x,b.y-60,'👇 TAP NOW!','#ffd166',true); return; }
+      Sound.beep(880,.05,'square',.03); }   // a tick the instant it's tappable
+    if(b.y>=floorY){
+      b.y=floorY; v.lives--; Sound.miss(); shake(); buzz(80);
       pop(b.x,groundY-60,'💢 '+rline(BARK.vbMiss),'#ff5d5d',true);
       if(v.lives<0){ vbEnd(); return; }
-      // re-serve from player — also a lob, also rides the grace ramp
-      v.pball++;
-      b.x=W*.3; b.y=groundY-280; b.vx=rand(20,60); b.vy=-rand(460,540); v.hittable=false;
+      v.pball++; b.x=W*.3; b.y=groundY-300; b.vx=rand(20,60); b.vy=-rand(500,560); v.hittable=false;
     }
   } else { // opponent's half — Savta auto-returns near the top of the arc
     v.hittable=false;
     if(b.x>cxn && b.vy>0 && b.y>groundY-300){
-      // Savta bumps it back toward the player
-      const sp=(1+Math.min(1.4,v.rally*.08))*(v.slow?.7:1);
-      b.vx=-rand(150,210)*sp; b.vy=-rand(330,400)*sp; v.side='player'; v.pball++;
-      Sound.bump();
+      const sp=v.df*(1+Math.min(1.0,v.rally*.07))*(v.slow?.7:1);
+      b.vx=-rand(150,200)*sp; b.vy=-rand(360,420)*sp; v.side='player'; v.pball++; Sound.bump();
     }
-    if(b.y>=groundY-26){ // shouldn't usually happen — treat as a point for you
-      b.y=groundY-26; b.x=W*.3; b.vx=rand(20,60); b.vy=-rand(460,540); v.side='player'; v.pball++;
-    }
+    if(b.y>=floorY){ b.y=floorY; b.x=W*.3; b.vx=rand(20,60); b.vy=-rand(500,560); v.side='player'; v.pball++; }
   }
 }
 function vbEnd(){
-  G.vb.over=true;
+  G.vb.over=true; bumpPlays('volley');
   if(G.vb.rally>S.best.volley) S.best.volley=G.vb.rally, G.result.best=true; else G.result.best=false;
   G.result.kind='volley'; G.result.rally=G.vb.rally;
   checkHustle('vol_rally',G.vb.rally);
@@ -1021,7 +1007,7 @@ function faUpdate(dt){
   f.power+=f.pdir*dt*1.5*(f.tut?.5:1)*(1+Math.min(.5,f.combo*.06));
   if(f.power>1){ f.power=1; f.pdir=-1; } if(f.power<0){ f.power=0; f.pdir=1; }
   // pita drifts
-  const pita=f.pita; pita.x+=pita.dir*90*dt;
+  const pita=f.pita; pita.x+=pita.dir*(78*diff('falafel'))*dt;   // pita drifts faster the more you play
   if(pita.x>W*.86){ pita.x=W*.86; pita.dir=-1; } if(pita.x<W*.46){ pita.x=W*.46; pita.dir=1; }
   const g=1700;
   for(const fl of f.falafels){
@@ -1055,7 +1041,7 @@ function faUpdate(dt){
   f.falafels=f.falafels.filter(fl=>!fl.done&&fl.x<W+60);
 }
 function faEnd(){
-  G.fa.over=true;
+  G.fa.over=true; bumpPlays('falafel');
   if(G.fa.hits>S.best.falafel) S.best.falafel=G.fa.hits, G.result.best=true; else G.result.best=false;
   G.result.kind='falafel'; G.result.hits=G.fa.hits;
   checkHustle('fal_batch',G.fa.hits); checkHustle('combo',G.fa.maxCombo);
@@ -1305,9 +1291,10 @@ function hubUpdate(dt){
     }
   } else p.walk=0;
   p.x=clamp(p.x,60,WORLD_W-60); p.d=clamp(p.d,0,1);
-  // camera eases to keep the player roughly centered
+  // camera eases to keep the player roughly centered, then SNAPS (no post-stop drift)
   const want=clamp(p.x-W*.42,0,Math.max(0,WORLD_W-W));
-  G.camX+=(want-G.camX)*Math.min(1,dt*6);
+  G.camX+=(want-G.camX)*Math.min(1,dt*7);
+  if(Math.abs(want-G.camX)<.5) G.camX=want;
   // nearest station prompt — only when up by the storefront line
   G.near=STATIONS.find(s=>Math.abs(s.x-p.x)<90&&p.d<.38)||null;
   G.prompt=clamp(G.prompt+(G.near?dt*6:-dt*6),0,1);
@@ -1501,17 +1488,49 @@ function drawTown(){
     drawEmoji('☀️',W*.8,H*.08,34);
     skyline(G.camX*.25,'#cfe0f0',t.top*.5,170);
   }
-  // the plaza: warm boardwalk receding downward; rows pack tighter toward the back
-  let g=SKYG.get('plaza');
-  if(!g){ g=cx.createLinearGradient(0,t.top,0,H);
-    g.addColorStop(0,'#d9b97e');g.addColorStop(1,'#e9cf9a');SKYG.set('plaza',g); }
-  cx.fillStyle=g;cx.fillRect(0,t.top,W,H-t.top);
-  cx.fillStyle='rgba(0,0,0,.16)';cx.fillRect(0,t.top,W,5);   // back curb
-  cx.strokeStyle='rgba(120,80,40,.22)';
-  for(let i=1;i<=9;i++){ const fy=t.top+Math.pow(i/9,1.5)*(H-t.top);
-    cx.lineWidth=1+i*.28; cx.beginPath();cx.moveTo(0,fy);cx.lineTo(W,fy);cx.stroke(); }
-  for(let x=-((G.camX)%84);x<W;x+=84){ cx.lineWidth=2;
-    cx.beginPath();cx.moveTo(x,t.top);cx.lineTo(x+(x-W/2)*.10,H);cx.stroke(); }   // joints fan slightly
+  // ground, layered for depth: a thin sea sliver, a sand strip with a wavy edge,
+  // then the wooden boardwalk in perspective.
+  const sandTop=t.top, sandBot=t.top+Math.round((H-t.top)*.30), seaH=8;
+  // sea sliver tucked under the horizon
+  let sea=SKYG.get('sea'); if(!sea){ sea=cx.createLinearGradient(0,sandTop-seaH,0,sandTop+2);
+    sea.addColorStop(0,'#3aa7d8');sea.addColorStop(1,'#7fd0e6');SKYG.set('sea',sea); }
+  cx.fillStyle=sea;cx.fillRect(0,sandTop-seaH,W,seaH+2);
+  for(let x=-((G.camX*.5)%30);x<W;x+=30){ cx.fillStyle='rgba(255,255,255,.5)';
+    cx.fillRect(x,sandTop-3+Math.sin(x*.3+G.t)*1.5,14,2); }       // little wave caps
+  // sand
+  let sand=SKYG.get('sand'); if(!sand){ sand=cx.createLinearGradient(0,sandTop,0,sandBot);
+    sand.addColorStop(0,'#f0dcab');sand.addColorStop(1,'#e3c486');SKYG.set('sand',sand); }
+  cx.fillStyle=sand;cx.fillRect(0,sandTop,W,sandBot-sandTop);
+  cx.fillStyle='#e3c486';                                          // wavy sand→boardwalk shoreline
+  cx.beginPath();cx.moveTo(0,sandBot);
+  for(let x=0;x<=W;x+=24) cx.lineTo(x,sandBot+Math.sin(x*.05+G.camX*.01)*5);
+  cx.lineTo(W,H);cx.lineTo(0,H);cx.fill();
+  // speckles on the sand
+  cx.fillStyle='rgba(150,110,60,.18)';
+  for(let i=0;i<26;i++){ const sx=((i*137.5-G.camX*.6)%W+W)%W, sy=sandTop+((i*53)%(sandBot-sandTop));
+    cx.fillRect(sx,sy,2,2); }
+  // boardwalk
+  let wood=SKYG.get('wood'); if(!wood){ wood=cx.createLinearGradient(0,sandBot,0,H);
+    wood.addColorStop(0,'#caa26a');wood.addColorStop(1,'#b07f48');SKYG.set('wood',wood); }
+  cx.fillStyle=wood;cx.fillRect(0,sandBot,W,H-sandBot);
+  // plank seams in perspective (fan out toward the viewer)
+  cx.strokeStyle='rgba(90,60,30,.28)';cx.lineWidth=2;
+  for(let x=-((G.camX)%96);x<W+96;x+=96){
+    cx.beginPath();cx.moveTo(x,sandBot);cx.lineTo(x+(x-W/2)*.22,H);cx.stroke(); }
+  // a couple of cross-plank highlights for grain
+  cx.strokeStyle='rgba(255,240,210,.12)';cx.lineWidth=3;
+  for(let i=1;i<=3;i++){ const fy=sandBot+Math.pow(i/3,1.6)*(H-sandBot);
+    cx.beginPath();cx.moveTo(0,fy);cx.lineTo(W,fy);cx.stroke(); }
+  // promenade railing along the shoreline (posts + rail)
+  cx.strokeStyle='rgba(40,80,90,.55)';cx.lineWidth=3;
+  cx.beginPath();cx.moveTo(0,sandBot-4);cx.lineTo(W,sandBot-4);cx.stroke();
+  for(let x=-((G.camX*1)%70);x<W;x+=70){ cx.lineWidth=4;cx.strokeStyle='rgba(40,80,90,.5)';
+    cx.beginPath();cx.moveTo(x,sandBot-14);cx.lineTo(x,sandBot+2);cx.stroke(); }
+  // long palm shadows raking across the boardwalk
+  cx.strokeStyle='rgba(60,50,30,.08)';cx.lineWidth=26;
+  for(let i=0;i<5;i++){ const px=((i*520-G.camX*.7)%(WORLD_W)+WORLD_W)%WORLD_W - G.camX*0;
+    const sx=((i*430-G.camX)%(W+200)); cx.beginPath();
+    cx.moveTo(sx,sandBot);cx.lineTo(sx+70,H);cx.stroke(); }
 }
 /* street furniture scattered across the plaza — drawn in depth order with the
    player. Clustered by zone so the beach end and the shuk end read differently
@@ -1628,15 +1647,24 @@ function drawVolley(){
   drawPlayer(W*.18,groundY,{dir:1,walk:1});
   if(artOk('savta-nu')) drawArt('savta-nu',W*.84,groundY-44,86);
   else { cx.save();cx.translate(W*.84,groundY-30);cx.scale(-1,1);drawEmoji('🧓',0,0,52);cx.restore(); }
-  // ball + hittable ring
   const b=v.ball;
-  if(v.hittable){ const pr=v.hold?1+.18*Math.sin(G.t*6):1;   // tutorial freeze: ring breathes big
-    cx.strokeStyle=`rgba(255,209,102,${.5+.4*Math.sin(G.t*9)})`;cx.lineWidth=v.hold?6:4;
-    cx.beginPath();cx.arc(b.x,b.y,38*pr,0,7);cx.stroke();
-    drawEmoji('👆',b.x,b.y+54,26); }
+  // landing-spot telegraph: a ring on the sand where the ball will come down,
+  // shrinking as it arrives — shows WHERE and WHEN, the clearest possible cue
+  if(v.side==='player' && b.vx<W && v.landT<1.4 && v.landX<W*.5+30){
+    const r=20+v.landT*70, a=clamp(1-v.landT/1.4,.2,1);
+    cx.strokeStyle=`rgba(255,209,102,${a})`;cx.lineWidth=4;
+    cx.beginPath();cx.ellipse(v.landX,groundY-18,r,r*.34,0,0,7);cx.stroke();
+    cx.fillStyle=`rgba(255,209,102,${a*.18})`;cx.beginPath();cx.ellipse(v.landX,groundY-18,r,r*.34,0,0,7);cx.fill();
+  }
+  // big "TAP!" the instant it's hittable
+  if(v.hittable){ const pr=1+.2*Math.sin(G.t*10);
+    cx.strokeStyle=`rgba(126,232,199,${.6+.4*Math.sin(G.t*11)})`;cx.lineWidth=v.hold?7:5;
+    cx.beginPath();cx.arc(b.x,b.y,40*pr,0,7);cx.stroke();
+    cx.font='900 26px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+    cx.lineWidth=6;cx.strokeStyle='rgba(15,20,40,.85)';cx.strokeText('TAP!',b.x,b.y-58);
+    cx.fillStyle='#7ee8c7';cx.fillText('TAP!',b.x,b.y-58); }
   cx.drawImage(glow('rgba(255,255,255,.4)',26),b.x-26,b.y-26);
   drawEmoji('🏐',b.x,b.y,40);
-  // hud bits
   vbHud();
   if(v.over) return;
 }
@@ -1647,11 +1675,10 @@ function vbHud(){
   // lives
   let lifeStr=''; for(let i=0;i<Math.max(0,v.lives+1);i++) lifeStr+='❤️';
   cx.font='18px sans-serif';cx.fillText(lifeStr||'—',W/2,SAFE_TOP+60);
-  if(v.rally===0){ cx.font='800 14px sans-serif';
+  if(v.rally===0&&!v.hold){ cx.font='800 14px sans-serif';
     cx.lineWidth=4;cx.strokeStyle='rgba(15,20,40,.85)';
-    cx.strokeText('TAP when the ball is low & the ring glows',W/2,groundY-180);
-    cx.fillStyle='#fff';
-    cx.fillText('TAP when the ball is low & the ring glows',W/2,groundY-180); }
+    const m='Tap the moment the ball drops into the gold ring';
+    cx.strokeText(m,W/2,groundY-180); cx.fillStyle='#fff'; cx.fillText(m,W/2,groundY-180); }
 }
 function drawFalafel(){
   const f=G.fa; if(!f) return;
