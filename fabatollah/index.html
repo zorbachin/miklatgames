@@ -16,8 +16,8 @@
 <meta property="og:image:height" content="800">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://miklatgames.fun/fabatollah/art/og.png">
-<link rel="icon" type="image/svg+xml" href="icon.svg">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" type="image/webp" href="art/icon.webp">
+<link rel="apple-touch-icon" href="art/icon.webp">
 <title>FABATOLLAH 🏳️‍🌈 — Pride makeover</title>
 <style>
   :root{
@@ -136,6 +136,17 @@
   </header>
 
   <p class="tag" data-i18n="tag">It's Pride Month. Give the Supreme Leader the glow-up he deserves — dress him, paint him, bedazzle him.</p>
+
+  <a href="dresscode/" id="dccta" style="display:flex;align-items:center;gap:11px;margin:0 16px 6px;padding:11px 14px;
+    background:linear-gradient(180deg,#241a44,#1a1233);border:1px solid var(--c-border-strong);border-radius:14px;
+    text-decoration:none;color:var(--c-ink);box-shadow:0 0 18px rgba(255,93,177,.2);">
+    <img src="art/icon.webp" alt="" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--c-pink);flex:0 0 auto;">
+    <span style="flex:1;line-height:1.25">
+      <b style="display:block;font-size:14.5px" data-i18n="dcCta">⏱️ Dress Code Challenge</b>
+      <span style="font-size:12px;color:var(--c-dim)" data-i18n="dcCtaSub">Dress him for the occasion — beat the clock!</span>
+    </span>
+    <span style="font-size:22px;color:var(--c-pink)">›</span>
+  </a>
 
   <div class="stage">
     <svg id="doll" viewBox="0 0 360 700" aria-label="Dress-up character">
@@ -754,6 +765,7 @@ function burst(){
 /* ============================ i18n ============================ */
 const I18N={
  en:{dir:'ltr',arcade:'Arcade',sub:'Pride makeover salon 🏳️‍🌈',
+  dcCta:'⏱️ Dress Code Challenge',dcCtaSub:'Dress him for the occasion — beat the clock!',
    tag:"It's Pride Month. Give the Supreme Leader the glow-up he deserves — dress him, paint him, bedazzle him.",
    meter:'Fabulous meter',surprise:'Surprise me',share:'Share',choose:'Pick a look',
    tiers:['Stern Cleric 😐','Loosening up 💅','Getting cute ✨','Fabulous 💖','Glamorous 🌈','Iconic 👑','SUPREME DIVA 🏆'],
@@ -762,6 +774,7 @@ const I18N={
    shareTxt:'💅🌈 I gave the Ayatollah a Pride makeover — meet FABATOLLAH. Build your own, free in the shelter: https://miklatgames.fun/fabatollah/',
    copied:'✅ Copied'},
  he:{dir:'rtl',arcade:'ארקייד',sub:'סלון מייקאובר לגאווה 🏳️‍🌈',
+  dcCta:'⏱️ אתגר הדרס-קוד',dcCtaSub:'תלבישו אותו לאירוע — נצחו את השעון!',
    tag:'חודש הגאווה כאן. תנו למנהיג העליון את השדרוג שמגיע לו — תלבישו, תאפרו, תנצנצו.',
    meter:'מד פאבולוסיות',surprise:'הפתיעו אותי',share:'שיתוף',choose:'בחרו לוק',
    tiers:['איש דת קודר 😐','מתחיל להשתחרר 💅','נהיה חמוד ✨','פאבולוס 💖','זוהר 🌈','אייקוני 👑','דיווה עליונה 🏆'],
