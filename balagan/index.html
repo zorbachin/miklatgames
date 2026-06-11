@@ -135,6 +135,7 @@
   <div class="logo" id="chatName" style="font-size:clamp(22px,6vw,32px);"></div>
   <div class="tag" id="chatLine" style="margin-top:14px;font-size:clamp(15px,4.2vw,19px);color:#f4ecdd;"></div>
   <div class="best" id="chatReward" style="color:#7ee8c7;"></div>
+  <button class="btn teal hidden" id="chatScratch">🎟️ GORAL −50₪</button>
   <button class="btn" id="chatBtn">OK 🤙</button>
 </div>
 
@@ -251,7 +252,7 @@ function glow(col,size){
 /* hand-drawn sprites — graceful fallback to emoji while loading / if absent.
    Drop matching PNGs into balagan/art/ and the world upgrades itself. */
 const ART={};
-for(const n of ['bg-city','stand-falafel','net-volley','shop-front','home',
+for(const n of ['bg-city','stand-falafel','net-volley','shop-front','home','kiosk',
   'char-avtali','char-savta','char-chabad','char-bro','char-hightech']){
   const i=new Image(); i.src='art/'+n+'.png'; ART[n]=i;
 }
@@ -284,6 +285,10 @@ const UPS=[
   {id:'walk',  ico:'👟', name:'Faster Walk',  base:150, max:4, step:30,  perk:lv=>`Stroll +${lv*30} speed (Lv ${lv}/4)`},
   {id:'lucky', ico:'🍀', name:'Lucky Charm',  base:300, max:3, step:1,
    perk:lv=>lv?`${lv} splat${lv===1?'':'s'}/run won't break your combo (Lv ${lv}/3)`:'Splats forgive your falafel combo (Lv 0/3)'},
+  // the endgame sink: nothing is more Tel Aviv than the dream of owning property.
+  // effectively infinite (×2.2/level) — the economy always has somewhere to go.
+  {id:'apt', ico:'🏠', name:'Tel Aviv Apt', base:8000, growth:2.2, max:99,
+   perk:lv=>lv?`${lv} apartment${lv===1?'':'s'} owned · +${lv*5}% earnings. Landlord!`:'Buy property → +5% earnings each. Rent is theft.'},
 ];
 
 /* =================== save / economy =================== */
@@ -291,12 +296,14 @@ const DEF={ shekels:500, day:1, dayStart:500, earnedToday:0, streak:0,
   chars:['avtali'], equip:'avtali', items:{}, ups:{}, lastClaim:0,
   shields:0, lastClearedDay:0, tutorialDone:false,
   hustle:{day:0,done:false}, hustleTotal:0,
+  login:{last:0,run:0}, met:{}, gift:{},
   best:{volley:0,falafel:0,daysCleared:0,topWallet:500}, lastSeen:0 };
 let S=load();
 function load(){
   try{ const s=JSON.parse(localStorage.getItem('bg_save')); if(s&&typeof s.shekels==='number'){
     return Object.assign({},DEF,s,{best:Object.assign({},DEF.best,s.best),
-      items:s.items||{},ups:s.ups||{},chars:s.chars||['avtali']}); }
+      items:s.items||{},ups:s.ups||{},chars:s.chars||['avtali'],
+      login:s.login||{last:0,run:0},met:s.met||{},gift:s.gift||{}}); }
   }catch(e){}
   return JSON.parse(JSON.stringify(DEF));
 }
@@ -310,12 +317,13 @@ function ownedPct(){ const total=CHARS.length+ITEMS.length+UPS.length;
 }
 function equipped(){ return CHARS.find(c=>c.id===S.equip)||CHARS[0]; }
 function upLv(id){ return S.ups[id]||0; }
-function upCost(u){ return Math.round(u.base*Math.pow(1.8,upLv(u.id))); }
-// total earnings multiplier from char + upgrades
+function upCost(u){ return Math.round(u.base*Math.pow(u.growth||1.8,upLv(u.id))); }
+// total earnings multiplier from char + upgrades + property
 function earnMult(kind){
   let m=1; const c=equipped();
   if(c.mult){ if(c.mult.all) m+=c.mult.all; if(c.mult[kind]) m+=c.mult[kind]; }
   m+=upLv('tips')*UPS[0].step;
+  m+=upLv('apt')*.05;
   return m;
 }
 function payout(raw,kind){ const v=Math.round(raw*earnMult(kind));
@@ -416,6 +424,7 @@ const STATIONS=[
   {id:'falafel', x:1020, ico:'🥙', art:'stand-falafel', label:'FALAFEL',   sub:'toss for tips'},
   {id:'chat_chabad',x:1450,ico:'🧔',label:'CHABAD',     sub:'tefillin?',   npc:true},
   {id:'shop',    x:1900, ico:'🛍️', art:'shop-front',    label:'SHUK SHOP', sub:'spend your shekels'},
+  {id:'kiosk',   x:2180, ico:'👵', art:'kiosk',         label:'KIOSK',     sub:'gossip & goralot', npc:true},
   {id:'volley',  x:2480, ico:'🏐', art:'net-volley',    label:'VOLLEYBALL',sub:'bump for cash'},
 ];
 const G={
@@ -493,6 +502,7 @@ function enterStation(st){
   if(st.id==='volley') return vbStart();
   if(st.id==='chat_savta') return openChat('savta');
   if(st.id==='chat_chabad') return openChat('chabad');
+  if(st.id==='kiosk') return openChat('babushka');
 }
 function goHome(){
   Sound.enter();
@@ -502,11 +512,14 @@ function goHome(){
     pop(G.player.x-G.camX,groundY-160,'🏐 rally · 🥙 toss','#9fe7d4'); }
 }
 
-/* =================== chat / NPCs — reactive to streak, progress & your skin =================== */
-const NPC={ savta:{ico:'🧓',name:'Savta Mizrahi'}, chabad:{ico:'🧔',name:'Chabad Guy'} };
+/* =================== chat / NPCs — memory, gossip & reactive lines =================== */
+const NPC={ savta:{ico:'🧓',name:'Savta Mizrahi'}, chabad:{ico:'🧔',name:'Chabad Guy'},
+  babushka:{ico:'👵',name:'Kiosk Babushka'} };
 function chatLines(who){
-  const eq=S.equip, prog=dayProg(), L=[];
+  const eq=S.equip, prog=dayProg(), n=S.met[who]||0, L=[];
   if(who==='savta'){
+    if(n<=1) L.push('So YOU\'RE the new one on the street. I\'m watching you, motek. Eat something.');
+    if(n>=10) L.push(`${n} visits. You're basically family now. Sit. SIT. There's cake.`);
     if(S.streak>=3) L.push(`${S.streak} days you doubled it?? Who ARE you. I told the whole makolet.`);
     if(prog>=1) L.push('NU! You doubled it already! Go home, sleep — don\'t spend it all on kishkush.');
     else if(prog>=.4) L.push('Halfway and the sun\'s still up. In my day we were faster… but not bad, motek.');
@@ -514,32 +527,58 @@ function chatLines(who){
     else if(eq==='bro') L.push('A beach bum?? Put on a shirt and go make money like a mensch.');
     else if(eq==='hightech') L.push('Exit, shmexit. Call your mother. Then double your money.');
     else if(eq==='mamadmom') L.push('Now THAT is a woman who runs the shelter. Proud of you, motek. 🛡️');
+    if(upLv('apt')>0) L.push(`A LANDLORD in the family! Wait till I tell the mahjong table. 🏠`);
     L.push('You look thin. Take ₪40 — don\'t tell your mother. 🤍');
     L.push('The shuk has new looks. Stop dressing like a student.');
-  } else {
+  } else if(who==='chabad'){
     if(eq==='chabad') L.push('Achi! Look at you — a real mensch. Free ₪60 every morning, enjoy. 🙏');
     else L.push('Achi, did you lay tefillin today? Buy the Chabad Guy skin — free ₪60 every morning. 🙏');
     if(S.streak>=7) L.push('Seven days strong — that is a Shabbat kind of dedication. 🕯️');
     L.push('A little tzedakah goes a long way. Here — ₪30, pass it on. 🙏');
     L.push('Shabbat is coming. Make your shekels now, rest later.');
+  } else { // kiosk babushka — the street's social web, and the goralot dealer
+    if(n<=1) L.push('New face. I know everything on this street, zolotse. EVERYTHING. Ask Savta.');
+    L.push('Savta says you owe her a visit. Pay before Shabbat or I hear about it.');
+    L.push('The Chabadnik? Heart of gold. Took my last cigarette though. For "havdalah," he said.');
+    if(S.streak>=3) L.push(`${S.streak}-day streak? The whole kiosk line is talking about you.`);
+    if(eq==='hightech') L.push('Hi-tech, shmy-tech. My nephew did "crypto." Now he sleeps on my couch.');
+    L.push('Feeling lucky? A goral is ₪50. Sometimes you win big. Sometimes… you fund my pension. 🎟️');
   }
   return L;
 }
 function openChat(who){
   const c=NPC[who]; if(!c) return;
   Sound.chat(); G.chatWho=who;
+  S.met[who]=(S.met[who]||0)+1;
   $('chatIco').textContent=c.ico; $('chatName').textContent=c.name;
   const L=chatLines(who); let line=L[irand(0,L.length-1)], reward='';
   // gifts are once per real day per NPC — a reason to visit, not a faucet to farm
-  const today=dayIndex(); S.gift=S.gift||{};
+  const today=dayIndex();
   const g=line.includes('₪40')?40:line.includes('₪30')?30:0;
   if(g && S.gift[who]!==today){ S.gift[who]=today; S.shekels+=g; S.earnedToday+=g;
     reward=`+${g}₪ ${who==='savta'?'from Savta 🤍':'tzedakah 🙏'}`; flyCoin(W/2,H*.45); Sound.cash(); }
   else if(g) reward='(already took your gift today — chutzpah!)';
   $('chatLine').textContent=line; $('chatReward').textContent=reward;
+  $('chatScratch').classList.toggle('hidden',who!=='babushka');
   save(); panel('chat');
 }
+/* goralot (scratch cards): ₪50 a pull, slight house edge — a fun infinite sink.
+   Winnings go to the WALLET only (never earnedToday): no gambling your way
+   through the double-up goal. */
+function scratchCard(){
+  if(S.shekels<50){ Sound.no(); $('chatReward').textContent='Come back with ₪50, zolotse.'; return; }
+  S.shekels-=50;
+  const r=Math.random(), win=r<.45?0:r<.75?30:r<.9?80:250;
+  if(win===0){ Sound.miss(); $('chatReward').textContent='🎟️ Gornisht. "Next one is the winner," she says.'; }
+  else{ Sound.cash(); flyCoin(W/2,H*.45);
+    if(win===250){ burstConfetti(26); Sound.win(); }
+    S.shekels+=win;
+    $('chatReward').textContent=win===250?'🎟️💥 JACKPOT +250₪!! The whole street heard her scream.':`🎟️ +${win}₪. Not bad, zolotse.`;
+  }
+  save();
+}
 $('chatBtn').addEventListener('click',()=>{ panel(null); G.state='hub'; });
+$('chatScratch').addEventListener('click',scratchCard);
 
 /* =================== VOLLEYBALL — timing rally vs Savta =================== */
 function vbStart(){
@@ -879,6 +918,8 @@ function update(dt){
   G.confetti=G.confetti.filter(f=>f.y<H+20);
   if(G.mitzvahPending){ pop(W/2,H*.4,`🙏 Mitzvah money +${G.mitzvahPending}₪`,'#7ee8c7',true);
     Sound.cash(); G.mitzvahPending=0; }
+  if(G.loginPop){ pop(W/2,H*.45,G.loginPop,'#8ad2ff',true);
+    Sound.cash(); flyCoin(W/2,H*.5); G.loginPop=null; }
   if(G.streakLost){ pop(W/2,H*.36,`💔 Streak lost (was ${G.streakLost}) — you missed a day`,'#ff5d5d',true);
     Sound.miss(); G.streakLost=0; }
   if(G.shieldUsed){ pop(W/2,H*.36,'🛡️ Shabbat Shield saved your streak!','#7ee8c7',true);
@@ -1123,12 +1164,27 @@ function rr(x,y,w,h,rad){ cx.beginPath();
   if(cx.roundRect) cx.roundRect(x,y,w,h,rad); else cx.rect(x,y,w,h); cx.fill(); }
 
 /* =================== boot =================== */
+/* 7-day login calendar: a gift on the first launch of each real day.
+   Consecutive days walk the ladder; day 7 banks a Shabbat Shield; then it cycles. */
+const LOGIN_GIFTS=[50,75,100,125,150,200,'shield'];
+function loginReward(){
+  const d=dayIndex(); if(S.login.last===d) return;
+  S.login.run=(d-S.login.last===1)?S.login.run+1:1;
+  S.login.last=d;
+  const idx=(S.login.run-1)%7, gift=LOGIN_GIFTS[idx];
+  if(gift==='shield'){ S.shields++;
+    G.loginPop=`📅 Day ${idx+1} gift: 🛡️ SHABBAT SHIELD!`; }
+  else{ S.shekels+=gift;        // wallet-only: gifts don't clear your double-up
+    G.loginPop=`📅 Day ${idx+1} gift: +${gift}₪`; }
+  save();
+}
 function startDay(){
   if(G.state!=='title') return;
   Sound.init(); userActed=true;
   if(S.lastSeen!==dayIndex()){ S.lastSeen=dayIndex(); }
   checkStreakLapse();            // punish a missed real day (unless a shield saves it)
   ensureHustle();                // refresh today's seeded objective
+  loginReward();                 // 7-day calendar gift on first launch of a real day
   newDay();
   syncPassport();
   panel(null); G.state='hub'; G.target=null;
