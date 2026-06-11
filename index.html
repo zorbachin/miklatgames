@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b0e1a">
+<meta name="theme-color" content="#0a1226">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MIKLAT GAMES">
 <link rel="manifest" href="manifest.webmanifest">
@@ -16,135 +16,286 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Free browser games that work in the shelter — no signal, no download, no ads.">
 <title>MIKLAT GAMES 🚨 — games from the shelter</title>
 <style>
-  :root{--navy:#0b0e1a;--gold:#ffd166;--teal:#7ee8c7;--coral:#ff5d5d;--cream:#f4ecdd;}
+  /* ---- DS tokens (subset, mobile-first 360–430) ---- */
+  :root{
+    --c-bg:#0a1226; --c-panel:#101b38; --c-panel-2:#16244a;
+    --c-cyan:#3ee6ff; --c-gold:#ffd166; --c-red:#ff5d73; --c-green:#5dffa8;
+    --c-ink:#eaf2ff; --c-dim:#8da3cc;
+    --c-cyan-border:rgba(62,230,255,.25); --c-cyan-border-strong:rgba(62,230,255,.55);
+    --c-cyan-wash:rgba(62,230,255,.08); --c-gold-border:rgba(255,209,102,.45);
+    --c-ink-faint:rgba(234,242,255,.06);
+    --glow-cyan:0 0 18px rgba(62,230,255,.8); --glow-cyan-soft:0 0 10px rgba(62,230,255,.45);
+    --shadow-card:0 10px 30px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.04);
+    --gradient-sky:radial-gradient(120% 90% at 50% -10%,#16244a 0%,#0e1730 45%,#0a1226 100%);
+    --font-display:"Courier New","Heebo",ui-monospace,Menlo,Consolas,monospace;
+    --font-body:"Heebo",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-  html,body{background:var(--navy);color:#e8ecf6;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;
-    min-height:100%;overscroll-behavior:none;}
-  body{padding:calc(env(safe-area-inset-top,0px) + 18px) 16px calc(env(safe-area-inset-bottom,0px) + 24px);
-    max-width:520px;margin:0 auto;}
-  header{text-align:center;margin-bottom:18px;}
-  .logo{font-size:clamp(34px,9vw,52px);font-weight:900;letter-spacing:.02em;line-height:1;
-    background:linear-gradient(180deg,#ffe29a,#e9a23b);-webkit-background-clip:text;background-clip:text;
-    color:transparent;filter:drop-shadow(0 4px 16px rgba(233,162,59,.3));}
-  .lamp{display:inline-block;animation:lampPulse 1.6s ease-in-out infinite;}
-  @keyframes lampPulse{50%{filter:drop-shadow(0 0 10px rgba(255,93,93,.9));transform:scale(1.12);}}
-  .tag{margin-top:8px;font-size:clamp(13px,3.6vw,15px);color:#aab4c8;}
-  .tag b{color:var(--teal);font-weight:700;}
-  .card{display:block;position:relative;border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;
-    background:#121830;border:1px solid #232c4a;margin-bottom:14px;
-    box-shadow:0 10px 30px rgba(0,0,0,.35);transition:transform .12s;}
-  .card:active{transform:scale(.98);}
-  .card.featured .art{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
-  .card .body{padding:14px 16px 16px;}
-  .name{font-size:22px;font-weight:900;letter-spacing:.01em;}
-  .hook{margin-top:3px;font-size:14px;color:#aab4c8;line-height:1.4;}
-  .meta{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-  .pill{font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;background:rgba(126,232,199,.12);
-    color:var(--teal);border:1px solid rgba(126,232,199,.3);}
-  .pill.best{background:rgba(255,209,102,.12);color:var(--gold);border-color:rgba(255,209,102,.3);}
-  .play{position:absolute;top:12px;right:12px;background:linear-gradient(180deg,#ffd166,#e9a23b);
-    color:#1a1405;font-weight:900;font-size:15px;padding:10px 18px;border-radius:12px;
+  html,body{background:var(--c-bg);min-height:100%;overscroll-behavior:none;}
+  body{color:var(--c-ink);font-family:var(--font-body);display:flex;justify-content:center;}
+  .portal{width:100%;max-width:520px;min-height:100vh;background:var(--gradient-sky);
+    display:flex;flex-direction:column;position:relative;}
+
+  /* ---- hero ---- */
+  .hero{position:relative;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 26px;
+    overflow:hidden;border-bottom:1px solid var(--c-cyan-border);}
+  .dome{position:absolute;inset:0;background:url("assets/hero-bg.webp") center bottom/cover no-repeat;pointer-events:none;}
+  .dome::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(10,18,38,.55) 0%,rgba(10,18,38,.4) 38%,rgba(10,18,38,.82) 78%,var(--c-bg) 100%);}
+  .hero-top{position:relative;display:flex;align-items:center;justify-content:space-between;}
+  .shield{font-size:22px;filter:drop-shadow(var(--glow-cyan-soft));}
+  .hero-controls{display:flex;gap:8px;}
+  .ctl{min-width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;gap:4px;
+    background:var(--c-panel);border:1px solid var(--c-cyan-border);border-radius:999px;
+    color:var(--c-dim);font:700 13px var(--font-body);cursor:pointer;padding:0 12px;
+    transition:all .12s var(--ease);}
+  .ctl.on{background:var(--c-cyan-wash);border-color:var(--c-cyan-border-strong);color:var(--c-cyan);
+    filter:drop-shadow(var(--glow-cyan-soft));}
+  .ctl:active{transform:scale(.96);}
+  .hero-body{position:relative;text-align:center;margin-top:34px;}
+  .wordmark{font-family:var(--font-display);font-weight:700;font-size:clamp(30px,8.6vw,38px);
+    letter-spacing:.08em;text-transform:uppercase;color:var(--c-ink);text-shadow:var(--glow-cyan);line-height:1.1;}
+  [dir="rtl"] .wordmark{letter-spacing:.02em;}
+  .wordmark-alt{margin-top:6px;font-size:16px;color:var(--c-cyan);text-shadow:var(--glow-cyan-soft);font-weight:500;}
+  .promise{margin:14px auto 0;max-width:340px;font-size:15px;line-height:1.5;color:var(--c-dim);}
+  .hero-badges{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+  .badge{font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;}
+  .badge.gold{background:rgba(255,209,102,.12);color:var(--c-gold);border:1px solid var(--c-gold-border);}
+  .badge.cyan{background:var(--c-cyan-wash);color:var(--c-cyan);border:1px solid var(--c-cyan-border);}
+
+  /* ---- cards ---- */
+  .main{padding:18px 16px 30px;display:flex;flex-direction:column;}
+  .cards{display:flex;flex-direction:column;gap:16px;}
+  .gcard{display:block;position:relative;border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;
+    background:var(--c-panel);border:1px solid var(--c-cyan-border);box-shadow:var(--shadow-card);
+    transition:transform .12s var(--ease);}
+  .gcard:active{transform:scale(.98);}
+  .gcard .cover{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--c-panel-2);}
+  .gcard .play{position:absolute;top:12px;inset-inline-end:12px;background:linear-gradient(180deg,#ffd166,#e9a23b);
+    color:#1a1405;font-weight:900;font-size:14px;padding:9px 16px;border-radius:11px;
     box-shadow:0 6px 18px rgba(233,162,59,.45);}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .shelf-label{margin:20px 2px 10px;font-size:12px;font-weight:800;letter-spacing:.18em;color:var(--gold);
-    display:flex;align-items:center;gap:10px;}
-  .shelf-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#232c4a,transparent);}
-  .tile{display:block;position:relative;border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;
-    border:1px solid #232c4a;box-shadow:0 8px 24px rgba(0,0,0,.3);transition:transform .12s;}
-  .tile:active{transform:scale(.98);}
-  .tile .tart{width:100%;aspect-ratio:2.4/1;object-fit:cover;object-position:72% center;display:block;}
-  .tile .tname{position:absolute;left:14px;bottom:12px;font-size:19px;font-weight:900;
-    text-shadow:0 2px 8px rgba(0,0,0,.8);}
-  .tile .tplay{position:absolute;top:10px;right:10px;background:linear-gradient(180deg,#ffd166,#e9a23b);
-    color:#1a1405;font-weight:900;font-size:13px;padding:7px 14px;border-radius:10px;
-    box-shadow:0 4px 14px rgba(233,162,59,.45);}
-  .tile::after{content:'';position:absolute;inset:0;
-    background:linear-gradient(0deg,rgba(11,14,26,.65) 0%,transparent 45%);pointer-events:none;}
-  .count{margin-top:10px;display:inline-block;font-size:12px;font-weight:700;padding:5px 12px;
-    border-radius:999px;background:rgba(255,209,102,.1);color:var(--gold);border:1px solid rgba(255,209,102,.3);}
-  .door{position:relative;border-radius:16px;border:1px solid #232c4a;overflow:hidden;
-    background:repeating-linear-gradient(45deg,#0f8a72 0 14px,#0b6b59 14px 28px);
-    aspect-ratio:1/1.05;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    text-align:center;padding:12px;filter:saturate(.55) brightness(.75);}
-  .door .shield{font-size:34px;}
-  .door .dname{margin-top:6px;font-weight:900;font-size:15px;color:#eafff7;}
-  .door .soon{margin-top:5px;font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--gold);
-    background:rgba(11,14,26,.55);padding:4px 9px;border-radius:999px;}
-  footer{margin-top:22px;text-align:center;color:#6b7694;font-size:12.5px;line-height:1.7;}
-  footer button{background:transparent;border:1px solid #46506b;border-radius:10px;color:#cdd6e8;
-    font-weight:600;font-size:13px;padding:9px 18px;margin-bottom:8px;cursor:pointer;}
+  .gcard .body{padding:13px 15px 15px;border-top:2px solid var(--accent,var(--c-cyan));}
+  .gcard .ttl{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+  .gcard .name{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+  .gcard .name-he{font-size:14px;color:var(--accent,var(--c-cyan));font-weight:500;}
+  .gcard .hook{margin-top:4px;font-size:13.5px;color:var(--c-dim);line-height:1.45;}
+  .gcard .meta{margin-top:9px;display:flex;gap:8px;flex-wrap:wrap;}
+  .pill{font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:999px;
+    background:var(--c-cyan-wash);color:var(--c-cyan);border:1px solid var(--c-cyan-border);}
+  .pill.best{background:rgba(255,209,102,.12);color:var(--c-gold);border-color:var(--c-gold-border);}
+
+  .ghost{border:1px dashed rgba(141,163,204,.4);border-radius:18px;padding:22px 16px;text-align:center;color:var(--c-dim);
+    font-size:13.5px;background:rgba(16,27,56,.4);}
+  .ghost .q{font-size:26px;filter:saturate(.6);margin-bottom:6px;}
+
+  /* ---- why / safety ---- */
+  .panel{margin-top:22px;background:var(--c-panel);border:1px solid var(--c-cyan-border);
+    border-radius:18px;padding:18px;box-shadow:var(--shadow-card);}
+  .why-title{font-family:var(--font-display);font-size:15px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--c-cyan);margin-bottom:8px;}
+  [dir="rtl"] .why-title{letter-spacing:0;}
+  .why-body{font-size:13.5px;line-height:1.55;color:var(--c-ink);margin-bottom:10px;}
+  .safety{font-size:13.5px;line-height:1.5;color:var(--c-gold);font-weight:500;
+    border-inline-start:2px solid var(--c-gold-border);padding-inline-start:12px;}
+
+  .share-row{margin-top:18px;}
+  .btn-share{width:100%;min-height:50px;background:linear-gradient(180deg,#1c2f5e,#122247);
+    border:1px solid var(--c-cyan-border);border-radius:14px;color:var(--c-ink);
+    font:700 15px var(--font-body);cursor:pointer;
+    box-shadow:0 0 0 1px transparent,0 0 18px rgba(62,230,255,.18),0 6px 18px rgba(0,0,0,.45);
+    transition:all .12s var(--ease);}
+  .btn-share:active{transform:scale(.98);}
+
+  footer{margin-top:auto;padding:18px 16px calc(env(safe-area-inset-bottom,0px) + 18px);
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    font:11px ui-monospace,Menlo,monospace;color:var(--c-dim);border-top:1px solid var(--c-ink-faint);}
+
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);
+    background:var(--c-panel-2);border:1px solid var(--c-cyan-border-strong);border-radius:999px;
+    color:var(--c-cyan);padding:10px 20px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;
+    transition:all .2s var(--ease);z-index:50;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  *:focus-visible{outline:2px solid var(--c-cyan);outline-offset:2px;}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo"><span class="lamp">🚨</span> MIKLAT GAMES</div>
-  <div class="tag">Games from the shelter. <b>Free. No app. One thumb.</b></div>
-  <span class="count">🕹️ 2 games live · 2 doors opening soon</span>
-</header>
-
-<a class="card featured" href="mamaddash/" id="cardMamad">
-  <img class="art" src="mamaddash/art/hero.webp" alt="MAMAD DASH" loading="eager">
-  <span class="play">PLAY ▶</span>
-  <div class="body">
-    <div class="name">MAMAD DASH</div>
-    <div class="hook">Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom. Savta is watching.</div>
-    <div class="meta">
-      <span class="pill">📅 Today's Siren</span>
-      <span class="pill best" id="mdBest" style="display:none"></span>
+<div class="portal">
+  <header class="hero">
+    <div class="dome" aria-hidden="true"></div>
+    <div class="hero-top">
+      <span class="shield" aria-hidden="true">🛡</span>
+      <div class="hero-controls">
+        <button class="ctl" id="audioCtl" aria-pressed="false">♪</button>
+        <button class="ctl" id="langCtl">עברית</button>
+      </div>
     </div>
-  </div>
-</a>
+    <div class="hero-body">
+      <h1 class="wordmark" data-i18n="brand">MIKLAT GAMES</h1>
+      <div class="wordmark-alt" data-i18n="brandAlt">משחקים למקלט</div>
+      <p class="promise" data-i18n="promise">Free browser games that work in the shelter — no signal, no download, no ads.</p>
+      <div class="hero-badges">
+        <span class="badge gold" data-i18n="free">Free forever</span>
+        <span class="badge cyan" data-i18n="nosignal">No signal needed</span>
+      </div>
+    </div>
+  </header>
 
-<div class="shelf-label">🚪 MORE IN THE SHELTER</div>
+  <main class="main">
+    <div class="cards">
+      <a class="gcard" href="mamaddash/" id="cardMamad" style="--accent:#7ee8c7" data-game="mamaddash">
+        <img class="cover" src="mamaddash/art/hero.webp" alt="Cartoon runner leaping over a savta on the Tel Aviv promenade" loading="eager">
+        <span class="play" data-i18n="play">PLAY ▶</span>
+        <div class="body">
+          <div class="ttl"><span class="name">Mamad Dash</span><span class="name-he">מקלט דאש</span></div>
+          <div class="hook" data-i18n="mamadHook">Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.</div>
+          <div class="meta">
+            <span class="pill" data-i18n="daily">📅 Today's Siren</span>
+            <span class="pill best" id="mdBest" style="display:none"></span>
+          </div>
+        </div>
+      </a>
 
-<a class="tile" href="irondome/" id="cardIron">
-  <img class="tart" src="irondome/share-card.jpg" alt="IRON DOME" loading="lazy">
-  <span class="tplay">PLAY ▶</span>
-  <div class="tname" style="font-size:14px;font-weight:700;color:#eafff7;">🛡️ tap the rockets. no pressure.</div>
-</a>
+      <a class="gcard" href="irondome/" id="cardIron" style="--accent:#3ee6ff" data-game="irondome">
+        <img class="cover" src="assets/irondome-cover.webp" alt="Pixel-art Iron Dome intercepting rockets over a glowing city skyline" loading="lazy">
+        <span class="play" data-i18n="play">PLAY ▶</span>
+        <div class="body">
+          <div class="ttl"><span class="name">Iron Dome</span><span class="name-he">כיפת ברזל</span></div>
+          <div class="hook" data-i18n="ironHook">Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.</div>
+          <div class="meta"><span class="pill" data-i18n="offline">📵 No reception needed</span></div>
+        </div>
+      </a>
 
-<div class="grid" style="margin-top:12px;">
-  <div class="door">
-    <div class="shield">❔</div>
-    <div class="dname">???</div>
-    <div class="soon">DOOR OPENING SOON</div>
-  </div>
-  <div class="door">
-    <div class="shield">❔</div>
-    <div class="dname">???</div>
-    <div class="soon">DOOR OPENING SOON</div>
-  </div>
+      <div class="ghost">
+        <div class="q">❔</div>
+        <span data-i18n="soon">More games loading… two doors open next.</span>
+      </div>
+    </div>
+
+    <section class="panel">
+      <h2 class="why-title" data-i18n="whyTitle">Why we exist</h2>
+      <p class="why-body" data-i18n="why">Built for morale. Open it once with internet — after that it works with zero signal. Free forever, no ads, no sign-up, nothing to install.</p>
+      <p class="safety" data-i18n="safety">During a real alert, follow Home Front Command instructions only.</p>
+    </section>
+
+    <div class="share-row">
+      <button class="btn-share" id="shareSite" data-i18n="share">📤 Send to the family group</button>
+    </div>
+  </main>
+
+  <footer>
+    <span>miklatgames.fun</span>
+    <span data-i18n="footer">made in a miklat 🚨</span>
+  </footer>
 </div>
-
-<footer>
-  <button id="shareSite">📤 Send the miklat to a friend</button>
-  <div>Built in Tel Aviv between sirens · <a href="mamaddash/?daily=1" style="color:var(--teal)">play today's siren</a></div>
-</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+<audio id="theme" src="assets/portal-theme.mp3" loop preload="none"></audio>
 
 <script>
 'use strict';
-// shelf remembers you: surface per-game bests
-try{
-  const b=JSON.parse(localStorage.getItem('md_best')||'null');
-  if(b&&b.sirens>0){
-    const el=document.getElementById('mdBest');
-    el.textContent=`🏆 Your best: ${b.sirens} siren${b.sirens===1?'':'s'}`;
-    el.style.display='';
-  }
-}catch(e){}
-// forward stray challenge links to the game with params intact
+/* ---- inbound challenge links: unchanged backend behavior ---- */
 const qs=location.search;
 if(/[?&](beat|daily)=/.test(qs)) location.replace('mamaddash/'+qs);
-document.getElementById('shareSite').addEventListener('click',async()=>{
-  const txt='🚨 MIKLAT GAMES — IRON DOME 🛡️ + MAMAD DASH 🏃 free from the shelter. No app, one thumb: https://miklatgames.fun/';
-  try{ if(navigator.share) await navigator.share({text:txt});
-    else{ await navigator.clipboard.writeText(txt);
-      document.getElementById('shareSite').textContent='✅ COPIED'; } }catch(e){}
+
+/* ---- i18n (DS dictionary, EN leads, HE full RTL) ---- */
+const I18N={
+ en:{dir:'ltr',brand:'MIKLAT GAMES',brandAlt:'משחקים למקלט',
+  promise:'Free browser games that work in the shelter — no signal, no download, no ads.',
+  play:'PLAY ▶',daily:'📅 Today’s Siren',offline:'📵 No reception needed',
+  mamadHook:'Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.',
+  ironHook:'Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.',
+  soon:'More games loading… two doors open next.',
+  whyTitle:'Why we exist',
+  why:'Built for morale. Open it once with internet — after that it works with zero signal. Free forever, no ads, no sign-up, nothing to install.',
+  safety:'During a real alert, follow Home Front Command instructions only.',
+  share:'📤 Send to the family group',footer:'made in a miklat 🚨',
+  free:'Free forever',nosignal:'No signal needed',best:s=>`🏆 Your best: ${s} siren${s===1?'':'s'}`,
+  shareTxt:'🚨 MIKLAT GAMES — IRON DOME 🛡️ + MAMAD DASH 🏃 free from the shelter. No app, one thumb: https://miklatgames.fun/',
+  copied:'✅ Copied'},
+ he:{dir:'rtl',brand:'משחקים למקלט',brandAlt:'MIKLAT GAMES',
+  promise:'משחקי דפדפן חינמיים שעובדים בממ״ד — בלי קליטה, בלי הורדה, בלי פרסומות.',
+  play:'שחקו ▶',daily:'📅 האזעקה של היום',offline:'📵 עובד בלי קליטה',
+  mamadHook:'רוצו לממ״ד לפני הבום. קופצים מעל הסבתות, מתכופפים מתחת ליונים.',
+  ironHook:'מיירטים רקטות עם האצבע. עשרה שלבים משדרות ועד אילת. עובד בלי קליטה.',
+  soon:'עוד משחקים בדרך… שתי דלתות נפתחות בקרוב.',
+  whyTitle:'למה אנחנו קיימים',
+  why:'בנוי בשביל המורל. פותחים פעם אחת עם אינטרנט — אחר כך זה עובד בלי שום קליטה. חינם לתמיד, בלי פרסומות, בלי הרשמה.',
+  safety:'באזעקה אמיתית פועלים רק לפי הנחיות פיקוד העורף.',
+  share:'📤 שלחו לקבוצה של המשפחה',footer:'נוצר במקלט 🚨',
+  free:'חינם לתמיד',nosignal:'עובד בלי קליטה',best:s=>`🏆 השיא שלכם: ${s} אזעקות`,
+  shareTxt:'🚨 משחקים למקלט — כיפת ברזל 🛡️ + מקלט דאש 🏃 חינם, בלי אפליקציה: https://miklatgames.fun/',
+  copied:'✅ הועתק'}
+};
+let lang='en';
+try{
+  const q=new URLSearchParams(location.search).get('lang');
+  const s=localStorage.getItem('miklat.lang');
+  lang=(q==='he'||q==='en')?q:(s==='he'||s==='en')?s:((navigator.language||'en').startsWith('he')?'he':'en');
+}catch(e){}
+function applyLang(){
+  const t=I18N[lang];
+  document.documentElement.lang=lang;
+  document.documentElement.dir=t.dir;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v=t[el.getAttribute('data-i18n')];
+    if(typeof v==='string') el.textContent=v;
+  });
+  document.getElementById('langCtl').textContent=(lang==='en')?'עברית':'EN';
+  renderBest();
+  try{localStorage.setItem('miklat.lang',lang);}catch(e){}
+}
+document.getElementById('langCtl').addEventListener('click',()=>{
+  lang=(lang==='en')?'he':'en'; applyLang(); track('lang-'+lang);
 });
+
+/* ---- best score memory (unchanged) ---- */
+function renderBest(){
+  try{
+    const b=JSON.parse(localStorage.getItem('md_best')||'null');
+    const el=document.getElementById('mdBest');
+    if(b&&b.sirens>0){ el.textContent=I18N[lang].best(b.sirens); el.style.display=''; }
+  }catch(e){}
+}
+
+/* ---- opt-in ambient theme: silent by default, persisted ---- */
+const theme=document.getElementById('theme'), audioCtl=document.getElementById('audioCtl');
+theme.volume=0.35;
+let audioOn=false;
+try{audioOn=localStorage.getItem('miklat.audio')==='on';}catch(e){}
+function applyAudio(){
+  audioCtl.classList.toggle('on',audioOn);
+  audioCtl.setAttribute('aria-pressed',String(audioOn));
+  audioCtl.textContent=audioOn?'♪ ✓':'♪';
+  try{ if(audioOn){const p=theme.play(); if(p&&p.catch)p.catch(()=>{});} else theme.pause(); }catch(e){}
+  try{localStorage.setItem('miklat.audio',audioOn?'on':'off');}catch(e){}
+}
+audioCtl.addEventListener('click',()=>{audioOn=!audioOn;applyAudio();track('music-'+(audioOn?'on':'off'));});
+document.addEventListener('visibilitychange',()=>{ try{ if(document.hidden)theme.pause(); else if(audioOn)theme.play().catch(()=>{});}catch(e){} });
+
+/* ---- share: real navigator.share -> clipboard fallback (unchanged contract) ---- */
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+document.getElementById('shareSite').addEventListener('click',async()=>{
+  const txt=I18N[lang].shareTxt;
+  try{
+    if(navigator.share){ await navigator.share({text:txt}); track('share'); }
+    else{ await navigator.clipboard.writeText(txt); toast(I18N[lang].copied); track('share-copy'); }
+  }catch(e){}
+});
+
+/* ---- analytics: goatcounter site code miklat-games (registered) ---- */
+function track(name){
+  try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'evt-'+name,event:true}); }catch(e){}
+}
+document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
+document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
+
+applyLang(); applyAudio();
 </script>
-<script data-goatcounter="https://miklat-games.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
+<script data-goatcounter="https://miklat-games.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
