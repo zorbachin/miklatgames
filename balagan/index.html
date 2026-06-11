@@ -779,14 +779,75 @@ function upCard(u){
 function flashCard(el){ el.style.boxShadow='0 0 0 2px #ff5d5d inset';
   setTimeout(()=>el.style.boxShadow='',300); }
 
-/* =================== share =================== */
+/* =================== share — real card + challenge loop =================== */
 const SITE=location.protocol.startsWith('http')?location.origin+location.pathname:'https://miklatgames.fun/balagan/';
-function shareFlex(){
-  const link=SITE.replace(/\/$/,'')+'/';
-  const txt=`🌴 BALAGAN: started on ₪500 of avtala, now I've cleared ${S.best.daysCleared} day${S.best.daysCleared===1?'':'s'} and stacked ${money(S.shekels)} — ${S.streak}🔥 streak. Double your money in Tel Aviv: ${link}`;
-  (async()=>{ try{ if(navigator.share) await navigator.share({text:txt});
-    else{ await navigator.clipboard.writeText(txt); $('ddShare').textContent='✅ COPIED';
-      setTimeout(()=>$('ddShare').textContent='📤 FLEX ON A FRIEND',1600); } }catch(e){} })();
+// ?stack=X&day=N — a friend's flex becomes your challenge ('stack', not 'beat',
+// so links never collide with Mamad Dash's ?beat= forwarding on the homepage)
+const QS=new URLSearchParams(location.search);
+const CHAL=QS.get('stack')!==null?{stack:parseInt(QS.get('stack'))||0,day:parseInt(QS.get('day'))||1}:null;
+if(CHAL){
+  $('titleTag').innerHTML=`👊 Someone turned ₪500 of avtala into <b style="color:#ffd166">${money(CHAL.stack)}</b> by day ${CHAL.day}.<br>Think you can hustle harder?`;
+  $('titleBtn').textContent='ACCEPT THE HUSTLE ▶';
+}
+function renderCard(){
+  const c=document.createElement('canvas');c.width=1080;c.height=1350;
+  const x=c.getContext('2d');x.lineJoin='round';
+  const sky=x.createLinearGradient(0,0,0,980);
+  sky.addColorStop(0,'#37b6ff');sky.addColorStop(.55,'#8fd8ff');sky.addColorStop(1,'#ffd9a8');
+  x.fillStyle=sky;x.fillRect(0,0,1080,980);
+  const em=(e,ex,ey,es)=>{x.font=es+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+    x.textAlign='center';x.textBaseline='middle';x.fillText(e,ex,ey);};
+  em('☀️',900,140,110);
+  x.fillStyle='#cfe0f0';
+  for(let i=0;i<9;i++){const bh=150+Math.abs(Math.sin(i*73.7))*230;x.fillRect(i*130-20,980-bh,110,bh);}
+  x.fillStyle='#e8eef8';
+  for(let i=0;i<8;i++){const bh=90+Math.abs(Math.sin(i*127.3))*190;x.fillRect(i*140+8,980-bh,124,bh);}
+  x.fillStyle='#e7c98f';x.fillRect(0,980,1080,370);
+  x.strokeStyle='rgba(120,80,40,.3)';x.lineWidth=5;
+  for(let i=1;i<16;i++){x.beginPath();x.moveTo(i*70,1030);x.lineTo(i*70,1350);x.stroke();}
+  em('🌴',110,900,150); em('🌴',975,915,120);
+  em(equipped().ico,330,1060,170);
+  em('🏐',520,1000,80); em('🥙',640,1060,95); em('🧓',860,1070,140);
+  const txt=(str,fy,fs,fill,maxW)=>{
+    x.font=`900 ${fs}px sans-serif`;
+    const w=x.measureText(str).width; if(maxW&&w>maxW) x.font=`900 ${Math.floor(fs*maxW/w)}px sans-serif`;
+    x.textAlign='center';x.textBaseline='middle';
+    x.lineWidth=fs*.16;x.strokeStyle='rgba(15,20,40,.9)';
+    x.strokeText(str,540,fy);x.fillStyle=fill;x.fillText(str,540,fy);
+  };
+  txt('🌴 BALAGAN',140,60,'#ffd166',520);
+  txt(S.best.daysCleared>0?'DOUBLED IT!':'THE HUSTLE IS ON',330,104,'#ffd166',1000);
+  txt(`💰 ₪500 → ${money(S.shekels)}`,470,78,'#fff',980);
+  txt(`🔥 ${S.streak}-day streak · day ${S.day} · ${S.best.daysCleared} cleared`,575,50,'#ffe1e1',980);
+  if(S.hustle&&S.hustle.done) txt(`🎯 Today's Hustle: DONE ✓`,665,44,'#aef0dc',900);
+  x.fillStyle='rgba(13,17,32,.88)';x.fillRect(0,1120,1080,230);
+  txt('CAN YOU DOUBLE YOUR AVTALA?',1198,62,'#7ee8c7',960);
+  txt(SITE.replace(/^https?:\/\//,'').replace(/\/$/,''),1288,54,'#ffd166',960);
+  return c;
+}
+async function shareFlex(){
+  const link=`${SITE}?stack=${S.shekels}&day=${S.day}`;
+  const txt=CHAL
+    ? (S.shekels>CHAL.stack
+      ? `🤌 You said ${money(CHAL.stack)}. I'm at ${money(S.shekels)} on day ${S.day}. Your move: ${link}`
+      : `They stacked ${money(CHAL.stack)}, I'm at ${money(S.shekels)}. This isn't over: ${link}`)
+    : `🌴 BALAGAN day ${S.day}: turned ₪500 of avtala into ${money(S.shekels)} — ${S.streak}🔥 streak. Double your money in Tel Aviv: ${link}`;
+  try{
+    let shared=false;
+    try{
+      const card=renderCard();
+      const blob=await new Promise(r=>card.toBlob(r,'image/png'));
+      if(blob&&navigator.canShare&&window.File){
+        const file=new File([blob],'balagan.png',{type:'image/png'});
+        if(navigator.canShare({files:[file]})){ await navigator.share({files:[file],text:txt}); shared=true; }
+      }
+    }catch(e){}
+    if(!shared){
+      if(navigator.share) await navigator.share({text:txt});
+      else{ await navigator.clipboard.writeText(txt); $('ddShare').textContent='✅ COPIED';
+        setTimeout(()=>$('ddShare').textContent='📤 FLEX ON A FRIEND',1600); }
+    }
+  }catch(e){}
 }
 
 /* =================== update =================== */
