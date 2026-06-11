@@ -1,45 +1,46 @@
-# Fabatollah — art drop zone
+# Fabatollah — art drop (READY TO COMPLETE)
 
-Upload **only Fabatollah game art** here. Anything not on this list is ignored
-(no stray generations, no `home screen.mp3`, no duplicates).
+My side is **already wired**. The game looks for these files automatically and
+uses them the moment they exist. Until then it falls back to the SVG — nothing
+breaks. Your only step: **drop the named PNGs into this folder (`fabatollah/art/`)
+and commit.** No code changes needed.
 
-The game currently renders the character as inline SVG. These PNGs get wired in
-two ways — both are fine to provide:
+## STEP 1 — the instant win (8 files)
 
-## A) Hero / preset / share art  (drop-in, highest value)
-Full finished illustrations of Fabatollah in a complete look. Used for the
-homepage cover, the share/OG card, and preset showcase art.
+Rename your finished full-look renders + the banner to EXACTLY these names and
+drop them here. Each preset button will then show your render instead of the SVG.
 
-| filename                | use                                  | size (px)     |
-|-------------------------|--------------------------------------|---------------|
-| `cover.png`             | homepage tile (replaces cover.svg)   | 1200 × 675    |
-| `og.png`                | social share card                    | 1200 × 630    |
-| `look-before.png`       | preset: stern "before"               | 1024 × 1536   |
-| `look-prideparade.png`  | preset: Pride Parade                 | 1024 × 1536   |
-| `look-discomullah.png`  | preset: Disco Mullah                 | 1024 × 1536   |
-| `look-desertdiva.png`   | preset: Desert Diva                  | 1024 × 1536   |
-| `look-festival.png`     | preset: Festival                     | 1024 × 1536   |
-| `look-cabaret.png`      | preset: Cabaret                      | 1024 × 1536   |
-| `look-cowboy.png`       | preset: Cowboy Couture               | 1024 × 1536   |
-| `look-angel.png`        | preset: Disco Angel                  | 1024 × 1536   |
+| your art (from the looks you generated) | rename to            |
+|-----------------------------------------|----------------------|
+| the navy + rainbow-stripe banner        | `cover.png`          |
+| Desert Diva (rainbow turban, gold top)  | `look-desertdiva.png`|
+| Disco Mullah (purple sequin cape, fan)  | `look-discomullah.png`|
+| Pride Parade (flower crown, pink skirt) | `look-prideparade.png`|
+| Festival (purple fishnet, feather robe) | `look-festival.png`  |
+| Cabaret (purple wig, white boa)         | `look-cabaret.png`   |
+| Cowboy Couture (hat, fishnet, boots)    | `look-cowboy.png`    |
+| Disco Angel (halo, wings, sheer)        | `look-angel.png`     |
 
-## B) Layered paper-doll sprites  (optional — to replace the SVG doll)
-Each item isolated on a **transparent** background, same pose/framing as
-`base.png`, so they stack. Naming = `<category>-<id>.png` using the game's IDs:
+That's it for the headline upgrade. Commit → tell me → I push a link.
 
-- `base.png` (neutral body)
-- `head-*` : bare, turban_white, turban_black, turban_rainbow, drag, wig_blonde,
-  tiara, flower, cowboy, beret, fascinator, halo, party
-- `top-*` : bare, tank, tee, crop, blouse, fishnet, mesh, sequin, halter,
-  military, vest, blazer
-- `bottom-*` : briefs, trousers, jeans, leather, leggings, hotpants, mini, tutu,
-  sequinSkirt, harem, fishnetTights
-- `robe-*` : aba, rainbow, sequin, feather, sheer
-- `face-*`, `jewel-*`, `acc-*` : see the prompt pack for the full list
+How to drop them (whichever is easiest):
+- **GitHub web:** repo → branch `claude/awesome-euler-odgkud` → this `art/`
+  folder → **Add file → Upload files** → drag them in → **Commit**.
+- **GitHub mobile app:** same, from your phone.
+- **Paste into a PR/issue comment** on the repo and I'll pull them in — GitHub
+  hosts attachments on a domain I can reach (Google Drive I cannot).
+
+## STEP 2 — optional: the mix-and-match wardrobe (sprite swap)
+
+Your isolated item sprites (the sticker sheets) can replace the SVG doll for
+true layered dressing. That one needs me to **see the files to position each
+layer on the body**, so: commit the sprites here (individual transparent PNGs,
+or the sheets and I'll slice them), and I'll do the compositing + tuning pass.
+Naming for individual sprites is `head-*`, `top-*`, `bottom-*`, `robe-*`,
+`acc-*`, `face-*` using the game's option ids — but don't sweat exact names for
+the sheets; I'll map them visually once they're in the repo.
 
 ## Specs
-- PNG, **transparent background** for sprites (flat/solid OK for cover & og).
-- Keep the character art consistent (same style + same Fabatollah face/pose).
-- Don't worry about exact cropping — I'll trim, center, and resize on import.
-
-When the files are pushed, tell me and I'll pull, process, and wire them in.
+- PNG. Full-look renders: transparent or solid bg both fine. Sprites: transparent.
+- `cover.png` ideally ~1200×675 (landscape). Looks can be any portrait size.
+- I auto-fit/trim on display — don't worry about precise cropping.
