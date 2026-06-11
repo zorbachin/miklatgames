@@ -184,7 +184,7 @@ const rockAt=(c,r)=>G.rocks.find(k=>k.state!=='fall'&&k.c===c&&k.r===r);
 /* ---------------- level generation ---------------- */
 function genLevel(){
   const lv=G.level;
-  // level plan: deeper rescues, more of everything, cats from L2
+  // level plan: higher rescues, more of everything, pigeons from L2
   const plan={
     res:Math.min(3+((lv-1)>>1),6),            // 3,3,4,4,5,5,6
     critters:Math.min(1+lv,6),
@@ -298,13 +298,14 @@ function genLevel(){
       if(free(c,r)){ take(c,r); G.supplies.push({c,r,kind:ITEMS[i],got:false}); break; }
     }
   }
-  // player to surface
+  // player to lobby
   P.x=cellCX(3); P.y=cellCY(LOBBY); P.dir=null; P.face='R'; P.invuln=0;
   G.demand=Math.random()<0.5&&G.residents.some(f=>f.dog); G.dogSafe=false; G.refuseCd=0; G.chainGrace=0; G.shake=0;
   G.time=Math.max(80,Math.min(125,95-3*(lv-1)+14*(G.totalRes-3)));
   if(G.demand) G.time+=12; // Savta's dog demand adds a mandatory detour
   G.sirenT=0;
   toast('Level '+lv+' — rescue '+G.totalRes+' neighbors!');
+  if(lv===1&&!store.get('twr_hint')){ store.set('twr_hint','1'); toast('Climb up through the balagan! ⬆'); }
 }
 
 /* ---------------- helpers ---------------- */
@@ -355,7 +356,7 @@ function updatePlayer(dt){
     if(blockedRock) sp=0;
     let nx=P.x+dx*sp*dt, ny=P.y+dy*sp*dt;
     nx=clamp(nx,minX,maxX); ny=clamp(ny,minY,maxY);
-    // keep off the surface-row ceiling: can't go above surface row
+    // clamp between the roof (TOP) and the lobby floor
     if(nx!==P.x||ny!==P.y){
       P.x=nx; P.y=ny; P.anim+=dt*10;
       if(!targetOpen&&!blockedRock){ P.digging=true; Snd.dig(dt); }
@@ -397,10 +398,10 @@ function updatePlayer(dt){
   // supplies
   for(const s of G.supplies){
     if(!s.got&&G.passable[s.c][s.r]&&dist(P.x,P.y,cellCX(s.c),cellCY(s.r))<24){
-      s.got=true; addScore(100+(s.r-4)*10,P.x,P.y-20); Snd.chime();
+      s.got=true; addScore(100+(LOBBY-1-s.r)*10,P.x,P.y-20); Snd.chime();
     }
   }
-  // rescue at miklat door (surface, left side)
+  // rescue at the miklat door (lobby, bottom-left)
   if(G.chain.length&&P.y>cellCY(LOBBY)-8&&P.x<TILE*2.2){
     let humans=0, dogs=0; const keep=[];
     for(const f of G.chain){
@@ -414,7 +415,8 @@ function updatePlayer(dt){
     if(humans||dogs){
       G.rescued+=humans; G.chain=keep;
       Snd.fanfare();
-      if(humans) toast(humans>1?'Everyone is safe in the miklat!':'Safe in the miklat!');
+      G.parts.push({x:P.x,y:P.y-30,vx:0,vy:-30,t:1.0,txt:'תודה ♥',col:'#9ef0a0'});
+      if(humans) toast(humans>1?humans+' neighbors safe in the miklat!':'Safe in the miklat!');
       if(dogs) toast('Woof! Dog safe in the miklat! +750 🐾');
       if(keep.length) toast('Savta Rivka: «Not without the dog!» 🐕');
       if(G.rescued>=G.totalRes){
@@ -444,7 +446,7 @@ function scatterChain(from=0){
   }
   G.chain.length=from;
   G.chainGrace=1.0;
-  toast(from?'Some ran back home!':'Oy! They ran back home!');
+  toast(from?'Oy! Some ran back home!':'Oy! They ran back home!');
 }
 function hitPlayer(){
   if(P.invuln>0||G.state!=='play')return;
@@ -571,7 +573,7 @@ function updateRocks(dt){
       k.vy=Math.min(k.vy+1000*dt,520); k.y+=k.vy*dt;
       carve(k.x,k.y,16);
       const nr=Math.floor((k.y+20)/TILE);
-      if(nr>=ROWS||(!isOpen(k.c,nr)&&nr>k.r)||G.rocks.some(o=>o!==k&&o.state!=='fall'&&o.c===k.c&&o.r===nr)){
+      if(nr>=LOBBY||(!isOpen(k.c,nr)&&nr>k.r)||G.rocks.some(o=>o!==k&&o.state!=='fall'&&o.c===k.c&&o.r===nr)){
         k.dead=true; G.shake=0.3; Snd.thud();
         puff(k.x,k.y+10,'#8a6a4a',14);
       }
@@ -618,12 +620,12 @@ function drawBackdrop(){
   ctx.fillStyle='#23272d'; ctx.fillRect(6,LOBBY*TILE+4,40,34);
   ctx.fillStyle='#2e7d32'; ctx.fillRect(48,LOBBY*TILE+6,46,16);
   ctx.fillStyle='#fff'; ctx.font='bold 11px Courier New'; ctx.textAlign='center';
-  ctx.fillText('מקלט⬇',71,LOBBY*TILE+18);
+  ctx.fillText('מקלט ↓',71,LOBBY*TILE+18);
   // the elevator, perpetually be'tikun (bottom-right)
   ctx.fillStyle='#7a828c'; ctx.fillRect(W-66,LOBBY*TILE+4,52,36);
   ctx.fillStyle='#5d646d'; ctx.fillRect(W-64,LOBBY*TILE+6,23,32); ctx.fillRect(W-39,LOBBY*TILE+6,23,32);
   ctx.fillStyle='#ffd166'; ctx.fillRect(W-62,LOBBY*TILE+14,44,12);
-  ctx.fillStyle='#5a4a1d'; ctx.font='bold 8px Courier New';
+  ctx.fillStyle='#5a4a1d'; ctx.font='bold 9px Courier New';
   ctx.fillText('בתיקון',W-40,LOBBY*TILE+23);
 }
 function drawSupplies(){
@@ -695,7 +697,11 @@ function drawResident(x,y,kind,wave){
 }
 function drawCritter(k){
   ctx.save(); ctx.translate(k.x,k.y);
-  if(k.state==='ghost') ctx.globalAlpha=0.45+Math.sin(k.anim*4)*0.1;
+  if(k.state==='ghost'){
+    ctx.fillStyle='rgba(25,18,35,.5)';
+    ctx.beginPath(); ctx.ellipse(0,0,17,14,0,0,7); ctx.fill();
+    ctx.globalAlpha=0.55+Math.sin(k.anim*4)*0.1;
+  }
   if(k.state==='stun'){ ctx.globalAlpha=0.75; ctx.rotate(Math.sin(k.anim*3)*0.15); }
   if(k.state==='pacified') ctx.globalAlpha=0.85;
   const b=Math.sin(k.anim)*2;
@@ -760,6 +766,12 @@ function drawPlayer(){
   ctx.restore();
 }
 function drawChain(){
+  if(G.chain.length){
+    ctx.save(); ctx.strokeStyle='rgba(255,222,150,.5)'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(P.x,P.y);
+    for(let i=0;i<G.chain.length;i++){ const q=followerPos(i); ctx.lineTo(q.x,q.y); }
+    ctx.stroke(); ctx.restore();
+  }
   for(let i=0;i<G.chain.length;i++){
     const p=followerPos(i), f=G.chain[i];
     f.wave+=0.1;
@@ -767,7 +779,7 @@ function drawChain(){
   }
 }
 function drawHUD(){
-  ctx.fillStyle='rgba(10,14,26,.55)'; ctx.fillRect(0,0,W,30);
+  ctx.fillStyle='rgba(10,14,26,.75)'; ctx.fillRect(0,0,W,30);
   ctx.textAlign='left'; ctx.font='bold 15px Courier New';
   // hearts
   ctx.fillStyle='#ff6b6b';
@@ -785,6 +797,12 @@ function drawHUD(){
   // mute icon
   ctx.fillStyle=Snd.on?'#9ef0a0':'#777';
   ctx.fillText(Snd.on?'♪':'∅',W-12,21);
+  // miklat beacon while escorting
+  if(G.state==='play'&&G.chain.length){
+    ctx.save(); ctx.globalAlpha=0.5+Math.sin(performance.now()/200)*0.4;
+    ctx.fillStyle='#6fdb74'; ctx.font='bold 20px Courier New'; ctx.textAlign='center';
+    ctx.fillText('▼',71,LOBBY*TILE-6); ctx.restore();
+  }
   // toasts
   ctx.textAlign='center'; ctx.font='bold 16px Courier New';
   G.toasts.forEach((t,i)=>{
@@ -798,17 +816,18 @@ function drawHUD(){
 function drawPads(){
   if(!Inp.touchSeen)return;
   const p=Inp.pad;
-  ctx.save(); ctx.globalAlpha=0.30;
+  const fade=clamp((dist(P.x,P.y,p.cx,p.cy)-80)/140,0.35,1); // ghost out near the door
+  ctx.save(); ctx.globalAlpha=0.30*fade;
   ctx.fillStyle='#fff';
   const arms=[[0,-1,'▲'],[0,1,'▼'],[-1,0,'◀'],[1,0,'▶']];
   for(const [dx,dy,ch] of arms){
     ctx.beginPath(); ctx.arc(p.cx+dx*52,p.cy+dy*52,26,0,7); ctx.fill();
   }
-  ctx.globalAlpha=0.7; ctx.fillStyle='#222'; ctx.font='bold 16px Courier New'; ctx.textAlign='center';
+  ctx.globalAlpha=0.7*fade; ctx.fillStyle='#222'; ctx.font='bold 16px Courier New'; ctx.textAlign='center';
   for(const [dx,dy,ch] of arms) ctx.fillText(ch,p.cx+dx*52,p.cy+dy*52+6);
-  ctx.globalAlpha=0.32; ctx.fillStyle='#ffd166';
+  ctx.globalAlpha=0.32*fade; ctx.fillStyle='#ffd166';
   ctx.beginPath(); ctx.arc(p.btnx,p.btny,p.btnr,0,7); ctx.fill();
-  ctx.globalAlpha=0.8; ctx.fillStyle='#7a4f1d';
+  ctx.globalAlpha=0.8*fade; ctx.fillStyle='#7a4f1d';
   ctx.beginPath(); ctx.arc(p.btnx,p.btny,16,0,7); ctx.fill();
   ctx.fillStyle='#d8b56a';
   for(let i=0;i<5;i++) ctx.fillRect(p.btnx-8+(i*37)%16,p.btny-8+(i*23)%16,3,3);
@@ -839,7 +858,7 @@ function drawTitle(){
   const lines=[
     'The elevator is in tikun. Climb up,',
     'clear the balagan, and bring the',
-    'neighbors DOWN to the miklat in time!',
+    'neighbors DOWN to the green מקלט sign!',
     '',
     '🥙 Falafel calms cats & pigeons.',
     '🗄 Don\'t stand under a wobbling armoire.',
@@ -861,7 +880,7 @@ function drawOver(){
   ctx.fillStyle='rgba(8,10,20,.78)'; ctx.fillRect(0,0,W,H);
   ctx.textAlign='center';
   ctx.fillStyle='#ff8787'; ctx.font='bold 34px Courier New';
-  ctx.fillText(G.overReason.startsWith('Time')?'TIME\'S UP!':'OY VA VOY!',W/2,H*0.33);
+  ctx.fillText(G.overReason.includes('stayed safe')?'TIME\'S UP!':'OY VA VOY!',W/2,H*0.33);
   ctx.fillStyle='#fff'; ctx.font='15px Courier New';
   ctx.fillText(G.overReason,W/2,H*0.39);
   ctx.fillStyle='#ffe66d'; ctx.font='bold 24px Courier New';
@@ -912,7 +931,7 @@ function loop(now){
 
   if(G.state==='play'&&!paused){
     G.time-=dt;
-    if(G.time<=0){ gameOver("Time's up — they sheltered in place at home."); }
+    if(G.time<=0){ gameOver("The neighbors stayed safe at home this time — yalla, again!"); }
     if(G.time<13&&G.time>0){ G.sirenT-=dt; if(G.sirenT<=0){ G.sirenT=1.0; Snd.sirenBeat(); } }
     if(G.state==='play') updatePlayer(dt);
     if(G.state==='play') updateCritters(dt);
