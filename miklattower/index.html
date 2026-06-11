@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>MIKLAT DIGGER — miklatgames.fun</title>
-<meta name="description" content="Dig the neighbors out of their miklats and walk them to Ein Kerem Hospital before the siren ends. A retro tunnel game.">
-<meta property="og:title" content="MIKLAT DIGGER">
-<meta property="og:description" content="Dig tunnels, rescue the neighbors, get them to Ein Kerem.">
-<meta property="og:url" content="https://miklatgames.fun/miklatdigger/">
-<meta property="og:image" content="https://miklatgames.fun/assets/miklatdigger-cover.png">
+<title>MIKLAT TOWER — miklatgames.fun</title>
+<meta name="description" content="The elevator is in tikun. Climb up, clear the balagan, and bring the neighbors down to the miklat before the siren ends. A retro rescue game.">
+<meta property="og:title" content="MIKLAT TOWER">
+<meta property="og:description" content="Everyone down to the miklat!">
+<meta property="og:url" content="https://miklatgames.fun/miklattower/">
+<meta property="og:image" content="https://miklatgames.fun/assets/miklattower-cover.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0b0e1a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="MIKLAT DIGGER">
+<meta name="apple-mobile-web-app-title" content="MIKLAT TOWER">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -30,11 +30,12 @@
 <script>
 'use strict';
 /* ============================================================
-   MIKLAT DIGGER v1 — a no-violence tunnel-buster.
-   Dig Dug skeleton: carve tunnels, critters walk/ghost,
-   boulders fall. Twist: rescue residents, falafel pacifies.
+   MIKLAT TOWER — a no-violence climbing rescue game.
+   Dig Dug engine turned on its head: clear the balagan in an
+   apartment tower, collect the neighbors upstairs, bring them
+   down to the basement miklat before the siren window closes.
    ============================================================ */
-const W=520, H=800, TILE=40, COLS=13, ROWS=20, SURF=3, SURFROW=2;
+const W=520, H=800, TILE=40, COLS=13, ROWS=20, TOP=2, LOBBY=ROWS-1;
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 const dpr=Math.min(window.devicePixelRatio||1,2);
 cv.width=W*dpr; cv.height=H*dpr; ctx.scale(dpr,dpr);
@@ -56,7 +57,7 @@ function track(name){ try{ if(window.goatcounter&&window.goatcounter.count)
 
 /* ---------------- sound (synth only, no assets) ---------------- */
 const Snd={
-  ac:null, on:store.get('dig_mute')!=='1', digT:0,
+  ac:null, on:store.get('twr_mute')!=='1', digT:0,
   ctx(){ if(!this.ac){ try{this.ac=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
     if(this.ac&&this.ac.state==='suspended') this.ac.resume(); return this.ac; },
   beep(f,dur,type,vol,slide){
@@ -75,7 +76,7 @@ const Snd={
   hurt(){ this.beep(300,0.4,'sawtooth',0.1,70); },
   thud(){ this.beep(60,0.25,'sine',0.18,35); },
   sirenBeat(){ this.beep(700,0.22,'triangle',0.07,950); },
-  toggle(){ this.on=!this.on; store.set('dig_mute',this.on?'0':'1'); }
+  toggle(){ this.on=!this.on; store.set('twr_mute',this.on?'0':'1'); }
 };
 
 /* ---------------- input ---------------- */
@@ -145,7 +146,7 @@ cv.addEventListener('mousedown',e=>{
 /* ---------------- game state ---------------- */
 const G={
   state:'title', level:1, score:0, hearts:3, time:100, rescued:0, totalRes:3,
-  best:+(store.get('dig_best')||0),
+  best:+(store.get('twr_best')||0),
   passable:null, rocks:[], critters:[], residents:[], supplies:[], falafels:[],
   chain:[], trail:[], parts:[], toasts:[],
   clearT:0, overReason:'', sirenT:0, shake:0
@@ -157,11 +158,11 @@ const dirt=document.createElement('canvas');
 dirt.width=W*dpr; dirt.height=H*dpr;
 const dctx=dirt.getContext('2d'); dctx.scale(dpr,dpr);
 
-function strataCol(r){
-  if(r<7)  return ['#c79a55','#bb8c49'];
-  if(r<11) return ['#a87940','#9c6e38'];
-  if(r<15) return ['#875c33','#7b522c'];
-  return ['#69462a','#5d3d23'];
+function strataCol(r){ // balagan density: top floors are the worst
+  if(r>14) return ['#cdb68a','#c2ab7e'];
+  if(r>10) return ['#b9a070','#ae9566'];
+  if(r>6)  return ['#a3895c','#988053'];
+  return ['#8a744e','#7f6a45'];
 }
 function carve(x,y,rad){
   dctx.save(); dctx.globalCompositeOperation='destination-out';
@@ -177,7 +178,7 @@ function carveCapsule(c1,r1,c2,r2){
 function openCell(c,r){
   if(!G.passable[c][r]){ G.passable[c][r]=true; carve(cellCX(c),cellCY(r),17); }
 }
-const isOpen=(c,r)=>c>=0&&c<COLS&&r>=SURFROW&&r<ROWS&&G.passable[c][r];
+const isOpen=(c,r)=>c>=0&&c<COLS&&r>=TOP&&r<ROWS&&G.passable[c][r];
 const rockAt=(c,r)=>G.rocks.find(k=>k.state!=='fall'&&k.c===c&&k.r===r);
 
 /* ---------------- level generation ---------------- */
@@ -187,26 +188,27 @@ function genLevel(){
   const plan={
     res:Math.min(3+((lv-1)>>1),6),            // 3,3,4,4,5,5,6
     critters:Math.min(1+lv,6),
-    resMin:Math.min(5+lv,10), resMax:Math.min(9+lv*2,ROWS-2),
+    resMin:Math.max(3,12-2*lv), resMax:Math.max(11,16-lv),
     rocks:4+Math.min(lv,4),
     corridors:lv>=2?ri(1,2):0
   };
   G.totalRes=plan.res;
   G.passable=Array.from({length:COLS},()=>Array(ROWS).fill(false));
-  for(let c=0;c<COLS;c++) G.passable[c][SURFROW]=true;
+  for(let c=0;c<COLS;c++) G.passable[c][LOBBY]=true;
   G.rocks=[]; G.critters=[]; G.residents=[]; G.supplies=[]; G.falafels=[]; G.pockets=[];
   G.chain=[]; G.trail=[]; G.parts=[]; G.toasts=[]; G.rescued=0;
 
   // rebuild dirt
   dctx.save(); dctx.globalCompositeOperation='source-over';
   dctx.clearRect(0,0,W,H);
-  for(let r=SURF;r<ROWS;r++){
+  for(let r=TOP;r<LOBBY;r++){
     const [a,b]=strataCol(r);
     dctx.fillStyle=r%2?a:b; dctx.fillRect(0,r*TILE,W,TILE);
-    dctx.fillStyle='rgba(0,0,0,.13)';
-    for(let i=0;i<10;i++) dctx.fillRect(rnd(0,W),r*TILE+rnd(2,TILE-4),3,3);
-    dctx.fillStyle='rgba(255,255,255,.07)';
-    for(let i=0;i<6;i++) dctx.fillRect(rnd(0,W),r*TILE+rnd(2,TILE-4),2,2);
+    dctx.strokeStyle='rgba(0,0,0,.18)'; dctx.lineWidth=1;
+    for(let i=0;i<4;i++){ const bx=rnd(0,W-26), by=r*TILE+rnd(2,TILE-16);
+      dctx.strokeRect(bx,by,rnd(14,24),rnd(10,14)); }
+    dctx.fillStyle='rgba(255,255,255,.08)';
+    for(let i=0;i<6;i++) dctx.fillRect(rnd(0,W),r*TILE+rnd(2,TILE-4),3,2);
   }
   dctx.restore();
 
@@ -240,14 +242,14 @@ function genLevel(){
   const N=plan.critters;
   for(let i=0;i<N;i++){
     for(let tries=0;tries<80;tries++){
-      const c=ri(1,COLS-2), r=ri(5,ROWS-2);
+      const c=ri(1,COLS-2), r=ri(3,ROWS-4);
       if(free(c,r)&&farFromUsed(c,r,3)){
         take(c,r); openCell(c,r);
-        const kind=(lv>1&&i%2)?'cat':'shafan';
+        const kind=(lv>1&&i%2)?'pigeon':'cat';
         G.critters.push({kind, x:cellCX(c),y:cellCY(r),
           tc:c,tr:r, state:'walk', dirX:1,dirY:0,
           ghostT:rnd(5,11)*(lv===1?1.3:1), ghostDur:0, anim:rnd(0,6),
-          spd:(kind==='cat'?52:44)*Math.min(1+0.05*(G.level-1),1.35)});
+          spd:(kind==='pigeon'?52:44)*Math.min(1+0.05*(G.level-1),1.35)});
         break;
       }
     }
@@ -257,7 +259,7 @@ function genLevel(){
   const nd=G.level>=3?2:1;
   for(let i=0;i<nd;i++){
     for(let tries=0;tries<80;tries++){
-      const c=ri(1,COLS-2), r=ri(6,ROWS-2);
+      const c=ri(1,COLS-2), r=ri(3,ROWS-5);
       if(free(c,r)&&farFromUsed(c,r,3)){
         take(c,r); openCell(c,r);
         G.pockets.push({c,r,dog:true});
@@ -271,20 +273,20 @@ function genLevel(){
   for(let i=0;i<plan.corridors;i++){
     const horiz=Math.random()<0.6, len=ri(3,5);
     if(horiz){
-      const r=ri(5,ROWS-3), c0=ri(0,COLS-1-len);
+      const r=ri(4,ROWS-3), c0=ri(0,COLS-1-len);
       for(let c=c0;c<c0+len;c++) if(free(c,r)){ take(c,r); openCell(c,r); }
       carveCapsule(c0,r,c0+len-1,r);
     } else {
-      const c=ri(1,COLS-2), r0=ri(4,ROWS-1-len);
+      const c=ri(1,COLS-2), r0=ri(3,ROWS-2-len);
       for(let r=r0;r<r0+len;r++) if(free(c,r)){ take(c,r); openCell(c,r); }
       carveCapsule(c,r0,c,r0+len-1);
     }
   }
-  // boulders
+  // armoires (falling furniture)
   const B=plan.rocks;
   for(let i=0;i<B;i++){
     for(let tries=0;tries<80;tries++){
-      const c=ri(0,COLS-1), r=ri(4,ROWS-4);
+      const c=ri(0,COLS-1), r=ri(3,ROWS-4);
       if(free(c,r)&&free(c,r+1)){ take(c,r); G.rocks.push({c,r,x:cellCX(c),y:cellCY(r),state:'idle',t:0,vy:0}); break; }
     }
   }
@@ -292,12 +294,12 @@ function genLevel(){
   const ITEMS=['bamba','water','battery','radio','bamba','water'];
   for(let i=0;i<ITEMS.length;i++){
     for(let tries=0;tries<80;tries++){
-      const c=ri(0,COLS-1), r=ri(4,ROWS-1);
+      const c=ri(0,COLS-1), r=ri(3,ROWS-2);
       if(free(c,r)){ take(c,r); G.supplies.push({c,r,kind:ITEMS[i],got:false}); break; }
     }
   }
   // player to surface
-  P.x=cellCX(3); P.y=cellCY(SURFROW); P.dir=null; P.face='R'; P.invuln=0;
+  P.x=cellCX(3); P.y=cellCY(LOBBY); P.dir=null; P.face='R'; P.invuln=0;
   G.demand=Math.random()<0.5&&G.residents.some(f=>f.dog); G.dogSafe=false; G.refuseCd=0; G.chainGrace=0; G.shake=0;
   G.time=Math.max(80,Math.min(125,95-3*(lv-1)+14*(G.totalRes-3)));
   if(G.demand) G.time+=12; // Savta's dog demand adds a mandatory detour
@@ -345,10 +347,10 @@ function updatePlayer(dt){
     const aheadX=P.x+dx*16, aheadY=P.y+dy*16;
     const [ac,ar]=cellOf(aheadX+dx*6,aheadY+dy*6);
     const blockedRock=rockAt(ac,ar);
-    const minY=cellCY(SURFROW), maxY=cellCY(ROWS-1);
+    const minY=cellCY(TOP), maxY=cellCY(LOBBY);
     const minX=cellCX(0), maxX=cellCX(COLS-1);
-    const targetOpen=isOpen(ac,ar)||(ar===SURFROW);
-    const digSp=ar<7?94:ar<11?80:ar<15?68:60;
+    const targetOpen=isOpen(ac,ar)||(ar===LOBBY);
+    const digSp=ar>14?94:ar>10?80:ar>6?68:60;
     let sp=targetOpen?140:digSp;
     if(blockedRock) sp=0;
     let nx=P.x+dx*sp*dt, ny=P.y+dy*sp*dt;
@@ -362,7 +364,7 @@ function updatePlayer(dt){
   }
   // mark cell open when centered enough
   const [c2,r2]=cellOf(P.x,P.y);
-  if(Math.abs(P.x-cellCX(c2))<13&&Math.abs(P.y-cellCY(r2))<13&&r2>=SURF) openCell(c2,r2);
+  if(Math.abs(P.x-cellCX(c2))<13&&Math.abs(P.y-cellCY(r2))<13&&r2>=TOP) openCell(c2,r2);
 
   // trail for followers
   const lt=G.trail[G.trail.length-1];
@@ -386,7 +388,7 @@ function updatePlayer(dt){
     if(dist(P.x,P.y,res.x,res.y)<26){
       G.residents.splice(i,1); G.chain.push(res); G.chainGrace=1.0;
       if(res.dog) toast(res.name+' the dog is following you! 🐶');
-      else toast(res.name+' is with you! To Ein Kerem! ⬆');
+      else toast(res.name+' is with you! Down to the miklat! ⬇');
       if(res.name==='Savta Rivka'&&G.demand&&!G.dogSafe)
         toast('Savta Rivka: «Not without the dog!» 🐕');
       Snd.chime();
@@ -399,7 +401,7 @@ function updatePlayer(dt){
     }
   }
   // rescue at miklat door (surface, left side)
-  if(G.chain.length&&P.y<cellCY(SURFROW)+8&&P.x<TILE*2.2){
+  if(G.chain.length&&P.y>cellCY(LOBBY)-8&&P.x<TILE*2.2){
     let humans=0, dogs=0; const keep=[];
     for(const f of G.chain){
       if(f.dog){ dogs++; G.dogSafe=true; addScore(750,P.x+rnd(-20,20),P.y-30); puff(P.x,P.y,'#ffd166',10); }
@@ -412,11 +414,11 @@ function updatePlayer(dt){
     if(humans||dogs){
       G.rescued+=humans; G.chain=keep;
       Snd.fanfare();
-      if(humans) toast(humans>1?'Everyone made it to Ein Kerem!':'Safe at Ein Kerem!');
-      if(dogs) toast('Woof! Dog safe at Ein Kerem! +750 🐾');
+      if(humans) toast(humans>1?'Everyone is safe in the miklat!':'Safe in the miklat!');
+      if(dogs) toast('Woof! Dog safe in the miklat! +750 🐾');
       if(keep.length) toast('Savta Rivka: «Not without the dog!» 🐕');
       if(G.rescued>=G.totalRes){
-        G.state='clear'; G.clearT=2.0; track('digger-clear');
+        G.state='clear'; G.clearT=2.0; track('tower-clear');
         const bonus=Math.ceil(G.time)*10;
         addScore(bonus); toast('ALL SAFE! Time bonus +'+bonus);
       }
@@ -442,20 +444,20 @@ function scatterChain(from=0){
   }
   G.chain.length=from;
   G.chainGrace=1.0;
-  toast(from?'Some ran back to the miklat!':'Oy! They ran back to the miklat!');
+  toast(from?'Some ran back home!':'Oy! They ran back home!');
 }
 function hitPlayer(){
   if(P.invuln>0||G.state!=='play')return;
   G.hearts--; P.invuln=2.5; G.shake=0.4;
   Snd.hurt(); puff(P.x,P.y,'#ffb0b0',14);
   scatterChain();
-  if(G.hearts<=0){ gameOver('You got too dizzy to dig!'); return; }
-  P.x=cellCX(3); P.y=cellCY(SURFROW); P.dir=null; G.trail.length=0;
+  if(G.hearts<=0){ gameOver('You got too dizzy to keep climbing!'); return; }
+  P.x=cellCX(3); P.y=cellCY(LOBBY); P.dir=null; G.trail.length=0;
 }
 function gameOver(reason){
   G.state='over'; G.overReason=reason; G.toasts.length=0;
-  track('digger-over');
-  if(G.score>G.best){ G.best=G.score; store.set('dig_best',G.best); }
+  track('tower-over');
+  if(G.score>G.best){ G.best=G.score; store.set('twr_best',G.best); }
 }
 
 /* ---------------- critters ---------------- */
@@ -480,7 +482,7 @@ function updateCritters(dt){
         const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
         for(const [dx,dy] of dirs){
           const nc=k.tc+dx, nr=k.tr+dy;
-          if(nr<SURF) continue; // critters stay underground
+          if(nr>=LOBBY||nr<TOP) continue; // critters stay out of the lobby
           if(isOpen(nc,nr)&&!rockAt(nc,nr)) opts.push([dx,dy]);
         }
         let pick=null;
@@ -502,11 +504,11 @@ function updateCritters(dt){
         k.x+=Math.cos(ang)*k.spd*dt; k.y+=Math.sin(ang)*k.spd*dt;
       }
       k.ghostT-=dt;
-      if(k.ghostT<=0&&dist(k.x,k.y,P.x,P.y)>TILE*1.5&&(P.y>cellCY(SURFROW)+10||G.chain.length)){
+      if(k.ghostT<=0&&dist(k.x,k.y,P.x,P.y)>TILE*1.5&&(P.y<cellCY(LOBBY)-10||G.chain.length)){
         k.state='ghost'; k.ghostDur=rnd(4,7); k.gTrav=0;
       }
     } else if(k.state==='ghost'){
-      const ang=Math.atan2(Math.max(P.y,cellCY(SURF)+4)-k.y,P.x-k.x);
+      const ang=Math.atan2(Math.min(P.y,cellCY(LOBBY-1)-4)-k.y,P.x-k.x);
       const gs=k.spd*0.62;
       k.x+=Math.cos(ang)*gs*dt; k.y+=Math.sin(ang)*gs*dt; k.gTrav+=gs*dt;
       k.ghostDur-=dt;
@@ -533,7 +535,7 @@ function updateCritters(dt){
 function updateFalafels(dt){
   for(const f of G.falafels){
     const [c,r]=cellOf(f.x,f.y);
-    const open=isOpen(c,r)||r===SURFROW;
+    const open=isOpen(c,r)||r===LOBBY;
     const sp=open?260:70;
     f.x+=f.dx*sp*dt; f.y+=f.dy*sp*dt; f.trav+=sp*dt;
     if(!open){
@@ -541,7 +543,7 @@ function updateFalafels(dt){
       if(Math.random()<0.35) G.parts.push({x:f.x+rnd(-6,6),y:f.y+rnd(-6,6),
         vx:rnd(-40,40),vy:rnd(-60,10),t:rnd(0.2,0.45),col:'#8a6a40'});
     }
-    if(f.trav>TILE*3.4||rockAt(c,r)||f.x<8||f.x>W-8||f.y<cellCY(SURFROW)-12||f.y>H-8){
+    if(f.trav>TILE*3.4||rockAt(c,r)||f.x<8||f.x>W-8||f.y<cellCY(TOP)-20||f.y>H-8){
       f.dead=true; puff(f.x,f.y,'#d8b56a',5); continue; }
     for(const k of G.critters){
       if((k.state==='walk'||k.state==='ghost')&&dist(f.x,f.y,k.x,k.y)<22){
@@ -571,7 +573,7 @@ function updateRocks(dt){
       const nr=Math.floor((k.y+20)/TILE);
       if(nr>=ROWS||(!isOpen(k.c,nr)&&nr>k.r)||G.rocks.some(o=>o!==k&&o.state!=='fall'&&o.c===k.c&&o.r===nr)){
         k.dead=true; G.shake=0.3; Snd.thud();
-        puff(k.x,k.y+10,'#8a8a8a',14);
+        puff(k.x,k.y+10,'#8a6a4a',14);
       }
       if(dist(k.x,k.y,P.x,P.y)<30) hitPlayer();
       for(const c of G.critters){
@@ -586,47 +588,43 @@ function updateRocks(dt){
 
 /* ---------------- drawing ---------------- */
 function drawSky(){
-  const g=ctx.createLinearGradient(0,0,0,SURF*TILE);
+  // sky above the roof
+  const g=ctx.createLinearGradient(0,0,0,TOP*TILE);
   g.addColorStop(0,'#8fd3f0'); g.addColorStop(1,'#d8f0fa');
-  ctx.fillStyle=g; ctx.fillRect(0,0,W,SURF*TILE);
-  // sun
-  ctx.fillStyle='#ffe28a'; ctx.beginPath(); ctx.arc(W-60,38,22,0,7); ctx.fill();
-  // city silhouette
-  ctx.fillStyle='#b3cfdd';
-  const bl=[ [150,46],[200,30],[250,52],[300,38],[360,56],[420,42] ];
-  for(const [bx,bh] of bl) ctx.fillRect(bx,SURF*TILE-bh-14,36,bh);
-  ctx.fillStyle='#9bbccc';
-  for(const [bx,bh] of bl) for(let wy=0;wy<bh-12;wy+=12) ctx.fillRect(bx+6,SURF*TILE-bh-8+wy,5,6);
-  // ground lip
-  ctx.fillStyle='#7da55c'; ctx.fillRect(0,SURF*TILE-14,W,14);
-  // Ein Kerem Hospital
-  ctx.fillStyle='#eef1f4'; ctx.fillRect(6,SURF*TILE-88,86,74);
-  ctx.fillStyle='#c5ccd3'; ctx.fillRect(6,SURF*TILE-88,86,7);
-  ctx.fillStyle='#e03131'; ctx.font='bold 10px Courier New'; ctx.textAlign='center';
-  ctx.fillText('בי״ח עין כרם',49,SURF*TILE-68);
-  ctx.fillStyle='#74c0fc';
-  for(let wx=0;wx<4;wx++) ctx.fillRect(12+wx*20,SURF*TILE-62,12,10);
-  ctx.fillStyle='#37464f'; ctx.fillRect(34,SURF*TILE-36,30,22);
-  magenDavid(75,SURF*TILE-30,8);
-  ctx.fillStyle='#1c2733'; ctx.font='bold 9px Courier New';
-  ctx.fillText('EIN KEREM',49,SURF*TILE-40);
-}
-function magenDavid(x,y,r){
-  ctx.strokeStyle='#e03131'; ctx.lineWidth=2;
-  for(const o of [Math.PI/2,-Math.PI/2]){
-    ctx.beginPath();
-    for(let i=0;i<3;i++){
-      const a=o+i*2*Math.PI/3;
-      const px=x+Math.cos(a)*r, py=y-Math.sin(a)*r;
-      i?ctx.lineTo(px,py):ctx.moveTo(px,py);
-    }
-    ctx.closePath(); ctx.stroke();
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,TOP*TILE);
+  ctx.fillStyle='#ffe28a'; ctx.beginPath(); ctx.arc(W-60,30,16,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.85)';
+  ctx.beginPath(); ctx.ellipse(120,28,26,9,0,0,7); ctx.ellipse(152,32,18,7,0,0,7); ctx.fill();
+  // roof: parapet, dudei shemesh, antenna
+  ctx.fillStyle='#6e6258'; ctx.fillRect(0,TOP*TILE-8,W,8);
+  for(const hx of [70,250,420]){
+    ctx.fillStyle='#e9ecef'; ctx.fillRect(hx,TOP*TILE-24,34,12);
+    ctx.fillStyle='#3b4754'; ctx.fillRect(hx-14,TOP*TILE-18,15,10);
   }
+  ctx.fillStyle='#555'; ctx.fillRect(478,TOP*TILE-34,3,26);
 }
 function drawBackdrop(){
-  ctx.fillStyle='#221206'; ctx.fillRect(0,SURF*TILE,W,H-SURF*TILE);
-  ctx.fillStyle='rgba(255,255,255,.03)';
-  for(let i=0;i<40;i++) ctx.fillRect((i*97)%W,SURF*TILE+(i*173)%(H-SURF*TILE),3,3);
+  // building interior behind the balagan
+  ctx.fillStyle='#2b2015'; ctx.fillRect(0,TOP*TILE,W,(LOBBY-TOP)*TILE);
+  ctx.fillStyle='#1d1610';
+  for(let r=TOP;r<LOBBY;r++) ctx.fillRect(0,(r+1)*TILE-2,W,2);
+  ctx.fillStyle='#9fd3ec';
+  for(let r=TOP;r<LOBBY-1;r+=2){ ctx.fillRect(5,r*TILE+10,14,20); ctx.fillRect(W-19,r*TILE+10,14,20); }
+  // lobby
+  ctx.fillStyle='#4a4f57'; ctx.fillRect(0,LOBBY*TILE,W,TILE);
+  ctx.fillStyle='#3d424a';
+  for(let x=0;x<W;x+=26) ctx.fillRect(x,LOBBY*TILE+TILE-6,22,4);
+  // miklat entrance (bottom-left): stair doorway + green sign
+  ctx.fillStyle='#23272d'; ctx.fillRect(6,LOBBY*TILE+4,40,34);
+  ctx.fillStyle='#2e7d32'; ctx.fillRect(48,LOBBY*TILE+6,46,16);
+  ctx.fillStyle='#fff'; ctx.font='bold 11px Courier New'; ctx.textAlign='center';
+  ctx.fillText('מקלט⬇',71,LOBBY*TILE+18);
+  // the elevator, perpetually be'tikun (bottom-right)
+  ctx.fillStyle='#7a828c'; ctx.fillRect(W-66,LOBBY*TILE+4,52,36);
+  ctx.fillStyle='#5d646d'; ctx.fillRect(W-64,LOBBY*TILE+6,23,32); ctx.fillRect(W-39,LOBBY*TILE+6,23,32);
+  ctx.fillStyle='#ffd166'; ctx.fillRect(W-62,LOBBY*TILE+14,44,12);
+  ctx.fillStyle='#5a4a1d'; ctx.font='bold 8px Courier New';
+  ctx.fillText('בתיקון',W-40,LOBBY*TILE+23);
 }
 function drawSupplies(){
   for(const s of G.supplies){
@@ -655,10 +653,10 @@ function drawPocketRoom(p){
     ctx.beginPath(); ctx.arc(x+15,y+8.5,3,0,7); ctx.arc(x+25,y+8.5,3,0,7); ctx.fill();
     return;
   }
-  ctx.fillStyle='#3b4754'; ctx.fillRect(x+3,y+TILE-9,TILE*2-6,6);
-  ctx.fillStyle='#2e7d32'; ctx.fillRect(x+TILE-15,y+1,30,12);
-  ctx.fillStyle='#fff'; ctx.font='bold 9px Courier New'; ctx.textAlign='center';
-  ctx.fillText('מקלט',x+TILE,y+10);
+  ctx.fillStyle='#5a452f'; ctx.fillRect(x+3,y+TILE-9,TILE*2-6,7);   // parquet
+  ctx.fillStyle='#8a4a5a'; ctx.fillRect(x+16,y+TILE-11,TILE*2-32,4); // rug
+  ctx.strokeStyle='#caa84a'; ctx.lineWidth=2; ctx.strokeRect(x+8,y+5,12,10); // picture
+  ctx.fillStyle='#ffe9a8'; ctx.beginPath(); ctx.arc(x+TILE*2-12,y+9,4,0,7); ctx.fill(); // lamp
 }
 function drawDog(x,y,wave){
   ctx.save(); ctx.translate(x,y);
@@ -701,14 +699,14 @@ function drawCritter(k){
   if(k.state==='stun'){ ctx.globalAlpha=0.75; ctx.rotate(Math.sin(k.anim*3)*0.15); }
   if(k.state==='pacified') ctx.globalAlpha=0.85;
   const b=Math.sin(k.anim)*2;
-  if(k.kind==='shafan'){
-    ctx.fillStyle='#a07850'; ctx.beginPath(); ctx.ellipse(0,b,14,11,0,0,7); ctx.fill();
-    ctx.fillStyle='#8a6240';
-    ctx.beginPath(); ctx.ellipse(-6,-9+b,4,6,0,0,7); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(6,-9+b,4,6,0,0,7); ctx.fill();
-    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(-4,-2+b,3.4,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(5,-2+b,3.4,0,7); ctx.fill();
-    ctx.fillStyle='#222'; ctx.beginPath(); ctx.arc(-3.4,-2+b,1.6,0,7); ctx.fill(); ctx.beginPath(); ctx.arc(5.6,-2+b,1.6,0,7); ctx.fill();
-    ctx.fillStyle='#6b4a30'; ctx.beginPath(); ctx.arc(0,4+b,2.4,0,7); ctx.fill();
+  if(k.kind==='pigeon'){
+    const fl=Math.sin(k.anim*(k.state==='ghost'?8:4))*3;
+    ctx.fillStyle='#8d99a6'; ctx.beginPath(); ctx.ellipse(0,b,12,9,0,0,7); ctx.fill();
+    ctx.fillStyle='#aab4bf'; ctx.beginPath(); ctx.ellipse(-3,b-3,8,5+fl,-0.3,0,7); ctx.fill();
+    ctx.fillStyle='#6f7d2c'; ctx.beginPath(); ctx.arc(9,-6+b,5,0,7); ctx.fill();
+    ctx.fillStyle='#e8890c'; ctx.beginPath(); ctx.moveTo(13,-7+b); ctx.lineTo(18,-5+b); ctx.lineTo(13,-3+b); ctx.fill();
+    ctx.fillStyle='#222'; ctx.beginPath(); ctx.arc(10,-8+b,1.5,0,7); ctx.fill();
+    ctx.fillStyle='#e8890c'; ctx.fillRect(-2,9+b,2,4); ctx.fillRect(3,9+b,2,4);
   } else {
     ctx.fillStyle='#9aa0a6'; ctx.beginPath(); ctx.ellipse(0,b,13,11,0,0,7); ctx.fill();
     ctx.fillStyle='#9aa0a6';
@@ -734,9 +732,9 @@ function drawRock(k){
   let wx=0;
   if(k.state==='wobble') wx=Math.sin(performance.now()/30)*3;
   ctx.translate(k.x+wx,k.y);
-  ctx.fillStyle='#7a7d80'; ctx.beginPath(); ctx.arc(0,0,16,0,7); ctx.fill();
-  ctx.fillStyle='#5d6063'; ctx.beginPath(); ctx.arc(5,5,9,0,7); ctx.fill();
-  ctx.fillStyle='#999da1'; ctx.beginPath(); ctx.arc(-5,-6,5,0,7); ctx.fill();
+  ctx.fillStyle='#6b4a2f'; ctx.fillRect(-15,-17,30,34);
+  ctx.fillStyle='#7d583a'; ctx.fillRect(-13,-15,12,30); ctx.fillRect(1,-15,12,30);
+  ctx.fillStyle='#3e2c1c'; ctx.fillRect(-4,-4,2,6); ctx.fillRect(2,-4,2,6);
   ctx.restore();
 }
 function drawPlayer(){
@@ -755,10 +753,10 @@ function drawPlayer(){
   ctx.fillRect(-9.5,-14,19,3);
   // eye
   ctx.fillStyle='#222'; ctx.fillRect(3,-11,2.5,2.5);
-  // shovel
+  // broom
   ctx.strokeStyle='#8d6e3a'; ctx.lineWidth=3;
-  ctx.beginPath(); ctx.moveTo(8,0); ctx.lineTo(17,4); ctx.stroke();
-  ctx.fillStyle='#adb5bd'; ctx.beginPath(); ctx.arc(19,5,4,0,7); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(8,-2); ctx.lineTo(17,6); ctx.stroke();
+  ctx.fillStyle='#caa84a'; ctx.fillRect(15,5,8,7);
   ctx.restore();
 }
 function drawChain(){
@@ -779,7 +777,7 @@ function drawHUD(){
   ctx.fillText(String(G.score).padStart(6,'0'),W/2,21);
   // level + rescued
   ctx.fillStyle='#9ef0a0'; ctx.textAlign='left';
-  ctx.fillText('L'+G.level+'  ✚'+G.rescued+'/'+G.totalRes+(G.dogSafe?' 🐾':''),70,21);
+  ctx.fillText('L'+G.level+'  ⌂'+G.rescued+'/'+G.totalRes+(G.dogSafe?' 🐾':''),70,21);
   // timer
   const urgent=G.time<15;
   ctx.fillStyle=urgent?(Math.floor(G.time*2)%2?'#ff6b6b':'#fff'):'#fff';
@@ -834,17 +832,17 @@ function drawTitle(){
   ctx.textAlign='center';
   ctx.fillStyle='#ffd166'; ctx.font='bold 44px Courier New';
   ctx.fillText('MIKLAT',W/2,H*0.26);
-  ctx.fillText('DIGGER',W/2,H*0.33);
+  ctx.fillText('TOWER',W/2,H*0.33);
   ctx.fillStyle='#9ef0a0'; ctx.font='bold 16px Courier New';
-  ctx.fillText('חופרים לעין כרם',W/2,H*0.385);
+  ctx.fillText('כולם למקלט!',W/2,H*0.385);
   ctx.fillStyle='#fff'; ctx.font='14px Courier New';
   const lines=[
-    'Dig the neighbors out of their miklats',
-    'and walk them to Ein Kerem Hospital',
-    '(top-left) before the siren ends!',
+    'The elevator is in tikun. Climb up,',
+    'clear the balagan, and bring the',
+    'neighbors DOWN to the miklat in time!',
     '',
-    '🥙 Falafel calms critters & bores dirt.',
-    '🪨 Don\'t stand under a wobbling boulder.',
+    '🥙 Falafel calms cats & pigeons.',
+    '🗄 Don\'t stand under a wobbling armoire.',
     '🐶 Dogs are bonus rescues! (+750)',
     '',
     'Move: arrows / WASD / swipe / pad',
@@ -863,7 +861,7 @@ function drawOver(){
   ctx.fillStyle='rgba(8,10,20,.78)'; ctx.fillRect(0,0,W,H);
   ctx.textAlign='center';
   ctx.fillStyle='#ff8787'; ctx.font='bold 34px Courier New';
-  ctx.fillText(G.overReason.includes('siren')?'TIME\'S UP!':'DRILL OVER',W/2,H*0.33);
+  ctx.fillText(G.overReason.startsWith('Time')?'TIME\'S UP!':'OY VA VOY!',W/2,H*0.33);
   ctx.fillStyle='#fff'; ctx.font='15px Courier New';
   ctx.fillText(G.overReason,W/2,H*0.39);
   ctx.fillStyle='#ffe66d'; ctx.font='bold 24px Courier New';
@@ -872,22 +870,22 @@ function drawOver(){
   ctx.fillText('BEST  '+G.best+(G.score>=G.best&&G.score>0?'  ★ NEW!':''),W/2,H*0.53);
   if(Math.floor(performance.now()/500)%2){
     ctx.fillStyle='#9ef0a0'; ctx.font='bold 18px Courier New';
-    ctx.fillText('TAP / ANY KEY TO DIG AGAIN',W/2,H*0.64);
+    ctx.fillText('TAP / ANY KEY TO TRY AGAIN',W/2,H*0.64);
   }
 }
 function drawClear(){
   ctx.fillStyle='rgba(8,10,20,.6)'; ctx.fillRect(0,H*0.3,W,H*0.22);
   ctx.textAlign='center';
   ctx.fillStyle='#9ef0a0'; ctx.font='bold 30px Courier New';
-  ctx.fillText('EVERYONE\'S AT EIN KEREM! ✚',W/2,H*0.39);
+  ctx.fillText('EVERYONE\'S IN THE MIKLAT! ⌂',W/2,H*0.39);
   ctx.fillStyle='#fff'; ctx.font='16px Courier New';
-  ctx.fillText('Digging deeper… Level '+(G.level+1),W/2,H*0.445);
+  ctx.fillText('Climbing higher… Level '+(G.level+1),W/2,H*0.445);
 }
 let paused=false;
 function togglePause(){ if(G.state==='play'||paused){ paused=!paused; } }
 function startGame(){
   G.level=1; G.score=0; G.hearts=3; G.state='play'; paused=false;
-  Inp.fire=false; track('digger-start');
+  Inp.fire=false; track('tower-start');
   genLevel(); Snd.fanfare();
 }
 function uiKey(key){
@@ -914,7 +912,7 @@ function loop(now){
 
   if(G.state==='play'&&!paused){
     G.time-=dt;
-    if(G.time<=0){ gameOver('The siren ended before everyone reached Ein Kerem.'); }
+    if(G.time<=0){ gameOver("Time's up — they sheltered in place at home."); }
     if(G.time<13&&G.time>0){ G.sirenT-=dt; if(G.sirenT<=0){ G.sirenT=1.0; Snd.sirenBeat(); } }
     if(G.state==='play') updatePlayer(dt);
     if(G.state==='play') updateCritters(dt);

@@ -1,0 +1,25 @@
+{
+  "name": "MIKLAT TOWER",
+  "short_name": "MIKLAT TOWER",
+  "description": "Everyone down to the miklat!",
+  "start_url": "/miklattower/",
+  "scope": "/miklattower/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0e1a",
+  "theme_color": "#0b0e1a",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
