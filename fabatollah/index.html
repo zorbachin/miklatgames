@@ -11,10 +11,11 @@
 <meta property="og:title" content="FABATOLLAH — Pride makeover">
 <meta property="og:description" content="It's Pride Month. Give the Supreme Leader the glow-up he deserves. Dress him, paint him, bedazzle him — make Fabatollah fabulous. Free, works in the shelter.">
 <meta property="og:url" content="https://miklatgames.fun/fabatollah/">
-<meta property="og:image" content="https://miklatgames.fun/og.jpg">
+<meta property="og:image" content="https://miklatgames.fun/fabatollah/art/og.png">
 <meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image:height" content="800">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://miklatgames.fun/fabatollah/art/og.png">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon.svg">
 <title>FABATOLLAH 🏳️‍🌈 — Pride makeover</title>
@@ -61,7 +62,7 @@
   .stage svg{width:auto;height:min(46vh,420px);max-width:100%;display:block;filter:drop-shadow(0 14px 26px rgba(0,0,0,.5));}
   /* full-look art overlay: shows AI preset render when present, else SVG falls through */
   #lookImg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-    height:min(46vh,420px);width:auto;max-width:94%;object-fit:contain;display:none;
+    height:min(46vh,420px);width:auto;max-width:94%;object-fit:contain;display:none;border-radius:16px;
     filter:drop-shadow(0 14px 26px rgba(0,0,0,.5));pointer-events:none;}
   .sparkle{position:absolute;font-size:22px;pointer-events:none;opacity:0;}
 
@@ -655,11 +656,12 @@ const PRESET_IMG={desertDiva:'look-desertdiva.png',discoMullah:'look-discomullah
   cowboyCouture:'look-cowboy.png',angel:'look-angel.png'};
 function hideLook(){ const i=document.getElementById('lookImg'),s=document.getElementById('doll');
   if(i)i.style.display='none'; if(s)s.style.opacity='1'; }
-function showLook(id){ const f=PRESET_IMG[id]; const i=document.getElementById('lookImg'),s=document.getElementById('doll');
+function showLookFile(f){ const i=document.getElementById('lookImg'),s=document.getElementById('doll');
   if(!f||!i){hideLook();return;}
   i.onload=()=>{ i.style.display='block'; if(s)s.style.opacity='0'; };
-  i.onerror=()=>{ hideLook(); };           // file not uploaded yet -> graceful SVG fallback
+  i.onerror=()=>{ hideLook(); };           // file missing -> graceful SVG fallback
   i.src='art/'+f; }
+function showLook(id){ const f=PRESET_IMG[id]; if(!f){hideLook();return;} showLookFile(f); }
 
 /* ============================ build UI ============================ */
 let activeTab='preset';
@@ -796,6 +798,7 @@ document.getElementById('reset').onclick=reset;
 /* ============================ boot ============================ */
 applyLang();
 render();
+showLookFile('look-before.png');   // first impression: the AI "before" render (falls back to SVG if absent)
 track('open');
 </script>
 <script data-goatcounter="https://miklat-games.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
