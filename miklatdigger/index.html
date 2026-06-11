@@ -168,6 +168,16 @@ const rockAt=(c,r)=>G.rocks.find(k=>k.state!=='fall'&&k.c===c&&k.r===r);
 
 /* ---------------- level generation ---------------- */
 function genLevel(){
+  const lv=G.level;
+  // level plan: deeper rescues, more of everything, cats from L2
+  const plan={
+    res:Math.min(3+((lv-1)>>1),6),            // 3,3,4,4,5,5,6
+    critters:Math.min(2+lv,7),
+    resMin:Math.min(5+lv,10), resMax:Math.min(9+lv*2,ROWS-2),
+    rocks:4+Math.min(lv,6),
+    corridors:lv>=2?ri(1,2):0
+  };
+  G.totalRes=plan.res;
   G.passable=Array.from({length:COLS},()=>Array(ROWS).fill(false));
   for(let c=0;c<COLS;c++) G.passable[c][SURFROW]=true;
   G.rocks=[]; G.critters=[]; G.residents=[]; G.supplies=[]; G.falafels=[]; G.pockets=[];
@@ -200,7 +210,7 @@ function genLevel(){
   const NAMES=['Savta Rivka',...POOL.sort(()=>Math.random()-0.5)];
   for(let i=0;i<G.totalRes;i++){
     for(let tries=0;tries<80;tries++){
-      const c=ri(1,COLS-3), r=ri(7,ROWS-2);
+      const c=ri(1,COLS-3), r=ri(plan.resMin,plan.resMax);
       if(free(c,r)&&free(c+1,r)&&farFromUsed(c,r,4)){
         take(c,r); take(c+1,r);
         openCell(c,r); openCell(c+1,r); carveCapsule(c,r,c+1,r);
@@ -212,15 +222,15 @@ function genLevel(){
     }
   }
   // critter pockets (1 cell)
-  const N=Math.min(2+G.level,6);
+  const N=plan.critters;
   for(let i=0;i<N;i++){
     for(let tries=0;tries<80;tries++){
       const c=ri(1,COLS-2), r=ri(5,ROWS-2);
       if(free(c,r)&&farFromUsed(c,r,3)){
         take(c,r); openCell(c,r);
-        G.critters.push({kind:i%2?'cat':'shafan', x:cellCX(c),y:cellCY(r),
+        G.critters.push({kind:(lv>1&&i%2)?'cat':'shafan', x:cellCX(c),y:cellCY(r),
           tc:c,tr:r, state:'walk', dirX:1,dirY:0,
-          ghostT:rnd(5,11), ghostDur:0, anim:rnd(0,6),
+          ghostT:rnd(5,11)*(lv===1?1.6:1), ghostDur:0, anim:rnd(0,6),
           spd:(i%2?52:44)*(1+0.06*(G.level-1))});
         break;
       }
@@ -241,8 +251,21 @@ function genLevel(){
       }
     }
   }
+  // pre-dug corridors (L2+): vary the map, give critters room to roam
+  for(let i=0;i<plan.corridors;i++){
+    const horiz=Math.random()<0.6, len=ri(3,5);
+    if(horiz){
+      const r=ri(5,ROWS-3), c0=ri(0,COLS-1-len);
+      for(let c=c0;c<c0+len;c++) if(free(c,r)){ take(c,r); openCell(c,r); }
+      carveCapsule(c0,r,c0+len-1,r);
+    } else {
+      const c=ri(1,COLS-2), r0=ri(4,ROWS-1-len);
+      for(let r=r0;r<r0+len;r++) if(free(c,r)){ take(c,r); openCell(c,r); }
+      carveCapsule(c,r0,c,r0+len-1);
+    }
+  }
   // boulders
-  const B=4+Math.min(G.level,4);
+  const B=plan.rocks;
   for(let i=0;i<B;i++){
     for(let tries=0;tries<80;tries++){
       const c=ri(0,COLS-1), r=ri(4,ROWS-4);
@@ -259,9 +282,10 @@ function genLevel(){
   }
   // player to surface
   P.x=cellCX(3); P.y=cellCY(SURFROW); P.dir=null; P.face='R'; P.invuln=0;
-  G.time=Math.max(70,105-5*(G.level-1));
+  G.time=Math.max(70,Math.min(130,105-6*(lv-1)+10*(plan.res-3)));
   G.sirenT=0;
   G.demand=Math.random()<0.5; G.dogSafe=false; G.refuseCd=0;
+  toast('Level '+lv+' — rescue '+plan.res+' neighbors!');
 }
 
 /* ---------------- helpers ---------------- */
@@ -306,7 +330,8 @@ function updatePlayer(dt){
     const minY=cellCY(SURFROW), maxY=cellCY(ROWS-1);
     const minX=cellCX(0), maxX=cellCX(COLS-1);
     const targetOpen=isOpen(ac,ar)||(ar===SURFROW);
-    let sp=targetOpen?140:82;
+    const digSp=ar<7?94:ar<11?80:ar<15?68:56;
+    let sp=targetOpen?140:digSp;
     if(blockedRock) sp=0;
     let nx=P.x+dx*sp*dt, ny=P.y+dy*sp*dt;
     nx=clamp(nx,minX,maxX); ny=clamp(ny,minY,maxY);
@@ -352,7 +377,7 @@ function updatePlayer(dt){
   // supplies
   for(const s of G.supplies){
     if(!s.got&&G.passable[s.c][s.r]&&dist(P.x,P.y,cellCX(s.c),cellCY(s.r))<24){
-      s.got=true; addScore(100,P.x,P.y-20); Snd.chime();
+      s.got=true; addScore(100+(s.r-4)*10,P.x,P.y-20); Snd.chime();
     }
   }
   // rescue at miklat door (surface, left side)
@@ -422,6 +447,11 @@ function updateCritters(dt){
       if(k.y<40) k.gone=true;
       continue;
     }
+    if(k.state==='stun'){
+      k.stunT-=dt;
+      if(k.stunT<=0){ k.state='ghost'; k.ghostDur=rnd(3,5); k.gTrav=TILE; }
+      continue;
+    }
     if(k.state==='walk'){
       const tx=cellCX(k.tc), ty=cellCY(k.tr);
       if(dist(k.x,k.y,tx,ty)<2){
@@ -481,14 +511,23 @@ function updateCritters(dt){
 /* ---------------- falafels ---------------- */
 function updateFalafels(dt){
   for(const f of G.falafels){
-    const sp=260; f.x+=f.dx*sp*dt; f.y+=f.dy*sp*dt; f.trav+=sp*dt;
     const [c,r]=cellOf(f.x,f.y);
-    if(f.trav>TILE*3.4||(!isOpen(c,r)&&r!==SURFROW)||rockAt(c,r)){ f.dead=true; puff(f.x,f.y,'#d8b56a',5); continue; }
+    const open=isOpen(c,r)||r===SURFROW;
+    const sp=open?260:70;
+    f.x+=f.dx*sp*dt; f.y+=f.dy*sp*dt; f.trav+=sp*dt;
+    if(!open){
+      carve(f.x,f.y,9);
+      if(Math.random()<0.35) G.parts.push({x:f.x+rnd(-6,6),y:f.y+rnd(-6,6),
+        vx:rnd(-40,40),vy:rnd(-60,10),t:rnd(0.2,0.45),col:'#8a6a40'});
+    }
+    if(f.trav>TILE*3.4||rockAt(c,r)||f.x<8||f.x>W-8||f.y<cellCY(SURFROW)-12||f.y>H-8){
+      f.dead=true; puff(f.x,f.y,'#d8b56a',5); continue; }
     for(const k of G.critters){
       if((k.state==='walk'||k.state==='ghost')&&dist(f.x,f.y,k.x,k.y)<22){
-        k.state='pacified'; f.dead=true;
-        addScore(200,k.x,k.y-22); Snd.pop();
-        puff(k.x,k.y,'#ffd166',10);
+        f.dead=true;
+        if(k.state==='ghost'){ k.state='stun'; k.stunT=2; addScore(100,k.x,k.y-22); }
+        else { k.state='pacified'; addScore(200,k.x,k.y-22); }
+        Snd.pop(); puff(k.x,k.y,'#ffd166',10);
         break;
       }
     }
@@ -637,6 +676,7 @@ function drawResident(x,y,kind,wave){
 function drawCritter(k){
   ctx.save(); ctx.translate(k.x,k.y);
   if(k.state==='ghost') ctx.globalAlpha=0.45+Math.sin(k.anim*4)*0.1;
+  if(k.state==='stun'){ ctx.globalAlpha=0.75; ctx.rotate(Math.sin(k.anim*3)*0.15); }
   if(k.state==='pacified') ctx.globalAlpha=0.85;
   const b=Math.sin(k.anim)*2;
   if(k.kind==='shafan'){
@@ -660,6 +700,10 @@ function drawCritter(k){
   if(k.state==='pacified'){
     ctx.globalAlpha=1; ctx.fillStyle='#ff8787'; ctx.font='12px Courier New'; ctx.textAlign='center';
     ctx.fillText('♥',0,-18);
+  }
+  if(k.state==='stun'){
+    ctx.globalAlpha=1; ctx.fillStyle='#ffd166'; ctx.font='12px Courier New'; ctx.textAlign='center';
+    ctx.fillText('✶ ✶',0,-18);
   }
   ctx.restore();
 }
@@ -776,7 +820,7 @@ function drawTitle(){
     'and walk them to Ein Kerem Hospital',
     '(top-left) before the siren ends!',
     '',
-    '🥙 Falafel toss calms the critters.',
+    '🥙 Falafel calms critters & bores dirt.',
     '🪨 Don\'t stand under a wobbling boulder.',
     '🐶 Dogs are bonus rescues! (+750)',
     '',
