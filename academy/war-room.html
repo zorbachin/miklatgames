@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d1120"><title>⚔️ WAR ROOM — Launch Day</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+<style>
+:root{--bg:#0d1120;--card:#161d33;--ink:#f2f4ff;--dim:#9aa3c7;--gold:#ffd166;--red:#ff5d73;--green:#7ee8c7;--cyan:#3ee6ff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,sans-serif;padding-bottom:60px}
+.wrap{max-width:680px;margin:0 auto;padding:18px 16px}
+h1{font-size:clamp(26px,7vw,38px);color:var(--gold);text-shadow:0 0 24px rgba(255,209,102,.35)}
+.sub{color:var(--dim);margin:6px 0 14px}
+h2{font-size:15px;color:var(--cyan);text-transform:uppercase;letter-spacing:.06em;margin:22px 0 8px}
+.card{background:var(--card);border:1px solid #232c4d;border-radius:14px;padding:13px 14px;margin:10px 0}
+.step{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #232c4d}
+.step:last-child{border-bottom:0}
+.step input{width:22px;height:22px;margin-top:2px;accent-color:var(--gold);flex-shrink:0}
+.step .t{flex:1;font-size:14.5px}
+.step .t b{color:var(--gold)}
+.step .min{font-size:11px;color:var(--dim);white-space:nowrap}
+a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}
+code{background:#0f1528;border:1px solid #2a3458;border-radius:6px;padding:1px 6px;font-size:12.5px;color:var(--green)}
+.copyblock{position:relative;background:#0f1528;border:1px solid #2a3458;border-radius:10px;padding:10px;margin:8px 0;font-size:12px;color:var(--dim);max-height:120px;overflow:auto;white-space:pre-wrap}
+details{margin:8px 0}summary{cursor:pointer;color:var(--gold);font-weight:700;font-size:14px}
+.prog{position:sticky;top:0;background:rgba(13,17,32,.95);padding:10px 0;z-index:5}
+.bar{height:10px;background:#232c4d;border-radius:6px;overflow:hidden}
+.fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--green));width:0%;transition:width .4s}
+.ptxt{font-size:12px;color:var(--gold);font-weight:700;margin-top:3px}
+.warn{color:var(--red);font-weight:700}
+</style></head><body><div class="wrap">
+<h1>⚔️ WAR ROOM</h1>
+<p class="sub">Launch day, one screen. Top to bottom, no detours. Each block says what it unlocks. <a href="./">← Academy</a></p>
+<div class="prog"><div class="bar"><div class="fill" id="fill"></div></div><div class="ptxt" id="ptxt">0 / 0</div></div>
+
+<h2>🔑 Phase 1 · Keys Session — 20 min, unblocks everything</h2>
+<div class="card">
+<label class="step"><input type="checkbox" data-k="kofi"><span class="t"><b>Ko-fi account</b> → <a href="https://ko-fi.com" target="_blank">ko-fi.com</a> (0% fees on tips). Then paste the URL to Claude → tip jars go live on all 4 surfaces in one commit.</span><span class="min">5 min</span></label>
+<label class="step"><input type="checkbox" data-k="gemini"><span class="t"><b>Gemini key</b> → <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> — <span class="warn">"Create API key in NEW project"</span> (old project is suspended). Paste to Claude.</span><span class="min">3 min</span></label>
+<label class="step"><input type="checkbox" data-k="itchacct"><span class="t"><b>itch.io account</b> → <a href="https://itch.io/register" target="_blank">itch.io/register</a> (publisher account, free).</span><span class="min">3 min</span></label>
+<label class="step"><input type="checkbox" data-k="cgacct"><span class="t"><b>CrazyGames dev account</b> → <a href="https://developer.crazygames.com" target="_blank">developer.crazygames.com</a>.</span><span class="min">3 min</span></label>
+<label class="step"><input type="checkbox" data-k="merge"><span class="t"><b>Merge PR #4</b> → <a href="https://github.com/zorbachin/miklatgames/pull/4" target="_blank">github.com/zorbachin/miklatgames/pull/4</a> — everything below goes live at miklatgames.fun.</span><span class="min">2 min</span></label>
+</div>
+
+<h2>🎨 Phase 2 · Art — one command per pack (Claude runs them)</h2>
+<div class="card">
+<label class="step"><input type="checkbox" data-k="art1"><span class="t"><code>bin/imagepack irondome</code> · <code>bin/imagepack mamaddash</code> · <code>bin/imagepack shukshopper</code> — press packs ×3 (key art, icon, poster, itch cover, banner each).</span><span class="min">~5 min</span></label>
+<label class="step"><input type="checkbox" data-k="art2"><span class="t"><code>bin/imagepack shukshopper/assets</code> — gameplay art (3 shuk backdrops + player + 3 vendors). The game auto-upgrades from emoji.</span><span class="min">~5 min</span></label>
+<details><summary>📦 Prompt packs (copy-paste for any design tool)</summary>
+<div id="prompts">Loading prompt packs… (works when hosted; otherwise: <a href="https://github.com/zorbachin/miklatgames/tree/main/irondome/press" target="_blank">irondome</a> · <a href="https://github.com/zorbachin/miklatgames/tree/main/mamaddash/press" target="_blank">mamaddash</a> · <a href="https://github.com/zorbachin/miklatgames/tree/main/shukshopper/press" target="_blank">shukshopper press</a> · <a href="https://github.com/zorbachin/miklatgames/tree/main/shukshopper/assets" target="_blank">shukshopper gameplay</a>)</div>
+</details>
+</div>
+
+<h2>🚢 Phase 3 · Portal submissions (the revenue move)</h2>
+<div class="card">
+<label class="step"><input type="checkbox" data-k="verdicts"><span class="t"><b>Read the panel verdicts first</b> (10M advisor teams ran overnight): <a href="https://github.com/zorbachin/miklatgames/blob/main/irondome/PANEL-VERDICT.md" target="_blank">Iron Dome</a> · <a href="https://github.com/zorbachin/miklatgames/blob/main/mamaddash/PANEL-VERDICT.md" target="_blank">Mamad Dash</a> · <a href="https://github.com/zorbachin/miklatgames/blob/main/shukshopper/PANEL-VERDICT.md" target="_blank">Shuk Shopper</a>. Ship what's green.</span><span class="min">10 min</span></label>
+<label class="step"><input type="checkbox" data-k="itch"><span class="t"><b>itch.io ×3</b> → <a href="https://itch.io/game/new" target="_blank">itch.io/game/new</a> — type: HTML, embed the live URLs; covers from press packs (crop 4:3 → 630×500). Zero curation bar, list all three today.</span><span class="min">30 min</span></label>
+<label class="step"><input type="checkbox" data-k="cg"><span class="t"><b>CrazyGames: submit the panel's top pick</b> → <a href="https://developer.crazygames.com" target="_blank">developer portal</a>. Note: 2-month launch exclusivity = +50% revshare; 48h guaranteed homepage. Claude preps the SDK integration when you pick the game.</span><span class="min">30 min</span></label>
+<label class="step"><input type="checkbox" data-k="poki"><span class="t"><b>Poki application</b> → <a href="https://developers.poki.com" target="_blank">developers.poki.com</a> (1–2 week review; apply today, it runs in background).</span><span class="min">10 min</span></label>
+</div>
+
+<h2>📣 Phase 4 · The tribe sees it</h2>
+<div class="card">
+<label class="step"><input type="checkbox" data-k="wa"><span class="t"><b>WhatsApp ×3 groups</b> (publishing mission — the only step no one can do for you). Paste below.</span><span class="min">5 min</span></label>
+<div class="copyblock" id="watext">🚨 We built an arcade in the miklat. Israeli games, free, work offline — even mid-azaka. Iron Dome, Mamad Dash, and the new SHUK SHOPPER 🧺
+Play: https://miklatgames.fun — beat my score if you can 🤌</div>
+<label class="step"><input type="checkbox" data-k="press"><span class="t"><b>Press pitch</b> → JTA tips: <a href="mailto:tips@jta.org">tips@jta.org</a> · ToI: <a href="https://www.timesofisrael.com/contact-us/" target="_blank">contact form</a>. Draft below; promo video: <a href="https://raw.githubusercontent.com/zorbachin/miklatgames/main/irondome/press/promo.mp4" target="_blank">hosted mp4</a>.</span><span class="min">10 min</span></label>
+<div class="copyblock">Subject: Israelis built a free arcade that works inside the bomb shelter
+
+Hi — I'm an Israeli indie builder. During the war we built MIKLAT GAMES (miklatgames.fun): free, bilingual web games made in the mamad, that work OFFLINE — so kids can play Iron Dome and Mamad Dash while the real sirens run. No app, no ads, made-in-a-miklat humor (the vendor chases you through Shuk HaCarmel in the new one).
+Promo video + press art: [link]. Happy to talk about building games between azakot.</div>
+</div>
+
+<h2>📊 Always-open tabs</h2>
+<div class="card" style="font-size:14px">
+<a href="https://miklat-games.goatcounter.com" target="_blank">GoatCounter dashboard</a> (watch evt-* move) · <a href="https://miklatgames.fun" target="_blank">live site</a> · <a href="https://github.com/zorbachin/miklatgames" target="_blank">repo</a> · <a href="./">Academy courses</a>
+</div>
+<script>
+'use strict';
+const boxes=[...document.querySelectorAll('input[type=checkbox]')];
+let S=JSON.parse(localStorage.getItem('warroom')||'{}');
+boxes.forEach(b=>{b.checked=!!S[b.dataset.k];b.addEventListener('change',()=>{S[b.dataset.k]=b.checked?1:0;localStorage.setItem('warroom',JSON.stringify(S));prog();});});
+function prog(){const d=boxes.filter(b=>b.checked).length;
+  document.getElementById('fill').style.width=(d/boxes.length*100)+'%';
+  document.getElementById('ptxt').textContent=d+' / '+boxes.length+(d===boxes.length?' — WAR WON 🏆':'');}
+prog();
+(async()=>{
+  const packs=[['IRON DOME — press','../irondome/press/prompts.json'],['MAMAD DASH — press','../mamaddash/press/prompts.json'],['SHUK SHOPPER — press','../shukshopper/press/prompts.json'],['SHUK SHOPPER — gameplay','../shukshopper/assets/prompts.json']];
+  try{
+    let html='';
+    for(const[name,url]of packs){
+      const j=await(await fetch(url)).json();
+      html+='<details><summary>'+name+'</summary>';
+      j.images.forEach(im=>{html+='<div class="copyblock"><b>'+im.file+' ('+im.aspect_ratio+')</b>\n'+im.prompt+'</div>';});
+      html+='</details>';
+    }
+    document.getElementById('prompts').innerHTML=html;
+  }catch(e){/* file:// or pre-merge — fallback links already shown */}
+})();
+</script>
+</div></body></html>
