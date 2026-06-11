@@ -29,12 +29,15 @@ whole *run*.
 - Rematch = new link back. A duel thread in a group chat IS the game loop.
 
 ### Rung 2: GHOST RACING (async, feels live)
-Record the input trace of a run (timestamped taps — tiny, ~1-2KB compressed
-for a 60s run since games are deterministic given seed + inputs).
+Record **position snapshots every N ticks** (not input replays — JS float
+math isn't bit-exact across engines, so re-simulation desyncs; snapshots
+make determinism irrelevant). A 60s run is still ~1-2KB compressed.
 - Race your friend's translucent ghost in real time on your screen.
 - Small ghosts fit IN the URL; longer ones go through the board worker (blob).
 - This is Mario Kart ghosts for the shuk — async that *feels* synchronous,
   with none of WebRTC's pain.
+- Duel etiquette from the genre: **36h to answer a duel or it forfeits**
+  (Trivia Crack's dead-game killer).
 
 ### Rung 3: LIVE VS (phase-gated, only after rungs 1-2 prove demand)
 WebRTC DataChannel, P2P position streaming, opponent rendered as ghost.
@@ -56,14 +59,24 @@ One Cloudflare Worker + KV/D1 (free tier; validate limits vs research).
   gauntlet — the fairest, most Wordle-like board), all-time, and
   **per-community boards** (a board per group code — see Companion).
 - Client ships DORMANT behind `BOARD_URL=''` (same pattern as TIP_URL).
+- **Validated infra math (research 2026-06-12):** KV free = 1,000 writes/day
+  → fine at launch (best-only writes), migrate to D1 (100K/day free) at
+  ~500 daily submitters; full scale = Workers Paid **$5/mo total**. Cloudflare
+  has Tel Aviv + Haifa PoPs (<50ms for IL players). Background Sync API never
+  shipped on iOS → the outbox queue IS the sync (flush on load + online +
+  visibilitychange, single-flight, remove on 2xx only).
+- **Portal builds use the portal's own boards** (CrazyGames SDK ships a
+  leaderboard with bounds + cooldowns + opaque acceptance); HaLuach serves
+  miklatgames.fun.
 
 ## 3 · COMPANION MODE — three shapes, cheapest first
 
 ### A. CHAVRUTA STREAK (the killer feature, async) ⭐
 Two people bind as chavruta (one link tap). The shared streak only survives
 if **BOTH** do today's daily.
-- Evidence-backed (duo-streak mechanics are Duolingo/Snapchat's strongest
-  retention loops; research validating numbers).
+- **Evidence (hard numbers):** Duolingo's Friend Streak drives **+22% daily
+  completion** and ~⅓ of DAU use it; Snapchat-streak research shows the
+  engine is loss aversion + mutual obligation — "we both lose it."
 - Deeply tribe-coded: chavruta is literally the Jewish institution of
   paired practice. Copy writes itself: "Don't break the chavruta."
 - Needs only the board worker (tiny shared-streak record) or even URL-ping

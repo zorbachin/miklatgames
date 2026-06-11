@@ -8,6 +8,11 @@
  * bounds + percentile framing), idempotent by (shemId, game, mode, day) so
  * the offline sync queue can flush blindly.
  *
+ * SCALE NOTE (validated 2026-06-12): KV free tier = 1,000 writes/day — fine
+ * at launch since only personal-best improvements write; migrate storage to
+ * D1 (100K rows/day free) at ~500 daily submitters; Workers Paid ($5/mo,
+ * 10M req) covers everything beyond. Tel Aviv/Haifa PoPs serve IL <50ms.
+ *
  * API:
  *   POST /score  {game, mode, day, score, meta, shem:{id,name,emoji}}
  *   GET  /board/{game}/{mode}/{day}   -> top 50 + count   (day: YYYY-MM-DD | all)
