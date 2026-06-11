@@ -585,7 +585,7 @@ let ptDown=null, ptMoved=false, dragX=0;
 function worldFromScreen(sx){ return sx+G.camX; }
 function depthFromScreen(sy){ const t=TOWN();
   return clamp((sy-t.top-26)/(t.bot-t.top-26),0,1); }
-const panelOpen=()=>['title','result','dayDone','chat','shop']
+const panelOpen=()=>['title','result','dayDone','chat','shop','morning']
   .some(p=>!$(p).classList.contains('hidden'));
 function onDown(sx,sy){
   userActed=true; Sound.init();
@@ -654,6 +654,9 @@ window.addEventListener('keydown',e=>{
 window.addEventListener('keyup',e=>{
   if((e.key===' '||e.key==='ArrowUp')&&G.state==='aroma') arUp();
 });
+// an interrupted pour (call, app switch, cursor left the window) ends gracefully
+window.addEventListener('touchcancel',()=>{ if(G.state==='aroma') arUp(); ptDown=null; });
+window.addEventListener('blur',()=>{ if(G.state==='aroma') arUp(); ptDown=null; });
 
 /* =================== stations =================== */
 function enterStation(st){
@@ -1099,6 +1102,7 @@ function mkEnd(){
   G.mk.over=true; bumpPlays('matkot');
   if(G.mk.rally>(S.best.matkot||0)) S.best.matkot=G.mk.rally, G.result.best=true; else G.result.best=false;
   G.result.kind='matkot'; G.result.rally=G.mk.rally;
+  checkHustle('mk_rally',G.mk.rally);
   save(); setTimeout(showResult,600);
 }
 function drawMatkot(){
@@ -1150,7 +1154,7 @@ function swTap(){
   if(Math.abs(s.m-s.zc)<s.zw){
     if(s.tut){ s.tut=false; S.taught.shawarma=1; s.zw=.11; save(); }
     s.hits++; s.combo++;
-    const got=payout(8+Math.min(s.combo,8)*3,'shawarma'); s.earn+=got;
+    const got=payout(8+Math.min(s.combo,8)*2,'shawarma'); s.earn+=got;
     pop(W*.3,groundY-160-s.m*120,`+${got}₪`,POP_COLS[s.combo%4]); flyCoin(W*.3,groundY-180);
     Sound.cash(); G.freeze=.04; buzz(18);
     if(s.combo===4||s.combo===7||s.combo===10){ burstConfetti(12);
@@ -1297,12 +1301,14 @@ function ctStart(){
 }
 function ctTap(sx,sy){
   const c=G.ct; if(!c||c.over) return;
-  const hit=c.cats.find(k=>!k.gone && Math.hypot(k.x-sx,k.y-sy)<52);
+  // hitbox tracks the drawn pop-in position, not the final spot
+  const hit=c.cats.find(k=>!k.gone &&
+    Math.hypot(k.x-sx,(k.y+(1-Math.min(1,k.t*6))*30)-sy)<52);
   if(hit){
     hit.gone=true;
     if(c.tut){ c.tut=false; S.taught.cats=1; save(); }
     c.pets++; c.combo++;
-    const got=payout(6+Math.min(c.combo,8)*2,'cats'); c.earn+=got;
+    const got=payout(6+Math.min(c.combo,6)*2,'cats'); c.earn+=got;
     pop(hit.x,hit.y-40,`+${got}₪ 😻`,POP_COLS[c.combo%4]); flyCoin(hit.x,hit.y);
     Sound.cash(); buzz(16);
     if(c.combo===4||c.combo===7||c.combo===10){ burstConfetti(10);
@@ -1328,7 +1334,7 @@ function ctUpdate(dt){
     if(k.t>k.dur){ k.gone=true; c.combo=0;
       pop(k.x,k.y-30,rline(BARK.ctMiss),'#aab4c8'); Sound.no(); }
   }
-  c.cats=c.cats.filter(k=>!k.gone||k.t<k.dur+.2);
+  c.cats=c.cats.filter(k=>!k.gone);
 }
 function ctEnd(){
   G.ct.over=true; bumpPlays('cats');
@@ -1369,10 +1375,10 @@ function alStart(){
   for(let i=0;i<4;i++){
     const dir=i%2?1:-1, n=2+(i%2);
     const cars=[];
-    for(let j=0;j<n;j++) cars.push({x:rand(0,W), e:['🛵','🚐','🚌'][irand(0,2)], w:[34,56,74][0] });
+    for(let j=0;j<n;j++){ const e=['🛵','🚐','🚌'][irand(0,2)];
+      cars.push({x:rand(0,W), e, w:e==='🛵'?34:e==='🚐'?56:74}); }
     lanes.push({dir, speed:rand(95,150), cars});
   }
-  for(const l of lanes) for(const cr of l.cars) cr.w=cr.e==='🛵'?34:cr.e==='🚐'?56:74;
   G.al={ time:25, lanes, row:0, hop:0, lives:2, crossings:0, earn:0, over:false,
     df:diff('allenby'), tut:!S.taught.allenby };
   if(G.al.tut) pop(W/2,groundY-260,rline(BARK.alTeach),'#fff',true);
@@ -1400,8 +1406,8 @@ function alUpdate(dt){
     cr.x+=l.dir*l.speed*a.df*dt;
     if(l.dir>0&&cr.x>W+60) cr.x=-60; if(l.dir<0&&cr.x<-60) cr.x=W+60;
   }
-  // collision: player stands at W/2 on rows 1..4
-  if(a.row>=1&&a.row<=4){
+  // collision: player stands at W/2 on rows 1..4 — mid-hop you're airborne (fair)
+  if(a.hop<=0&&a.row>=1&&a.row<=4){
     const l=a.lanes[a.row-1];
     for(const cr of l.cars){
       if(Math.abs(cr.x-W/2)<cr.w/2+16){
