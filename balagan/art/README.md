@@ -34,6 +34,7 @@ Wider pieces, ~420px tall, sit on the boardwalk.
 | `net-volley.png`    | beach volleyball net + sand patch |
 | `shop-front.png`    | shuk storefront (the "buy a new life" shop) |
 | `home.png`          | the player's apartment door / stairwell |
+| `kiosk.png`         | classic Tel Aviv street kiosk — cigarettes, lottery (goralot) tickets, gum, a babushka leaning on the counter |
 
 ## Background
 | file | what |
