@@ -41,6 +41,11 @@ view drops in perfectly.)
 | `home.png`          | the player's apartment door / stairwell |
 | `kiosk.png`         | classic Tel Aviv street kiosk — cigarettes, lottery (goralot) tickets, gum, a babushka leaning on the counter |
 | `matkot.png`        | a pair of crossed wooden beach paddles (matkot) stuck in the sand with the ball |
+| `shawarma.png`      | shawarma stand: vertical spit with the meat cone, knife, laffa stack |
+| `aroma.png`         | iced-coffee cart/counter: cold brew jug, plastic cups, ice, "AROMA"-style sign |
+| `cats.png`          | alley corner with crates and windowsills — street-cat territory |
+| `allenby.png`       | busy crosswalk corner: traffic light, zebra stripes, a waiting sherut |
+| `music.mp3`         | 🎵 street music loop — drops in and just plays (the Music object watches for it) |
 
 ## Background
 | file | what |

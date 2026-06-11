@@ -216,7 +216,8 @@ const Sound={
 $('mute').textContent=Sound.on?'🔊':'🔇';
 $('mute').addEventListener('click',e=>{ e.stopPropagation();
   Sound.on=!Sound.on; localStorage.setItem('bg_mute',Sound.on?'0':'1');
-  $('mute').textContent=Sound.on?'🔊':'🔇'; });
+  $('mute').textContent=Sound.on?'🔊':'🔇';
+  if(typeof Music!=='undefined') Music.sync(); });
 
 /* ---------------- canvas ---------------- */
 const cv=$('cv'),cx=cv.getContext('2d');
@@ -267,10 +268,21 @@ function glow(col,size){
    Drop matching PNGs into balagan/art/ and the world upgrades itself. */
 const ART={};
 for(const n of ['bg-city','stand-falafel','net-volley','shop-front','home','kiosk','matkot',
+  'shawarma','aroma','cats','allenby',
   'char-avtali','char-savta','char-chabad','char-bro','char-hightech',
   'savta-nu']){            // savta-nu: shared with Mamad Dash — volleyball opponent + street savta
   const i=new Image(); i.src='art/'+n+'.png'; ART[n]=i;
 }
+/* street music — drop art/music.mp3 into the repo and it just works.
+   Starts on the first user gesture, loops, follows the mute button. */
+const Music={el:null,dead:false,
+  init(){ if(this.el||this.dead) return;
+    try{ const a=new Audio('art/music.mp3'); a.loop=true; a.volume=.35;
+      a.addEventListener('error',()=>{ Music.dead=true; Music.el=null; });
+      this.el=a; this.sync(); }catch(e){ this.dead=true; } },
+  sync(){ if(!this.el) return;
+    if(Sound.on&&userActed) this.el.play().catch(()=>{}); else this.el.pause(); }
+};
 const artOk=n=>{const i=ART[n];return i&&i.complete&&i.naturalWidth>0;};
 function drawArt(n,x,y,h,flip){
   const i=ART[n], w=h*i.naturalWidth/i.naturalHeight;
@@ -313,7 +325,7 @@ const DEF={ shekels:500, day:1, dayStart:500, earnedToday:0, streak:0,
   hustle:{day:0,done:false}, hustleTotal:0,
   login:{last:0,run:0}, met:{}, gift:{}, taught:{},
   bracha:0, brachaBuff:0, soupLife:0, gossip:null, plays:{},
-  best:{volley:0,falafel:0,matkot:0,daysCleared:0,topWallet:500}, lastSeen:0 };
+  best:{volley:0,falafel:0,matkot:0,shawarma:0,aroma:0,cats:0,allenby:0,daysCleared:0,topWallet:500}, lastSeen:0 };
 // medium baseline that creeps up the more you've played a game (caps ~+55%)
 function diff(game){ return 1+Math.min(.55,(S.plays[game]||0)*.045); }
 function bumpPlays(game){ S.plays[game]=(S.plays[game]||0)+1; }
@@ -348,7 +360,7 @@ function earnMult(kind){
   // 🗣️ babushka's gossip: the named hustle pays +15% today
   if(S.gossip&&S.gossip.day===dayIndex()&&S.gossip.kind===kind) m+=.15;
   // 🙏 the bracha rides the current run only
-  if(G.runBracha&&(G.state==='volley'||G.state==='falafel')) m+=G.runBracha;
+  if(G.runBracha&&MINI.includes(G.state)) m+=G.runBracha;
   return m;
 }
 function payout(raw,kind){ const v=Math.round(raw*earnMult(kind));
@@ -414,6 +426,11 @@ function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a
 const HUSTLE_DEFS=[
   {id:'fal_batch',min:7,max:11,desc:n=>`Land ${n} falafels in one batch`,icon:'🥙'},
   {id:'vol_rally',min:6,max:10,desc:n=>`Reach a ${n}-rally with Savta`,icon:'🏐'},
+  {id:'mk_rally', min:6,max:10,desc:n=>`Keep a ${n}-rally at matkot`,icon:'🏓'},
+  {id:'sw_slices',min:8,max:12,desc:n=>`Carve ${n} clean shawarma slices`,icon:'🌯'},
+  {id:'ar_pours', min:5,max:8, desc:n=>`Pour ${n} good cold brews`,icon:'☕'},
+  {id:'ct_pets',  min:8,max:12,desc:n=>`Pet ${n} street cats`,icon:'🐈'},
+  {id:'al_cross', min:2,max:4, desc:n=>`Cross Allenby ${n} times`,icon:'🚌'},
   {id:'combo',    min:4,max:6, desc:n=>`Hit a ×${n} falafel combo`,icon:'🔥'},
   {id:'earn',     min:5,max:8, mul:100,desc:n=>`Earn ₪${n*100} in one day`,icon:'💸'},
   {id:'double',   min:1,max:1, desc:()=>`Double your money & clear the day`,icon:'🌅'},
@@ -466,18 +483,23 @@ function checkHustle(id,value){
 }
 
 /* =================== world / state =================== */
-/* world compressed per vetting: home→volley cross ≈9s, not 17 */
-const WORLD_W=2400;
+/* a longer street for 12 stations; the MAP is fast-travel, walking is flavor */
+const WORLD_W=3600;
 const STATIONS=[
   {id:'home',    x:140,  ico:'🏠', art:'home',          label:'HOME',      sub:'sleep / new day'},
-  {id:'matkot',  x:360,  ico:'🏓', art:'matkot',         label:'MATKOT',    sub:'paddle rally'},
-  {id:'chat_savta',x:560,ico:'🧓', label:'SAVTA',       sub:'a word of advice', npc:true},
-  {id:'falafel', x:900,  ico:'🥙', art:'stand-falafel', label:'FALAFEL',   sub:'toss for tips'},
-  {id:'chat_chabad',x:1280,ico:'🧔',label:'CHABAD',     sub:'tefillin?',   npc:true},
-  {id:'shop',    x:1660, ico:'🛍️', art:'shop-front',    label:'SHUK SHOP', sub:'spend your shekels'},
-  {id:'kiosk',   x:1960, ico:'👵', art:'kiosk',         label:'KIOSK',     sub:'gossip & goralot', npc:true},
-  {id:'volley',  x:2260, ico:'🏐', art:'net-volley',    label:'VOLLEYBALL',sub:'bump for cash'},
+  {id:'matkot',  x:420,  ico:'🏓', art:'matkot',        label:'MATKOT',    sub:'paddle rally'},
+  {id:'chat_savta',x:700,ico:'🧓', label:'SAVTA',       sub:'a word of advice', npc:true},
+  {id:'falafel', x:990,  ico:'🥙', art:'stand-falafel', label:'FALAFEL',   sub:'toss for tips'},
+  {id:'shawarma',x:1280, ico:'🌯', art:'shawarma',      label:'SHAWARMA',  sub:'carve the spit'},
+  {id:'chat_chabad',x:1570,ico:'🧔',label:'CHABAD',     sub:'tefillin?',   npc:true},
+  {id:'shop',    x:1870, ico:'🛍️', art:'shop-front',    label:'SHUK SHOP', sub:'spend your shekels'},
+  {id:'aroma',   x:2160, ico:'☕', art:'aroma',          label:'ICED AROMA',sub:'pour the cold brew'},
+  {id:'kiosk',   x:2450, ico:'👵', art:'kiosk',         label:'KIOSK',     sub:'gossip & goralot', npc:true},
+  {id:'cats',    x:2740, ico:'🐈', art:'cats',          label:'STREET CATS',sub:'pet the council'},
+  {id:'volley',  x:3030, ico:'🏐', art:'net-volley',    label:'VOLLEYBALL',sub:'bump for cash'},
+  {id:'allenby', x:3330, ico:'🚌', art:'allenby',       label:'ALLENBY',   sub:'cross the traffic'},
 ];
+const MINI=['volley','falafel','matkot','shawarma','aroma','cats','allenby'];
 const G={
   state:'title', t:0, freeze:0,
   camX:0, player:{x:300,d:.5,dir:1,walk:0}, target:null,   // d = depth into the plaza (0 back → 1 front)
@@ -510,6 +532,30 @@ const BARK={
   mkRes:{lo:[['SANDY','The matkot gods are unimpressed.'],['DROPPED IT','The sea took your ball. Again.']],
     mid:[['SOLID RALLY','The beach nodded. The beach is hard to impress.'],['NICE PADDLE','Tourists clapped. One filmed it.']],
     hi:[['MATKOT KING','No drops, all respect. Savta saw.'],['BEACH LEGEND','They want you on the promenade team.']]},
+  swTeach:['Slice when the blade hits the juicy green.','Carve in the green, achi. The laffa is waiting.','Green means cut. Brown means shame.'],
+  swCombo:['SLICED LIKE A SURGEON','THE LAFFA IS HONORED','JUICY. PERFECT.','THE LUNCH LINE GASPS'],
+  swMiss:['Dry slice.','The floor eats first.','Oy, the gristle.'],
+  swRes:{lo:[['BUTCHERED','The spit weeps. The line left.'],['DRY CUTS','Even the cats passed.']],
+    mid:[['CLEAN CUTS','The lunch line nods. The line never nods.'],['GOOD HANDS','The boss stopped watching you. A promotion.']],
+    hi:[['SHAWARMA SURGEON','They want you at the GOOD stand.'],['SPIT MAESTRO','Tourists are filming the technique.']]},
+  arTeach:['HOLD to pour. Release in the gold band.','Fill to the gold line. Not a drop more.','Cold brew waits for no one. Pour smart.'],
+  arGood:['SMOOTH POUR','ICE COLD PRECISION','BARISTA HANDS','THE REGULAR NODDED'],
+  arSpill:['Overflow! The counter cries.','Mopping. Again.','That was the good ice.'],
+  arRes:{lo:[['PUDDLE CITY','The counter is a lake. The tips are not.'],['SPILL MASTER','The mop knows your name now.']],
+    mid:[['SMOOTH SHIFT','Regulars noticed. Regulars never notice.'],['DECENT POURS','Two tips and a phone number. Probably a scam.']],
+    hi:[['KING OF COLD BREW','Aroma offered you a shift. You said you freelance.'],['ICE SOMMELIER','They put your pour on the story.']]},
+  ctTeach:['Tap each cat while it glows. They wait for no one.','Pet the glowing cat, achi. Quickly. Respectfully.','The council convenes. Tap to pay respect.'],
+  ctCombo:['CHONK SECURED','THE COUNCIL APPROVES','NINE LIVES, ALL FANS','PURR ECONOMY RISING'],
+  ctMiss:['It judged you and left.','Gone. Like your deposit.','It told the other cats.'],
+  ctRes:{lo:[['HISSED AT','The street cats filed a complaint.'],['IGNORED','A cat yawned at you. Devastating.']],
+    mid:[['CAT FRIEND','Three followed you home. That\'s a committee.'],['RESPECTED','They let you pass the alley now.']],
+    hi:[['CAT MAYOR','The alley is yours. Tribute: tuna.'],['PURR BARON','The council voted. It\'s unanimous.']]},
+  alTeach:['Tap to dash a lane. Wait for the gap.','One tap, one lane. The sherut stops for no one.','Cross like a local: confident and slightly insane.'],
+  alCross:['FROGGER OF ALLENBY','THE SHERUT MISSED','JAYWALK ROYALTY','CROSSED LIKE A KING'],
+  alHit:['CLIPPED by a scooter.','The bus honked in Russian.','The sherut sends regards.'],
+  alRes:{lo:[['FLATTENED','The crossing guard called your savta.'],['TRAFFIC FOOD','The scooters are telling the story.']],
+    mid:[['STREET SMART','Two crossings, zero apologies.'],['BOLD MOVES','A taxi blessed you. In traffic language.']],
+    hi:[['ALLENBY LEGEND','Traffic parts for you now. Like a sea.'],['CROSSING KING','Even the buses wave you through.']]},
   selfie:['"You\'re seeing it live, achi. The comeback starts on a beach."',
     '"Day forty-something. Savta still can\'t beat me. Like and subscribe."',
     '"₪500 by sundown. This pita is step one."',
@@ -549,6 +595,10 @@ function onDown(sx,sy){
   else if(G.state==='volley') vbTap();
   else if(G.state==='falafel') faTap();
   else if(G.state==='matkot') mkTap();
+  else if(G.state==='shawarma') swTap();
+  else if(G.state==='aroma') arDown();
+  else if(G.state==='cats') ctTap(sx,sy);
+  else if(G.state==='allenby') alTap();
 }
 function onMove(sx){
   // top-down: no drag-scroll (it fought the camera-follow). A drag just cancels
@@ -557,6 +607,7 @@ function onMove(sx){
 }
 let lastTapY=0;
 function onUp(sx){
+  if(G.state==='aroma'){ arUp(); ptDown=null; return; }   // hold-and-release
   if(G.state!=='hub'){ ptDown=null; return; }
   if(ptDown && !ptMoved){            // a tap: walk there, or enter a tapped building
     const wx=worldFromScreen(sx), sy=lastTapY;
@@ -594,9 +645,14 @@ window.addEventListener('keydown',e=>{
     if(k==='arrowup'||k==='w') G.target={x:p.x,d:clamp(p.d-.4,0,1)};
     if(k==='arrowdown'||k==='s') G.target={x:p.x,d:clamp(p.d+.4,0,1)};
     if(k===' '||k==='enter'){ const st=STATIONS.find(s=>Math.abs(s.x-p.x)<110&&p.d<.38); if(st) enterStation(st); }
-  } else if((k===' '||k==='arrowup')&&(G.state==='volley'||G.state==='falafel'||G.state==='matkot')){
-    e.preventDefault(); G.state==='volley'?vbTap():G.state==='matkot'?mkTap():faTap();
+  } else if((k===' '||k==='arrowup')&&MINI.includes(G.state)){
+    e.preventDefault();
+    ({volley:vbTap,matkot:mkTap,shawarma:swTap,allenby:alTap,falafel:faTap,
+      aroma:arDown,cats:()=>ctTap(W/2,groundY-H*.15)}[G.state])();
   }
+});
+window.addEventListener('keyup',e=>{
+  if((e.key===' '||e.key==='ArrowUp')&&G.state==='aroma') arUp();
 });
 
 /* =================== stations =================== */
@@ -606,6 +662,10 @@ function enterStation(st){
   if(st.id==='falafel') return faStart();
   if(st.id==='volley') return vbStart();
   if(st.id==='matkot') return mkStart();
+  if(st.id==='shawarma') return swStart();
+  if(st.id==='aroma') return arStart();
+  if(st.id==='cats') return ctStart();
+  if(st.id==='allenby') return alStart();
   if(st.id==='chat_savta') return openChat('savta');
   if(st.id==='chat_chabad') return openChat('chabad');
   if(st.id==='kiosk') return openChat('babushka');
@@ -875,12 +935,17 @@ function gossipBuy(){
   }
   if(S.shekels<20){ Sound.no(); $('chatReward').textContent=rline(B.broke); return; }
   S.shekels-=20;
-  const kind=mulberry32(today*7919+3)()<.5?'volley':'falafel';
+  const kind=MINI[Math.floor(mulberry32(today*7919+3)()*MINI.length)];
   S.gossip={day:today,kind}; Sound.cash();
   $('chatAct').textContent='🗣️ WHAT WAS IT AGAIN?';
-  $('chatReward').textContent=rline(kind==='volley'?B.revealVolley:B.revealFalafel);
+  $('chatReward').textContent=
+    kind==='volley'?rline(B.revealVolley):
+    kind==='falafel'?rline(B.revealFalafel):
+    `"${GLABEL[kind]} pays plus fifteen today, zolotse. The street told me. Go."`;
   save();
 }
+const GLABEL={volley:'🏐 The net',falafel:'🥙 The falafel',matkot:'🏓 The paddles',
+  shawarma:'🌯 The spit',aroma:'☕ The cold brew',cats:'🐈 The cats',allenby:'🚌 The crossing'};
 /* goralot (scratch cards): ₪50 a pull, slight house edge — a fun infinite sink.
    Winnings go to the WALLET only (never earnedToday): no gambling your way
    through the double-up goal. */
@@ -1069,6 +1134,323 @@ function drawMatkot(){
     cx.strokeText(t,W/2,groundY-180);cx.fillStyle='#fff';cx.fillText(t,W/2,groundY-180); }
 }
 
+/* =================== SHAWARMA CARVE — slice when the blade hits the green ===================
+   A blade sweeps the spit; a juicy green zone moves after every clean slice.
+   Timing-zone feel (vs falafel's power meter). 20s, no bust — misses cost combo. */
+function swStart(){
+  Sound.enter(); G.state='shawarma'; G.pops.length=0;
+  if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; pop(W/2,groundY-210,'🙏 bracha +20%','#8ad2ff',true); } else G.runBracha=0;
+  G.sw={ time:20, m:.5, dir:1, zc:rand(.25,.75), zw:.11, hits:0, combo:0, earn:0,
+    over:false, df:diff('shawarma'), tut:!S.taught.shawarma, thrown:false, flash:0 };
+  if(G.sw.tut){ G.sw.zw=.16; pop(W/2,groundY-250,rline(BARK.swTeach),'#fff',true); }
+}
+function swTap(){
+  const s=G.sw; if(!s||s.over) return;
+  s.thrown=true; s.flash=.12;
+  if(Math.abs(s.m-s.zc)<s.zw){
+    if(s.tut){ s.tut=false; S.taught.shawarma=1; s.zw=.11; save(); }
+    s.hits++; s.combo++;
+    const got=payout(8+Math.min(s.combo,8)*3,'shawarma'); s.earn+=got;
+    pop(W*.3,groundY-160-s.m*120,`+${got}₪`,POP_COLS[s.combo%4]); flyCoin(W*.3,groundY-180);
+    Sound.cash(); G.freeze=.04; buzz(18);
+    if(s.combo===4||s.combo===7||s.combo===10){ burstConfetti(12);
+      pop(W/2,groundY-150,rline(BARK.swCombo),POP_COLS[s.combo%4],true); }
+    s.zc=rand(.15,.85);                          // the juicy spot moves
+  } else if(s.tut){ Sound.no(); pop(W*.3,groundY-120,'aim for the green!','#9fe7d4'); }
+  else { s.combo=0; Sound.miss(); pop(W*.3,groundY-120,rline(BARK.swMiss),'#aab4c8'); }
+}
+function swUpdate(dt){
+  const s=G.sw; if(!s||s.over) return;
+  if(s.flash>0) s.flash-=dt;
+  if(!(s.tut&&!s.thrown)){ s.time-=dt; if(s.time<=0){ s.time=0; swEnd(); return; } }
+  s.m+=s.dir*dt*1.05*s.df*(s.tut?.5:1);
+  if(s.m>1){ s.m=1; s.dir=-1; } if(s.m<0){ s.m=0; s.dir=1; }
+}
+function swEnd(){
+  G.sw.over=true; bumpPlays('shawarma');
+  if(G.sw.hits>(S.best.shawarma||0)) S.best.shawarma=G.sw.hits, G.result.best=true; else G.result.best=false;
+  G.result.kind='shawarma'; checkHustle('sw_slices',G.sw.hits);
+  save(); setTimeout(showResult,500);
+}
+function drawShawarma(){
+  cx.fillStyle='rgba(11,14,26,.32)';cx.fillRect(0,0,W,H);   // lift the UI off the painted bg
+  const s=G.sw; if(!s) return;
+  const sx=W*.32, top=groundY-300, bot=groundY-60, L=bot-top;
+  // the stand counter + you
+  drawPlayer(W*.78,groundY,{dir:-1,walk:0});
+  cx.fillStyle='#8a5a2b';cx.fillRect(sx-6,top-26,12,L+40);            // pole
+  // the meat cone (procedural, tasty-ish)
+  for(let i=0;i<10;i++){ const yy=top+18+i*(L-30)/10, w2=34-(i*1.4);
+    cx.fillStyle=i%2?'#b9762e':'#a35f1d'; rr(sx-w2,yy,w2*2,(L-30)/10+1,6); }
+  drawEmoji('🔥',sx,bot+18,26);
+  // the juicy green zone
+  const zy1=top+(s.zc-s.zw)*L, zy2=top+(s.zc+s.zw)*L;
+  cx.fillStyle=`rgba(126,232,199,${.30+.18*Math.sin(G.t*6)})`;
+  rr(sx-42,zy1,84,zy2-zy1,8);
+  cx.strokeStyle='#7ee8c7';cx.lineWidth=2;cx.strokeRect(sx-42,zy1,84,zy2-zy1);
+  // the blade
+  const by=top+s.m*L;
+  cx.save();cx.translate(sx+50,by);cx.rotate(-.12+(s.flash>0?-.5:0));drawEmoji('🔪',0,0,38);cx.restore();
+  const inZone=Math.abs(s.m-s.zc)<s.zw;
+  if(inZone){ cx.font='900 24px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+    cx.lineWidth=6;cx.strokeStyle='rgba(15,20,40,.85)';cx.strokeText('SLICE!',sx+108,by);
+    cx.fillStyle='#7ee8c7';cx.fillText('SLICE!',sx+108,by); }
+  // laffa plate
+  drawEmoji('🫓',W*.78,groundY-66,40); drawEmoji('🍽️',W*.78,groundY-40,34);
+  // hud
+  cx.font='900 16px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+  hudPill(W/2,SAFE_TOP+30,`⏱️ ${Math.ceil(s.time)}s · 🌯 ${s.hits}`, s.time<5?'#ff5d5d':'#ffd166');
+  if(s.combo>1){ cx.fillStyle='#ff8ad4';cx.font='900 20px sans-serif';cx.fillText(`🔥 ${s.combo} combo`,W/2,SAFE_TOP+62); }
+}
+
+/* =================== ICED AROMA — hold to pour, release in the gold band ===================
+   The only hold-and-release game: press fills the cup, let go at the line. */
+function arStart(){
+  Sound.enter(); G.state='aroma'; G.pops.length=0;
+  if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; pop(W/2,groundY-210,'🙏 bracha +20%','#8ad2ff',true); } else G.runBracha=0;
+  G.ar={ time:20, f:0, pouring:false, good:0, cups:0, spills:0, combo:0, earn:0,
+    over:false, df:diff('aroma'), tut:!S.taught.aroma, poured:false };
+  if(G.ar.tut) pop(W/2,groundY-250,rline(BARK.arTeach),'#fff',true);
+}
+function arDown(){ const a=G.ar; if(!a||a.over) return; a.pouring=true; a.poured=true; }
+function arUp(){
+  const a=G.ar; if(!a||a.over||!a.pouring) return;
+  a.pouring=false;
+  if(a.f<.1){ a.f=0; return; }                       // a splash, not a pour
+  a.cups++;
+  const lo=a.tut?.68:.74, hi=.92;
+  if(a.f>=lo&&a.f<=hi){
+    if(a.tut){ a.tut=false; S.taught.aroma=1; save(); }
+    a.good++; a.combo++;
+    const acc=1-Math.abs(a.f-.84)/(hi-lo), bonus=Math.round(18*clamp(acc,0,1));
+    const got=payout(10+bonus+a.combo*2,'aroma'); a.earn+=got;
+    pop(W/2,groundY-200,`+${got}₪${acc>.8?' PERFECT ❄️':''}`,POP_COLS[a.combo%4],acc>.8);
+    flyCoin(W/2,groundY-180); Sound.cash(); buzz(18);
+    if(a.combo===3||a.combo===5){ burstConfetti(10); pop(W/2,groundY-150,rline(BARK.arGood),POP_COLS[a.combo%4],true); }
+  } else {
+    a.combo=0; a.spills++;
+    Sound.miss(); shake(); pop(W/2,groundY-200,rline(BARK.arSpill),'#aab4c8');
+  }
+  a.f=0;
+}
+function arUpdate(dt){
+  const a=G.ar; if(!a||a.over) return;
+  if(!(a.tut&&!a.poured)){ a.time-=dt; if(a.time<=0){ a.time=0; arEnd(); return; } }
+  if(a.pouring){
+    a.f+=dt*.55*a.df*(a.tut?.55:1);
+    if(a.f>=1){ a.f=0; a.pouring=false; a.combo=0; a.spills++; a.cups++;
+      Sound.miss(); shake(); pop(W/2,groundY-200,rline(BARK.arSpill),'#ff5d5d',true); }
+  }
+}
+function arEnd(){
+  G.ar.over=true; bumpPlays('aroma');
+  if(G.ar.good>(S.best.aroma||0)) S.best.aroma=G.ar.good, G.result.best=true; else G.result.best=false;
+  G.result.kind='aroma'; checkHustle('ar_pours',G.ar.good);
+  save(); setTimeout(showResult,500);
+}
+function drawAroma(){
+  cx.fillStyle='rgba(11,14,26,.32)';cx.fillRect(0,0,W,H);   // lift the UI off the painted bg
+  const a=G.ar; if(!a) return;
+  drawPlayer(W*.2,groundY,{dir:1,walk:0});
+  // counter
+  cx.fillStyle='#2e3a55';rr(0,groundY-44,W,60,0);
+  cx.fillStyle='#1f2940';rr(0,groundY-50,W,10,0);
+  // the cup
+  const cw=86, ch=150, cxp=W*.58, cy=groundY-60;
+  // gold target band
+  const lo=(a.tut?.68:.74), hi=.92;
+  cx.fillStyle='rgba(255,209,102,.25)';
+  cx.fillRect(cxp-cw/2-14,cy-hi*ch,cw+28,(hi-lo)*ch);
+  cx.strokeStyle='#ffd166';cx.lineWidth=2;
+  cx.strokeRect(cxp-cw/2-14,cy-hi*ch,cw+28,(hi-lo)*ch);
+  if(a.tut){ cx.font='900 13px sans-serif';cx.textAlign='left';cx.textBaseline='middle';
+    cx.fillStyle='#ffd166';cx.fillText('RELEASE HERE →',cxp-cw/2-150,cy-(lo+hi)/2*ch); }
+  // glass
+  cx.strokeStyle='rgba(255,255,255,.8)';cx.lineWidth=4;
+  cx.strokeRect(cxp-cw/2,cy-ch,cw,ch);
+  // coffee fill
+  let cof=SKYG.get('cof'); if(!cof){ cof=cx.createLinearGradient(0,cy-ch,0,cy);
+    cof.addColorStop(0,'#6b4226');cof.addColorStop(1,'#3c2415');SKYG.set('cof',cof); }
+  cx.fillStyle=cof; cx.fillRect(cxp-cw/2+3,cy-a.f*ch+3,cw-6,Math.max(0,a.f*ch-6));
+  if(a.f>.05) drawEmoji('🧊',cxp-12,cy-a.f*ch+16,22);
+  // the pour stream
+  if(a.pouring){ cx.fillStyle='#5b3a22';
+    cx.fillRect(cxp-4,cy-ch-46,8,ch-a.f*ch+46-6); }
+  drawEmoji('🫗',cxp,cy-ch-58,44);
+  // hud
+  cx.font='900 16px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+  hudPill(W/2,SAFE_TOP+30,`⏱️ ${Math.ceil(a.time)}s · ☕ ${a.good}`, a.time<5?'#ff5d5d':'#ffd166');
+  if(a.combo>1){ cx.fillStyle='#ff8ad4';cx.font='900 20px sans-serif';cx.fillText(`🔥 ${a.combo} combo`,W/2,SAFE_TOP+62); }
+  cx.font='800 13px sans-serif';cx.fillStyle='#cdd6e8';
+  cx.fillText(a.pouring?'…release in the gold band!':'HOLD to pour',W/2,groundY+34);
+}
+
+/* =================== STREET CATS — pet the council while each one glows ===================
+   Whack-a-mole reaction: cats pop up around the alley; tap them before they leave. */
+const CT_SPOTS=[[.18,.30],[.5,.26],[.82,.30],[.30,.55],[.68,.55]];   // [x%, y% above ground]
+function ctStart(){
+  Sound.enter(); G.state='cats'; G.pops.length=0;
+  if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; pop(W/2,groundY-210,'🙏 bracha +20%','#8ad2ff',true); } else G.runBracha=0;
+  G.ct={ time:20, cats:[], nextSpawn:0, pets:0, combo:0, earn:0, over:false,
+    df:diff('cats'), tut:!S.taught.cats };
+  if(G.ct.tut) pop(W/2,groundY-260,rline(BARK.ctTeach),'#fff',true);
+}
+function ctTap(sx,sy){
+  const c=G.ct; if(!c||c.over) return;
+  const hit=c.cats.find(k=>!k.gone && Math.hypot(k.x-sx,k.y-sy)<52);
+  if(hit){
+    hit.gone=true;
+    if(c.tut){ c.tut=false; S.taught.cats=1; save(); }
+    c.pets++; c.combo++;
+    const got=payout(6+Math.min(c.combo,8)*2,'cats'); c.earn+=got;
+    pop(hit.x,hit.y-40,`+${got}₪ 😻`,POP_COLS[c.combo%4]); flyCoin(hit.x,hit.y);
+    Sound.cash(); buzz(16);
+    if(c.combo===4||c.combo===7||c.combo===10){ burstConfetti(10);
+      pop(W/2,groundY-200,rline(BARK.ctCombo),POP_COLS[c.combo%4],true); }
+  }
+}
+function ctUpdate(dt){
+  const c=G.ct; if(!c||c.over) return;
+  c.time-=dt; if(c.time<=0){ c.time=0; ctEnd(); return; }
+  c.nextSpawn-=dt;
+  if(c.nextSpawn<=0 && c.cats.filter(k=>!k.gone).length<3){
+    const used=c.cats.filter(k=>!k.gone).map(k=>k.spot);
+    const free=CT_SPOTS.map((_,i)=>i).filter(i=>!used.includes(i));
+    if(free.length){
+      const sp=free[irand(0,free.length-1)], [px,py]=CT_SPOTS[sp];
+      c.cats.push({spot:sp,x:W*px,y:groundY-H*py*.5- (py>0.4?40:0),t:0,
+        dur:(c.tut?9:1.5)/Math.sqrt(c.df), e:['🐈','🐈‍⬛','🐱'][irand(0,2)], gone:false});
+    }
+    c.nextSpawn=(c.tut?1.4:rand(.55,.95))/c.df;
+  }
+  for(const k of c.cats){ if(k.gone) continue;
+    k.t+=dt;
+    if(k.t>k.dur){ k.gone=true; c.combo=0;
+      pop(k.x,k.y-30,rline(BARK.ctMiss),'#aab4c8'); Sound.no(); }
+  }
+  c.cats=c.cats.filter(k=>!k.gone||k.t<k.dur+.2);
+}
+function ctEnd(){
+  G.ct.over=true; bumpPlays('cats');
+  if(G.ct.pets>(S.best.cats||0)) S.best.cats=G.ct.pets, G.result.best=true; else G.result.best=false;
+  G.result.kind='cats'; checkHustle('ct_pets',G.ct.pets);
+  save(); setTimeout(showResult,500);
+}
+function drawCats(){
+  cx.fillStyle='rgba(11,14,26,.32)';cx.fillRect(0,0,W,H);   // lift the UI off the painted bg
+  const c=G.ct; if(!c) return;
+  // alley furniture: crates & sills the cats pop from
+  for(const [px,py] of CT_SPOTS){
+    const x=W*px, y=groundY-H*py*.5-(py>0.4?40:0);
+    cx.fillStyle='rgba(120,80,40,.5)';rr(x-44,y+18,88,26,6);
+    cx.strokeStyle='rgba(60,40,20,.5)';cx.lineWidth=2;cx.strokeRect(x-44,y+18,88,26);
+  }
+  for(const k of c.cats){
+    if(k.gone) continue;
+    const pop_=Math.min(1,k.t*6), left=1-(k.t/k.dur);
+    const ys=k.y+(1-pop_)*30;
+    // urgency ring shrinks with time left
+    cx.strokeStyle=`rgba(126,232,199,${.4+.5*left})`;cx.lineWidth=4;
+    cx.beginPath();cx.arc(k.x,ys,40*left+18,0,7);cx.stroke();
+    cx.save();cx.translate(k.x,ys);cx.scale(pop_,pop_);drawEmoji(k.e,0,0,52);cx.restore();
+  }
+  // hud
+  cx.font='900 16px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+  hudPill(W/2,SAFE_TOP+30,`⏱️ ${Math.ceil(c.time)}s · 🐈 ${c.pets}`, c.time<5?'#ff5d5d':'#ffd166');
+  if(c.combo>1){ cx.fillStyle='#ff8ad4';cx.font='900 20px sans-serif';cx.fillText(`🔥 ${c.combo} combo`,W/2,SAFE_TOP+62); }
+}
+
+/* =================== CROSS ALLENBY — tap to dash through the traffic ===================
+   Frogger in one column: hop lane to lane between sherut/scooters/buses. */
+function alStart(){
+  Sound.enter(); G.state='allenby'; G.pops.length=0;
+  if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; pop(W/2,groundY-210,'🙏 bracha +20%','#8ad2ff',true); } else G.runBracha=0;
+  const lanes=[];
+  for(let i=0;i<4;i++){
+    const dir=i%2?1:-1, n=2+(i%2);
+    const cars=[];
+    for(let j=0;j<n;j++) cars.push({x:rand(0,W), e:['🛵','🚐','🚌'][irand(0,2)], w:[34,56,74][0] });
+    lanes.push({dir, speed:rand(95,150), cars});
+  }
+  for(const l of lanes) for(const cr of l.cars) cr.w=cr.e==='🛵'?34:cr.e==='🚐'?56:74;
+  G.al={ time:25, lanes, row:0, hop:0, lives:2, crossings:0, earn:0, over:false,
+    df:diff('allenby'), tut:!S.taught.allenby };
+  if(G.al.tut) pop(W/2,groundY-260,rline(BARK.alTeach),'#fff',true);
+}
+const AL_ROWY=r=>groundY-30-r*54;            // row 0 = start curb … 5 = far curb
+function alTap(){
+  const a=G.al; if(!a||a.over||a.hop>0) return;
+  a.row++; a.hop=.14; Sound.serve(a.row); buzz(12);
+  if(a.row>=5){ // made it!
+    if(a.tut){ a.tut=false; S.taught.allenby=1; save(); }
+    a.crossings++;
+    const got=payout(28+a.crossings*12,'allenby'); a.earn+=got;
+    burstConfetti(14); Sound.win(); flyCoin(W/2,AL_ROWY(5));
+    pop(W/2,AL_ROWY(5)-30,rline(BARK.alCross)+` +${got}₪`,POP_COLS[a.crossings%4],true);
+    a.row=0;
+    for(const l of a.lanes) l.speed*=1.12;     // traffic wakes up each crossing
+  }
+}
+function alUpdate(dt){
+  const a=G.al; if(!a||a.over) return;
+  if(a.tut) dt*=.6;
+  a.time-=dt; if(a.time<=0){ a.time=0; alEnd(); return; }
+  if(a.hop>0) a.hop-=dt;
+  for(const l of a.lanes) for(const cr of l.cars){
+    cr.x+=l.dir*l.speed*a.df*dt;
+    if(l.dir>0&&cr.x>W+60) cr.x=-60; if(l.dir<0&&cr.x<-60) cr.x=W+60;
+  }
+  // collision: player stands at W/2 on rows 1..4
+  if(a.row>=1&&a.row<=4){
+    const l=a.lanes[a.row-1];
+    for(const cr of l.cars){
+      if(Math.abs(cr.x-W/2)<cr.w/2+16){
+        a.lives--; a.row=0; Sound.miss(); shake(); flash(.25); buzz(120);
+        pop(W/2,AL_ROWY(2),'💢 '+rline(BARK.alHit),'#ff5d5d',true);
+        if(a.lives<0){ alEnd(); return; }
+        break;
+      }
+    }
+  }
+}
+function alEnd(){
+  G.al.over=true; bumpPlays('allenby');
+  if(G.al.crossings>(S.best.allenby||0)) S.best.allenby=G.al.crossings, G.result.best=true; else G.result.best=false;
+  G.result.kind='allenby'; checkHustle('al_cross',G.al.crossings);
+  save(); setTimeout(showResult,600);
+}
+function drawAllenby(){
+  const a=G.al; if(!a) return;
+  // road spans rows 1-4
+  cx.fillStyle='#3a3f4d';rr(0,AL_ROWY(4)-26,W,AL_ROWY(1)-AL_ROWY(4)+52,0);
+  cx.setLineDash([14,12]);cx.strokeStyle='rgba(255,255,255,.4)';cx.lineWidth=3;
+  for(let r=1;r<4;r++){ const y=(AL_ROWY(r)+AL_ROWY(r+1))/2;
+    cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke(); }
+  cx.setLineDash([]);
+  // curbs
+  cx.fillStyle='rgba(244,236,221,.5)';rr(0,AL_ROWY(0)-8,W,6,0);rr(0,AL_ROWY(5)+22,W,6,0);
+  cx.font='800 12px sans-serif';cx.textAlign='center';cx.fillStyle='#9fe7d4';
+  cx.fillText('🥤 the kiosk on the other side',W/2,AL_ROWY(5)-26);
+  // traffic
+  for(let i=0;i<4;i++){ const l=a.lanes[i], y=AL_ROWY(i+1);
+    for(const cr of l.cars){ cx.save();cx.translate(cr.x,y);
+      if(l.dir<0) cx.scale(-1,1); drawEmoji(cr.e,0,0,cr.w); cx.restore(); } }
+  // gap hint: glow the next lane when it's safe-ish
+  if(a.row<5){ const l=a.lanes[Math.min(3,a.row)], y=AL_ROWY(a.row+1);
+    const danger=l&&l.cars.some(cr=>Math.abs(cr.x-W/2)<cr.w/2+70);
+    if(a.row<4&&!danger){ cx.strokeStyle=`rgba(126,232,199,${.5+.4*Math.sin(G.t*8)})`;
+      cx.lineWidth=3;cx.beginPath();cx.arc(W/2,y,30,0,7);cx.stroke();
+      cx.font='900 16px sans-serif';cx.fillStyle='#7ee8c7';cx.fillText('GO!',W/2,y-40); } }
+  // the player, hopping rows
+  const py=AL_ROWY(a.row)-(a.hop>0?Math.sin(a.hop/.14*Math.PI)*22:0);
+  drawPlayer(W/2,py,{dir:1,walk:0},.9);
+  // hud
+  cx.font='900 16px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+  hudPill(W/2,SAFE_TOP+30,`⏱️ ${Math.ceil(a.time)}s · 🚌 ${a.crossings}`, a.time<5?'#ff5d5d':'#ffd166');
+  let lifeStr='';for(let i=0;i<Math.max(0,a.lives+1);i++)lifeStr+='❤️';
+  cx.font='18px sans-serif';cx.fillText(lifeStr||'—',W/2,SAFE_TOP+60);
+}
+
 /* =================== FALAFEL TOSS — timing power into the pita =================== */
 function faStart(){
   Sound.enter(); G.state='falafel'; G.pops.length=0;
@@ -1159,6 +1541,22 @@ function showResult(){
     const t=rline(BARK.mkRes[G.mk.rally>=8?'hi':G.mk.rally>=4?'mid':'lo']);
     $('rTitle').textContent=t[0]; $('rSub').textContent=`${t[1]} (${G.mk.rally}-rally)`;
     $('rBestLine').innerHTML=`🏓 Best rally: <b>${S.best.matkot||0}</b>`;
+  } else if(r.kind==='shawarma'){
+    const t=rline(BARK.swRes[G.sw.hits>=10?'hi':G.sw.hits>=5?'mid':'lo']);
+    $('rTitle').textContent=t[0]; $('rSub').textContent=`${t[1]} (${G.sw.hits} slices)`;
+    $('rBestLine').innerHTML=`🌯 Best carve: <b>${S.best.shawarma||0}</b>`;
+  } else if(r.kind==='aroma'){
+    const t=rline(BARK.arRes[G.ar.good>=6?'hi':G.ar.good>=3?'mid':'lo']);
+    $('rTitle').textContent=t[0]; $('rSub').textContent=`${t[1]} (${G.ar.good} good pours)`;
+    $('rBestLine').innerHTML=`☕ Best shift: <b>${S.best.aroma||0}</b>`;
+  } else if(r.kind==='cats'){
+    const t=rline(BARK.ctRes[G.ct.pets>=10?'hi':G.ct.pets>=5?'mid':'lo']);
+    $('rTitle').textContent=t[0]; $('rSub').textContent=`${t[1]} (${G.ct.pets} cats petted)`;
+    $('rBestLine').innerHTML=`🐈 Best round: <b>${S.best.cats||0}</b>`;
+  } else if(r.kind==='allenby'){
+    const t=rline(BARK.alRes[G.al.crossings>=4?'hi':G.al.crossings>=2?'mid':'lo']);
+    $('rTitle').textContent=t[0]; $('rSub').textContent=`${t[1]} (${G.al.crossings} crossings)`;
+    $('rBestLine').innerHTML=`🚌 Best run: <b>${S.best.allenby||0}</b>`;
   } else {
     if(G.fa.bust){ $('rTitle').textContent=rline(BARK.faBustTitle);
       $('rSub').textContent=`Three on the floor — pita reclaimed. Still landed ${G.fa.hits}.`; }
@@ -1167,7 +1565,9 @@ function showResult(){
     $('rBestLine').innerHTML=`🥙 Best batch: <b>${S.best.falafel}</b>`;
   }
   const earned=S.earnedToday;
-  $('rEarn').textContent=money(r.kind==='volley'?G.vb.earn:r.kind==='matkot'?G.mk.earn:G.fa.earn);
+  const EARNS={volley:()=>G.vb.earn,matkot:()=>G.mk.earn,shawarma:()=>G.sw.earn,
+    aroma:()=>G.ar.earn,cats:()=>G.ct.earn,allenby:()=>G.al.earn,falafel:()=>G.fa.earn};
+  $('rEarn').textContent=money((EARNS[r.kind]||EARNS.falafel)());
   $('rGoal').textContent=dayProg()>=1
     ? '🌅 You DOUBLED your money — go HOME to sleep & bank the streak!'
     : `Double-up: ${money(S.earnedToday)} / ${money(dayGoal())} earned today (${Math.round(dayProg()*100)}%)`;
@@ -1178,7 +1578,8 @@ function showResult(){
   panel('result');
 }
 $('rAgain').addEventListener('click',()=>{ panel(null);
-  G.result.kind==='volley'?vbStart():G.result.kind==='matkot'?mkStart():faStart(); });
+  ({volley:vbStart,matkot:mkStart,shawarma:swStart,aroma:arStart,
+    cats:ctStart,allenby:alStart,falafel:faStart}[G.result.kind]||faStart)(); });
 $('rBack').addEventListener('click',()=>{ panel(null); G.state='hub'; });
 
 function clearDay(){
@@ -1375,6 +1776,10 @@ function update(dt){
   else if(G.state==='volley') vbUpdate(dt);
   else if(G.state==='falafel') faUpdate(dt);
   else if(G.state==='matkot') mkUpdate(dt);
+  else if(G.state==='shawarma') swUpdate(dt);
+  else if(G.state==='aroma') arUpdate(dt);
+  else if(G.state==='cats') ctUpdate(dt);
+  else if(G.state==='allenby') alUpdate(dt);
 }
 function hubUpdate(dt){
   ensureHustle();                 // keeps today's objective in sync if midnight passes mid-session
@@ -1413,7 +1818,11 @@ function draw(){
   else { drawSky(); drawStreet();
     if(G.state==='volley') drawVolley();
     else if(G.state==='falafel') drawFalafel();
-    else if(G.state==='matkot') drawMatkot(); }
+    else if(G.state==='matkot') drawMatkot();
+    else if(G.state==='shawarma') drawShawarma();
+    else if(G.state==='aroma') drawAroma();
+    else if(G.state==='cats') drawCats();
+    else if(G.state==='allenby') drawAllenby(); }
   // shared FX
   for(const q of G.pops){ const a=1-q.t, rise=q.t*54;
     cx.globalAlpha=a;cx.font=`900 ${q.big?24:18}px sans-serif`;cx.textAlign='center';cx.textBaseline='middle';
@@ -1513,38 +1922,42 @@ function drawMap(){
   cx.beginPath();cx.moveTo(zx(0),ry);cx.lineTo(zx(1),ry);cx.stroke();cx.setLineDash([]);
   cx.strokeStyle='#ffd166';cx.lineWidth=4;
   cx.beginPath();cx.moveTo(zx(0),ry);cx.lineTo(lerp(zx(0),zx(1),clamp(prog,0,1)),ry);cx.stroke();
-  // nodes
+  // nodes — 12 of them on a phone: smaller discs, three-step label stagger
   G.mapNodes=[];
   const today=dayIndex(), h=todaysHustle();
-  const hustStation=h.id==='vol_rally'?'volley':(h.id==='earn'||h.id==='double')?'home':'falafel';
+  const HUST2ST={vol_rally:'volley',mk_rally:'matkot',sw_slices:'shawarma',
+    ar_pours:'aroma',ct_pets:'cats',al_cross:'allenby'};
+  const hustStation=HUST2ST[h.id]||((h.id==='earn'||h.id==='double')?'home':'falafel');
   STATIONS.forEach((s,i)=>{
     const nx=zx(s.x/WORLD_W), ny=ry;
     let pulse=false, dim=false;
     if(!S.tutorialDone){ pulse=(s.id==='falafel'); dim=!pulse; }
     if(s.id==='home'&&prog>=1) pulse=true;
     cx.globalAlpha=dim?.45:1;
-    cx.fillStyle='rgba(13,17,32,.78)';cx.beginPath();cx.arc(nx,ny,21,0,7);cx.fill();
+    cx.fillStyle='rgba(13,17,32,.78)';cx.beginPath();cx.arc(nx,ny,15,0,7);cx.fill();
     cx.strokeStyle='#ffd166';cx.lineWidth=2;cx.stroke();
     if(pulse){ const pr=1+.25*Math.sin(G.t*5);
       cx.strokeStyle='rgba(255,209,102,.85)';cx.lineWidth=3;
-      cx.beginPath();cx.arc(nx,ny,25*pr,0,7);cx.stroke(); }
-    drawEmoji(s.ico,nx,ny,26);
+      cx.beginPath();cx.arc(nx,ny,19*pr,0,7);cx.stroke(); }
+    drawEmoji(s.ico,nx,ny,19);
     // badges: what's waiting here
     let badge=null;
     if(s.id==='home') badge=prog>=1?'🌅':'🔒';
     else if(s.id==='chat_savta'&&(S.gift.savta||0)<today) badge='🎁';
     else if(s.id==='chat_chabad'&&(S.bracha<today||(S.gift.chabad||0)<today)) badge='🎁';
     else if(s.id==='kiosk'&&!(S.gossip&&S.gossip.day===today)) badge='🎁';
-    if(badge) drawEmoji(badge,nx+17,ny-16,17);
-    if(s.id===hustStation&&!(S.hustle&&S.hustle.done)) drawEmoji('🎯',nx-17,ny-16,17);
+    if(badge) drawEmoji(badge,nx+12,ny-12,14);
+    if(s.id===hustStation&&!(S.hustle&&S.hustle.done)) drawEmoji('🎯',nx-12,ny-12,14);
     cx.globalAlpha=1;
-    // label, zigzag so seven of them fit a phone
-    const ly=ny+(i%2?40:-40);
-    cx.font='800 10.5px sans-serif';
-    const lw=cx.measureText(s.label).width+12;
-    cx.fillStyle='rgba(13,17,32,.7)';rr(nx-lw/2,ly-9,lw,18,9);
-    cx.fillStyle='#fff';cx.fillText(s.label,nx,ly);
-    G.mapNodes.push({id:s.id,x:nx,y:ny,r:36});
+    // label: 4-step stagger keeps 12 plates readable on 390px
+    const stag=[-56,-34,34,56][i%4];
+    cx.font='800 9.5px sans-serif';
+    const lw=cx.measureText(s.label).width+10;
+    cx.fillStyle='rgba(13,17,32,.7)';rr(nx-lw/2,ny+stag-9,lw,17,8);
+    cx.fillStyle='#fff';cx.fillText(s.label,nx,ny+stag);
+    cx.strokeStyle='rgba(255,255,255,.25)';cx.lineWidth=1;          // leader line
+    cx.beginPath();cx.moveTo(nx,ny+(stag>0?15:-15));cx.lineTo(nx,ny+stag+(stag>0?-9:9));cx.stroke();
+    G.mapNodes.push({id:s.id,x:nx,y:ny,r:26});
   });
   // you, on the route
   const pmx=zx(G.player.x/WORLD_W);
@@ -1571,10 +1984,12 @@ function mapTap(sx,sy){
   const n=(G.mapNodes||[]).find(n=>Math.hypot(n.x-sx,n.y-sy)<n.r);
   if(!n) return;
   Sound.enter();
-  G.state='hub'; G.camX=clamp(G.player.x-W*.42,0,Math.max(0,WORLD_W-W));
+  // the map IS fast travel: hop straight to the spot, take the last few steps in
   const st=STATIONS.find(s=>s.id===n.id);
-  if(Math.abs(st.x-G.player.x)<110&&G.player.d<.38) enterStation(st);
-  else { G.target={x:st.x,d:.14}; G.pendingEnter=st.id; }   // walk over & enter on arrival
+  G.state='hub';
+  G.player.x=clamp(st.x-70,60,WORLD_W-60); G.player.d=.3;
+  G.camX=clamp(G.player.x-W*.42,0,Math.max(0,WORLD_W-W));
+  G.target={x:st.x,d:.14}; G.pendingEnter=st.id;
 }
 
 /* the town: painted horizon band, then the plaza receding toward the viewer */
@@ -1643,22 +2058,22 @@ function drawTown(){
    even though the horizon tiles. hop: doves & cats get a little life. */
 const PROPS=[
   // west = beach end: surf, shells, parasols (foreground-biased)
-  {e:'⛱️',x:210, d:.70,s:44},{e:'🏄',x:330, d:.34,s:34},{e:'🐚',x:410, d:.80,s:20},
-  {e:'⛱️',x:540, d:.52,s:40},{e:'🪴',x:620, d:.18,s:30},{e:'🐚',x:710, d:.62,s:18},
-  {e:'🐈',x:770, d:.76,s:26,hop:1},{e:'🛟',x:840, d:.44,s:26},{e:'🕊️',x:1040,d:.42,s:22,hop:1},
+  {e:'⛱️',x:240, d:.70,s:44},{e:'🏄',x:460, d:.34,s:34},{e:'🐚',x:560, d:.80,s:20},
+  {e:'⛱️',x:790, d:.52,s:40},{e:'🪴',x:880, d:.18,s:30},{e:'🐚',x:1040,d:.62,s:18},
+  {e:'🐈',x:1110,d:.76,s:26,hop:1},{e:'🛟',x:1210,d:.44,s:26},{e:'🕊️',x:1480,d:.42,s:22,hop:1},
   // mid: city street
-  {e:'🛴',x:1130,d:.68,s:30},{e:'🪑',x:1330,d:.32,s:26},{e:'🕊️',x:1410,d:.64,s:20,hop:1},
-  {e:'⛱️',x:1500,d:.80,s:46},{e:'🧺',x:1580,d:.50,s:26},
-  // east = shuk end: crates, juice, mess
-  {e:'📦',x:1740,d:.56,s:28},{e:'🧃',x:1820,d:.72,s:24},{e:'📦',x:1880,d:.36,s:24},
-  {e:'🚧',x:2030,d:.64,s:30},{e:'🐕',x:2080,d:.78,s:28,hop:1},{e:'🕊️',x:2160,d:.44,s:20,hop:1},
-  {e:'🧃',x:2280,d:.68,s:22},{e:'🪴',x:2330,d:.22,s:30},
+  {e:'🛴',x:1650,d:.68,s:30},{e:'🪑',x:1940,d:.32,s:26},{e:'🕊️',x:2050,d:.64,s:20,hop:1},
+  {e:'⛱️',x:2230,d:.80,s:46},{e:'🧺',x:2330,d:.50,s:26},
+  // east = shuk/city end: crates, juice, mess
+  {e:'📦',x:2560,d:.56,s:28},{e:'🧃',x:2660,d:.72,s:24},{e:'📦',x:2820,d:.36,s:24},
+  {e:'🚧',x:3000,d:.64,s:30},{e:'🐕',x:3090,d:.78,s:28,hop:1},{e:'🕊️',x:3190,d:.44,s:20,hop:1},
+  {e:'🧃',x:3380,d:.68,s:22},{e:'🪴',x:3460,d:.22,s:30},
 ];
 /* ambient pedestrians — the street has other people living their day */
 const WALKERS=[
-  {e:'🚶',x:500, d:.50,vx:45,s:38},{e:'🧕',x:1100,d:.35,vx:-38,s:36},
-  {e:'🏃',x:1700,d:.70,vx:80,s:38},{e:'🧑‍🤝‍🧑',x:2200,d:.25,vx:30,s:40},
-  {e:'🚶‍♀️',x:800,d:.62,vx:-52,s:38},
+  {e:'🚶',x:600, d:.50,vx:45,s:38},{e:'🧕',x:1500,d:.35,vx:-38,s:36},
+  {e:'🏃',x:2400,d:.70,vx:80,s:38},{e:'🧑‍🤝‍🧑',x:3100,d:.25,vx:30,s:40},
+  {e:'🚶‍♀️',x:1000,d:.62,vx:-52,s:38},{e:'🚶',x:2800,d:.55,vx:-60,s:38},
 ];
 function drawHub(){
   const t=TOWN(), base=t.top+26;
@@ -1895,7 +2310,7 @@ function loginReward(){
 }
 function startDay(){
   if(G.state!=='title') return;
-  Sound.init(); userActed=true;
+  Sound.init(); userActed=true; Music.init(); Music.sync();
   checkStreakLapse();            // punish a missed real day (unless a shield saves it)
   ensureHustle();                // refresh today's seeded objective
   loginReward();                 // 7-day calendar gift on first launch of a real day
@@ -1906,7 +2321,7 @@ function startDay(){
   syncPassport(); save();
   G.target=null; G.player.d=.3;
   if(!S.tutorialDone){           // first session: spawn right at the falafel stand so
-    G.player.x=830; G.walletShown=S.shekels;          // earning starts in <10s, not after a long walk
+    G.player.x=920; G.walletShown=S.shekels;          // earning starts in <10s, not after a long walk
   } else { G.player.x=300; }
   G.camX=clamp(G.player.x-W*.42,0,Math.max(0,WORLD_W-W));
   G.state='map';                 // the map is home base: where am I, why am I hustling
