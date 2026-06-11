@@ -2070,13 +2070,13 @@ applyLang();
 requestAnimationFrame(loop);
 
 /* ---------- analytics (GoatCounter: free, cookieless, fails silently) ----------
-   Dashboard: https://miklatgames.goatcounter.com — counts visits, plays,
+   Dashboard: https://miklat-games.goatcounter.com — counts visits, plays,
    wins, and PWA installs. No personal data, no cookies, no consent needed. */
 function track(event){
   try{
     if (location.protocol === 'file:' || location.hostname === 'localhost') return;
     const img = new Image(1, 1);
-    img.src = 'https://miklatgames.goatcounter.com/count?' +
+    img.src = 'https://miklat-games.goatcounter.com/count?' +
       'p=' + encodeURIComponent(event ? '/' + event : location.pathname) +
       (event ? '&e=true' : '') +
       '&r=' + encodeURIComponent(REF ? 'share:' + REF : document.referrer) +
