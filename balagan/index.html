@@ -446,15 +446,16 @@ function checkHustle(id,value){
 }
 
 /* =================== world / state =================== */
-const WORLD_W=2800;
+/* world compressed per vetting: home→volley cross ≈9s, not 17 */
+const WORLD_W=2400;
 const STATIONS=[
   {id:'home',    x:140,  ico:'🏠', art:'home',          label:'HOME',      sub:'sleep / new day'},
-  {id:'chat_savta',x:560,ico:'🧓', label:'SAVTA',       sub:'a word of advice', npc:true},
-  {id:'falafel', x:1020, ico:'🥙', art:'stand-falafel', label:'FALAFEL',   sub:'toss for tips'},
-  {id:'chat_chabad',x:1450,ico:'🧔',label:'CHABAD',     sub:'tefillin?',   npc:true},
-  {id:'shop',    x:1900, ico:'🛍️', art:'shop-front',    label:'SHUK SHOP', sub:'spend your shekels'},
-  {id:'kiosk',   x:2180, ico:'👵', art:'kiosk',         label:'KIOSK',     sub:'gossip & goralot', npc:true},
-  {id:'volley',  x:2480, ico:'🏐', art:'net-volley',    label:'VOLLEYBALL',sub:'bump for cash'},
+  {id:'chat_savta',x:520,ico:'🧓', label:'SAVTA',       sub:'a word of advice', npc:true},
+  {id:'falafel', x:900,  ico:'🥙', art:'stand-falafel', label:'FALAFEL',   sub:'toss for tips'},
+  {id:'chat_chabad',x:1280,ico:'🧔',label:'CHABAD',     sub:'tefillin?',   npc:true},
+  {id:'shop',    x:1660, ico:'🛍️', art:'shop-front',    label:'SHUK SHOP', sub:'spend your shekels'},
+  {id:'kiosk',   x:1960, ico:'👵', art:'kiosk',         label:'KIOSK',     sub:'gossip & goralot', npc:true},
+  {id:'volley',  x:2260, ico:'🏐', art:'net-volley',    label:'VOLLEYBALL',sub:'bump for cash'},
 ];
 const G={
   state:'title', t:0, freeze:0,
@@ -480,9 +481,9 @@ function panel(id){ for(const p of ['title','result','dayDone','chat','shop'])
    The street is a walkable plaza seen from above-and-behind (classic JRPG
    town view): buildings line the back edge, the player roams x AND depth.
    d=0 is the storefront line, d=1 the bottom of the screen. */
-const TOWN=()=>({top:Math.round(H*.34), bot:Math.round(H*.88)});
+const TOWN=()=>({top:Math.round(H*.42), bot:Math.round(H*.78)});   // tighter plaza: no dead bottom half
 const townY=d=>{const t=TOWN();return t.top+26+d*(t.bot-t.top-26);};
-const townScale=d=>.82+.38*d;          // closer = bigger: cheap, effective depth
+const townScale=d=>.85+.6*d;           // closer = noticeably bigger: depth actually reads
 
 /* =================== input — tap anywhere to walk, tap a building to enter =================== */
 let ptDown=null, ptMoved=false, dragX=0;
@@ -516,9 +517,9 @@ function onUp(sx){
     const st=STATIONS.find(s=>Math.abs(s.x-wx)<75 && sy<t.top+90);
     if(st){
       if(Math.abs(st.x-G.player.x)<110 && G.player.d<.38) enterStation(st);   // close: walk in
-      else G.target={x:st.x, d:.14};                                          // far: walk to the door
+      else { G.target={x:st.x, d:.14}; G.pendingEnter=st.id; }                // far: walk there & enter
     }
-    else G.target={x:clamp(wx,60,WORLD_W-60), d:depthFromScreen(sy)};
+    else { G.target={x:clamp(wx,60,WORLD_W-60), d:depthFromScreen(sy)}; G.pendingEnter=null; }
   }
   ptDown=null;
 }
@@ -984,12 +985,16 @@ function update(dt){
 }
 function hubUpdate(dt){
   ensureHustle();                 // keeps today's objective in sync if midnight passes mid-session
-  const p=G.player, sp=140+upLv('walk')*30;
+  for(const w of WALKERS){ w.x=(w.x+w.vx*dt+WORLD_W)%WORLD_W; }   // ambient life wraps the street
+  const p=G.player, sp=190+upLv('walk')*30;
   if(G.target!=null){
     const t=TOWN(), dSpan=Math.max(1,t.bot-t.top-26);
     const dx=G.target.x-p.x, dd=G.target.d-p.d;
     const distPx=Math.hypot(dx, dd*dSpan);
-    if(distPx<7){ p.x=G.target.x; p.d=G.target.d; G.target=null; p.walk=0; }
+    if(distPx<7){ p.x=G.target.x; p.d=G.target.d; G.target=null; p.walk=0;
+      // tapped a far building earlier? walking there finishes the job
+      if(G.pendingEnter){ const st=STATIONS.find(s=>s.id===G.pendingEnter); G.pendingEnter=null;
+        if(st&&Math.abs(st.x-p.x)<110&&p.d<.38) enterStation(st); } }
     else {
       const step=Math.min(distPx,sp*dt)/distPx;     // straight line across the plaza
       if(Math.abs(dx)>2) p.dir=dx<0?-1:1;
@@ -1097,12 +1102,27 @@ function drawTown(){
   for(let x=-((G.camX)%84);x<W;x+=84){ cx.lineWidth=2;
     cx.beginPath();cx.moveTo(x,t.top);cx.lineTo(x+(x-W/2)*.10,H);cx.stroke(); }   // joints fan slightly
 }
-/* street furniture scattered across the plaza — drawn in depth order with the player */
+/* street furniture scattered across the plaza — drawn in depth order with the
+   player. Clustered by zone so the beach end and the shuk end read differently
+   even though the horizon tiles. hop: doves & cats get a little life. */
 const PROPS=[
-  {e:'⛱️',x:330, d:.62,s:44},{e:'🪴',x:700, d:.18,s:30},{e:'🐈',x:870, d:.74,s:26},
-  {e:'🕊️',x:1190,d:.40,s:22},{e:'🛴',x:1330,d:.66,s:30},{e:'🪑',x:1620,d:.30,s:26},
-  {e:'⛱️',x:1750,d:.78,s:46},{e:'🕊️',x:2050,d:.55,s:22},{e:'🐕',x:2300,d:.70,s:28},
-  {e:'🪴',x:2620,d:.22,s:30},
+  // west = beach end: surf, shells, parasols (foreground-biased)
+  {e:'⛱️',x:210, d:.70,s:44},{e:'🏄',x:330, d:.34,s:34},{e:'🐚',x:410, d:.80,s:20},
+  {e:'⛱️',x:540, d:.52,s:40},{e:'🪴',x:620, d:.18,s:30},{e:'🐚',x:710, d:.62,s:18},
+  {e:'🐈',x:770, d:.76,s:26,hop:1},{e:'🛟',x:840, d:.44,s:26},{e:'🕊️',x:1040,d:.42,s:22,hop:1},
+  // mid: city street
+  {e:'🛴',x:1130,d:.68,s:30},{e:'🪑',x:1330,d:.32,s:26},{e:'🕊️',x:1410,d:.64,s:20,hop:1},
+  {e:'⛱️',x:1500,d:.80,s:46},{e:'🧺',x:1580,d:.50,s:26},
+  // east = shuk end: crates, juice, mess
+  {e:'📦',x:1740,d:.56,s:28},{e:'🧃',x:1820,d:.72,s:24},{e:'📦',x:1880,d:.36,s:24},
+  {e:'🚧',x:2030,d:.64,s:30},{e:'🐕',x:2080,d:.78,s:28,hop:1},{e:'🕊️',x:2160,d:.44,s:20,hop:1},
+  {e:'🧃',x:2280,d:.68,s:22},{e:'🪴',x:2330,d:.22,s:30},
+];
+/* ambient pedestrians — the street has other people living their day */
+const WALKERS=[
+  {e:'🚶',x:500, d:.50,vx:45,s:38},{e:'🧕',x:1100,d:.35,vx:-38,s:36},
+  {e:'🏃',x:1700,d:.70,vx:80,s:38},{e:'🧑‍🤝‍🧑',x:2200,d:.25,vx:30,s:40},
+  {e:'🚶‍♀️',x:800,d:.62,vx:-52,s:38},
 ];
 function drawHub(){
   const t=TOWN(), base=t.top+26;
@@ -1111,13 +1131,21 @@ function drawHub(){
     const sx=s.x-G.camX; if(sx<-130||sx>W+130) continue;
     drawStation(s,sx,base);
   }
-  // props + player share the plaza — painter's order by depth
+  // props + walkers + player share the plaza — painter's order by depth
   const p=G.player;
   const ents=PROPS.filter(pr=>{const sx=pr.x-G.camX;return sx>-60&&sx<W+60;})
     .map(pr=>({d:pr.d,draw:()=>{const sc=townScale(pr.d);
+      const hop=pr.hop?Math.abs(Math.sin(G.t*3+pr.x))*5:0;     // doves/cats have a pulse
       cx.fillStyle='rgba(0,0,0,.16)';cx.beginPath();
       cx.ellipse(pr.x-G.camX,townY(pr.d)+6*sc,pr.s*.42*sc,4*sc,0,0,7);cx.fill();
-      drawEmoji(pr.e,pr.x-G.camX,townY(pr.d)-pr.s*.38*sc,pr.s*sc);}}));
+      drawEmoji(pr.e,pr.x-G.camX,townY(pr.d)-pr.s*.38*sc-hop,pr.s*sc);}}));
+  for(const wk of WALKERS){ const sx=wk.x-G.camX; if(sx<-60||sx>W+60) continue;
+    ents.push({d:wk.d,draw:()=>{const sc=townScale(wk.d);
+      cx.fillStyle='rgba(0,0,0,.2)';cx.beginPath();
+      cx.ellipse(sx,townY(wk.d)+6*sc,14*sc,4*sc,0,0,7);cx.fill();
+      cx.save();cx.translate(sx,townY(wk.d)-wk.s*.44*sc+Math.sin(G.t*9+wk.x)*1.6);
+      if(wk.vx<0) cx.scale(-1,1);
+      drawEmoji(wk.e,0,0,wk.s*sc);cx.restore();}}); }
   ents.push({d:p.d,draw:()=>drawPlayer(p.x-G.camX,townY(p.d),p,townScale(p.d))});
   ents.sort((a,b)=>a.d-b.d);
   for(const e of ents) e.draw();
@@ -1127,7 +1155,7 @@ function drawHub(){
     cx.globalAlpha=G.prompt;
     const txt='TAP TO ENTER';
     cx.font='900 15px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
-    const w=cx.measureText(txt).width+24, bx=sx, by=base-152-Math.sin(G.t*4)*4;
+    const w=cx.measureText(txt).width+24, bx=sx, by=base-192-Math.sin(G.t*4)*4;
     cx.fillStyle='rgba(13,17,32,.8)'; rr(bx-w/2,by-16,w,30,8);
     cx.fillStyle='#ffd166';cx.fillText(txt,bx,by);
     cx.fillStyle='rgba(13,17,32,.8)';cx.beginPath();cx.moveTo(bx-8,by+13);cx.lineTo(bx+8,by+13);cx.lineTo(bx,by+24);cx.fill();
@@ -1137,30 +1165,38 @@ function drawHub(){
 function drawStation(s,sx,base){
   // contact shadow on the plaza
   cx.fillStyle='rgba(0,0,0,.18)';cx.beginPath();cx.ellipse(sx,base+8,46,9,0,0,7);cx.fill();
-  if(s.art&&artOk(s.art)){ drawArt(s.art,sx,base-60,128); }   // 3/4-view buildings sit on the back edge
+  if(s.art&&artOk(s.art)){ drawArt(s.art,sx,base-70,150); }   // 3/4-view buildings sit on the back edge
   else if(s.id==='chat_savta'&&artOk('savta-nu')){            // painted savta on her corner
     drawArt('savta-nu',sx,base-44,84);
     if(G.t%2<1) drawEmoji('💬',sx+34,base-96,26);
   }
-  else {
-    // a little procedural stall so it isn't a lone floating emoji
-    if(!s.npc){
-      cx.fillStyle='rgba(177,141,90,.8)';rr(sx-52,base-46,104,46,8);              // stall body
-      for(let i=0;i<6;i++){ cx.fillStyle=i%2?'#e35d5d':'#f4ecdd'; rr(sx-54+i*18,base-74,18,16,2); }  // awning
-    }
-    drawEmoji(s.ico,sx,s.npc?base-44:base-94,s.npc?52:48);
-    if(s.npc&&G.t%2<1) drawEmoji('💬',sx+30,base-94,26);
+  else if(s.npc){
+    // a little counter so NPCs aren't disembodied heads on the curb
+    cx.fillStyle='#b98a52';rr(sx-40,base-38,80,38,6);
+    cx.strokeStyle='rgba(15,20,40,.55)';cx.lineWidth=2;cx.strokeRect(sx-40,base-38,80,38);
+    drawEmoji(s.ico,sx,base-58,48);
+    if(G.t%2<1) drawEmoji('💬',sx+30,base-92,26);
   }
-  // label plate
-  cx.font='900 14px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
-  const w=cx.measureText(s.label).width+20;
-  cx.fillStyle='rgba(13,17,32,.72)';rr(sx-w/2,base-152,w,26,8);
-  cx.fillStyle='#fff';cx.fillText(s.label,sx,base-139);
-  cx.font='700 11px sans-serif';cx.fillStyle='#9fe7d4';cx.fillText(s.sub,sx,base-121);
+  else {
+    // anchored opaque stall: solid body, awning, the goods ON the counter
+    cx.fillStyle='#f4ecdd';rr(sx-50,base-58,100,58,8);
+    cx.strokeStyle='rgba(15,20,40,.55)';cx.lineWidth=2;cx.strokeRect(sx-50,base-58,100,58);
+    for(let i=0;i<6;i++){ cx.fillStyle=i%2?'#e35d5d':'#fffaf0'; rr(sx-52+i*17.5,base-76,17.5,16,2); }
+    drawEmoji(s.ico,sx,base-84,44);
+  }
+  // label plate (two lines: name + what it does); hidden while the prompt hovers
+  if(!(G.near===s&&G.prompt>.5)){
+    cx.font='900 14px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+    const w=Math.max(cx.measureText(s.label).width,s.sub.length*5.6)+22;
+    cx.fillStyle='rgba(13,17,32,.78)';rr(sx-w/2,base-168,w,40,9);
+    cx.fillStyle='#fff';cx.fillText(s.label,sx,base-156);
+    cx.font='700 10.5px sans-serif';cx.fillStyle='#9fe7d4';cx.fillText(s.sub,sx,base-139);
+  }
 }
 function drawPlayer(sx,by,p,sc){
   sc=sc||1;
-  const bob=p&&p.walk?Math.sin(p.walk*1.4)*3:0;
+  // walking bobs with the stride; standing still breathes instead of freeze-framing
+  const bob=p&&p.walk?Math.sin(p.walk*1.4)*3:Math.sin(G.t*2.2)*1.5;
   cx.fillStyle='rgba(0,0,0,.28)';cx.beginPath();cx.ellipse(sx,by+8*sc,20*sc,6*sc,0,0,7);cx.fill();
   const c=equipped();
   cx.save();cx.translate(sx,by-34*sc+bob);cx.scale(sc,sc);
@@ -1309,7 +1345,7 @@ function startDay(){
   syncPassport(); save();
   panel(null); G.state='hub'; G.target=null; G.player.d=.3;
   if(!S.tutorialDone){           // first session: spawn right at the falafel stand so
-    G.player.x=970; G.walletShown=S.shekels;          // earning starts in <10s, not after a 1000px walk
+    G.player.x=830; G.walletShown=S.shekels;          // earning starts in <10s, not after a long walk
   } else { G.player.x=300; }
   G.camX=clamp(G.player.x-W*.42,0,Math.max(0,WORLD_W-W));
 }

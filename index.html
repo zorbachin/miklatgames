@@ -81,7 +81,7 @@
 <header>
   <div class="logo"><span class="lamp">🚨</span> MIKLAT GAMES</div>
   <div class="tag">Games from the shelter. <b>Free. No app. One thumb.</b></div>
-  <span class="count">🕹️ 3 games live · 1 door opening soon</span>
+  <span class="count">🕹️ 2 games live · BALAGAN coming soon 🌴</span>
 </header>
 
 <a class="card featured" href="mamaddash/" id="cardMamad">
@@ -99,21 +99,19 @@
 
 <div class="shelf-label">🚪 MORE IN THE SHELTER</div>
 
-<a class="tile" href="balagan/" id="cardBalagan">
-  <img class="tart" src="balagan/tile.jpg" alt="BALAGAN" loading="lazy" style="object-position:center;">
-  <span class="tplay">PLAY ▶</span>
-  <span style="position:absolute;top:10px;left:12px;background:rgba(11,14,26,.6);color:#7ee8c7;
-    font-size:11px;font-weight:800;letter-spacing:.1em;padding:5px 10px;border-radius:999px;">🆕 NEW</span>
-  <div class="tname">🌴 BALAGAN</div>
-  <div class="tname" style="bottom:30px;font-size:12px;font-weight:700;color:#ffe1b8;">double your ₪500 of avtala</div>
-  <span class="pill best" id="balBest" style="position:absolute;right:12px;bottom:12px;display:none;font-size:11px;"></span>
-</a>
-
-<a class="tile" href="irondome/" id="cardIron" style="margin-top:12px;">
+<a class="tile" href="irondome/" id="cardIron">
   <img class="tart" src="irondome/share-card.jpg" alt="IRON DOME" loading="lazy">
   <span class="tplay">PLAY ▶</span>
   <div class="tname" style="font-size:14px;font-weight:700;color:#eafff7;">🛡️ tap the rockets. no pressure.</div>
 </a>
+
+<div class="tile" id="cardBalagan" style="margin-top:12px;cursor:default;filter:saturate(.6) brightness(.8);">
+  <img class="tart" src="balagan/tile.jpg" alt="BALAGAN — coming soon" loading="lazy" style="object-position:center;">
+  <span style="position:absolute;top:10px;right:10px;background:rgba(11,14,26,.75);color:#ffd166;
+    font-size:11px;font-weight:800;letter-spacing:.12em;padding:6px 12px;border-radius:999px;">🔜 COMING SOON</span>
+  <div class="tname">🌴 BALAGAN</div>
+  <div class="tname" style="bottom:30px;font-size:12px;font-weight:700;color:#ffe1b8;">unemployed in Tel Aviv. double your ₪500 of avtala.</div>
+</div>
 
 <div class="grid" style="margin-top:12px;">
   <div class="door">
@@ -136,14 +134,6 @@ try{
   if(b&&b.sirens>0){
     const el=document.getElementById('mdBest');
     el.textContent=`🏆 Your best: ${b.sirens} siren${b.sirens===1?'':'s'}`;
-    el.style.display='';
-  }
-}catch(e){}
-try{
-  const s=JSON.parse(localStorage.getItem('bg_save')||'null');
-  if(s&&typeof s.shekels==='number'&&(s.shekels!==500||s.streak>0)){
-    const el=document.getElementById('balBest');
-    el.textContent=`💰 ${Math.round(s.shekels)}₪${s.streak>0?` · ${s.streak}🔥`:''}`;
     el.style.display='';
   }
 }catch(e){}
