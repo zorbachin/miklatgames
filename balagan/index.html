@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b0e1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BALAGAN">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:title" content="BALAGAN — Tel Aviv on ₪500">
+<meta property="og:description" content="Unemployed in Tel Aviv with ₪500 of avtala. Bump volleyball, toss falafel, work the shuk — double your money before sundown, then buy a new life. Savta's still watching.">
+<meta property="og:url" content="https://miklatgames.fun/balagan/">
+<meta property="og:image" content="https://miklatgames.fun/balagan/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://miklatgames.fun/balagan/og.jpg">
+<link rel="icon" type="image/png" href="../mamaddash/art/icon.png">
+<link rel="apple-touch-icon" href="../mamaddash/art/icon.png">
+<title>BALAGAN 🌴</title>
+<style>
+  :root{ --navy:#0b0e1a; --gold:#ffd166; --teal:#7ee8c7; --red:#ff5d5d; --cream:#f4ecdd; --pink:#ff8ad4; --blue:#8ad2ff; }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none;
+    background:var(--navy);font-family:-apple-system,'Segoe UI',Roboto,sans-serif;color:#e8ecf6;
+    user-select:none;-webkit-user-select:none;}
+  #wrap{position:fixed;inset:0;}
+  #wrap.shake{animation:shk .3s linear;}
+  @keyframes shk{0%,100%{transform:none}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-4px)}
+    60%{transform:translate(-4px,-2px)}80%{transform:translate(3px,4px)}}
+  canvas{display:block;width:100%;height:100%;}
+  #flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .5s;}
+  .panel{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:24px;z-index:10;background:radial-gradient(ellipse at 50% 35%,rgba(11,14,26,.55),rgba(11,14,26,.93));}
+  #title{background:linear-gradient(rgba(11,14,26,.4),rgba(11,14,26,.85)),
+    linear-gradient(180deg,#37b6ff 0%,#8fd8ff 45%,#ffd9a8 100%);}
+  .logo{font-size:clamp(40px,12vw,78px);font-weight:900;letter-spacing:.02em;line-height:1;
+    background:linear-gradient(180deg,#ffe29a,#e9a23b);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 4px 18px rgba(233,162,59,.4));}
+  .tag{margin-top:10px;font-size:clamp(13px,3.6vw,17px);color:#cdd6e8;max-width:430px;line-height:1.45;}
+  .big{font-size:clamp(20px,6vw,30px);font-weight:800;color:var(--gold);margin-top:26px;animation:pulse 1.1s ease-in-out infinite;}
+  @keyframes pulse{50%{transform:scale(1.07);opacity:.85}}
+  .controls{margin-top:16px;font-size:clamp(12px,3.4vw,14px);color:#aab4c8;display:flex;gap:18px;justify-content:center;flex-wrap:wrap;}
+  .controls b{color:var(--teal);}
+  .btn{margin-top:14px;border:0;border-radius:14px;padding:15px 34px;font-size:17px;font-weight:800;cursor:pointer;
+    background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;box-shadow:0 6px 22px rgba(233,162,59,.35);}
+  .btn:active{transform:scale(.96);}
+  .btn.ghost{background:transparent;color:#cdd6e8;border:1px solid #46506b;box-shadow:none;font-weight:600;}
+  .btn.teal{background:linear-gradient(180deg,#7ee8c7,#34b89a);color:#06231c;box-shadow:0 6px 22px rgba(52,184,154,.3);}
+  .btn:disabled{opacity:.4;filter:grayscale(.6);}
+  .stat{font-size:clamp(15px,4.2vw,18px);margin-top:8px;color:#cdd6e8;}
+  .stat b{color:var(--gold);}
+  .best{margin-top:18px;font-size:14px;color:var(--teal);}
+
+  /* shop */
+  #shop{justify-content:flex-start;background:linear-gradient(rgba(11,14,26,.92),rgba(11,14,26,.97));overflow-y:auto;padding:0;}
+  .shopHead{position:sticky;top:0;z-index:2;width:100%;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 12px;
+    background:linear-gradient(180deg,rgba(11,14,26,.98),rgba(11,14,26,.86));border-bottom:1px solid #232c4a;}
+  .shopHead .wallet{font-size:22px;font-weight:900;color:var(--gold);}
+  .shopHead .sub{font-size:12px;color:#8b95ad;margin-top:2px;}
+  .tabs{display:flex;gap:8px;margin-top:12px;justify-content:center;}
+  .tab{flex:1;max-width:140px;font-size:13px;font-weight:800;padding:9px 0;border-radius:11px;border:1px solid #2a3450;
+    background:rgba(20,26,46,.6);color:#aab4c8;cursor:pointer;}
+  .tab.on{background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;border-color:transparent;}
+  #shopList{width:100%;max-width:520px;margin:0 auto;padding:14px 14px calc(env(safe-area-inset-bottom,0px) + 90px);
+    display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .item{position:relative;border-radius:16px;border:1px solid #232c4a;background:#141a2e;padding:14px 12px 12px;
+    display:flex;flex-direction:column;align-items:center;text-align:center;}
+  .item.owned{border-color:rgba(126,232,199,.4);}
+  .item.equipped{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset;}
+  .item .ico{font-size:42px;line-height:1;margin-bottom:6px;filter:drop-shadow(0 3px 8px rgba(0,0,0,.4));}
+  .item .iart{width:64px;height:64px;object-fit:contain;margin-bottom:4px;}
+  .item .nm{font-size:15px;font-weight:800;}
+  .item .pk{font-size:11px;color:var(--teal);margin-top:3px;line-height:1.35;min-height:30px;}
+  .item .buy{margin-top:9px;width:100%;border:0;border-radius:10px;padding:9px 0;font-size:13px;font-weight:800;cursor:pointer;
+    background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;}
+  .item .buy.own{background:rgba(126,232,199,.16);color:var(--teal);}
+  .item .buy.eq{background:var(--gold);color:#1a1405;}
+  .item .buy:disabled{opacity:.45;}
+  .item .cnt{position:absolute;top:8px;right:10px;font-size:12px;font-weight:800;color:var(--blue);}
+  .shopClose{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 16px);z-index:5;
+    border:0;border-radius:14px;padding:14px 40px;font-size:16px;font-weight:800;cursor:pointer;
+    background:linear-gradient(180deg,#7ee8c7,#34b89a);color:#06231c;box-shadow:0 8px 26px rgba(0,0,0,.5);}
+
+  #mute{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);right:12px;z-index:20;font-size:20px;
+    background:rgba(13,17,32,.55);border:1px solid #2a3450;border-radius:10px;padding:6px 10px;color:#e8ecf6;}
+  .hidden{display:none!important;}
+  .pop{animation:popin .25s ease-out;}
+  @keyframes popin{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="cv"></canvas></div>
+<div id="flash"></div>
+<button id="mute">🔊</button>
+
+<!-- TITLE -->
+<div class="panel" id="title">
+  <div class="logo">BALAGAN</div>
+  <div class="tag" id="titleTag">🌴 Unemployed in Tel Aviv with <b style="color:#ffd166">₪500</b> of avtala. Bump volleyball, toss falafel, work the street — <b style="color:#ffd166">double your money</b> before sundown. Then buy a whole new life.</div>
+  <div class="controls"><span><b>DRAG / TAP</b> to stroll</span><span><b>TAP</b> a spot to enter</span></div>
+  <div class="big" id="titleBtn">START THE DAY ▶</div>
+  <div class="best" id="titleBest"></div>
+</div>
+
+<!-- MINIGAME RESULT -->
+<div class="panel hidden" id="result">
+  <div class="logo" id="rTitle" style="font-size:clamp(26px,8vw,44px);">NICE!</div>
+  <div class="tag" id="rSub"></div>
+  <div class="stat" style="margin-top:18px;">💸 Earned: <b id="rEarn">0₪</b></div>
+  <div class="stat" id="rBestLine"></div>
+  <div class="best" id="rGoal" style="color:#ffd166;"></div>
+  <button class="btn" id="rAgain">PLAY AGAIN ▶</button>
+  <button class="btn ghost" id="rBack">↩ BACK TO THE STREET</button>
+</div>
+
+<!-- DAY CLEARED -->
+<div class="panel hidden" id="dayDone">
+  <div style="font-size:54px">🌅</div>
+  <div class="logo" style="font-size:clamp(26px,8vw,44px);">DOUBLED IT!</div>
+  <div class="tag" id="ddSub">You turned your avtala around. Savta's almost proud.</div>
+  <div class="stat" style="margin-top:16px;">🔥 Streak: <b id="ddStreak">1</b> day<span id="ddS"></span></div>
+  <div class="stat">🎁 Bonus banked: <b id="ddBonus">+0₪</b></div>
+  <div class="stat">💰 Wallet: <b id="ddWallet">0₪</b></div>
+  <div class="best" id="ddNext" style="color:#ffd166;"></div>
+  <button class="btn teal" id="ddNextBtn">START TOMORROW ▶</button>
+  <button class="btn ghost" id="ddShare">📤 FLEX ON A FRIEND</button>
+</div>
+
+<!-- CHAT -->
+<div class="panel hidden" id="chat" style="background:radial-gradient(ellipse at 50% 35%,rgba(11,14,26,.35),rgba(11,14,26,.85));">
+  <div id="chatIco" style="font-size:64px">🧓</div>
+  <div class="logo" id="chatName" style="font-size:clamp(22px,6vw,32px);"></div>
+  <div class="tag" id="chatLine" style="margin-top:14px;font-size:clamp(15px,4.2vw,19px);color:#f4ecdd;"></div>
+  <div class="best" id="chatReward" style="color:#7ee8c7;"></div>
+  <button class="btn" id="chatBtn">OK 🤙</button>
+</div>
+
+<!-- SHOP -->
+<div class="panel hidden" id="shop">
+  <div class="shopHead">
+    <div class="wallet" id="shopWallet">💰 0₪</div>
+    <div class="sub" id="shopSub">Spend it before the next siren. Collection 0%</div>
+    <div class="tabs">
+      <button class="tab on" data-tab="char">🧍 Characters</button>
+      <button class="tab" data-tab="item">🥙 Items</button>
+      <button class="tab" data-tab="up">⚡ Upgrades</button>
+    </div>
+  </div>
+  <div id="shopList"></div>
+  <button class="shopClose" id="shopClose">↩ BACK TO THE STREET</button>
+</div>
+
+<script>
+'use strict';
+/* =================== BALAGAN — Tel Aviv life, on ₪500 ===================
+   The lifestyle prototype that Mamad Dash grew out of, reimagined as an
+   ongoing game. Stroll a Tel Aviv street, work the mini-games for shekels,
+   double your money to clear the day (streak + escalating goal), and sink
+   the winnings into a shop of characters, items and upgrades.
+
+   One file, mobile-first, canvas + emoji→PNG art fallback (so a real image
+   pack drops straight in — see ART{} and README). Wallet persists forever. */
+
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const lerp=(a,b,t)=>a+(b-a)*t;
+const rand=(a,b)=>a+Math.random()*(b-a);
+const irand=(a,b)=>Math.floor(rand(a,b+1));
+const money=n=>Math.round(n)+'₪';
+let userActed=false;
+const buzz=p=>{try{userActed&&navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+
+/* ---------------- sound (WebAudio, built on first gesture) ---------------- */
+const Sound={
+  ctx:null, bus:null, on:localStorage.getItem('bg_mute')!=='1',
+  init(){ if(!this.ctx){ try{ this.ctx=new (window.AudioContext||window.webkitAudioContext)();
+      this.bus=this.ctx.createDynamicsCompressor(); this.bus.connect(this.ctx.destination);
+    }catch(e){} } if(this.ctx&&this.ctx.state==='suspended') this.ctx.resume(); },
+  beep(f,d,type='square',g=.05,slide=0,when=0){
+    if(!this.on||!this.ctx) return;
+    const o=this.ctx.createOscillator(),v=this.ctx.createGain(),t=this.ctx.currentTime+when;
+    o.type=type;o.frequency.setValueAtTime(f,t);
+    if(slide) o.frequency.exponentialRampToValueAtTime(Math.max(40,f+slide),t+d);
+    v.gain.setValueAtTime(g,t);v.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(v).connect(this.bus||this.ctx.destination);o.start(t);o.stop(t+d);
+  },
+  step(){this.beep(180,.05,'square',.02,40);},
+  enter(){this.beep(523,.08,'square',.04);this.beep(784,.12,'square',.04,0,.07);},
+  bump(n=0){const m=Math.pow(2,Math.min(n,12)/12);this.beep(560*m,.07,'square',.05,120);},
+  miss(){this.beep(180,.25,'sawtooth',.07,-70);},
+  serve(n=0){const m=Math.pow(2,Math.min(n,10)/12);this.beep(880*m,.06,'square',.04);this.beep(1320*m,.08,'square',.04,0,.05);},
+  cash(){this.beep(1318,.06,'square',.05);this.beep(1760,.1,'square',.05,0,.06);this.beep(2093,.12,'square',.05,0,.13);},
+  buy(){this.beep(740,.07,'square',.05);this.beep(988,.1,'square',.05,0,.06);},
+  no(){this.beep(200,.12,'square',.05);this.beep(150,.16,'square',.05,0,.1);},
+  win(){[523,659,784,1047].forEach((f,i)=>this.beep(f,.16,'square',.05,0,i*.09));},
+  chat(){this.beep(660,.05,'triangle',.04);this.beep(880,.06,'triangle',.04,0,.05);},
+};
+$('mute').textContent=Sound.on?'🔊':'🔇';
+$('mute').addEventListener('click',e=>{ e.stopPropagation();
+  Sound.on=!Sound.on; localStorage.setItem('bg_mute',Sound.on?'0':'1');
+  $('mute').textContent=Sound.on?'🔊':'🔇'; });
+
+/* ---------------- canvas ---------------- */
+const cv=$('cv'),cx=cv.getContext('2d');
+let W=0,H=0,DPR=1,groundY=0,SAFE_TOP=0,clearCaches=()=>{};
+const saProbe=document.createElement('div');
+saProbe.style.cssText='position:fixed;top:0;left:0;width:1px;height:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none;';
+document.body.appendChild(saProbe);
+function resize(){
+  DPR=Math.min(2,window.devicePixelRatio||1);
+  W=window.innerWidth;H=window.innerHeight;
+  SAFE_TOP=saProbe.offsetHeight||0;
+  cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0);
+  cx.lineJoin='round';
+  groundY=Math.round(H*.72);
+  clearCaches();
+}
+window.addEventListener('resize',resize);resize();
+
+/* sprite caches — emoji rasterized once, gradients/glows once */
+const EMO=new Map(), GLOWS=new Map(), SKYG=new Map();
+clearCaches=()=>{EMO.clear();GLOWS.clear();SKYG.clear();};
+function drawEmoji(e,x,y,s){
+  const k=e+'|'+(s|0);
+  let c=EMO.get(k);
+  if(!c){ c=document.createElement('canvas');
+    const pad=Math.ceil(s*1.5);
+    c.width=Math.ceil(pad*DPR);c.height=Math.ceil(pad*DPR);c._w=pad;
+    const g=c.getContext('2d');g.scale(DPR,DPR);
+    g.font=s+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+    g.textAlign='center';g.textBaseline='middle';g.fillText(e,pad/2,pad/2);
+    EMO.set(k,c);
+  }
+  cx.drawImage(c,x-c._w/2,y-c._w/2,c._w,c._w);
+}
+function glow(col,size){
+  const k=col+'|'+size;
+  let c=GLOWS.get(k);
+  if(!c){ c=document.createElement('canvas');c.width=c.height=size*2;
+    const g=c.getContext('2d');
+    const r=g.createRadialGradient(size,size,size*.12,size,size,size);
+    r.addColorStop(0,col);r.addColorStop(1,'rgba(0,0,0,0)');
+    g.fillStyle=r;g.fillRect(0,0,size*2,size*2);
+    GLOWS.set(k,c);
+  }
+  return c;
+}
+/* hand-drawn sprites — graceful fallback to emoji while loading / if absent.
+   Drop matching PNGs into balagan/art/ and the world upgrades itself. */
+const ART={};
+for(const n of ['bg-city','stand-falafel','net-volley','shop-front','home',
+  'char-avtali','char-savta','char-chabad','char-bro','char-hightech']){
+  const i=new Image(); i.src='art/'+n+'.png'; ART[n]=i;
+}
+const artOk=n=>{const i=ART[n];return i&&i.complete&&i.naturalWidth>0;};
+function drawArt(n,x,y,h,flip){
+  const i=ART[n], w=h*i.naturalWidth/i.naturalHeight;
+  cx.save();cx.translate(x,y);if(flip)cx.scale(-1,1);
+  cx.drawImage(i,-w/2,-h/2,w,h);cx.restore();
+}
+
+/* =================== catalog — the shop drives the whole economy ===================
+   Characters are skins WITH a perk (incentive to actually buy, not just collect).
+   Items are consumables auto-spent in the mini-games. Upgrades are permanent. */
+const CHARS=[
+  {id:'avtali',  ico:'🧍', name:'Avtali',      cost:0,    perk:'The original. Broke and hopeful.'},
+  {id:'savta',   ico:'🧓', name:'Savta Mizrahi',cost:450, perk:'+15% falafel tips — she knows everyone.', mult:{falafel:.15}},
+  {id:'bro',     ico:'🏄', name:'Beach Bro',    cost:600, perk:'+1 volleyball life. Totally chill.',     vlife:1},
+  {id:'chabad',  ico:'🧔', name:'Chabad Guy',   cost:800, perk:'Daily mitzvah: free +₪60 each morning.', mitzvah:60},
+  {id:'hightech',ico:'🦸', name:'Hi-Tech Bro',  cost:1500, perk:'+10% earnings, −1 volley life. He optimized it.', mult:{all:.10}, vlife:-1},
+  {id:'mamadmom',ico:'🦸‍♀️', name:'Mamad Mom',  cost:0, secret:true,
+   perk:'+10% on everything. Earned across the whole Miklat universe. 🛡️', mult:{all:.10}},
+];
+const ITEMS=[
+  {id:'falafel', ico:'🥙', name:'Falafel Pack', cost:80,  perk:'+5s on your next mini-game.'},
+  {id:'hummus',  ico:'🫓', name:'Hummus Bowl',  cost:130, perk:'Auto-saves one volleyball miss.'},
+  {id:'goldstar',ico:'🍺', name:'Cold Goldstar',cost:60,  perk:'Slows the next game down a touch.'},
+];
+const UPS=[
+  {id:'tips',  ico:'💸', name:'Bigger Tips',  base:200, name2:'earnings', max:5, step:.12, perk:lv=>`+${lv*12}% all earnings (Lv ${lv}/5)`},
+  {id:'walk',  ico:'👟', name:'Faster Walk',  base:150, max:4, step:30,  perk:lv=>`Stroll +${lv*30} speed (Lv ${lv}/4)`},
+  {id:'lucky', ico:'🍀', name:'Lucky Charm',  base:300, max:3, step:1,   perk:lv=>`Combos build faster (Lv ${lv}/3)`},
+];
+
+/* =================== save / economy =================== */
+const DEF={ shekels:500, day:1, dayStart:500, earnedToday:0, streak:0,
+  chars:['avtali'], equip:'avtali', items:{}, ups:{}, lastClaim:0,
+  shields:0, lastClearedDay:0, tutorialDone:false,
+  best:{volley:0,falafel:0,daysCleared:0,topWallet:500}, lastSeen:0 };
+let S=load();
+function load(){
+  try{ const s=JSON.parse(localStorage.getItem('bg_save')); if(s&&typeof s.shekels==='number'){
+    return Object.assign({},DEF,s,{best:Object.assign({},DEF.best,s.best),
+      items:s.items||{},ups:s.ups||{},chars:s.chars||['avtali']}); }
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEF));
+}
+function save(){ try{ localStorage.setItem('bg_save',JSON.stringify(S)); }catch(e){} }
+const owned=id=>S.chars.includes(id);
+function ownedPct(){ const total=CHARS.length+ITEMS.length+UPS.length;
+  let have=S.chars.length;
+  for(const it of ITEMS) if((S.items[it.id]||0)>0||S['ever_'+it.id]) have++;
+  for(const u of UPS) if((S.ups[u.id]||0)>0) have++;
+  return Math.round(have/total*100);
+}
+function equipped(){ return CHARS.find(c=>c.id===S.equip)||CHARS[0]; }
+function upLv(id){ return S.ups[id]||0; }
+function upCost(u){ return Math.round(u.base*Math.pow(1.8,upLv(u.id))); }
+// total earnings multiplier from char + upgrades
+function earnMult(kind){
+  let m=1; const c=equipped();
+  if(c.mult){ if(c.mult.all) m+=c.mult.all; if(c.mult[kind]) m+=c.mult[kind]; }
+  m+=upLv('tips')*UPS[0].step;
+  return m;
+}
+function payout(raw,kind){ const v=Math.round(raw*earnMult(kind));
+  S.shekels+=v; S.earnedToday+=v;
+  if(S.shekels>S.best.topWallet) S.best.topWallet=S.shekels;
+  return v;
+}
+
+/* daily roll-over: a real new calendar day refreshes the mitzvah claim */
+function dayIndex(){ return Math.floor(Date.now()/864e5); }
+function newDay(){            // start (or restart) a day
+  S.dayStart=S.shekels; S.earnedToday=0;
+  // Chabad mitzvah: free shekels once per real day if he's equipped
+  const c=equipped();
+  if(c.mitzvah && S.lastClaim!==dayIndex()){
+    S.lastClaim=dayIndex(); S.shekels+=c.mitzvah;
+    G.mitzvahPending=c.mitzvah;
+  }
+  save();
+}
+/* Economy v2: the "double-up" target is a fixed gentle ladder, NOT the wallet —
+   so the clearDay bonus can't compound the goal out of reach. Day 1 = earn ₪500
+   (literally double your starting avtala); it creeps ~15%/day after. */
+const dayGoal=()=>Math.round(500*Math.pow(1.15,S.day-1));
+const dayProg=()=>clamp(S.earnedToday/Math.max(1,dayGoal()),0,1);
+
+/* streak with stakes: miss a real day and the streak resets — unless you banked
+   a Shabbat Shield (earned at 3/7/14-day milestones). */
+function checkStreakLapse(){
+  if(S.streak<=0) return;
+  const gap=dayIndex()-S.lastClearedDay;
+  if(S.lastClearedDay>0 && gap>1){
+    if(S.shields>0){ S.shields--; S.lastClearedDay=dayIndex()-1; G.shieldUsed=true; }
+    else { G.streakLost=S.streak; S.streak=0; }
+    save();
+  }
+}
+
+/* =================== Miklat Passport — one identity across the arcade ===================
+   A shared localStorage profile that Balagan writes to and the sibling games can
+   read. Balagan is the spend hub; Mamad Dash / Iron Dome feed cross-game unlocks. */
+function passport(){ try{return JSON.parse(localStorage.getItem('miklat_passport'))||{};}catch(e){return{};} }
+function syncPassport(){
+  const p=passport();
+  p.balagan={wallet:S.shekels, day:S.day, streak:S.streak,
+    daysCleared:S.best.daysCleared, collection:ownedPct(), ts:Date.now()};
+  try{ const md=JSON.parse(localStorage.getItem('md_best')||'null');
+    if(md) p.mamaddash={sirens:md.sirens||0, coins:md.coins||0}; }catch(e){}
+  try{ localStorage.setItem('miklat_passport',JSON.stringify(p)); }catch(e){}
+  return p;
+}
+// the secret crossover skin: clear a day HERE + survive a siren in Mamad Dash
+function crossUnlocked(){ const p=passport();
+  return S.best.daysCleared>0 && p.mamaddash && p.mamaddash.sirens>0; }
+
+/* =================== world / state =================== */
+const WORLD_W=2800;
+const STATIONS=[
+  {id:'home',    x:140,  ico:'🏠', art:'home',          label:'HOME',      sub:'sleep / new day'},
+  {id:'chat_savta',x:560,ico:'🧓', label:'SAVTA',       sub:'a word of advice', npc:true},
+  {id:'falafel', x:1020, ico:'🥙', art:'stand-falafel', label:'FALAFEL',   sub:'toss for tips'},
+  {id:'chat_chabad',x:1450,ico:'🧔',label:'CHABAD',     sub:'tefillin?',   npc:true},
+  {id:'shop',    x:1900, ico:'🛍️', art:'shop-front',    label:'SHUK SHOP', sub:'spend your shekels'},
+  {id:'volley',  x:2480, ico:'🏐', art:'net-volley',    label:'VOLLEYBALL',sub:'bump for cash'},
+];
+const G={
+  state:'title', t:0, freeze:0,
+  camX:0, player:{x:300,y:0,vy:0,dir:1,walk:0}, target:null,
+  near:null, prompt:0, mitzvahPending:0, walletShown:S.shekels,
+  streakLost:0, shieldUsed:false,
+  pops:[], confetti:[], coins:[],
+  vb:null, fa:null,
+  result:{kind:'',earn:0,best:false},
+};
+const POP_COLS=['#ffd166','#7ee8c7','#ff8ad4','#8ad2ff'];
+function pop(x,y,txt,col,big){ G.pops.push({x,y,txt,col:col||'#ffd166',t:0,big:!!big}); }
+function flyCoin(x,y){ G.coins.push({x,y,t:0}); }
+function burstConfetti(n){ for(let i=0;i<n;i++) G.confetti.push({x:rand(0,W),y:rand(-H*.2,H*.3),
+  vx:rand(-40,40),vy:rand(150,330),rot:rand(0,6),vr:rand(-6,6),col:POP_COLS[i%4],s:rand(5,10)}); }
+function flash(o){ const f=$('flash');f.style.transition='none';f.style.opacity=o;
+  requestAnimationFrame(()=>{f.style.transition='opacity .5s';f.style.opacity=0;}); }
+function shake(){ const w=$('wrap');w.classList.remove('shake');void w.offsetWidth;w.classList.add('shake'); }
+function panel(id){ for(const p of ['title','result','dayDone','chat','shop'])
+  $(p).classList.toggle('hidden',p!==id); }
+
+/* =================== input — drag/tap to stroll, tap a spot to enter =================== */
+let ptDown=null, ptMoved=false, dragX=0;
+function worldFromScreen(sx){ return sx+G.camX; }
+function onDown(sx,sy){
+  userActed=true; Sound.init();
+  if(G.state==='hub'){ ptDown={sx,sy}; ptMoved=false; dragX=sx; }
+  else if(G.state==='volley') vbTap();
+  else if(G.state==='falafel') faTap();
+}
+function onMove(sx){
+  if(G.state==='hub'&&ptDown){ const dx=sx-dragX;
+    if(Math.abs(sx-ptDown.sx)>8) ptMoved=true;
+    G.camX=clamp(G.camX-dx,0,Math.max(0,WORLD_W-W)); dragX=sx;
+    // drag scrolls the world; player walks toward the drag too
+    G.player.x=clamp(G.player.x, G.camX+60, G.camX+W-60);
+  }
+}
+function onUp(sx){
+  if(G.state!=='hub'){ ptDown=null; return; }
+  if(ptDown && !ptMoved){            // a tap: walk there, or enter a nearby spot
+    const wx=worldFromScreen(sx);
+    const st=STATIONS.find(s=>Math.abs(s.x-wx)<70 && Math.abs(s.x-G.player.x)<120);
+    if(st) enterStation(st);
+    else G.target=clamp(wx,60,WORLD_W-60);
+  }
+  ptDown=null;
+}
+window.addEventListener('touchstart',e=>{ if(e.target.closest('button')) return;
+  e.preventDefault(); const t=e.touches[0]; onDown(t.clientX,t.clientY); },{passive:false});
+window.addEventListener('touchmove',e=>{ if(ptDown===null&&G.state==='hub') return;
+  e.preventDefault(); if(e.touches[0]) onMove(e.touches[0].clientX); },{passive:false});
+window.addEventListener('touchend',e=>{ const t=e.changedTouches[0]; onUp(t?t.clientX:0); },{passive:false});
+window.addEventListener('mousedown',e=>{ if(e.target.closest('button')) return; onDown(e.clientX,e.clientY); });
+window.addEventListener('mousemove',e=>{ if(ptDown) onMove(e.clientX); });
+window.addEventListener('mouseup',e=>{ onUp(e.clientX); });
+window.addEventListener('contextmenu',e=>e.preventDefault());
+window.addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  if(G.state==='hub'){
+    if(k==='arrowleft'||k==='a') G.target=G.player.x-260;
+    if(k==='arrowright'||k==='d') G.target=G.player.x+260;
+    if(k===' '||k==='enter'){ const st=STATIONS.find(s=>Math.abs(s.x-G.player.x)<110); if(st) enterStation(st); }
+  } else if((k===' '||k==='arrowup')&&(G.state==='volley'||G.state==='falafel')){
+    e.preventDefault(); G.state==='volley'?vbTap():faTap();
+  }
+});
+
+/* =================== stations =================== */
+function enterStation(st){
+  if(st.id==='home') return goHome();
+  if(st.id==='shop') return openShop();
+  if(st.id==='falafel') return faStart();
+  if(st.id==='volley') return vbStart();
+  if(st.id==='chat_savta') return openChat('savta');
+  if(st.id==='chat_chabad') return openChat('chabad');
+}
+function goHome(){
+  Sound.enter();
+  if(dayProg()>=1){ clearDay(); }
+  else { Sound.no();
+    pop(G.player.x-G.camX,groundY-200,`🌅 Double up first — ${Math.round(dayProg()*100)}%`,'#ffd166',true);
+    pop(G.player.x-G.camX,groundY-160,'🏐 rally · 🥙 toss','#9fe7d4'); }
+}
+
+/* =================== chat / NPCs — reactive to streak, progress & your skin =================== */
+const NPC={ savta:{ico:'🧓',name:'Savta Mizrahi'}, chabad:{ico:'🧔',name:'Chabad Guy'} };
+function chatLines(who){
+  const eq=S.equip, prog=dayProg(), L=[];
+  if(who==='savta'){
+    if(S.streak>=3) L.push(`${S.streak} days you doubled it?? Who ARE you. I told the whole makolet.`);
+    if(prog>=1) L.push('NU! You doubled it already! Go home, sleep — don\'t spend it all on kishkush.');
+    else if(prog>=.4) L.push('Halfway and the sun\'s still up. In my day we were faster… but not bad, motek.');
+    if(eq==='chabad') L.push('Suddenly so frum? Your savta is Mizrahi — don\'t forget the tradition. 🕯️');
+    else if(eq==='bro') L.push('A beach bum?? Put on a shirt and go make money like a mensch.');
+    else if(eq==='hightech') L.push('Exit, shmexit. Call your mother. Then double your money.');
+    else if(eq==='mamadmom') L.push('Now THAT is a woman who runs the shelter. Proud of you, motek. 🛡️');
+    L.push('You look thin. Take ₪40 — don\'t tell your mother. 🤍');
+    L.push('The shuk has new looks. Stop dressing like a student.');
+  } else {
+    if(eq==='chabad') L.push('Achi! Look at you — a real mensch. Free ₪60 every morning, enjoy. 🙏');
+    else L.push('Achi, did you lay tefillin today? Buy the Chabad Guy skin — free ₪60 every morning. 🙏');
+    if(S.streak>=7) L.push('Seven days strong — that is a Shabbat kind of dedication. 🕯️');
+    L.push('A little tzedakah goes a long way. Here — ₪30, pass it on. 🙏');
+    L.push('Shabbat is coming. Make your shekels now, rest later.');
+  }
+  return L;
+}
+function openChat(who){
+  const c=NPC[who]; if(!c) return;
+  Sound.chat(); G.chatWho=who;
+  $('chatIco').textContent=c.ico; $('chatName').textContent=c.name;
+  const L=chatLines(who); let line=L[irand(0,L.length-1)], reward='';
+  // gifts are once per real day per NPC — a reason to visit, not a faucet to farm
+  const today=dayIndex(); S.gift=S.gift||{};
+  const g=line.includes('₪40')?40:line.includes('₪30')?30:0;
+  if(g && S.gift[who]!==today){ S.gift[who]=today; S.shekels+=g; S.earnedToday+=g;
+    reward=`+${g}₪ ${who==='savta'?'from Savta 🤍':'tzedakah 🙏'}`; flyCoin(W/2,H*.45); Sound.cash(); }
+  else if(g) reward='(already took your gift today — chutzpah!)';
+  $('chatLine').textContent=line; $('chatReward').textContent=reward;
+  save(); panel('chat');
+}
+$('chatBtn').addEventListener('click',()=>{ panel(null); G.state='hub'; });
+
+/* =================== VOLLEYBALL — timing rally vs Savta =================== */
+function vbStart(){
+  Sound.enter(); G.state='volley'; G.pops.length=0;
+  let lives=2 + (equipped().vlife||0);
+  // items are consumed at the start — their benefit (a life, slow-mo) lands now
+  let used=[];
+  if((S.items.hummus||0)>0){ S.items.hummus--; lives++; used.push('🫓 +1 life'); }
+  let slow=(S.items.goldstar||0)>0?1:0; if(slow){ S.items.goldstar--; used.push('🍺 slow-mo'); }
+  if(used.length){ save(); pop(W/2,groundY-210,used.join('  '),'#8ad2ff',true); }
+  G.vb={ ball:{x:W*.3,y:groundY-260,vx:40,vy:-200}, side:'player', rally:0, lives, maxLives:Math.max(1,lives),
+    over:false, t:0, hittable:false, slow, earn:0 };
+}
+function vbTap(){
+  const v=G.vb; if(!v||v.over) return;
+  if(v.hittable){
+    v.rally++;
+    const got=payout(8+v.rally*2, 'volley'); v.earn+=got;
+    pop(v.ball.x,v.ball.y-30,`+${got}₪`,POP_COLS[v.rally%4]); flyCoin(v.ball.x,v.ball.y);
+    Sound.bump(v.rally); G.freeze=.05; flash(.12); buzz(20);   // hit-stop: the bump connects
+    if(v.rally===5||v.rally===10||v.rally===15){ burstConfetti(14);
+      pop(W/2,groundY-150,`RALLY ×${v.rally} 🔥`,POP_COLS[v.rally%4],true); }
+    // send it back to Savta, faster each rally
+    const sp=1+Math.min(1.4,v.rally*.08)*(v.slow?.7:1);
+    v.ball.vx=Math.abs(rand(150,210))*sp; v.ball.vy=-rand(360,430)*sp;
+    v.side='opp'; v.hittable=false; v.served=true;
+  } else { // early/whiff tap — tiny visual nudge, no penalty
+    pop(G.player.x-G.camX,groundY-180,'too early!','#aab4c8'); Sound.no();
+  }
+}
+function vbUpdate(dt){
+  const v=G.vb; if(!v||v.over) return;
+  v.t+=dt; const g=2000*(v.slow?.78:1);
+  const b=v.ball, cxn=W*.5;
+  b.vy+=g*dt; b.x+=b.vx*dt; b.y+=b.vy*dt;
+  // walls
+  if(b.x<W*.08){ b.x=W*.08; b.vx=Math.abs(b.vx); }
+  if(b.x>W*.92){ b.x=W*.92; b.vx=-Math.abs(b.vx); }
+  if(v.side==='player'){
+    // hittable when descending into the lower zone on the player's half
+    v.hittable = b.vy>0 && b.y>groundY-200 && b.x<cxn+40;
+    if(b.y>=groundY-26){ // hit the sand on your side
+      b.y=groundY-26;
+      v.lives--; Sound.miss(); shake(); buzz(80);
+      pop(b.x,groundY-60,'MISSED! 💢','#ff5d5d',true);
+      if(v.lives<0){ vbEnd(); return; }
+      // re-serve from player
+      b.x=W*.3; b.y=groundY-240; b.vx=rand(80,140); b.vy=-rand(120,180); v.hittable=false;
+    }
+  } else { // opponent's half — Savta auto-returns near the top of the arc
+    v.hittable=false;
+    if(b.x>cxn && b.vy>0 && b.y>groundY-300){
+      // Savta bumps it back toward the player
+      const sp=1+Math.min(1.4,v.rally*.08)*(v.slow?.7:1);
+      b.vx=-rand(150,210)*sp; b.vy=-rand(330,400)*sp; v.side='player';
+      Sound.bump();
+    }
+    if(b.y>=groundY-26){ // shouldn't usually happen — treat as a point for you
+      b.y=groundY-26; b.x=W*.3; b.vx=rand(80,140); b.vy=-rand(150,200); v.side='player';
+    }
+  }
+}
+function vbEnd(){
+  G.vb.over=true;
+  if(G.vb.rally>S.best.volley) S.best.volley=G.vb.rally, G.result.best=true; else G.result.best=false;
+  G.result.kind='volley'; G.result.rally=G.vb.rally;
+  save(); setTimeout(showResult,700);
+}
+
+/* =================== FALAFEL TOSS — timing power into the pita =================== */
+function faStart(){
+  Sound.enter(); G.state='falafel'; G.pops.length=0;
+  let used=[];
+  let extra=(S.items.falafel||0)>0?5:0; if(extra){ S.items.falafel--; used.push('🥙 +5s'); }
+  let slow=(S.items.goldstar||0)>0?1:0; if(slow){ S.items.goldstar--; used.push('🍺 slow-mo'); }
+  if(used.length){ save(); pop(W/2,groundY-210,used.join('  '),'#8ad2ff',true); }
+  G.fa={ time:20+extra, pita:{x:W*.66,dir:1}, falafels:[], power:0, pdir:1, combo:0,
+    hits:0, earn:0, over:false, slow };
+}
+function faTap(){
+  const f=G.fa; if(!f||f.over) return;
+  const p=f.power;            // 0..1 oscillating meter = throw strength
+  const minV=W*.34, maxV=W*.92;
+  const vx=lerp(minV,maxV,p);
+  f.falafels.push({x:W*.12,y:groundY-40,vx,vy:-rand(560,640),done:false});
+  Sound.serve(f.combo);
+}
+function faUpdate(dt){
+  const f=G.fa; if(!f||f.over) return;
+  if(f.slow) dt*=.82;
+  f.time-=dt; if(f.time<=0){ f.time=0; faEnd(); return; }
+  // power meter ping-pongs
+  f.power+=f.pdir*dt*1.5*(1+upLv('lucky')*.12);
+  if(f.power>1){ f.power=1; f.pdir=-1; } if(f.power<0){ f.power=0; f.pdir=1; }
+  // pita drifts
+  const pita=f.pita; pita.x+=pita.dir*90*dt;
+  if(pita.x>W*.86){ pita.x=W*.86; pita.dir=-1; } if(pita.x<W*.46){ pita.x=W*.46; pita.dir=1; }
+  const g=1700;
+  for(const fl of f.falafels){
+    if(fl.done) continue;
+    fl.vy+=g*dt; fl.x+=fl.vx*dt; fl.y+=fl.vy*dt;
+    if(fl.y>=groundY-40){ fl.y=groundY-40; fl.done=true;
+      if(Math.abs(fl.x-pita.x)<46){           // in the pita!
+        f.combo++; f.hits++;
+        const got=payout(12+f.combo*4,'falafel'); f.earn+=got;
+        pop(pita.x,groundY-120,`+${got}₪${f.combo>1?` ×${f.combo}`:''}`,POP_COLS[f.combo%4],f.combo>2);
+        flyCoin(pita.x,groundY-80); Sound.cash(); G.freeze=.04; buzz(15);   // hit-stop on the catch
+        if(f.combo===3||f.combo===5||f.combo===8){ burstConfetti(12);
+          pop(W/2,groundY-160,`×${f.combo} STREAK! 🔥`,POP_COLS[f.combo%4],true); }
+      } else { f.combo=0; Sound.miss(); shake(); pop(fl.x,groundY-50,'splat 🫠','#aab4c8'); }
+    }
+  }
+  f.falafels=f.falafels.filter(fl=>!fl.done&&fl.x<W+60);
+}
+function faEnd(){
+  G.fa.over=true;
+  if(G.fa.hits>S.best.falafel) S.best.falafel=G.fa.hits, G.result.best=true; else G.result.best=false;
+  G.result.kind='falafel'; G.result.hits=G.fa.hits;
+  save(); setTimeout(showResult,500);
+}
+
+/* =================== result / day-cleared =================== */
+function showResult(){
+  const r=G.result;
+  if(r.kind==='volley'){
+    $('rTitle').textContent=G.vb.rally>=8?'BALLER! 🏐':G.vb.rally>=4?'NOT BAD!':'OOF.';
+    $('rSub').textContent=`You kept a ${G.vb.rally}-rally going with Savta.`;
+    $('rBestLine').innerHTML=`🏐 Best rally: <b>${S.best.volley}</b>`;
+  } else {
+    $('rTitle').textContent=G.fa.hits>=10?'SHUK LEGEND! 🥙':G.fa.hits>=5?'TASTY!':'MESSY.';
+    $('rSub').textContent=`${G.fa.hits} falafels in the pita. The street is fed.`;
+    $('rBestLine').innerHTML=`🥙 Best batch: <b>${S.best.falafel}</b>`;
+  }
+  const earned=S.earnedToday;
+  $('rEarn').textContent=money(r.kind==='volley'?G.vb.earn:G.fa.earn);
+  $('rGoal').textContent=dayProg()>=1
+    ? '🌅 You DOUBLED your money — go HOME to sleep & bank the streak!'
+    : `Double-up: ${money(S.earnedToday)} / ${money(dayGoal())} earned today (${Math.round(dayProg()*100)}%)`;
+  if(r.best) $('rBestLine').innerHTML+=' &nbsp;🏆 <b style="color:#ffd166">NEW BEST!</b>';
+  if(!S.tutorialDone){ S.tutorialDone=true; save(); }
+  syncPassport();
+  panel('result');
+}
+$('rAgain').addEventListener('click',()=>{ panel(null);
+  G.result.kind==='volley'?vbStart():faStart(); });
+$('rBack').addEventListener('click',()=>{ panel(null); G.state='hub'; });
+
+function clearDay(){
+  Sound.win(); flash(.5);
+  S.streak++; S.day++; S.best.daysCleared++; S.lastClearedDay=dayIndex();
+  burstConfetti(36+Math.min(120,S.streak*12));           // ceremony scales with the streak
+  // bonus is flat-capped — the STREAK is the headline reward, and it can't
+  // compound the next goal (which is now a fixed ladder)
+  const bonus=Math.min(S.streak*60,420)+150;
+  S.shekels+=bonus;
+  for(let i=0;i<10;i++) setTimeout(()=>flyCoin(rand(W*.3,W*.7),H*.5),i*60);
+  let shieldNote='';
+  if([3,7,14,30,60].includes(S.streak)){ S.shields++;
+    shieldNote=`🛡️ Shabbat Shield earned (×${S.shields}) — it survives one missed day.`; }
+  $('ddStreak').textContent=S.streak; $('ddS').textContent=S.streak===1?'':'s';
+  $('ddBonus').textContent='+'+money(bonus);
+  $('ddWallet').textContent=money(S.shekels);
+  newDay();
+  $('ddNext').innerHTML=`Tomorrow's double-up: earn <b>${money(dayGoal())}</b>.`
+    + (shieldNote?`<br><span style="color:#7ee8c7">${shieldNote}</span>`:'')
+    + (crossUnlocked()&&!owned('mamadmom')?'<br><span style="color:#ffd166">🛡️ MAMAD MOM unlocked — claim her in the shop!</span>':'');
+  syncPassport(); save(); panel('dayDone');
+}
+$('ddNextBtn').addEventListener('click',()=>{ panel(null); G.state='hub';
+  G.player.x=300; G.target=null; G.camX=0; });
+$('ddShare').addEventListener('click',shareFlex);
+
+/* =================== shop =================== */
+let shopTab='char';
+function openShop(){ Sound.enter(); shopTab='char'; renderShop(); panel('shop'); }
+$('shopClose').addEventListener('click',()=>{ panel(null); G.state='hub'; });
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  shopTab=t.dataset.tab; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t)); renderShop(); }));
+function renderShop(){
+  $('shopWallet').textContent='💰 '+money(S.shekels);
+  $('shopSub').textContent=`Collection ${ownedPct()}% · ${S.streak}🔥${S.shields?` · ${S.shields}🛡️`:''} · day ${S.day}`;
+  const list=$('shopList'); list.innerHTML='';
+  if(shopTab==='char') CHARS.forEach(c=>list.appendChild(charCard(c)));
+  else if(shopTab==='item') ITEMS.forEach(it=>list.appendChild(itemCard(it)));
+  else UPS.forEach(u=>list.appendChild(upCard(u)));
+}
+function cardShell(ico,art,nm,pk,cntTxt){
+  const el=document.createElement('div'); el.className='item pop';
+  const icoHTML = art&&artOk(art)
+    ? `<img class="iart" src="art/${art}.png" alt="">`
+    : `<div class="ico">${ico}</div>`;
+  el.innerHTML=`${cntTxt?`<div class="cnt">${cntTxt}</div>`:''}${icoHTML}<div class="nm">${nm}</div><div class="pk">${pk}</div>`;
+  return el;
+}
+function charCard(c){
+  const have=owned(c.id), eq=S.equip===c.id;
+  const el=cardShell(c.ico,'char-'+c.id,c.name,c.perk);
+  if(have) el.classList.add('owned'); if(eq) el.classList.add('equipped');
+  const b=document.createElement('button'); b.className='buy';
+  if(eq){ b.textContent='EQUIPPED ✓'; b.classList.add('eq'); b.disabled=true; }
+  else if(have){ b.textContent='WEAR IT'; b.classList.add('own');
+    b.onclick=()=>{ S.equip=c.id; Sound.buy(); save(); renderShop(); }; }
+  else if(c.secret){                          // the cross-game crossover skin
+    if(crossUnlocked()){ b.textContent='CLAIM 🎁'; b.classList.add('own');
+      b.onclick=()=>{ S.chars.push(c.id); S.equip=c.id; Sound.cash(); burstConfetti(24); syncPassport(); save(); renderShop(); }; }
+    else { b.textContent='🔒 LOCKED'; b.disabled=true;
+      el.querySelector('.pk').innerHTML='🔒 Clear a day here <b>+</b> survive a siren in <b>Mamad Dash</b> to unlock.'; }
+  }
+  else { b.textContent='BUY '+money(c.cost);
+    b.onclick=()=>{ if(S.shekels<c.cost){ Sound.no(); flashCard(el); return; }
+      S.shekels-=c.cost; S.chars.push(c.id); S.equip=c.id; Sound.cash(); save(); renderShop(); }; }
+  el.appendChild(b); return el;
+}
+function itemCard(it){
+  const cnt=S.items[it.id]||0;
+  const el=cardShell(it.ico,null,it.name,it.perk,cnt>0?'×'+cnt:'');
+  if(cnt>0) el.classList.add('owned');
+  const b=document.createElement('button'); b.className='buy';
+  b.textContent='BUY '+money(it.cost);
+  b.onclick=()=>{ if(S.shekels<it.cost){ Sound.no(); flashCard(el); return; }
+    S.shekels-=it.cost; S.items[it.id]=(S.items[it.id]||0)+1; S['ever_'+it.id]=1; Sound.buy(); save(); renderShop(); };
+  el.appendChild(b); return el;
+}
+function upCard(u){
+  const lv=upLv(u.id), maxed=lv>=u.max, cost=upCost(u);
+  const el=cardShell(u.ico,null,u.name,u.perk(lv));
+  if(lv>0) el.classList.add('owned');
+  const b=document.createElement('button'); b.className='buy';
+  if(maxed){ b.textContent='MAXED ✓'; b.classList.add('eq'); b.disabled=true; }
+  else { b.textContent=(lv>0?'UPGRADE ':'BUY ')+money(cost);
+    b.onclick=()=>{ if(S.shekels<cost){ Sound.no(); flashCard(el); return; }
+      S.shekels-=cost; S.ups[u.id]=lv+1; Sound.buy(); save(); renderShop(); }; }
+  el.appendChild(b); return el;
+}
+function flashCard(el){ el.style.boxShadow='0 0 0 2px #ff5d5d inset';
+  setTimeout(()=>el.style.boxShadow='',300); }
+
+/* =================== share =================== */
+const SITE=location.protocol.startsWith('http')?location.origin+location.pathname:'https://miklatgames.fun/balagan/';
+function shareFlex(){
+  const link=SITE.replace(/\/$/,'')+'/';
+  const txt=`🌴 BALAGAN: started on ₪500 of avtala, now I've cleared ${S.best.daysCleared} day${S.best.daysCleared===1?'':'s'} and stacked ${money(S.shekels)} — ${S.streak}🔥 streak. Double your money in Tel Aviv: ${link}`;
+  (async()=>{ try{ if(navigator.share) await navigator.share({text:txt});
+    else{ await navigator.clipboard.writeText(txt); $('ddShare').textContent='✅ COPIED';
+      setTimeout(()=>$('ddShare').textContent='📤 FLEX ON A FRIEND',1600); } }catch(e){} })();
+}
+
+/* =================== update =================== */
+function update(dt){
+  G.t+=dt;
+  G.walletShown+=(S.shekels-G.walletShown)*Math.min(1,dt*9);   // wallet counts up to its real value
+  if(Math.abs(S.shekels-G.walletShown)<1) G.walletShown=S.shekels;
+  for(const q of G.pops) q.t+=dt; G.pops=G.pops.filter(q=>q.t<1);
+  for(const c of G.coins) c.t+=dt*2.4; G.coins=G.coins.filter(c=>c.t<1);
+  for(const f of G.confetti){ f.x+=f.vx*dt; f.y+=f.vy*dt; f.rot+=f.vr*dt; }
+  G.confetti=G.confetti.filter(f=>f.y<H+20);
+  if(G.mitzvahPending){ pop(W/2,H*.4,`🙏 Mitzvah money +${G.mitzvahPending}₪`,'#7ee8c7',true);
+    Sound.cash(); G.mitzvahPending=0; }
+  if(G.streakLost){ pop(W/2,H*.36,`💔 Streak lost (was ${G.streakLost}) — you missed a day`,'#ff5d5d',true);
+    Sound.miss(); G.streakLost=0; }
+  if(G.shieldUsed){ pop(W/2,H*.36,'🛡️ Shabbat Shield saved your streak!','#7ee8c7',true);
+    Sound.cash(); G.shieldUsed=false; }
+  if(G.state==='hub') hubUpdate(dt);
+  else if(G.state==='volley') vbUpdate(dt);
+  else if(G.state==='falafel') faUpdate(dt);
+}
+function hubUpdate(dt){
+  const p=G.player, sp=140+upLv('walk')*30;
+  if(G.target!=null){
+    const dx=G.target-p.x;
+    if(Math.abs(dx)<6){ p.x=G.target; G.target=null; p.walk=0; }
+    else { p.dir=dx<0?-1:1; p.x+=p.dir*Math.min(Math.abs(dx),sp*dt); p.walk+=dt*10;
+      if(Math.floor(p.walk*2)!==Math.floor((p.walk-dt*10)*2)) Sound.step(); }
+  } else p.walk=0;
+  p.x=clamp(p.x,60,WORLD_W-60);
+  // camera eases to keep the player roughly centered
+  const want=clamp(p.x-W*.42,0,Math.max(0,WORLD_W-W));
+  G.camX+=(want-G.camX)*Math.min(1,dt*6);
+  // nearest station prompt
+  G.near=STATIONS.find(s=>Math.abs(s.x-p.x)<90)||null;
+  G.prompt=clamp(G.prompt+(G.near?dt*6:-dt*6),0,1);
+}
+
+/* =================== draw =================== */
+function draw(){
+  cx.clearRect(0,0,W,H);
+  drawSky();
+  drawStreet();
+  if(G.state==='hub') drawHub();
+  else if(G.state==='volley') drawVolley();
+  else if(G.state==='falafel') drawFalafel();
+  // shared FX
+  for(const q of G.pops){ const a=1-q.t, rise=q.t*54;
+    cx.globalAlpha=a;cx.font=`900 ${q.big?24:18}px sans-serif`;cx.textAlign='center';cx.textBaseline='middle';
+    cx.lineWidth=5;cx.strokeStyle='rgba(15,20,40,.8)';cx.strokeText(q.txt,q.x,q.y-rise);
+    cx.fillStyle=q.col;cx.fillText(q.txt,q.x,q.y-rise);cx.globalAlpha=1; }
+  for(const c of G.coins){ const e=c.t*c.t*(3-2*c.t), ty=(SAFE_TOP+58);
+    drawEmoji('🪙',lerp(c.x,W-30,e),lerp(c.y,ty,e),26-12*e); }
+  for(const f of G.confetti){ cx.save();cx.translate(f.x,f.y);cx.rotate(f.rot);
+    cx.fillStyle=f.col;cx.fillRect(-f.s/2,-f.s/2,f.s,f.s*.6);cx.restore(); }
+  if(G.state!=='title'&&G.state!=='shop') hud();
+}
+function drawSky(){
+  if(artOk('bg-city')){ const bg=ART['bg-city'], th=groundY+2, tw=th*bg.naturalWidth/bg.naturalHeight;
+    for(let x=-((G.camX*.4)%tw);x<W;x+=tw) cx.drawImage(bg,x,0,tw+1,th); return; }
+  let sky=SKYG.get('sky');
+  if(!sky){ sky=cx.createLinearGradient(0,0,0,groundY);
+    sky.addColorStop(0,'#37b6ff');sky.addColorStop(.55,'#8fd8ff');sky.addColorStop(1,'#ffd9a8');
+    SKYG.set('sky',sky); }
+  cx.fillStyle=sky;cx.fillRect(0,0,W,groundY);
+  // sun
+  cx.drawImage(glow('rgba(255,235,150,.95)',90),W*.8-90,H*.12-90);
+  drawEmoji('☀️',W*.8,H*.12,40);
+  // skyline parallax (procedural)
+  skyline(G.camX*.25,'#cfe0f0',groundY*.32,170);
+  skyline(G.camX*.5+300,'#a9c6e0',groundY*.22,150);
+  // palms along the promenade
+  cx.globalAlpha=.9;
+  for(let i=0;i<14;i++){ const wx=i*220+90, sx=wx-G.camX*.7;
+    if(sx>-40&&sx<W+40) drawEmoji('🌴',sx,groundY-70,46); }
+  cx.globalAlpha=1;
+}
+function skyline(off,fill,hMax,sp){
+  let st=SKYG.get('sl'+fill+hMax);
+  if(!st){ st=document.createElement('canvas'); st.width=sp*6; st.height=Math.ceil(hMax+40);
+    const g=st.getContext('2d');
+    for(let i=0;i<6;i++){ const seed=Math.abs(Math.sin(i*127.3)); const bh=40+seed*hMax, bw=80+(i%3)*34;
+      g.fillStyle=fill; g.fillRect(i*sp,st.height-bh,bw,bh);
+      g.fillStyle='rgba(255,255,255,.25)';
+      for(let y=st.height-bh+10;y<st.height-10;y+=16) for(let x=i*sp+8;x<i*sp+bw-8;x+=18)
+        if(Math.abs(Math.sin(x*y))>.7) g.fillRect(x,y,6,8); }
+    SKYG.set('sl'+fill+hMax,st); }
+  const period=st.width; let x=-(off%period); if(x>0)x-=period;
+  for(;x<W;x+=period) cx.drawImage(st,x,groundY-st.height);
+}
+function drawStreet(){
+  // sand + boardwalk
+  let g=SKYG.get('road');
+  if(!g){ g=cx.createLinearGradient(0,groundY,0,H); g.addColorStop(0,'#e7c98f');g.addColorStop(1,'#cfa863');
+    SKYG.set('road',g); }
+  cx.fillStyle=g;cx.fillRect(0,groundY,W,H-groundY);
+  cx.fillStyle='rgba(0,0,0,.18)';cx.fillRect(0,groundY,W,8);
+  // boardwalk planks
+  cx.strokeStyle='rgba(120,80,40,.25)';cx.lineWidth=3;
+  for(let x=-((G.camX)%70);x<W;x+=70){ cx.beginPath();cx.moveTo(x,groundY+14);cx.lineTo(x,H);cx.stroke(); }
+}
+function drawHub(){
+  // stations
+  for(const s of STATIONS){
+    const sx=s.x-G.camX; if(sx<-120||sx>W+120) continue;
+    drawStation(s,sx);
+  }
+  // player
+  drawPlayer(G.player.x-G.camX, groundY, G.player);
+  // proximity prompt
+  if(G.near&&G.prompt>0.02){
+    const sx=G.near.x-G.camX;
+    cx.globalAlpha=G.prompt;
+    const txt='TAP TO ENTER';
+    cx.font='900 15px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+    const w=cx.measureText(txt).width+24, bx=sx, by=groundY-200-Math.sin(G.t*4)*4;
+    cx.fillStyle='rgba(13,17,32,.8)'; rr(bx-w/2,by-16,w,30,8);
+    cx.fillStyle='#ffd166';cx.fillText(txt,bx,by);
+    cx.fillStyle='rgba(13,17,32,.8)';cx.beginPath();cx.moveTo(bx-8,by+13);cx.lineTo(bx+8,by+13);cx.lineTo(bx,by+24);cx.fill();
+    cx.globalAlpha=1;
+  }
+}
+function drawStation(s,sx){
+  // shadow
+  cx.fillStyle='rgba(0,0,0,.18)';cx.beginPath();cx.ellipse(sx,groundY+10,46,9,0,0,7);cx.fill();
+  if(s.art&&artOk(s.art)){ drawArt(s.art,sx,groundY-58,128); }
+  else {
+    // a little procedural stall so it isn't a lone floating emoji
+    if(!s.npc){
+      cx.fillStyle='rgba(214,168,99,.45)';rr(sx-52,groundY-44,104,44,8);          // stall body
+      cx.fillStyle='#e35d5d';                                                      // striped awning
+      for(let i=0;i<6;i++){ cx.fillStyle=i%2?'#e35d5d':'#f4ecdd'; rr(sx-54+i*18,groundY-72,18,16,2); }
+    }
+    drawEmoji(s.ico,sx,s.npc?groundY-44:groundY-92,s.npc?52:48);
+    if(s.npc&&G.t%2<1) drawEmoji('💬',sx+30,groundY-92,26);
+  }
+  // label plate
+  cx.font='900 14px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+  const w=cx.measureText(s.label).width+20;
+  cx.fillStyle='rgba(13,17,32,.72)';rr(sx-w/2,groundY-150,w,26,8);
+  cx.fillStyle='#fff';cx.fillText(s.label,sx,groundY-137);
+  cx.font='700 11px sans-serif';cx.fillStyle='#9fe7d4';cx.fillText(s.sub,sx,groundY-119);
+}
+function drawPlayer(sx,by,p){
+  const bob=p&&p.walk?Math.sin(p.walk*1.4)*3:0;
+  cx.fillStyle='rgba(0,0,0,.28)';cx.beginPath();cx.ellipse(sx,by+8,20,6,0,0,7);cx.fill();
+  const c=equipped();
+  cx.save();cx.translate(sx,by-34+bob);
+  if(p&&p.dir<0) cx.scale(-1,1);
+  if(artOk('char-'+c.id)) drawArt('char-'+c.id,0,0,64);
+  else drawEmoji(c.ico,0,0,52);
+  cx.restore();
+}
+function drawVolley(){
+  const v=G.vb; if(!v) return;
+  // net
+  const nx=W*.5;
+  cx.fillStyle='#cdd6e8';cx.fillRect(nx-3,groundY-150,6,150);
+  cx.strokeStyle='rgba(255,255,255,.7)';cx.lineWidth=2;
+  for(let y=groundY-150;y<groundY-40;y+=12){cx.beginPath();cx.moveTo(nx-26,y);cx.lineTo(nx+26,y);cx.stroke();}
+  // you + savta
+  drawPlayer(W*.18,groundY,{dir:1,walk:1});
+  cx.save();cx.translate(W*.84,groundY-30);cx.scale(-1,1);drawEmoji('🧓',0,0,52);cx.restore();
+  // ball + hittable ring
+  const b=v.ball;
+  if(v.hittable){ cx.strokeStyle=`rgba(255,209,102,${.5+.4*Math.sin(G.t*9)})`;cx.lineWidth=4;
+    cx.beginPath();cx.arc(b.x,b.y,38,0,7);cx.stroke();
+    drawEmoji('👆',b.x,b.y+54,26); }
+  cx.drawImage(glow('rgba(255,255,255,.4)',26),b.x-26,b.y-26);
+  drawEmoji('🏐',b.x,b.y,40);
+  // hud bits
+  vbHud();
+  if(v.over) return;
+}
+function vbHud(){
+  const v=G.vb;
+  cx.font='900 16px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+  hudPill(W/2,SAFE_TOP+30,`🏐 RALLY ${v.rally}`,'#ffd166');
+  // lives
+  let lifeStr=''; for(let i=0;i<Math.max(0,v.lives+1);i++) lifeStr+='❤️';
+  cx.font='18px sans-serif';cx.fillText(lifeStr||'—',W/2,SAFE_TOP+60);
+  if(v.rally===0){ cx.font='800 14px sans-serif';cx.fillStyle='rgba(255,255,255,.8)';
+    cx.fillText('TAP when the ball is low & the ring glows',W/2,groundY-180); }
+}
+function drawFalafel(){
+  const f=G.fa; if(!f) return;
+  // thrower (you) + pita
+  drawPlayer(W*.12,groundY,{dir:1,walk:0});
+  // pita basket
+  const px=f.pita.x;
+  cx.fillStyle='rgba(0,0,0,.2)';cx.beginPath();cx.ellipse(px,groundY+6,40,8,0,0,7);cx.fill();
+  drawEmoji('🧺',px,groundY-22,52); drawEmoji('🫓',px,groundY-30,30);
+  // falafels in flight
+  for(const fl of f.falafels) if(!fl.done) drawEmoji('🧆',fl.x,fl.y,30);
+  // power meter
+  const bw=Math.min(W*.7,360), bx=(W-bw)/2, by=groundY+(H-groundY)*.42;
+  cx.fillStyle='rgba(13,17,32,.5)';rr(bx-4,by-4,bw+8,20,8);
+  cx.fillStyle='#2a3450';rr(bx,by,bw,12,6);
+  let pg=SKYG.get('pmeter'); if(!pg){ pg=cx.createLinearGradient(bx,0,bx+bw,0);
+    pg.addColorStop(0,'#7ee8c7');pg.addColorStop(.5,'#ffd166');pg.addColorStop(1,'#ff5d5d');SKYG.set('pmeter',pg); }
+  cx.fillStyle=pg;rr(bx,by,bw*f.power,12,6);
+  cx.fillStyle='#fff';cx.fillRect(bx+bw*f.power-2,by-3,4,18);
+  cx.font='800 13px sans-serif';cx.textAlign='center';cx.fillStyle='#cdd6e8';
+  cx.fillText('TAP to toss',W/2,by+34);
+  // timer + combo
+  cx.font='900 16px sans-serif';
+  hudPill(W/2,SAFE_TOP+30,`⏱️ ${Math.ceil(f.time)}s`, f.time<5?'#ff5d5d':'#ffd166');
+  if(f.combo>1){ cx.fillStyle='#ff8ad4';cx.font='900 20px sans-serif';cx.fillText(`🔥 ${f.combo} combo`,W/2,SAFE_TOP+62); }
+}
+function hudPill(cxp,cyp,txt,col){
+  cx.font=cx.font||'900 16px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+  const w=cx.measureText(txt).width+24;
+  cx.fillStyle='rgba(13,17,32,.62)';rr(cxp-w/2,cyp-15,w,30,15);
+  cx.fillStyle=col;cx.fillText(txt,cxp,cyp);
+}
+function hud(){
+  // wallet + day-goal bar, always on (the persistent loop, made visible)
+  const py=SAFE_TOP+14;
+  cx.textAlign='left';cx.textBaseline='middle';cx.font='900 16px sans-serif';
+  // wallet + streak pills live top-left — only on the street, so they don't
+  // collide with a mini-game's own centered pill
+  if(G.state==='hub'){
+    const wtxt='💰 '+money(G.walletShown);
+    const ww=cx.measureText(wtxt).width+22;
+    cx.fillStyle='rgba(13,17,32,.66)';rr(12,py,ww,30,15);
+    cx.fillStyle='#ffd166';cx.fillText(wtxt,24,py+15);
+    if(S.streak>0){ const stxt='🔥 '+S.streak; const sw=cx.measureText(stxt).width+20;
+      cx.fillStyle='rgba(13,17,32,.66)';rr(12+ww+8,py,sw,30,15);
+      cx.fillStyle='#ff8ad4';cx.fillText(stxt,12+ww+8+10,py+15); }
+  }
+  // doubling goal bar — on the street only, so mini-games keep a clean top
+  // (the result screen reports double-up progress between games)
+  if(G.state==='hub'){
+    const bw=Math.min(W*.6,300), bx=W-bw-14, by=py+8;
+    cx.font='800 11px sans-serif';cx.textAlign='right';
+    cx.fillStyle='#cdd6e8';cx.fillText(`DOUBLE-UP  ${Math.round(dayProg()*100)}%`,W-14,py-2);
+    cx.fillStyle='rgba(13,17,32,.6)';rr(bx-3,by-3,bw+6,12,6);
+    cx.fillStyle='#2a3450';rr(bx,by,bw,6,3);
+    let g=SKYG.get('goalbar'); if(!g){ g=cx.createLinearGradient(bx,0,bx+bw,0);
+      g.addColorStop(0,'#7ee8c7');g.addColorStop(1,'#ffd166');SKYG.set('goalbar',g); }
+    cx.fillStyle=dayProg()>=1?'#ffd166':g; rr(bx,by,bw*dayProg(),6,3);
+    if(dayProg()>=1){ cx.textAlign='right';cx.font='900 11px sans-serif';cx.fillStyle='#ffd166';
+      cx.fillText('🌅 GO HOME TO SLEEP',W-14,by+18); }
+  }
+}
+function rr(x,y,w,h,rad){ cx.beginPath();
+  if(cx.roundRect) cx.roundRect(x,y,w,h,rad); else cx.rect(x,y,w,h); cx.fill(); }
+
+/* =================== boot =================== */
+function startDay(){
+  if(G.state!=='title') return;
+  Sound.init(); userActed=true;
+  if(S.lastSeen!==dayIndex()){ S.lastSeen=dayIndex(); }
+  checkStreakLapse();            // punish a missed real day (unless a shield saves it)
+  newDay();
+  syncPassport();
+  panel(null); G.state='hub'; G.target=null;
+  if(!S.tutorialDone){           // first session: spawn right at the falafel stand so
+    G.player.x=970; G.walletShown=S.shekels;          // earning starts in <10s, not after a 1000px walk
+  } else { G.player.x=300; }
+  G.camX=clamp(G.player.x-W*.42,0,Math.max(0,WORLD_W-W));
+}
+$('title').addEventListener('click',e=>{ if(e.target.closest('#mute'))return; startDay(); });
+$('titleBtn').addEventListener('click',startDay);
+
+// title best line
+(function(){ const b=S.best;
+  $('titleBest').textContent = b.daysCleared>0
+    ? `💰 Wallet ${money(S.shekels)} · 🔥 ${S.streak} streak · ${b.daysCleared} days cleared`
+    : (S.shekels!==500?`💰 Wallet ${money(S.shekels)} — welcome back`:''); })();
+
+let lastT=performance.now();
+function loop(now){ requestAnimationFrame(loop);
+  let dt=Math.min(.05,(now-lastT)/1000);lastT=now;
+  if(G.freeze>0){ G.freeze-=dt; dt=0; }      // hit-stop freeze-frame: impacts get weight
+  try{ update(dt); draw(); }catch(err){ console.error(err); } }
+requestAnimationFrame(loop);
+</script>
+<script data-goatcounter="https://miklat-games.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

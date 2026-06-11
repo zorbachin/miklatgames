@@ -81,7 +81,7 @@
 <header>
   <div class="logo"><span class="lamp">🚨</span> MIKLAT GAMES</div>
   <div class="tag">Games from the shelter. <b>Free. No app. One thumb.</b></div>
-  <span class="count">🕹️ 2 games live · 2 doors opening soon</span>
+  <span class="count">🕹️ 3 games live · 1 door opening soon</span>
 </header>
 
 <a class="card featured" href="mamaddash/" id="cardMamad">
@@ -99,18 +99,28 @@
 
 <div class="shelf-label">🚪 MORE IN THE SHELTER</div>
 
-<a class="tile" href="irondome/" id="cardIron">
+<a class="tile" href="balagan/" id="cardBalagan">
+  <div class="tart balagan-art" style="aspect-ratio:2.4/1;
+    background:linear-gradient(180deg,#37b6ff 0%,#8fd8ff 42%,#ffd9a8 75%,#e7c98f 75%,#cfa863 100%);
+    display:flex;align-items:flex-end;gap:6px;padding:0 16px 8px;font-size:38px;line-height:1;">
+    <span style="font-size:30px">🌴</span><span>🏐</span><span>🥙</span><span style="font-size:30px">🛍️</span>
+    <span style="margin-left:auto;font-size:30px">🧓</span>
+  </div>
+  <span class="tplay">PLAY ▶</span>
+  <span style="position:absolute;top:10px;left:12px;background:rgba(11,14,26,.6);color:#7ee8c7;
+    font-size:11px;font-weight:800;letter-spacing:.1em;padding:5px 10px;border-radius:999px;">🆕 NEW</span>
+  <div class="tname">🌴 BALAGAN</div>
+  <div class="tname" style="bottom:30px;font-size:12px;font-weight:700;color:#ffe1b8;">double your ₪500 of avtala</div>
+  <span class="pill best" id="balBest" style="position:absolute;right:12px;bottom:12px;display:none;font-size:11px;"></span>
+</a>
+
+<a class="tile" href="irondome/" id="cardIron" style="margin-top:12px;">
   <img class="tart" src="irondome/share-card.jpg" alt="IRON DOME" loading="lazy">
   <span class="tplay">PLAY ▶</span>
   <div class="tname" style="font-size:14px;font-weight:700;color:#eafff7;">🛡️ tap the rockets. no pressure.</div>
 </a>
 
 <div class="grid" style="margin-top:12px;">
-  <div class="door">
-    <div class="shield">❔</div>
-    <div class="dname">???</div>
-    <div class="soon">DOOR OPENING SOON</div>
-  </div>
   <div class="door">
     <div class="shield">❔</div>
     <div class="dname">???</div>
@@ -131,6 +141,14 @@ try{
   if(b&&b.sirens>0){
     const el=document.getElementById('mdBest');
     el.textContent=`🏆 Your best: ${b.sirens} siren${b.sirens===1?'':'s'}`;
+    el.style.display='';
+  }
+}catch(e){}
+try{
+  const s=JSON.parse(localStorage.getItem('bg_save')||'null');
+  if(s&&typeof s.shekels==='number'&&(s.shekels!==500||s.streak>0)){
+    const el=document.getElementById('balBest');
+    el.textContent=`💰 ${Math.round(s.shekels)}₪${s.streak>0?` · ${s.streak}🔥`:''}`;
     el.style.display='';
   }
 }catch(e){}
