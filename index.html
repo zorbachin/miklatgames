@@ -90,12 +90,17 @@
   .pill.best{background:rgba(255,209,102,.12);color:var(--c-gold);border-color:var(--c-gold-border);}
 
   .ghosts{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  .ghost{border:1px dashed rgba(141,163,204,.4);border-radius:18px;padding:22px 12px;text-align:center;color:var(--c-dim);
-    font-size:13.5px;background:rgba(16,27,56,.4);}
-  .ghost .q{font-size:30px;filter:saturate(.6);margin-bottom:8px;}
-  .ghost .gname{font-family:var(--font-display);font-size:17px;font-weight:700;letter-spacing:.08em;color:#aab9da;margin-bottom:7px;}
-  .ghost .glabel{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.12em;color:var(--c-gold);
-    background:rgba(255,209,102,.1);border:1px solid rgba(255,209,102,.3);border-radius:999px;padding:4px 10px;}
+  .ghost{position:relative;border:1px dashed rgba(141,163,204,.45);border-radius:18px;overflow:hidden;
+    text-align:center;color:var(--c-dim);background:rgba(16,27,56,.4);}
+  .ghost .gart{width:100%;aspect-ratio:16/11;object-fit:cover;display:block;
+    filter:saturate(.75) brightness(.8);}
+  .ghost::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(0deg,rgba(10,18,38,.88) 0%,rgba(10,18,38,.25) 45%,transparent 70%);pointer-events:none;}
+  .ghost .gbody{position:absolute;left:0;right:0;bottom:10px;z-index:2;}
+  .ghost .gname{font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:.07em;color:#eaf2ff;
+    text-shadow:0 2px 8px rgba(0,0,0,.9);margin-bottom:6px;}
+  .ghost .glabel{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.11em;color:var(--c-gold);
+    background:rgba(10,14,26,.8);border:1px solid rgba(255,209,102,.4);border-radius:999px;padding:4px 9px;}
 
   /* ---- why / safety ---- */
   .panel{margin-top:22px;background:var(--c-panel);border:1px solid var(--c-cyan-border);
@@ -175,14 +180,18 @@
 
       <div class="ghosts">
         <div class="ghost">
-          <div class="q">🌀</div>
-          <div class="gname">BALAGAN</div>
-          <span class="glabel" data-i18n="soon">DOOR OPENING SOON</span>
+          <img class="gart" src="assets/balagan-cover.webp" alt="Balagan — Tel Aviv boardwalk" loading="lazy">
+          <div class="gbody">
+            <div class="gname">🌀 BALAGAN</div>
+            <span class="glabel" data-i18n="soon">DOOR OPENING SOON</span>
+          </div>
         </div>
         <div class="ghost">
-          <div class="q">🧆</div>
-          <div class="gname">FABATOLLAH</div>
-          <span class="glabel" data-i18n="soon">DOOR OPENING SOON</span>
+          <img class="gart" src="assets/fabatollah-cover.webp" alt="Fabatollah" loading="lazy" style="object-position:78% center;">
+          <div class="gbody">
+            <div class="gname">🧆 FABATOLLAH</div>
+            <span class="glabel" data-i18n="soon">DOOR OPENING SOON</span>
+          </div>
         </div>
       </div>
     </div>
