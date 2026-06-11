@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d1120">
+<title>MIKLAT ACADEMY — the 10M Download Playbook</title>
+<meta property="og:title" content="MIKLAT ACADEMY 🎓 — the 10M Download Playbook">
+<meta property="og:description" content="2 hours. 7 levels. Zero to armed: monetization, tribe marketing, distribution — for the Miklat Games arcade.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+<style>
+:root{--bg:#0d1120;--card:#161d33;--ink:#f2f4ff;--dim:#9aa3c7;--gold:#ffd166;--red:#ff5d73;--green:#7ee8c7;--cyan:#3ee6ff;--purple:#b99cff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,'Segoe UI',sans-serif;padding-bottom:90px}
+.wrap{max-width:680px;margin:0 auto;padding:18px 16px}
+header{position:sticky;top:0;z-index:9;background:rgba(13,17,32,.94);backdrop-filter:blur(8px);border-bottom:1px solid #232c4d}
+.hbar{max-width:680px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px}
+.hbar a{color:var(--dim);text-decoration:none;font-size:13px;white-space:nowrap}
+.xpwrap{flex:1}
+.xpbar{height:10px;background:#232c4d;border-radius:6px;overflow:hidden}
+.xpfill{height:100%;background:linear-gradient(90deg,var(--gold),var(--green));width:0%;transition:width .6s}
+.rank{font-size:12px;color:var(--gold);font-weight:700;margin-top:2px}
+h1{font-size:clamp(26px,7vw,40px);line-height:1.1;color:var(--gold);text-shadow:0 0 24px rgba(255,209,102,.35)}
+.sub{color:var(--dim);margin:8px 0 4px}
+.lvl{background:var(--card);border:1px solid #232c4d;border-radius:16px;margin:14px 0;overflow:hidden}
+.lvl-head{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+.lvl-head .num{font-size:22px}
+.lvl-head .t{font-weight:800;flex:1}
+.lvl-head .mins{font-size:12px;color:var(--dim)}
+.lvl-head .state{font-size:18px}
+.lvl-body{display:none;padding:0 16px 16px;border-top:1px solid #232c4d}
+.lvl.open .lvl-body{display:block}
+.lvl.locked{opacity:.45}
+.lvl.locked .lvl-head{cursor:not-allowed}
+.card{background:#0f1528;border:1px solid #232c4d;border-radius:12px;padding:13px 14px;margin:12px 0}
+.card h3{font-size:14px;color:var(--cyan);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.card p{margin:6px 0;font-size:15px}
+.big{color:var(--gold);font-weight:800}
+.num-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.stat{background:#0f1528;border:1px solid #2a3458;border-radius:10px;padding:8px 12px;text-align:center;flex:1;min-width:120px}
+.stat b{display:block;font-size:18px;color:var(--gold)}
+.stat span{font-size:11.5px;color:var(--dim)}
+.quiz{border-left:3px solid var(--purple)}
+.quiz h3{color:var(--purple)}
+.opt{display:block;width:100%;text-align:left;background:#161d33;border:1px solid #2a3458;color:var(--ink);border-radius:10px;padding:10px 12px;margin:7px 0;font-size:14.5px;cursor:pointer}
+.opt:hover{border-color:var(--gold)}
+.opt.right{border-color:var(--green);background:rgba(126,232,199,.12)}
+.opt.wrong{border-color:var(--red);background:rgba(255,93,115,.12)}
+.explain{display:none;font-size:13.5px;color:var(--green);margin-top:8px}
+.mission{border-left:3px solid var(--gold)}
+.mission h3{color:var(--gold)}
+.mission label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;margin-top:8px}
+.mission input{width:20px;height:20px;margin-top:2px;accent-color:var(--gold)}
+.mxp{font-size:12px;color:var(--gold);font-weight:700}
+.donebtn{display:block;width:100%;background:linear-gradient(90deg,var(--gold),#ffb84d);color:#1a1405;font-weight:900;border:0;border-radius:12px;padding:13px;font-size:16px;margin-top:14px;cursor:pointer}
+.donebtn:disabled{opacity:.4;cursor:not-allowed}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+th,td{border-bottom:1px solid #232c4d;padding:6px 6px;text-align:left;vertical-align:top}
+th{color:var(--dim);font-size:11.5px;text-transform:uppercase}
+td b{color:var(--gold)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);background:var(--gold);color:#1a1405;font-weight:800;padding:10px 18px;border-radius:99px;transition:transform .3s;z-index:99}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.fin{display:none;text-align:center;padding:30px 16px}
+.fin h2{color:var(--gold);font-size:30px}
+ul{padding-left:20px}li{margin:4px 0;font-size:14.5px}
+.src{font-size:11px;color:#5e6890;margin-top:6px}
+</style>
+</head>
+<body>
+<header><div class="hbar">
+  <a href="../">🚨 ARCADE</a>
+  <div class="xpwrap"><div class="xpbar"><div class="xpfill" id="xpfill"></div></div><div class="rank" id="rank"></div></div>
+  <span id="xptxt" style="font-size:13px;color:var(--gold);font-weight:800">0 XP</span>
+</div></header>
+<div class="wrap">
+  <h1>MIKLAT ACADEMY</h1>
+  <p class="sub">The 10M Download Playbook · 7 levels · ~2 hours · every number sourced (full receipts: <code>.claude/os/research/</code>)</p>
+  <p class="sub" style="color:var(--green)">Rules: read the cards, take the shot, do the mission. Missions on your <b>real</b> arcade. Publishing missions pay double — you know why. 🎯</p>
+  <div id="levels"></div>
+  <div class="fin" id="fin">
+    <h2>🏆 10M GENERAL</h2>
+    <p>You're armed. The playbook is yours, the factory is built, the tribe is waiting.</p>
+    <p style="margin-top:10px;color:var(--gold);font-weight:800">Final order: open the standup and hand mg-ceo Phase 1. Tonight.</p>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+'use strict';
+/* ================= MIKLAT ACADEMY — course engine ================= */
+const LEVELS=[
+{icon:'🗺️',title:'LEVEL 0 · THE MAP',mins:'5 min',html:`
+<div class="card"><h3>The one idea that reorders everything</h3>
+<p>Wordle earned <span class="big">$0</span>. No ads, no tips. The NYT still paid <span class="big">~$1–3M</span> for it. What did they buy? <b>A daily ritual and the distribution it built</b> — millions of people who showed up every day and dragged their friends in.</p>
+<p>You don't have a game problem — people already tell you the games are good. You have a <span class="big">distribution problem</span>. This course is the fix.</p></div>
+<div class="card"><h3>How a free web game makes money — the whole funnel</h3>
+<p><b>Plays → returning players → share events → revenue events.</b> Money comes out of four taps: <b>ads</b> (per session), <b>tips</b> (per fan), <b>portals/licenses</b> (per platform), <b>sponsors/merch/ports</b> (per brand). Every tap is downstream of traffic — which is why distribution comes first, monetization second.</p></div>
+<div class="card"><h3>The 10M ladder — one metric per rung</h3>
+<table><tr><th>Rung</th><th>The only metric that matters there</th></tr>
+<tr><td><b>1K plays</b></td><td>Does anyone come back? (D1 return)</td></tr>
+<tr><td><b>10K users</b></td><td>Do they bring friends? (share rate ≥3%)</td></tr>
+<tr><td><b>100K</b></td><td>Channels: which one compounds? (portal vs WhatsApp vs press)</td></tr>
+<tr><td><b>1M</b></td><td>Revenue per 1,000 plays — switch streams on</td></tr>
+<tr><td><b>10M</b></td><td>Brand: sponsors, ports, the Haaretz/NYT call</td></tr></table>
+<p>Precedent that the ladder is real: <b>Meduyeket</b> (Hebrew Wordle, one guy, spare time) hit thousands of dailies in 10 days and now lives on <b>Haaretz</b>. That's the Israeli edition of the NYT-buys-Wordle ending.</p></div>`,
+quiz:{q:'When NYT bought Wordle for ~$1–3M, what were they actually buying?',opts:['The codebase and game engine','A daily ritual + the distribution it built','The Wordle trademark','Ad revenue'],a:1,ex:'Wordle was ~200 lines of JS making $0. The asset was millions of people in a synchronized daily habit. Distribution IS the business.'},
+mission:{id:'m0',xp:50,txt:'Open the GoatCounter dashboard (miklat-games.goatcounter.com) and write down this week\\u2019s plays-per-game. That number is your baseline — everything in this course exists to move it.'}},
+
+{icon:'💰',title:'LEVEL 1 · THE MONEY',mins:'18 min',html:`
+<div class="card"><h3>Every stream, ranked for Miklat (real numbers)</h3>
+<table><tr><th>Stream</th><th>Reality</th><th>When</th></tr>
+<tr><td><b>Tip jar</b></td><td>&lt;1% of players tip, avg $3–5. Ko-fi takes <b>0%</b> on tips (BMC takes 5%) → use Ko-fi.</td><td>NOW (hooks already shipped, dormant)</td></tr>
+<tr><td><b>Portals</b></td><td>Poki: 50/50 their traffic, <b>100% yours</b>; ~1 game/day accepted. CrazyGames: % secret, <b>+50% bonus for 2-mo exclusivity</b>, 48h homepage guaranteed, €100 min payout. GameMonetize: 45% (90% if you also self-host).</td><td>Week 1–2</td></tr>
+<tr><td><b>Own-site ads</b></td><td>The sleeper. Verified: ~<b>$8–9 per 1,000 MAU/mo</b> with a gaming network (Venatus) vs ~<b>€1 per 1,000 plays</b> on portal revshare. You already own miklatgames.fun.</td><td>At ~10K MAU</td></tr>
+<tr><td><b>Licensing</b></td><td>Non-exclusive HTML5 licenses: ~$1K/game (htmlgames); Coolmath ~$2K anecdotes. One dev peaked $12–14K/mo on licenses alone.</td><td>Opportunistic</td></tr>
+<tr><td><b>Sponsorship</b></td><td>Jewish orgs/brands pay for aligned reach (70 Faces sells 3M/mo of it). Needs your funnel numbers first.</td><td>~300 plays/day</td></tr>
+<tr><td><b>Merch</b></td><td>POD tee ≈ $7–8 profit. Brand play, not income play, until 100K.</td><td>Later</td></tr>
+<tr><td><b>Steam wrap</b></td><td>The lottery ticket with precedent: Cookie Clicker free web → ~$22M on Steam; Vampire Survivors free itch build → £40M dev. Earn it at 1M.</td><td>1M+</td></tr></table>
+<p class="src">Sources: research/portals-economics.md, direct-revenue.md, earnings-case-studies.md</p></div>
+<div class="card"><h3>Honest math (so nothing surprises you)</h3>
+<div class="num-row">
+<div class="stat"><b>€1–3</b><span>per 1,000 portal plays (verified floor)</span></div>
+<div class="stat"><b>$8–9</b><span>per 1,000 MAU/mo self-hosted + gaming ads</span></div>
+<div class="stat"><b>$500–3K/mo</b><span>realistic first-game band once distributed</span></div></div>
+<p>And one Israel-specific edge: Israeli-geo ad rates are <b>~35–50% of US rates</b> — which means your <b>diaspora (US) players are worth 2–3× per impression</b>. The tribe strategy isn't just heart, it's CPM.</p></div>
+<div class="card"><h3>Scale proof it's a real business</h3>
+<p>Shell Shockers: <b>low seven figures/yr, 80–90% from ads</b>, web-first. Smash Karts: 3 people, full-time, 70M players. Exits: Mope.io &gt;$1M, 1v1.LOL <b>$42M</b> (SEC-filed). The web arcade path has millionaires on it.</p></div>`,
+quiz:{q:'Per 1,000 players, which earns more?',opts:['Portal revshare plays','Your own site with a gaming ad network','They\\u2019re identical','Tips'],a:1,ex:'Verified: ~€1/1,000 plays on portals vs ~$8–9/1,000 MAU/mo self-hosted with Venatus-class ads. Portals are for REACH; your own domain is for MARGIN. Use portals to fish, bring fans home to miklatgames.fun.'},
+mission:{id:'m1',xp:100,txt:'Create the Ko-fi account (0% fees) and drop the URL into TIP_URL in the 4 files (portal + 3 games) — or just paste the URL to Claude and it\\u2019s done in one commit. This flips the first revenue switch.'}},
+
+{icon:'🤝',title:'LEVEL 2 · THE TRIBE',mins:'18 min',html:`
+<div class="card"><h3>Your instinct is right, and it's quantified</h3>
+<div class="num-row">
+<div class="stat"><b>$1B</b><span>Israel Bonds bought in 4 weeks post-Oct-7</span></div>
+<div class="stat"><b>+67%</b><span>traffic from a "Black-owned" label alone (AER study)</span></div>
+<div class="stat"><b>63% vs 23%</b><span>want to support vs know how to find (McKinsey)</span></div></div>
+<p>People <b>want</b> to support their tribe with money and attention — bonds, wine (+40%), Star-of-David jewelry (+300–600%), Eurovision televotes. The bottleneck is never desire. It's <span class="big">discovery + friction</span>.</p>
+<p class="src">research/tribe-psychology.md</p></div>
+<div class="card"><h3>The 3 laws of converting tribe support</h3>
+<ul>
+<li><b>1. LABEL IT.</b> The AER study's +67% came from a label. "Made in a miklat 🚨" isn't a cute footer — it's the conversion mechanic. Say Israeli-made, loudly, everywhere.</li>
+<li><b>2. ONE CLICK.</b> Support converted when Yelp made it a filter and Sephora made it a shelf. Your version: the game IS the support act — playing, sharing, tipping. Never more than one tap.</li>
+<li><b>3. GIVE THEM A BADGE.</b> Wordle's grid won because sharing it signaled "I'm in this tribe" without spoiling. Your share cards are tribe badges: scores wrapped in Israeli identity, WhatsApp-ready.</li></ul></div>
+<div class="card"><h3>Precedents that this exact play works</h3>
+<p><b>Pou</b> (Lebanese dev): 1B downloads, MENA resonance at the core. <b>YouVersion</b>: 500M installs on faith-tribe rails. <b>Black Card Revoked</b>: culture-trivia → sold out via community press → Target shelves → BET show. <b>Jewdle</b>: a Wordle clone with Jewish identity got near-total diaspora press saturation in days. And research says <b>identity fit beats production value</b> (PENS: relatedness predicts engagement, not graphics). You will never out-polish Subway Surfers. You don't have to.</p></div>
+<div class="card"><h3>One warning from the data</h3>
+<p>Solidarity spikes <b>fade</b> (UW study) unless the product holds. The tribe gets them in the door; the <b>game</b> keeps them. That's Level 4.</p></div>`,
+quiz:{q:'63% of consumers wanted to support Black-owned businesses but didn\\u2019t. What was the #1 blocker?',opts:['Price','They didn\\u2019t know how to find them','Product quality','Shipping'],a:1,ex:'Discovery, not desire. Same for you: thousands of Jews and Israelis would play + share + tip TODAY if the games were put in front of them with a clear label. Marketing = making support findable.'},
+mission:{id:'m2',xp:75,txt:'Audit every share text in all 3 games: does each one carry the tribe badge (Israeli identity + miklatgames.fun)? Rewrite the weakest one so the WhatsApp paste itself says "this is ours." (Tell Claude the new line — one commit.)'}},
+
+{icon:'📡',title:'LEVEL 3 · DISTRIBUTION',mins:'18 min',html:`
+<div class="card"><h3>Rail #1: WhatsApp — Israel's actual internet</h3>
+<div class="num-row">
+<div class="stat"><b>98–99%</b><span>of Israelis use WhatsApp</span></div>
+<div class="stat"><b>~15</b><span>groups per Israeli (avg)</span></div>
+<div class="stat"><b>65%</b><span>get NEWS from WhatsApp</span></div></div>
+<p>Every Israeli player is standing in ~15 rooms. Your share buttons already target the group chat — that was the right call. The discipline: every game moment that feels good must end in a <b>one-tap WhatsApp artifact</b> (score card, challenge link, daily result).</p>
+<p class="src">research/israel-channels.md</p></div>
+<div class="card"><h3>Rail #2: Portals = free fishing nets</h3>
+<p>Poki: 1B plays/mo, accepts ~1 game/day (apply, expect the bar). CrazyGames: 40M MAU, <b>48 guaranteed homepage hours</b> for new games, SDK + 2-month exclusivity = +50% revshare. itch.io: zero bar, list everything today. Order: <b>itch now → CrazyGames with SDK → Poki application</b>. Portals find strangers; your job is converting strangers into tribe (arcade link, PWA install, challenge loops).</p></div>
+<div class="card"><h3>Rail #3: The JTA wire effect</h3>
+<p>One JTA story about Hebrew Wordles ran in <b>~10 outlets within days</b> (Forward, ToI, Cleveland, Sydney…). The Jewish press LOVES this beat — Hey Alma covers Jewish games as a category, Haaretz hosts word games itself, JPost profiles Israeli indies. A wartime-built, offline-capable Israeli arcade with an Iron Dome game is a <b>story they want</b>. One good pitch + press pack = syndicated reach of 3M+ (70 Faces alone).</p></div>
+<div class="card"><h3>Rail #4: Institutions + the calendar</h3>
+<p><b>906 US Jewish day schools · 850 Hillel campuses · 300+ camps</b> — and Ji Tap proved games flow through these pipes (13K Jewish games in schools). Teacher-spread built Kahoot (47% of US classrooms) and Prodigy (100M users, no marketing). Plus the calendar: holiday content <b>re-spikes every year for free</b> (Sandler's Chanukah Song charted 4 separate years; Maccabeats 1M views in week one). Hanukkah is your Q4.</p></div>
+<div class="card"><h3>The 80/20</h3>
+<p>You can't work 4 rails at once. The order that compounds: <span class="big">WhatsApp share loops (daily) → CrazyGames submission (week 1) → one JTA/ToI pitch (week 2) → schools packet (month 2) → Hanukkah blitz (planned now)</span>.</p></div>`,
+quiz:{q:'Which channel reaches 98% of Israelis and routes through ~15 groups per person?',opts:['TikTok','Instagram','WhatsApp','Telegram'],a:2,ex:'WhatsApp isn\\u2019t A channel in Israel — it\\u2019s THE channel. 65% even get news there. Design every share artifact for the group-chat paste first.'},
+mission:{id:'m3',xp:100,txt:'PUBLISHING MISSION (double XP): right now, send one game with its challenge text to 3 WhatsApp groups you\\u2019re actually in. Not drafted — SENT. Watch GoatCounter move within the hour.'}},
+
+{icon:'🎮',title:'LEVEL 4 · THE EXPERIENCE MOAT',mins:'15 min',html:`
+<div class="card"><h3>Why someone opens Miklat instead of Subway Surfers</h3>
+<p>Not graphics. The research (PENS/Self-Determination) says engagement follows <b>need-fit</b>: competence (beatable challenge), autonomy, and <b>relatedness — "this game is about US."</b> A Dark Room hit #1 in 5 countries with zero graphics. Untitled Goose Game beat Death Stranding at the DICE awards with a meme goose. Your moat = identity × ritual × challenge loops.</p></div>
+<div class="card"><h3>The ritual playbook (Wordle's real secret)</h3>
+<p>One puzzle/day = scarcity = everyone solves the SAME thing = conversation. <b>Mamad Dash already has a daily mode</b> — that's your most underrated asset. Port the daily pattern to every game, add a streak counter, and tie events to the Jewish calendar (90%+ of top-grossing games run seasonal events; ~16–20% engagement lifts are standard).</p></div>
+<div class="card"><h3>Session design IS ad design</h3>
+<p>Where revenue hides later: the death screen (5–7s pause = Smash Karts' "drives a lot of revenue" slot), the revive (MD's 100₪ continue is a rewarded-video slot waiting to happen), level breaks (interstitials). Build the moments now; flip ads on when traffic justifies. Avg session &gt;4 min (Puckit's bar) = portal-ready.</p></div>
+<div class="card"><h3>Already built (protect these)</h3>
+<ul><li>Challenge links with score targets — all 3 games ✅</li>
+<li>Canvas share cards (MD) ✅ · Daily gauntlet (MD) ✅</li>
+<li>Offline PWA everywhere — "works in the miklat" is a FEATURE no competitor copies ✅</li>
+<li>D1/D7 return tracking (Iron Dome) — now extend to all ✅→</li></ul></div>`,
+quiz:{q:'What made Wordle\\u2019s daily-puzzle scarcity so powerful?',opts:['It saved server costs','Everyone solves the SAME puzzle, so it becomes a shared conversation','It made the game harder','It increased ad slots'],a:1,ex:'Synchronization turns a game into a ritual and a ritual into a conversation. Mamad Dash\\u2019s daily mode is the same mechanic — make it the spine of every Miklat game.'},
+mission:{id:'m4',xp:75,txt:'Choose ONE retention hook to ship this week: (a) daily mode in Iron Dome, (b) streak counter on MD daily, or (c) a Jewish-calendar event skin. Tell Claude which — it goes on the factory queue tonight.'}},
+
+{icon:'🏷️',title:'LEVEL 5 · THE BRAND',mins:'12 min',html:`
+<div class="card"><h3>What Miklat stands for</h3>
+<p><span class="big">Resilience + humor + home.</span> The miklat is where Israelis wait out sirens together — you turned it into an arcade. The brand promise writes itself: <b>"Games from the shelter. Work offline — even in one."</b> Nobody on earth can copy that sentence honestly.</p></div>
+<div class="card"><h3>One roof beats five games</h3>
+<p>The arcade shelf is the strategy: every game cross-promotes the others (arcade back-link ✅), one brand accumulates all the press, one domain accumulates all the SEO and direct traffic (where you keep <b>100% of Poki-model revenue</b> and ~$8–9/1K MAU ad rates). Wordle had no roof — NYT had to buy one. You're building yours from day 1.</p></div>
+<div class="card"><h3>Voice rules (already true — now they're law)</h3>
+<ul><li>Deadpan, warm, never mean (MD's death lines are the canon).</li>
+<li>Heroic-protective, never war-glorifying (Iron Dome only shields; threats unnamed).</li>
+<li>Bilingual always — Hebrew first at home, English first in diaspora.</li>
+<li>The safety note stays sacred ("real alert → Home Front Command only").</li></ul></div>
+<div class="card"><h3>Why brand = money</h3>
+<p>Sponsors don't buy traffic, they buy <b>aligned audiences</b> — 70 Faces Media sells 3M/mo of Jewish reach to advertisers. At 300+ plays/day you sell the same thing with better engagement: "your brand inside the games the tribe plays." Brand clarity is literally pricing power.</p></div>`,
+quiz:{q:'What does a sponsor actually pay for?',opts:['Page views','An aligned audience that trusts the brand carrying the ad','Game quality','Download counts'],a:1,ex:'Alignment + trust. "Made in a miklat" gives a sponsor borrowed trust with the exact audience Jewish/Israeli brands pay 70 Faces millions to reach.'},
+mission:{id:'m5',xp:50,txt:'Lock the brand promise: put "Games from the shelter. Work offline — even in one." (or your sharper version) into the portal og:description and the press pitch. One line, everywhere, forever.'}},
+
+{icon:'🚀',title:'LEVEL 6 · THE 90-DAY PLAYBOOK + BOSS FIGHT',mins:'20 min',html:`
+<div class="card"><h3>Phase 1 · SWITCH ON (weeks 1–2) — owner: you + Claude</h3>
+<ul><li>Ko-fi live → TIP_URL flipped (L1 mission) ☑</li>
+<li>Gemini key → generate all art packs (press + gameplay) ☑</li>
+<li>itch.io: all 3 games listed (day one, zero bar)</li>
+<li>CrazyGames: submit best title with SDK (+50% exclusivity window)</li>
+<li>Poki application in parallel (1–2 week review)</li>
+<li>JTA + Times of Israel pitch with press pack ("wartime arcade, works offline in the shelter")</li></ul>
+<p><b>Gate to Phase 2: 1,000 plays/week.</b></p></div>
+<div class="card"><h3>Phase 2 · TRIBE ENGINE (weeks 3–8) — owner: mg-ceo</h3>
+<ul><li>Weekly clip cadence (batch system): 1 gameplay clip → TikTok/Reels + WhatsApp-ready cut</li>
+<li>Daily modes + streaks in all games (L4 mission)</li>
+<li>Schools/camps packet: free, safe, offline, bilingual → 50 day-school + Hillel emails (Ji Tap precedent)</li>
+<li>First calendar event (nearest holiday skin + challenge)</li></ul>
+<p><b>Gate: 10K users · D1 ≥ 20% · share rate ≥ 3%.</b></p></div>
+<div class="card"><h3>Phase 3 · COMPOUND (weeks 9–13)</h3>
+<ul><li>300 plays/day → sponsorship one-pager out to Jewish brands/orgs</li>
+<li>Self-host ad network application (Venatus-class) at 10K MAU</li>
+<li>Hebrew press round (Ynet/Geektime/Haaretz angle: "the Haaretz-hosts-Meduyeket of arcades")</li>
+<li><b>HANUKKAH BLITZ planned in full</b> — your Q4 Super Bowl, re-spikes annually forever</li>
+<li>Best title earns a Steam-wrap evaluation at 1M plays</li></ul>
+<p><b>Gate: 100K cumulative plays · first $500 month.</b></p></div>
+<div class="card"><h3>Who runs what (your org, already filed)</h3>
+<p><b>mg-ceo</b> (Commercialization CEO): everything above — portals, press, cadence, sponsors. <b>Per-game PMs</b> + 10M advisor panels: retention hooks, daily modes, quality gates. <b>You</b>: accounts/keys, final approvals, and the publishing missions only you can do. <b>Claude/COO</b>: the factory (GAME-FACTORY.md) keeps every new game on rails.</p></div>`,
+quiz:null,
+boss:[
+{q:'A new game just hit 1,000 plays/week. What metric decides if it advances?',opts:['Revenue','D1 return rate','Twitter followers','App-store rating'],a:1},
+{q:'Best per-1,000 economics comes from…',opts:['Portal revshare','Your own domain + gaming ad network','Banner ads on portals','Tips'],a:1},
+{q:'The tip platform for Miklat and why:',opts:['BMC — bigger brand','Ko-fi — 0% on tips','Patreon — subscriptions','PayPal links'],a:1},
+{q:'The label effect study showed identity labeling alone drove…',opts:['+5% traffic','+67% traffic','+200% traffic','No change'],a:1},
+{q:'Israel\\u2019s viral railroad is…',opts:['TikTok','WhatsApp (98%, ~15 groups each)','Facebook','Email'],a:1},
+{q:'Portal submission order:',opts:['Poki → CrazyGames → itch','itch now → CrazyGames w/ SDK → Poki application','Steam first','Coolmath first'],a:1},
+{q:'Diaspora (US) traffic vs Israeli traffic per ad impression:',opts:['Worth less','Same','Worth 2–3×','Worth 10×'],a:2},
+{q:'Wordle\\u2019s share grid worked because it was…',opts:['Colorful','A spoiler-free brag that doubled as a tribe badge','Required','Animated'],a:1},
+{q:'Solidarity spikes fade unless…',opts:['You advertise more','The product itself retains (ritual + loops)','Prices drop','You go viral again'],a:1},
+{q:'The sentence no competitor can copy:',opts:['"Fun for everyone"','"Games from the shelter. Work offline — even in one."','"Best graphics on the web"','"Play free now"'],a:1}],
+mission:{id:'m6',xp:150,txt:'FINAL ORDER: open tomorrow\\u2019s standup and hand mg-ceo Phase 1 as the day\\u2019s plan (say "standup" to Claude — the plan is pre-loaded). The course is only real once the playbook is running.'}}
+];
+const RANKS=[[0,'🧺 Shuk Rookie'],[150,'🍊 Stall Owner'],[400,'🛒 Market Boss'],[700,'🤝 Tribe Builder'],[1000,'🎖️ 10M General']];
+const MAXXP=1160;
+let S=JSON.parse(localStorage.getItem('academy')||'{"xp":0,"quiz":{},"missions":{},"boss":{},"done":{}}');
+const save=()=>localStorage.setItem('academy',JSON.stringify(S));
+const $=id=>document.getElementById(id);
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1900);}
+function gain(n){S.xp+=n;save();renderHud();toast('+'+n+' XP');}
+function renderHud(){
+  $('xpfill').style.width=Math.min(100,S.xp/MAXXP*100)+'%';
+  $('xptxt').textContent=S.xp+' XP';
+  let r=RANKS[0][1];for(const[t,n]of RANKS)if(S.xp>=t)r=n;
+  $('rank').textContent=r;
+  if(window.goatcounter&&S.xp>0&&!S._t0){S._t0=1;save();try{goatcounter.count({path:'evt-academy-start',event:true})}catch(e){}}
+}
+function levelDone(i){return !!S.done['l'+i];}
+function unlocked(i){return i===0||levelDone(i-1);}
+function build(){
+  const root=$('levels');root.innerHTML='';
+  LEVELS.forEach((L,i)=>{
+    const el=document.createElement('div');
+    el.className='lvl'+(unlocked(i)?'':' locked');
+    let inner=`<div class="lvl-head" data-i="${i}"><span class="num">${L.icon}</span><span class="t">${L.title}</span><span class="mins">${L.mins}</span><span class="state">${levelDone(i)?'✅':unlocked(i)?'▶':'🔒'}</span></div><div class="lvl-body">${L.html}`;
+    if(L.quiz){
+      const done=S.quiz[i]!==undefined;
+      inner+=`<div class="card quiz"><h3>⚔️ Take the shot (+25 XP)</h3><p>${L.quiz.q}</p>`+
+        L.quiz.opts.map((o,j)=>`<button class="opt ${done?(j===L.quiz.a?'right':(S.quiz[i]===j?'wrong':'')):''}" data-l="${i}" data-j="${j}" ${done?'disabled':''}>${o}</button>`).join('')+
+        `<div class="explain" style="display:${done?'block':'none'}">${L.quiz.ex}</div></div>`;
+    }
+    if(L.boss){
+      inner+=`<div class="card quiz"><h3>👹 BOSS FIGHT — 10 questions, +20 XP each</h3>`;
+      L.boss.forEach((B,k)=>{
+        const done=S.boss[k]!==undefined;
+        inner+=`<p style="margin-top:12px"><b>${k+1}.</b> ${B.q}</p>`+
+          B.opts.map((o,j)=>`<button class="opt ${done?(j===B.a?'right':(S.boss[k]===j?'wrong':'')):''}" data-b="${k}" data-j="${j}" ${done?'disabled':''}>${o}</button>`).join('');
+      });
+      inner+=`</div>`;
+    }
+    if(L.mission){
+      const m=S.missions[L.mission.id];
+      inner+=`<div class="card mission"><h3>🎯 Mission <span class="mxp">+${L.mission.xp} XP</span></h3>
+      <label><input type="checkbox" data-m="${L.mission.id}" data-xp="${L.mission.xp}" data-l="${i}" ${m?'checked disabled':''}><span>${L.mission.txt}</span></label></div>`;
+    }
+    inner+=`<button class="donebtn" data-fin="${i}" ${levelDone(i)?'disabled':''}>${levelDone(i)?'LEVEL CLEAR ✅':'COMPLETE LEVEL ▶'}</button></div>`;
+    el.innerHTML=inner;root.appendChild(el);
+  });
+  $('fin').style.display=levelDone(LEVELS.length-1)?'block':'none';
+}
+document.addEventListener('click',e=>{
+  const h=e.target.closest('.lvl-head');
+  if(h){const i=+h.dataset.i;if(!unlocked(i)){toast('Clear the previous level first 🔒');return;}
+    h.parentElement.classList.toggle('open');return;}
+  const o=e.target.closest('.opt');
+  if(o&&!o.disabled){
+    if(o.dataset.l!==undefined){const i=+o.dataset.l,j=+o.dataset.j;S.quiz[i]=j;save();
+      if(j===LEVELS[i].quiz.a)gain(25);else toast('Not quite — read the green answer');
+      build();openLvl(i);return;}
+    if(o.dataset.b!==undefined){const k=+o.dataset.b,j=+o.dataset.j;S.boss[k]=j;save();
+      if(j===LEVELS[6].boss[k].a)gain(20);else toast('Boss hit you back 💥');
+      build();openLvl(6);return;}
+  }
+  const m=e.target.closest('input[data-m]');
+  if(m&&m.checked){S.missions[m.dataset.m]=1;save();gain(+m.dataset.xp);
+    try{goatcounter.count({path:'evt-academy-mission-'+m.dataset.m,event:true})}catch(e){}
+    build();openLvl(+m.dataset.l);return;}
+  const f=e.target.closest('[data-fin]');
+  if(f&&!f.disabled){const i=+f.dataset.fin;S.done['l'+i]=1;save();gain(30);
+    build();if(i<LEVELS.length-1)openLvl(i+1);
+    if(i===LEVELS.length-1){try{goatcounter.count({path:'evt-academy-complete',event:true})}catch(e){}}
+  }
+});
+function openLvl(i){const els=document.querySelectorAll('.lvl');if(els[i])els[i].classList.add('open');}
+build();renderHud();
+const first=Object.keys(S.done).length?Math.min(LEVELS.length-1,Object.keys(S.done).length):0;
+openLvl(first);
+</script>
+<script data-goatcounter="https://miklat-games.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
