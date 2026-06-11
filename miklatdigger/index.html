@@ -298,7 +298,7 @@ function genLevel(){
   }
   // player to surface
   P.x=cellCX(3); P.y=cellCY(SURFROW); P.dir=null; P.face='R'; P.invuln=0;
-  G.demand=Math.random()<0.5&&G.residents.some(f=>f.dog); G.dogSafe=false; G.refuseCd=0; G.chainGrace=0;
+  G.demand=Math.random()<0.5&&G.residents.some(f=>f.dog); G.dogSafe=false; G.refuseCd=0; G.chainGrace=0; G.shake=0;
   G.time=Math.max(80,Math.min(125,95-3*(lv-1)+14*(G.totalRes-3)));
   if(G.demand) G.time+=12; // Savta's dog demand adds a mandatory detour
   G.sirenT=0;
@@ -437,7 +437,7 @@ function scatterChain(from=0){
   for(let i=from;i<G.chain.length;i++){
     const f=G.chain[i], p=followerPos(i);
     puff(p.x,p.y,'#fff',10);
-    f.x=cellCX(f.homeC)+10; f.y=cellCY(f.homeR);
+    f.x=cellCX(f.homeC)+(f.dog?0:10); f.y=cellCY(f.homeR);
     G.residents.push(f);
   }
   G.chain.length=from;
