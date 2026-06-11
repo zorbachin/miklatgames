@@ -931,7 +931,7 @@ function soupDecline(){
 function gossipBuy(){
   const today=dayIndex(), B=SCRIPT.babushka;
   if(S.gossip&&S.gossip.day===today){
-    $('chatReward').textContent=rline(B.again); return;
+    $('chatReward').textContent=rline(B.again)+` (…fine. ${GLABEL[S.gossip.kind]||S.gossip.kind}. Plus fifteen.)`; return;
   }
   if(S.shekels<20){ Sound.no(); $('chatReward').textContent=rline(B.broke); return; }
   S.shekels-=20;
