@@ -48,6 +48,22 @@
     color:#1a1405;font-weight:900;font-size:15px;padding:10px 18px;border-radius:12px;
     box-shadow:0 6px 18px rgba(233,162,59,.45);}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .shelf-label{margin:20px 2px 10px;font-size:12px;font-weight:800;letter-spacing:.18em;color:var(--gold);
+    display:flex;align-items:center;gap:10px;}
+  .shelf-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#232c4a,transparent);}
+  .tile{display:block;position:relative;border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;
+    border:1px solid #232c4a;box-shadow:0 8px 24px rgba(0,0,0,.3);transition:transform .12s;}
+  .tile:active{transform:scale(.98);}
+  .tile .tart{width:100%;aspect-ratio:2.4/1;object-fit:cover;object-position:72% center;display:block;}
+  .tile .tname{position:absolute;left:14px;bottom:12px;font-size:19px;font-weight:900;
+    text-shadow:0 2px 8px rgba(0,0,0,.8);}
+  .tile .tplay{position:absolute;top:10px;right:10px;background:linear-gradient(180deg,#ffd166,#e9a23b);
+    color:#1a1405;font-weight:900;font-size:13px;padding:7px 14px;border-radius:10px;
+    box-shadow:0 4px 14px rgba(233,162,59,.45);}
+  .tile::after{content:'';position:absolute;inset:0;
+    background:linear-gradient(0deg,rgba(11,14,26,.65) 0%,transparent 45%);pointer-events:none;}
+  .count{margin-top:10px;display:inline-block;font-size:12px;font-weight:700;padding:5px 12px;
+    border-radius:999px;background:rgba(255,209,102,.1);color:var(--gold);border:1px solid rgba(255,209,102,.3);}
   .door{position:relative;border-radius:16px;border:1px solid #232c4a;overflow:hidden;
     background:repeating-linear-gradient(45deg,#0f8a72 0 14px,#0b6b59 14px 28px);
     aspect-ratio:1/1.05;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -65,6 +81,7 @@
 <header>
   <div class="logo"><span class="lamp">🚨</span> MIKLAT GAMES</div>
   <div class="tag">Games from the shelter. <b>Free. No app. One thumb.</b></div>
+  <span class="count">🕹️ 2 games live · 2 doors opening soon</span>
 </header>
 
 <a class="card featured" href="mamaddash/" id="cardMamad">
@@ -80,24 +97,24 @@
   </div>
 </a>
 
-<a class="card featured" href="irondome/" id="cardIron">
-  <img class="art" src="irondome/share-card.jpg" alt="IRON DOME" loading="lazy">
-  <span class="play">PLAY ▶</span>
-  <div class="body">
-    <div class="name">IRON DOME 🛡️</div>
-    <div class="hook">Tap the rockets before they land. A billion-dollar defense system, outsourced to your thumb. No pressure.</div>
-    <div class="meta">
-      <span class="pill">🆕 New door open</span>
-      <span class="pill">📵 Works without reception</span>
-    </div>
-  </div>
+<div class="shelf-label">🚪 MORE IN THE SHELTER</div>
+
+<a class="tile" href="irondome/" id="cardIron">
+  <img class="tart" src="irondome/share-card.jpg" alt="IRON DOME" loading="lazy">
+  <span class="tplay">PLAY ▶</span>
+  <div class="tname">IRON DOME 🛡️ <span style="font-weight:600;font-size:13px;color:#cdd6e8;">tap the rockets. no pressure.</span></div>
 </a>
 
-<div class="grid">
-  <div class="door" style="grid-column:1/-1;aspect-ratio:2.6/1;">
+<div class="grid" style="margin-top:12px;">
+  <div class="door">
     <div class="shield">❔</div>
     <div class="dname">???</div>
-    <div class="soon">IN THE MIKLAT</div>
+    <div class="soon">DOOR OPENING SOON</div>
+  </div>
+  <div class="door">
+    <div class="shield">❔</div>
+    <div class="dname">???</div>
+    <div class="soon">DOOR OPENING SOON</div>
   </div>
 </div>
 
