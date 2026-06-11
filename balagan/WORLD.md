@@ -1,53 +1,76 @@
-# 🌀 BALAGAN — world bible (concept, stage 1 — awaiting Zorba gate)
+# 🌀 BALAGAN — world bible v2 (concept, stage 1 — Zorba steered: SPORTS)
 
-**Pitch:** The daily Israeli-culture duel built for the group chat. 90
-seconds, 5 chaotic rounds, one shared gauntlet a day — then you send the
-link and find out who's really Israeli.
+**Pitch:** The Tel Aviv beach, in your pocket. Three Israeli street sports —
+**matkot, beach volleyball, scooter racing** — built so every one of them is
+played WITH someone. The arcade's social flagship.
 
-**Why this game:** the social brief demands a game where connection IS the
-mechanic, not a bolt-on. Precedents from the research corpus: Trivia Crack
-hit #1 in 19 countries on cultural flavor alone; Wordle built the world's
-biggest daily ritual on a shareable result grid; both patterns are
-URL-duel-native (zero backend, WhatsApp-first — rung 1 of SOCIAL.md).
+**Why this beats the trivia concept (parked, see bottom):** each sport maps
+1:1 onto a rung of the social architecture (SOCIAL.md) — BALAGAN becomes the
+living demo of the whole social layer:
 
-## The daily: 5 rounds, ~90 seconds, seeded (same for everyone)
-1. **אמת או בלאגן? (Emet o Balagan?)** — a wild "fact" about Israel: real
-   or invented? (10s)
-2. **Slang Match** — 4 slang words ↔ 4 meanings, against the clock.
-3. **שוק: The Price Is Right** — real shuk item, guess the price; closest
-   band scores. (Shuk Shopper crossover energy.)
-4. **Emoji Pitgam** — decode the Hebrew proverb/song from emojis
-   (🕊️🫒 → ...). The screenshots share themselves.
-5. **Savta Says** — reflex round; obey ONLY instructions prefixed
-   "Savta says." Miss once, savta wins.
+| Sport | Social mode it embodies | Infra |
+|---|---|---|
+| 🏓 **MATKOT** | **Companion** — co-op by nature: keep the rally alive *together* | none |
+| 🏐 **VOLLEYBALL** | **VS** — 1v1 duel | none (couch) → live later |
+| 🛴 **SCOOTER RACE** | **Ghost racing** — race your friend's recorded run | URL ghosts |
 
-**Result = points + speed**, rendered as a Wordle-grade share grid:
-`BALAGAN #12 🟩🟩🟥🟩🟨 87 — savta took me on round 3. Your turn:` + duel link.
+## 🏓 MATKOT — the companion game
+The most Israeli sport that exists: no winner, no points — just two people
+refusing to drop the ball. Pure cooperation.
+- **One-phone couch co-op:** split screen, one thumb each side, rally counter
+  climbing. The phone passes the beach to any two people in a room.
+- **Solo vs. the Savta wall** (practice mode, offline).
+- **Async chavruta rally:** the rally counter carries across the duo —
+  you play your half today, send the link, they continue the rally tomorrow.
+  *"Rally: 847 hits, 12 days — don't drop it"* = the chavruta streak made
+  physical. The share line writes itself.
+- Sound: that unmistakable *tok… tok… tok* (WebAudio, like siblings).
 
-## The duel (the actual game)
-Your result rides IN the link (SOCIAL.md rung 1, no server). Friend plays
-the same 5 rounds; their device compares round-by-round; result card crowns
-👑 per round + overall, with a taunt line. Rematch = tomorrow's daily —
-**the retention loop is the relationship.**
-- Chavruta streaks apply natively (both played today = streak lives).
-- Group chats become standings: everyone replies with their card.
+## 🏐 VOLLEYBALL — the VS game
+Pikachu-Volleyball-class 1v1 (proven minimal physics: one ball, gravity, two
+jumpers, a net). Gordon Beach at golden hour, sand physics, crowd of savtas.
+- **Couch VS:** one phone, two thumbs (left/right halves) — instant duels.
+- **Solo vs. AI** with personality tiers (Shuk Vendor → Lifeguard → Savta).
+- **Async VS:** seeded ball physics + your point pattern in the duel link.
+- **Live VS:** the rung-3 WebRTC candidate when duel volume earns it.
 
-## Tone & content rules
-- Celebratory chaos, never cringe, never partisan. Politics is OUT; culture,
-  food, slang, savta, nostalgia are IN. Bilingual EN/HE with full parity —
-  diaspora plays in English, gets the same rounds.
-- Content ships as versioned JSON packs (factory: agents draft, human
-  approves — cultural sensitivity gate is MANDATORY per pack).
-- Holiday packs = the calendar engine (Hanukkah pack, Pesach pack) — re-spike
-  every year, sponsorable later.
+## 🛴 SCOOTER RACE — the ghost game
+Race a lime scooter down the tayelet (the Mamad Dash scooter, promoted to
+hero). Dodge joggers, savtas with carts, matkot crossfire, dog leashes.
+- Time-trial with **position-snapshot ghosts in the URL** (SOCIAL.md rung 2)
+  — race any friend's translucent run, no backend, 36h duel forfeit.
+- **Daily route** (seeded) = the shared gauntlet + HaLuach board entry.
+- The bridge game: scooter ghosts are the tech rehearsal for ghosts in
+  Mamad Dash + Shuk Shopper.
+
+## The daily: "YOM YAM" (beach day)
+One seeded challenge across all three (e.g. 30 rally hits + first to 5 vs AI
++ tayelet time-trial) → one Wordle-grade result card:
+`BALAGAN #12 🏓847 🏐5:3 🛴0:42 — yom yam! Your turn:` + duel link.
+
+## Tone & art
+Golden-hour Gordon Beach palette (sky #7ec8ff, sand #ffe2b0, lime scooter
+green, matkot-paddle wood). Same cartoon language as the arcade; assets via
+prompts.json packs (factory stage 4). Zero gore, zero politics, maximum
+August-in-Tel-Aviv.
 
 ## Tech shape
-Single file, offline-first (packs precached in SW), seeded daily from
-day-number, zero backend for solo + duels; HaLuach board + streaks when the
-worker exists. Standard factory invariants (i18n, events, og, tip hook).
+Single file per the house pattern; three mini-games behind one menu (still
+one canvas, shared physics helpers); offline-first SW; i18n EN/HE; events
+`evt-bg-*`; standard factory invariants. Couch modes ship with ZERO infra;
+async modes ride the URL; HaLuach/live arrive with their phases.
 
-## Open questions for Zorba (the stage-1 gate)
-1. Greenlight BALAGAN as this (the social daily duel) vs. keep the name for
-   something else?
-2. Round 5 alternative: "Protexia" (queue-jumping reflex game)?
-3. English-market naming: "BALAGAN" travels great — agree?
+## Build order
+1. **Matkot couch + solo** (smallest, most iconic — and the companion-mode
+   proof) → 2. Scooter time-trial + URL ghosts → 3. Volleyball couch VS →
+   4. Yom Yam daily card → 5. live VS (gated).
+
+## Parked (not lost)
+The trivia-duel concept (Emet o Balagan / Slang Match / Emoji Pitgam / Savta
+Says) is strong but it's a different game — parked as a future door
+(working name: **SAVTA SAYS 👵**), nucleus-logged.
+
+## Zorba gates (stage 1)
+1. Greenlight BALAGAN = beach sports trilogy as above?
+2. Build order OK (matkot first)?
+3. "Yom Yam" as the daily's name?
