@@ -255,7 +255,8 @@ function glow(col,size){
    Drop matching PNGs into balagan/art/ and the world upgrades itself. */
 const ART={};
 for(const n of ['bg-city','stand-falafel','net-volley','shop-front','home','kiosk',
-  'char-avtali','char-savta','char-chabad','char-bro','char-hightech']){
+  'char-avtali','char-savta','char-chabad','char-bro','char-hightech',
+  'savta-nu']){            // savta-nu: shared with Mamad Dash — volleyball opponent + street savta
   const i=new Image(); i.src='art/'+n+'.png'; ART[n]=i;
 }
 const artOk=n=>{const i=ART[n];return i&&i.complete&&i.naturalWidth>0;};
@@ -270,7 +271,7 @@ function drawArt(n,x,y,h,flip){
    Items are consumables auto-spent in the mini-games. Upgrades are permanent. */
 const CHARS=[
   {id:'avtali',  ico:'🧍', name:'Avtali',      cost:0,    perk:'The original. Broke and hopeful.'},
-  {id:'savta',   ico:'🧓', name:'Savta Mizrahi',cost:450, perk:'+15% falafel tips — she knows everyone.', mult:{falafel:.15}},
+  {id:'savta',   ico:'🧓', name:'Savta Mizrahi',cost:450, perk:'+15% falafel tips — she knows everyone.', mult:{falafel:.15}, artFlip:true},
   {id:'bro',     ico:'🏄', name:'Beach Bro',    cost:600, perk:'+1 volleyball life. Totally chill.',     vlife:1},
   {id:'chabad',  ico:'🧔', name:'Chabad Guy',   cost:800, perk:'Daily mitzvah: free +₪60 each morning.', mitzvah:60},
   {id:'hightech',ico:'🦸', name:'Hi-Tech Bro',  cost:1500, perk:'+10% earnings, −1 volley life. He optimized it.', mult:{all:.10}, vlife:-1},
@@ -1068,6 +1069,10 @@ function drawStation(s,sx){
   // shadow
   cx.fillStyle='rgba(0,0,0,.18)';cx.beginPath();cx.ellipse(sx,groundY+10,46,9,0,0,7);cx.fill();
   if(s.art&&artOk(s.art)){ drawArt(s.art,sx,groundY-58,128); }
+  else if(s.id==='chat_savta'&&artOk('savta-nu')){   // painted savta on her corner
+    drawArt('savta-nu',sx,groundY-44,84);
+    if(G.t%2<1) drawEmoji('💬',sx+34,groundY-96,26);
+  }
   else {
     // a little procedural stall so it isn't a lone floating emoji
     if(!s.npc){
@@ -1091,6 +1096,7 @@ function drawPlayer(sx,by,p){
   const c=equipped();
   cx.save();cx.translate(sx,by-34+bob);
   if(p&&p.dir<0) cx.scale(-1,1);
+  if(c.artFlip) cx.scale(-1,1);            // sprites drawn facing left get pre-mirrored
   if(artOk('char-'+c.id)) drawArt('char-'+c.id,0,0,64);
   else drawEmoji(c.ico,0,0,52);
   cx.restore();
@@ -1102,9 +1108,10 @@ function drawVolley(){
   cx.fillStyle='#cdd6e8';cx.fillRect(nx-3,groundY-150,6,150);
   cx.strokeStyle='rgba(255,255,255,.7)';cx.lineWidth=2;
   for(let y=groundY-150;y<groundY-40;y+=12){cx.beginPath();cx.moveTo(nx-26,y);cx.lineTo(nx+26,y);cx.stroke();}
-  // you + savta
+  // you + savta (painted savta faces the player natively; emoji needs the mirror)
   drawPlayer(W*.18,groundY,{dir:1,walk:1});
-  cx.save();cx.translate(W*.84,groundY-30);cx.scale(-1,1);drawEmoji('🧓',0,0,52);cx.restore();
+  if(artOk('savta-nu')) drawArt('savta-nu',W*.84,groundY-44,86);
+  else { cx.save();cx.translate(W*.84,groundY-30);cx.scale(-1,1);drawEmoji('🧓',0,0,52);cx.restore(); }
   // ball + hittable ring
   const b=v.ball;
   if(v.hittable){ cx.strokeStyle=`rgba(255,209,102,${.5+.4*Math.sin(G.t*9)})`;cx.lineWidth=4;
@@ -1123,7 +1130,10 @@ function vbHud(){
   // lives
   let lifeStr=''; for(let i=0;i<Math.max(0,v.lives+1);i++) lifeStr+='❤️';
   cx.font='18px sans-serif';cx.fillText(lifeStr||'—',W/2,SAFE_TOP+60);
-  if(v.rally===0){ cx.font='800 14px sans-serif';cx.fillStyle='rgba(255,255,255,.8)';
+  if(v.rally===0){ cx.font='800 14px sans-serif';
+    cx.lineWidth=4;cx.strokeStyle='rgba(15,20,40,.85)';
+    cx.strokeText('TAP when the ball is low & the ring glows',W/2,groundY-180);
+    cx.fillStyle='#fff';
     cx.fillText('TAP when the ball is low & the ring glows',W/2,groundY-180); }
 }
 function drawFalafel(){

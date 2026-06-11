@@ -13,13 +13,15 @@ silhouettes, transparent background PNGs, drawn facing **right**
 ## Characters (skins — the player sprite + shop card)
 Each is a full standing figure, ~320px tall, transparent bg.
 
-| file | who | vibe |
-|------|-----|------|
-| `char-avtali.png`   | Avtali        | the broke-but-hopeful default Tel Avivi |
-| `char-savta.png`    | Savta Mizrahi | Sephardi grandma, shopping cart energy |
-| `char-bro.png`      | Beach Bro     | tan, tank top, flip-flops, Goldstar |
-| `char-chabad.png`   | Chabad Guy    | black hat/coat, tefillin, warm smile |
-| `char-hightech.png` | Hi-Tech Bro   | hoodie, AirPods, cold brew, smug |
+| file | who | status |
+|------|-----|--------|
+| `char-avtali.png`   | Avtali        | ✅ pulled from Mamad Dash (`run1.png`) |
+| `char-savta.png`    | Savta Mizrahi | ✅ pulled from Mamad Dash (`savta-cart.png`, faces left — `artFlip` set in code) |
+| `char-bro.png`      | Beach Bro     | 🔲 needed: tan, tank top, flip-flops, Goldstar |
+| `char-chabad.png`   | Chabad Guy    | 🔲 needed: black hat/coat, tefillin, warm smile |
+| `char-hightech.png` | Hi-Tech Bro   | 🔲 needed: hoodie, AirPods, cold brew, smug |
+| `char-mamadmom.png` | Mamad Mom     | 🔲 needed (secret cross-game skin): supermom with a shelter-door shield |
+| `savta-nu.png`      | street/volley Savta | ✅ pulled from Mamad Dash |
 
 (Walk-cycle frames `char-<id>-1.png`/`-2.png` are a nice-to-have; the engine
 currently uses a single sprite with a bob — wire the frames in `drawPlayer`
@@ -39,7 +41,7 @@ Wider pieces, ~420px tall, sit on the boardwalk.
 ## Background
 | file | what |
 |------|------|
-| `bg-city.png` | seamless horizontal Tel Aviv strip (sky→skyline→sea→promenade). Tiles horizontally; height maps to the ground line. Replaces the procedural sky+skyline+palms. |
+| `bg-city.png` | ✅ pulled from Mamad Dash (`bg-beach.webp` — webp bytes, browsers sniff content). A dedicated seamless strip can replace it later. |
 
 ## Share / store art (referenced by the page, not auto-loaded)
 | file | what |
