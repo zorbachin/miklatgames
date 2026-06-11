@@ -121,34 +121,80 @@
     transition:all .2s var(--ease);z-index:50;}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
   *:focus-visible{outline:2px solid var(--c-pink);outline-offset:2px;}
+  /* ===================== studio flow ===================== */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 4px;}
+  .tbtn{min-width:40px;height:38px;display:inline-flex;align-items:center;justify-content:center;background:var(--c-panel);
+    border:1px solid var(--c-border);border-radius:999px;color:var(--c-dim);font:700 16px var(--font-body);cursor:pointer;padding:0 12px;text-decoration:none;}
+  .occChip{display:inline-flex;align-items:center;gap:7px;background:var(--c-panel);border:1px solid var(--c-border-strong);
+    border-radius:999px;color:var(--c-ink);font:800 14px var(--font-body);cursor:pointer;padding:8px 16px;max-width:62%;}
+  .occChip>span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .meterMini{margin:5px 14px 0;height:14px;border-radius:999px;background:rgba(255,255,255,.07);
+    border:1px solid var(--c-border);overflow:hidden;position:relative;}
+  .meterMini>i{display:block;height:100%;width:0;background:var(--rainbow);transition:width .35s var(--ease);box-shadow:0 0 10px rgba(255,93,177,.5);}
+  .meterMini>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font:800 9.5px var(--font-display);letter-spacing:.04em;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.7);}
+  .stageWrap{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .stageWrap svg{height:min(54vh,520px);width:auto;max-width:60%;display:block;position:relative;z-index:2;
+    filter:drop-shadow(0 16px 30px rgba(0,0,0,.5));}
+  .glow{position:absolute;left:50%;top:48%;width:92%;height:72%;transform:translate(-50%,-50%);border-radius:50%;
+    background:radial-gradient(circle, var(--glow,rgba(255,93,177,.22)) 0%, transparent 64%);filter:blur(10px);z-index:0;transition:background .4s;}
+  .rail{position:absolute;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:13px;z-index:5;}
+  .rail.left{inset-inline-start:8px;} .rail.right{inset-inline-end:8px;}
+  .bubble{width:56px;height:56px;border-radius:50%;background:var(--c-panel);border:1px solid var(--c-border);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+    box-shadow:0 6px 16px rgba(0,0,0,.4);animation:bfloat 3.6s ease-in-out infinite;transition:transform .12s var(--ease),border-color .2s,box-shadow .2s;}
+  .bubble:active{transform:scale(.9);}
+  .bubble .bem{font-size:23px;line-height:1;} .bubble .blab{font-size:8px;font-weight:800;color:var(--c-dim);margin-top:1px;text-transform:uppercase;letter-spacing:.03em;}
+  .bubble.filled{border-color:var(--c-pink);box-shadow:0 0 0 1px var(--c-pink),0 6px 18px rgba(255,93,177,.4);}
+  .bubble.filled .blab{color:var(--c-pink);}
+  .bubble.act{border-color:var(--c-cyan);box-shadow:0 0 0 2px var(--c-cyan);}
+  .rail .bubble:nth-child(2){animation-delay:.6s;} .rail .bubble:nth-child(3){animation-delay:1.2s;} .rail .bubble:nth-child(4){animation-delay:1.8s;}
+  @keyframes bfloat{50%{transform:translateY(-7px);}}
+  .quick{display:flex;gap:8px;padding:6px 14px calc(env(safe-area-inset-bottom,0px) + 10px);}
+  .qbtn{flex:1;min-height:46px;border:1px solid var(--c-border);border-radius:13px;font:800 14px var(--font-body);cursor:pointer;
+    background:var(--c-panel);color:var(--c-ink);display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+  .qbtn#reset,.qbtn.share{flex:0 0 auto;padding:0 15px;}
+  .qbtn.done{flex:1.4;background:linear-gradient(180deg,#ff7bc4,#e0469b);color:#2a0a1d;border:0;}
+  .qbtn:active{transform:scale(.97);}
+  .trayWrap{position:fixed;inset:0;z-index:30;pointer-events:none;}
+  .trayBackdrop{position:absolute;inset:0;background:rgba(5,9,20,.5);opacity:0;transition:opacity .25s;}
+  .tray{position:absolute;left:0;right:0;bottom:0;max-width:520px;margin:0 auto;background:var(--c-panel);
+    border-top:1px solid var(--c-border-strong);border-radius:20px 20px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.5);
+    transform:translateY(110%);transition:transform .28s var(--ease);max-height:62%;display:flex;flex-direction:column;}
+  .trayWrap.open{pointer-events:auto;} .trayWrap.open .trayBackdrop{opacity:1;} .trayWrap.open .tray{transform:translateY(0);}
+  .trayHead{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px;}
+  .trayHead>span{font-family:var(--font-display);font-size:16px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--c-pink);}
+  .trayHead>button{width:34px;height:34px;border-radius:50%;background:var(--c-panel-2);border:1px solid var(--c-border);color:var(--c-ink);font-size:15px;cursor:pointer;}
+  .trayBody{overflow-y:auto;padding:2px 14px 16px;-webkit-overflow-scrolling:touch;}
+  .scenes{position:fixed;inset:0;z-index:50;background:radial-gradient(ellipse at 50% 28%,#1c2350,#0a1226);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;transition:opacity .3s;}
+  .scenes.hidden{opacity:0;pointer-events:none;}
+  .scTitle{font-family:var(--font-display);font-weight:700;font-size:clamp(20px,6vw,28px);line-height:1.1;
+    background:var(--rainbow);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .scSub{font-size:13px;color:var(--c-dim);margin:6px 0 16px;}
+  .scGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:420px;max-height:68vh;overflow-y:auto;padding:2px;}
+  .scCard{background:var(--c-panel);border:1px solid var(--c-border);border-radius:16px;padding:14px 10px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:5px;transition:transform .1s var(--ease),border-color .2s;}
+  .scCard:active{transform:scale(.95);} .scCard.free{grid-column:1/-1;border-style:dashed;}
+  .scCard .se{font-size:30px;} .scCard .sn{font-size:13px;font-weight:800;}
+  .celebrate{position:fixed;inset:0;z-index:35;pointer-events:none;}
+  .confetti{position:absolute;top:18%;width:9px;height:14px;border-radius:2px;transform:rotate(var(--r));animation:conf 1.1s ease-in forwards;}
+  @keyframes conf{to{transform:translate(var(--x),72vh) rotate(calc(var(--r) + 540deg));opacity:0}}
+
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
 </style>
 </head>
 <body>
 <div class="app">
-  <header>
-    <a class="back" href="../" id="back">‹ <span data-i18n="arcade">Arcade</span></a>
-    <div class="brand">
-      <div class="nm">FABATOLLAH</div>
-      <div class="alt" data-i18n="sub">Pride makeover salon 🏳️‍🌈</div>
-    </div>
-    <button class="ctl" id="langCtl">עברית</button>
-  </header>
+  <div class="topbar">
+    <a class="tbtn" href="../" aria-label="Arcade">‹</a>
+    <button class="occChip" id="occChip"><span id="occEmoji">🎨</span><span id="occName">Free Style</span></button>
+    <button class="tbtn" id="langCtl">עברית</button>
+  </div>
+  <div class="meterMini"><i id="meterBar"></i><span id="meterVal">—</span></div>
 
-  <p class="tag" data-i18n="tag">It's Pride Month. Give the Supreme Leader the glow-up he deserves — dress him, paint him, bedazzle him.</p>
-
-  <a href="dresscode/" id="dccta" style="display:flex;align-items:center;gap:11px;margin:0 16px 6px;padding:11px 14px;
-    background:linear-gradient(180deg,#241a44,#1a1233);border:1px solid var(--c-border-strong);border-radius:14px;
-    text-decoration:none;color:var(--c-ink);box-shadow:0 0 18px rgba(255,93,177,.2);">
-    <img src="art/icon.webp" alt="" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--c-pink);flex:0 0 auto;">
-    <span style="flex:1;line-height:1.25">
-      <b style="display:block;font-size:14.5px" data-i18n="dcCta">⏱️ Dress Code Challenge</b>
-      <span style="font-size:12px;color:var(--c-dim)" data-i18n="dcCtaSub">Dress him for the occasion — beat the clock!</span>
-    </span>
-    <span style="font-size:22px;color:var(--c-pink)">›</span>
-  </a>
-
-  <div class="stage">
+  <div class="stageWrap" id="stageWrap">
+    <div class="glow" id="glow"></div>
     <svg id="doll" viewBox="0 0 360 700" aria-label="Dress-up character">
       <defs>
         <linearGradient id="gRainbow" x1="0" y1="0" x2="1" y2="1">
@@ -181,25 +227,45 @@
       </defs>
       <g id="dollG"></g>
     </svg>
-    <img id="lookImg" alt="" aria-hidden="true">
     <div class="sparkle" id="spk1">✨</div>
     <div class="sparkle" id="spk2">💖</div>
     <div class="sparkle" id="spk3">🌈</div>
+    <div class="rail left">
+      <button class="bubble" data-cat="looks"><span class="bem">✨</span><span class="blab"></span></button>
+      <button class="bubble" data-cat="head"><span class="bem">👳</span><span class="blab"></span></button>
+      <button class="bubble" data-cat="top"><span class="bem">👕</span><span class="blab"></span></button>
+    </div>
+    <div class="rail right">
+      <button class="bubble" data-cat="bottom"><span class="bem">👖</span><span class="blab"></span></button>
+      <button class="bubble" data-cat="robe"><span class="bem">🧥</span><span class="blab"></span></button>
+      <button class="bubble" data-cat="face"><span class="bem">💄</span><span class="blab"></span></button>
+      <button class="bubble" data-cat="bling"><span class="bem">💎</span><span class="blab"></span></button>
+    </div>
   </div>
 
-  <div class="meter">
-    <div class="row"><span class="lbl" data-i18n="meter">Fabulous meter</span><span class="val" id="meterVal">—</span></div>
-    <div class="bar"><i id="meterBar"></i></div>
+  <div class="quick">
+    <button class="qbtn" id="surprise">🎲 <span data-i18n="surprise">Surprise</span></button>
+    <button class="qbtn" id="reset" title="Reset">↺</button>
+    <button class="qbtn share" id="share">📤</button>
+    <button class="qbtn done" id="done">✓ <span data-i18n="done">Strut!</span></button>
   </div>
 
-  <div class="tabs" id="tabs"></div>
-  <div class="panel" id="panel"></div>
-
-  <div class="actions">
-    <button class="btn surprise" id="surprise">✨ <span data-i18n="surprise">Surprise me</span></button>
-    <button class="btn sec" id="reset" title="Reset">↺</button>
-    <button class="btn share" id="share">📤 <span data-i18n="share">Share</span></button>
+  <div class="trayWrap" id="trayWrap">
+    <div class="trayBackdrop" id="trayBackdrop"></div>
+    <div class="tray" id="tray">
+      <div class="trayHead"><span id="trayTitle"></span><button id="trayClose" aria-label="close">✕</button></div>
+      <div class="trayBody" id="panel"></div>
+    </div>
   </div>
+
+  <div class="scenes" id="scenes">
+    <div class="scTitle" data-i18n="where">Where's he headed today?</div>
+    <div class="scSub" data-i18n="whereSub">Pick the occasion — then make him fabulous.</div>
+    <div class="scGrid" id="scGrid"></div>
+    <a href="dresscode/" style="margin-top:16px;font-size:12.5px;font-weight:700;color:var(--c-cyan);text-decoration:none" data-i18n="dcLink">⏱️ Or race the clock — Dress Code ›</a>
+  </div>
+
+  <div class="celebrate" id="celebrate"></div>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 
@@ -217,10 +283,10 @@ const PELVIS='M132 342 Q180 358 228 342 L224 396 Q180 412 136 396 Z';
 /* ============================ state ============================ */
 const DEFAULT={
   base:'elder',
-  head:'turban_white',
-  top:'tank', topColor:'#3a4a7a',
-  bottom:'trousers', bottomColor:'#2a2f45',
-  robe:'aba', robeColor:'#15182a',
+  head:'bare',
+  top:'tank', topColor:'#eef2fb',
+  bottom:'briefs', bottomColor:'#cfd6e2',
+  robe:'none', robeColor:'#15182a',
   tattoo:'none',
   lips:'none', eyeshadow:'none', beard:'gray', glasses:'none', blush:false, gems:false,
   earrings:'none', necklace:'none', noseRing:false,
@@ -354,7 +420,7 @@ function tattoo(){
 function bottom(){
   const c=state.bottomColor;
   switch(state.bottom){
-    case 'briefs': return path('M134 360 Q180 374 226 360 L220 396 Q180 410 140 396 Z',c);
+    case 'briefs': return path('M132 360 Q180 376 228 360 L222 400 Q180 416 138 400 Z','url(#gRainbowV)')+'<path d="M132 361 Q180 377 228 361" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/>';
     case 'trousers': return stroke(LEG_L,c,34)+stroke(LEG_R,c,34)+pelvisCover(c);
     case 'jeans': return stroke(LEG_L,'#3a5a8c',34)+stroke(LEG_R,'#3a5a8c',34)+pelvisCover('#3a5a8c')+'<path d="M180 360 V412" stroke="#ffcf66" stroke-width="1.4" stroke-dasharray="3 3"/>';
     case 'leather': return stroke(LEG_L,'#171821',36)+stroke(LEG_R,'#171821',36)+pelvisCover('#171821')+'<path d="M156 460 q3 0 0 6 M204 460 q-3 0 0 6" stroke="rgba(255,255,255,.35)" stroke-width="3"/>';
@@ -656,8 +722,8 @@ const PRESETS={
   angel:{head:'halo',top:'mesh',bottom:'mini',bottomColor:'#fff',robe:'sheer',robeColor:'#fff',lips:'#ff7a59',eyeshadow:'#5b8cff',beard:'glitter',glasses:'none',blush:true,gems:true,earrings:'pearl',necklace:'pearls',boa:'#fff',wings:true,flag:false}
 };
 function applyPreset(id){
-  state=Object.assign({},DEFAULT,{robe:'none',top:'tank',bottom:'trousers'},PRESETS[id]);
-  render(); showLook(id); burst();
+  state=Object.assign({},DEFAULT,{robe:'none',top:'tank',bottom:'briefs'},PRESETS[id]);
+  render(); burst(); syncChips(); updateBubbles(); updateMeter();
   track('preset-'+id);
 }
 
@@ -674,81 +740,89 @@ function showLookFile(f){ const i=document.getElementById('lookImg'),s=document.
   i.src='art/'+f; }
 function showLook(id){ const f=PRESET_IMG[id]; if(!f){hideLook();return;} showLookFile(f); }
 
-/* ============================ build UI ============================ */
-let activeTab='preset';
-function buildTabs(){
-  const t=I18N[lang], el=document.getElementById('tabs'); el.innerHTML='';
-  TABS.forEach(tab=>{
-    const b=document.createElement('button');
-    b.className='tab'+(tab.id===activeTab?' on':'');
-    b.innerHTML=`<span class="ic">${tab.ic}</span><span>${t.tabs[tab.name]||tab.name}</span>`;
-    b.onclick=()=>{activeTab=tab.id;buildTabs();buildPanel();};
-    el.appendChild(b);
-  });
-}
-function buildPanel(){
-  const t=I18N[lang], tab=TABS.find(x=>x.id===activeTab), el=document.getElementById('panel');
-  el.innerHTML='';
-  tab.controls.forEach(ctrl=>{
-    const grp=document.createElement('div'); grp.className='grp';
-    if(ctrl.type==='preset'){
-      grp.innerHTML=`<h4>${t.choose}</h4>`;
-      const wrap=document.createElement('div'); wrap.className='chips';
-      ctrl.items.forEach(it=>{
-        const c=document.createElement('button'); c.className='chip preset';
-        c.innerHTML=`<span class="em">${it.em}</span>${t.presets[it.id]||it.label}`;
-        c.onclick=()=>applyPreset(it.id);
-        wrap.appendChild(c);
-      });
-      grp.appendChild(wrap); el.appendChild(grp); return;
-    }
-    if(ctrl.type==='toggle'){
-      const wrap=document.createElement('div'); wrap.className='chips';
-      const c=document.createElement('button'); c.className='chip tgl'+(state[ctrl.key]?' on':'');
-      c.dataset.key=ctrl.key; c.dataset.toggle='1';
-      c.innerHTML=`<span>${ctrl.em||''}</span>${t.labels[ctrl.key]||ctrl.label}`;
-      c.onclick=()=>{state[ctrl.key]=!state[ctrl.key];render();track('set-'+ctrl.key);};
-      wrap.appendChild(c); grp.appendChild(wrap); el.appendChild(grp); return;
-    }
-    // pick
-    grp.innerHTML=`<h4>${t.labels[ctrl.label]||ctrl.label}</h4>`;
+/* ============================ studio: bubbles + tray ============================ */
+const CATS={ looks:['preset'], head:['head'], top:['top'], bottom:['bottom'], robe:['robe'],
+  face:['face'], bling:['jewel','acc','tattoo'] };
+const CAT_KEYS={ head:['head'], top:['top','topColor'], bottom:['bottom','bottomColor'], robe:['robe','robeColor'],
+  face:['lips','eyeshadow','beard','glasses','blush','gems'],
+  bling:['earrings','necklace','noseRing','boa','flag','wings','gloves','fan','tattoo'] };
+let activeCat=null;
+
+function renderControl(el,ctrl,t){
+  const grp=document.createElement('div'); grp.className='grp';
+  if(ctrl.type==='preset'){
+    grp.innerHTML=`<h4>${t.choose}</h4>`; const wrap=document.createElement('div'); wrap.className='chips';
+    ctrl.items.forEach(it=>{ const c=document.createElement('button'); c.className='chip preset';
+      c.innerHTML=`<span class="em">${it.em}</span>${t.presets[it.id]||it.label}`;
+      c.onclick=()=>{ applyPreset(it.id); };
+      wrap.appendChild(c); });
+    grp.appendChild(wrap); el.appendChild(grp); return;
+  }
+  if(ctrl.type==='toggle'){
     const wrap=document.createElement('div'); wrap.className='chips';
-    ctrl.items.forEach(it=>{
-      const c=document.createElement('button');
-      c.className='chip'+(state[ctrl.key]===it.id?' on':'');
-      c.dataset.key=ctrl.key; c.dataset.val=it.id;
-      let sw='';
-      if(it.sw){
-        const bg = it.sw==='rainbow'?'var(--rainbow)':it.sw==='gold'?'linear-gradient(180deg,#fff1b8,#b8860b)':it.sw==='disco'?'linear-gradient(135deg,#ff4fd8,#3ee6ff)':it.sw==='glitter'?'linear-gradient(180deg,#f4f8ff,#b9c4dc)':it.sw;
-        sw=`<span class="sw" style="background:${bg}"></span>`;
-      }
-      const lbl = it.label? (t.labels[it.label]!==undefined? t.labels[it.label] : it.label) : '';
-      c.innerHTML=sw+(lbl?`<span>${lbl}</span>`:'');
-      c.onclick=()=>{state[ctrl.key]=it.id;render();track('set-'+ctrl.key);};
-      wrap.appendChild(c);
-    });
-    grp.appendChild(wrap); el.appendChild(grp);
+    const c=document.createElement('button'); c.className='chip tgl'+(state[ctrl.key]?' on':'');
+    c.dataset.key=ctrl.key; c.dataset.toggle='1';
+    c.innerHTML=`<span>${ctrl.em||''}</span>${t.labels[ctrl.key]||ctrl.label}`;
+    c.onclick=()=>{ state[ctrl.key]=!state[ctrl.key]; apply(); track('set-'+ctrl.key); };
+    wrap.appendChild(c); grp.appendChild(wrap); el.appendChild(grp); return;
+  }
+  grp.innerHTML=`<h4>${t.labels[ctrl.label]||ctrl.label}</h4>`;
+  const wrap=document.createElement('div'); wrap.className='chips';
+  ctrl.items.forEach(it=>{
+    const c=document.createElement('button'); c.className='chip'+(state[ctrl.key]===it.id?' on':'');
+    c.dataset.key=ctrl.key; c.dataset.val=it.id;
+    let sw='';
+    if(it.sw){ const bg=it.sw==='rainbow'?'var(--rainbow)':it.sw==='gold'?'linear-gradient(180deg,#fff1b8,#b8860b)':it.sw==='disco'?'linear-gradient(135deg,#ff4fd8,#3ee6ff)':it.sw==='glitter'?'linear-gradient(180deg,#f4f8ff,#b9c4dc)':it.sw;
+      sw=`<span class="sw" style="background:${bg}"></span>`; }
+    const lbl=it.label?(t.labels[it.label]!==undefined?t.labels[it.label]:it.label):'';
+    c.innerHTML=sw+(lbl?`<span>${lbl}</span>`:'');
+    c.onclick=()=>{ state[ctrl.key]=it.id; apply(); track('set-'+ctrl.key); };
+    wrap.appendChild(c);
   });
+  grp.appendChild(wrap); el.appendChild(grp);
+}
+function buildTray(cat){
+  const t=I18N[lang], el=document.getElementById('panel'); el.innerHTML='';
+  document.getElementById('trayTitle').textContent=t.cats[cat]||cat;
+  (CATS[cat]||[]).forEach(tid=>{ const tab=TABS.find(x=>x.id===tid); if(tab) tab.controls.forEach(ctrl=>renderControl(el,ctrl,t)); });
 }
 function syncChips(){
-  document.querySelectorAll('#panel .chip').forEach(c=>{
-    const k=c.dataset.key; if(!k)return;
+  document.querySelectorAll('#panel .chip').forEach(c=>{ const k=c.dataset.key; if(!k)return;
     if(c.dataset.toggle) c.classList.toggle('on',!!state[k]);
-    else if(c.dataset.val!==undefined) c.classList.toggle('on',state[k]===c.dataset.val);
-  });
+    else if(c.dataset.val!==undefined) c.classList.toggle('on',state[k]===c.dataset.val); });
+}
+function apply(){ render(); syncChips(); updateBubbles(); updateMeter(); }
+function openTray(cat){ activeCat=cat; buildTray(cat); syncChips();
+  document.getElementById('trayWrap').classList.add('open');
+  document.querySelectorAll('.bubble').forEach(b=>b.classList.toggle('act',b.dataset.cat===cat));
+  track('open-'+cat); }
+function closeTray(){ activeCat=null; document.getElementById('trayWrap').classList.remove('open');
+  document.querySelectorAll('.bubble').forEach(b=>b.classList.remove('act')); }
+function updateBubbles(){
+  document.querySelectorAll('.bubble').forEach(b=>{ const keys=CAT_KEYS[b.dataset.cat];
+    b.classList.toggle('filled', !!(keys&&keys.some(k=>state[k]!==DEFAULT[k]))); });
+}
+function setupBubbles(){
+  const t=I18N[lang];
+  document.querySelectorAll('.bubble').forEach(b=>{ const cat=b.dataset.cat, lab=b.querySelector('.blab');
+    if(lab) lab.textContent=t.cats[cat]||cat;
+    b.onclick=()=>{ if(activeCat===cat) closeTray(); else openTray(cat); }; });
 }
 
-/* ============================ surprise / reset ============================ */
+/* ============================ surprise / reset / strut ============================ */
 function rand(a){return a[Math.floor(Math.random()*a.length)];}
 function surprise(){
-  TABS.forEach(tab=>tab.controls.forEach(ctrl=>{
-    if(ctrl.type==='pick'){ state[ctrl.key]=rand(ctrl.items).id; }
-    else if(ctrl.type==='toggle'){ state[ctrl.key]=Math.random()<0.5; }
-  }));
-  // keep it wearable: ensure a top/bottom
-  render(); burst(); track('surprise');
+  TABS.forEach(tab=>{ if(tab.id==='preset'||tab.id==='base')return;
+    tab.controls.forEach(ctrl=>{ if(ctrl.type==='pick') state[ctrl.key]=rand(ctrl.items).id;
+      else if(ctrl.type==='toggle') state[ctrl.key]=Math.random()<.5; }); });
+  apply(); burst(); track('surprise');
 }
-function reset(){state=Object.assign({},DEFAULT);render();track('reset');}
+function reset(){ state=Object.assign({},DEFAULT); apply(); track('reset'); }
+function confetti(n){ const cols=['#ff4d4d','#ff9f43','#ffd166','#5dffa8','#3ee6ff','#a25bff'],lay=document.getElementById('celebrate');
+  for(let k=0;k<n;k++){ const s=document.createElement('div'); s.className='confetti'; s.style.left=(12+Math.random()*76)+'%';
+    s.style.background=cols[k%cols.length]; s.style.setProperty('--r',(Math.random()*360)+'deg');
+    s.style.setProperty('--x',((Math.random()*2-1)*140).toFixed(0)+'px'); lay.appendChild(s); setTimeout(()=>s.remove(),1100); } }
+function strut(){ burst(); confetti(28); toast(I18N[lang].strut); track('strut'); }
 
 /* ============================ sparkle burst ============================ */
 function burst(){
@@ -764,55 +838,82 @@ function burst(){
 
 /* ============================ i18n ============================ */
 const I18N={
- en:{dir:'ltr',arcade:'Arcade',sub:'Pride makeover salon 🏳️‍🌈',
-  dcCta:'⏱️ Dress Code Challenge',dcCtaSub:'Dress him for the occasion — beat the clock!',
-   tag:"It's Pride Month. Give the Supreme Leader the glow-up he deserves — dress him, paint him, bedazzle him.",
-   meter:'Fabulous meter',surprise:'Surprise me',share:'Share',choose:'Pick a look',
+ en:{dir:'ltr',
+   where:"Where's he headed today?",whereSub:'Pick the occasion — then make him fabulous.',freestyle:'Free Style',
+   surprise:'Surprise',share:'Share',done:'Strut!',strut:'Werk it, your holiness 💅',choose:'Pick a look',
+   cats:{looks:'Looks',head:'Head',top:'Top',bottom:'Bottom',robe:'Robe',face:'Face',bling:'Bling'},
    tiers:['Stern Cleric 😐','Loosening up 💅','Getting cute ✨','Fabulous 💖','Glamorous 🌈','Iconic 👑','SUPREME DIVA 🏆'],
-   tabs:{looks:'Looks',base:'Base',head:'Head',makeup:'Makeup',tops:'Tops',bottoms:'Bottoms',robes:'Robes',tattoos:'Ink',jewelry:'Jewels',extras:'Extras'},
    labels:{}, presets:{desertDiva:'Desert Diva',discoMullah:'Disco Mullah',prideParade:'Pride Parade',festival:'Festival',cabaret:'Cabaret',cowboyCouture:'Cowboy Couture',angel:'Disco Angel'},
-   shareTxt:'💅🌈 I gave the Ayatollah a Pride makeover — meet FABATOLLAH. Build your own, free in the shelter: https://miklatgames.fun/fabatollah/',
-   copied:'✅ Copied'},
- he:{dir:'rtl',arcade:'ארקייד',sub:'סלון מייקאובר לגאווה 🏳️‍🌈',
-  dcCta:'⏱️ אתגר הדרס-קוד',dcCtaSub:'תלבישו אותו לאירוע — נצחו את השעון!',
-   tag:'חודש הגאווה כאן. תנו למנהיג העליון את השדרוג שמגיע לו — תלבישו, תאפרו, תנצנצו.',
-   meter:'מד פאבולוסיות',surprise:'הפתיעו אותי',share:'שיתוף',choose:'בחרו לוק',
+   shareTxt:'💅🌈 I styled the Ayatollah — meet FABATOLLAH. Dress your own, free in the shelter: https://miklatgames.fun/fabatollah/',
+   copied:'✅ Copied',dcLink:'⏱️ Or race the clock — Dress Code ›'},
+ he:{dir:'rtl',
+   where:'לאן הוא יוצא היום?',whereSub:'בחרו את האירוע — ואז תהפכו אותו לפאבולוס.',freestyle:'בלי אירוע',
+   surprise:'הפתעה',share:'שיתוף',done:'לצעוד!',strut:'תקרעי, כבוד הרב 💅',choose:'בחרו לוק',
+   cats:{looks:'לוקים',head:'ראש',top:'עליון',bottom:'תחתון',robe:'גלימה',face:'פנים',bling:'בלינג'},
    tiers:['איש דת קודר 😐','מתחיל להשתחרר 💅','נהיה חמוד ✨','פאבולוס 💖','זוהר 🌈','אייקוני 👑','דיווה עליונה 🏆'],
-   tabs:{looks:'לוקים',base:'בסיס',head:'ראש',makeup:'איפור',tops:'עליוניות',bottoms:'תחתוניות',robes:'גלימות',tattoos:'קעקוע',jewelry:'תכשיטים',extras:'תוספות'},
    labels:{}, presets:{desertDiva:'דיווה במדבר',discoMullah:'מולה דיסקו',prideParade:'מצעד הגאווה',festival:'פסטיבל',cabaret:'קברט',cowboyCouture:'קאובוי קוטור',angel:'מלאך דיסקו'},
-   shareTxt:'💅🌈 עשיתי לאיתאללה מייקאובר לגאווה — הכירו את פבאטולה. בנו משלכם, חינם בממ״ד: https://miklatgames.fun/fabatollah/',
-   copied:'✅ הועתק'}
+   shareTxt:'💅🌈 עשיתי לאיתאללה סטיילינג — הכירו את פבאטולה. בנו משלכם, חינם בממ״ד: https://miklatgames.fun/fabatollah/',
+   copied:'✅ הועתק',dcLink:'⏱️ או נצחו את השעון — דרס קוד ›'}
 };
 let lang='en';
 try{ const q=new URLSearchParams(location.search).get('lang'); const s=localStorage.getItem('miklat.lang');
   lang=(q==='he'||q==='en')?q:(s==='he'||s==='en')?s:((navigator.language||'en').startsWith('he')?'he':'en'); }catch(e){}
+function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200);}
+function track(name){try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:'evt-fab-'+name,event:true});}catch(e){}}
 function applyLang(){
   const t=I18N[lang];
   document.documentElement.lang=lang; document.documentElement.dir=t.dir;
   document.querySelectorAll('[data-i18n]').forEach(el=>{const v=t[el.getAttribute('data-i18n')]; if(typeof v==='string')el.textContent=v;});
   document.getElementById('langCtl').textContent=lang==='en'?'עברית':'EN';
-  buildTabs(); buildPanel(); updateMeter();
+  setupBubbles(); buildScenes(); if(activeCat){ buildTray(activeCat); syncChips(); }
+  updateBubbles(); updateMeter(); setOcc(curScene);
   try{localStorage.setItem('miklat.lang',lang);}catch(e){}
 }
 document.getElementById('langCtl').onclick=()=>{lang=lang==='en'?'he':'en';applyLang();track('lang-'+lang);};
 
-/* ============================ share + analytics ============================ */
-function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');
-  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200);}
-function track(name){try{if(window.goatcounter&&window.goatcounter.count)window.goatcounter.count({path:'evt-fab-'+name,event:true});}catch(e){}}
+/* ============================ scenario screen ============================ */
+const SCENES_S=[
+ {id:'pride',e:'🏳️‍🌈',en:'Pride Parade',he:'מצעד הגאווה',tint:'rgba(255,93,177,.30)'},
+ {id:'drag',e:'🥞',en:'Drag Brunch',he:'בראנץ׳ דראג',tint:'rgba(162,91,255,.30)'},
+ {id:'disco',e:'🪩',en:'Disco Night',he:'ערב דיסקו',tint:'rgba(123,92,255,.30)'},
+ {id:'met',e:'👑',en:'Met Gala',he:'מט גאלה',tint:'rgba(255,209,102,.28)'},
+ {id:'beach',e:'🏖️',en:'Beach Party',he:'מסיבת חוף',tint:'rgba(62,230,255,.28)'},
+ {id:'rodeo',e:'🤠',en:'TLV Rodeo',he:'רודיאו ת״א',tint:'rgba(255,159,67,.28)'},
+ {id:'un',e:'🏛️',en:'Address the UN',he:'נאום באו״ם',tint:'rgba(91,140,255,.24)'},
+ {id:'wedding',e:'💒',en:'Gay Wedding',he:'חתונה גאה',tint:'rgba(255,255,255,.22)'},
+ {id:'rave',e:'✨',en:'Glitter Rave',he:'רייב נצנצים',tint:'rgba(45,214,195,.28)'}
+];
+let curScene=null;
+function buildScenes(){
+  const t=I18N[lang], g=document.getElementById('scGrid'); g.innerHTML='';
+  SCENES_S.forEach(s=>{ const c=document.createElement('button'); c.className='scCard';
+    c.innerHTML=`<span class="se">${s.e}</span><span class="sn">${s[lang]}</span>`;
+    c.onclick=()=>chooseScene(s); g.appendChild(c); });
+  const free=document.createElement('button'); free.className='scCard free';
+  free.innerHTML=`<span class="se">🎨</span><span class="sn">${t.freestyle}</span>`;
+  free.onclick=()=>chooseScene(null); g.appendChild(free);
+}
+function setOcc(s){
+  document.getElementById('occEmoji').textContent=s?s.e:'🎨';
+  document.getElementById('occName').textContent=s?s[lang]:I18N[lang].freestyle;
+  document.getElementById('glow').style.setProperty('--glow', s?s.tint:'rgba(255,93,177,.22)');
+}
+function chooseScene(s){ curScene=s; setOcc(s); document.getElementById('scenes').classList.add('hidden'); track('scene-'+(s?s.id:'free')); }
+document.getElementById('occChip').onclick=()=>document.getElementById('scenes').classList.remove('hidden');
+
+/* ============================ handlers + boot ============================ */
+document.getElementById('trayClose').onclick=closeTray;
+document.getElementById('trayBackdrop').onclick=closeTray;
+document.getElementById('surprise').onclick=surprise;
+document.getElementById('reset').onclick=reset;
+document.getElementById('done').onclick=strut;
 document.getElementById('share').onclick=async()=>{
   const txt=I18N[lang].shareTxt;
   try{ if(navigator.share){await navigator.share({text:txt});track('share');}
     else{await navigator.clipboard.writeText(txt);toast(I18N[lang].copied);track('share-copy');} }catch(e){}
 };
-document.getElementById('surprise').onclick=surprise;
-document.getElementById('reset').onclick=reset;
-
-/* ============================ boot ============================ */
-applyLang();
-render();
-showLookFile('look-before.png');   // first impression: the AI "before" render (falls back to SVG if absent)
-track('open');
+applyLang(); render(); track('open');
 </script>
 <script data-goatcounter="https://miklat-games.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
