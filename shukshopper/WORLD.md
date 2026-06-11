@@ -1,0 +1,75 @@
+# 🧺 SHUK SHOPPER — World Bible
+
+The run is a pilgrimage through Israel's three iconic markets:
+**Shuk HaCarmel** (Tel Aviv) → **Shuk Levinsky** (Tel Aviv) → **Mahane Yehuda**
+(Jerusalem). Every completed basket, Ima sends you to the next stand; finish a
+shuk's districts and you hop markets ("🚌 Next stop…"). Districts own their
+list items, obstacles, awning colors, and chasing vendor.
+
+## ✅ Implemented districts (v1, in `index.html` → `ZONES`)
+
+### Shuk HaCarmel — loud, crowded, everything at once
+| District | List items | Signature hazards |
+|---|---|---|
+| Produce Row | 🍅🥒🍆🥬🥕🍋🍇🍉 | hanging bananas, watermelon crates, savta on a stool |
+| Street Food Corner | 🧆🥙🍕🍔🍟🥤 | parked delivery scooters, kids underfoot |
+| Fish Market | 🐟🦐🦑🐙🍋 | ice blocks, hanging fish, shuk cats |
+| Juice Stands | 🍊🥭🍓🍌🥥🍹 | fruit crates, balloons |
+| Tchotchke Alley | 👕🧢🩴🕶️🧦 | hanging t-shirts, suitcases, loitering tourists |
+
+### Shuk Levinsky — the connoisseur's market
+| District | List items | Signature hazards |
+|---|---|---|
+| Spice Alley | 🌶️🧄🧅🍯🌿🫒 | hanging herb bundles, spice baskets, cats |
+| Nuts & Dried Fruit | 🥜🌰🫘🍇🥥🍯 | hanging scales, sample baskets |
+| Bureka & Deli | 🥟🫓🥖🫒🧀🥚 | delivery scooters, deli scales |
+| Gazoz & Coffee | ☕🧋🥤🍋🍰 | café chairs spilling into the lane, black cats |
+
+### Mahane Yehuda — the climb to Shabbat… and after dark
+| District | List items | Signature hazards |
+|---|---|---|
+| Bakery & Rugelach | 🥐🍞🥖🥨🍩🫓 | hanging pretzels/challah, bread baskets |
+| Cheese & Dairy | 🧀🥛🧈🥚🍦 | ice blocks, hanging scales |
+| Halva Kingdom | 🍬🍫🍯🥜🍰🍪 | sample-grabbing kids, savtas |
+| The Night Shuk | 🍺🍷🍹🍢🥃 | disco ball + lanterns overhead, bar stools, dancers blocking lanes |
+
+World rules baked into v1:
+- **Ima's list is always local** — it draws only from the current district, so
+  "get cheese" happens at the cheese guy.
+- **Vendor changes per district** — the farmer chases you in Produce Row, the
+  bartender in the Night Shuk.
+- **Awning colors are the district's flag** — the lane visibly changes as you
+  travel (fish-market cyan, spice amber, night-shuk purple/black).
+- **Fallback travel** — if a list stalls for 12,000 dist, you advance anyway;
+  nobody gets stuck in one district.
+- HUD shows `District · Shuk` center-top; analytics event fires per shuk reached.
+
+## 🗺️ Roadmap (not yet built — PM backlog, in rough priority)
+
+1. **Friday clock / Shabbat siren finale.** The run is the last 30 minutes
+   before the shuk closes. At "16:00" the siren sounds — shutters slam lane by
+   lane, an end-of-world sprint. Survive it = "Shabbat Shalom" bonus screen.
+   This gives the endless runner a *narrative ceiling* and a shareable moment.
+2. **Shuk characters.** The Savta boss (walks slow, blocks ALL lanes, must
+   jump the moment she bends for her bag); the shuk cat companion (follow-up
+   power-up: trips the vendor once); the "Yalla yalla!" porter with a cart you
+   can draft behind.
+3. **Phone calls from Ima** mid-run ("also pick up cilantro!") — adds one item
+   to the current list, double basket bonus if you get it.
+4. **Per-shuk leaderboards** — "King of the Carmel", "Levinsky Legend",
+   "Yehuda Royalty" — best baskets reached *within* each shuk; feeds the share
+   loop ("I'm King of the Carmel, beat me").
+5. **Seasonal dressing** (config-only, no new mechanics): Rosh Hashana honey
+   rush, Hanukkah sufganiyot in Bakery Lane, Purim costumes on the crowd,
+   pre-Pesach matzah madness.
+6. **Shekel economy** — spend pocketed ₪ on cosmetic baskets/outfits
+   (local-storage only, no server): beach kid (Carmel), chef (Levinsky),
+   hipster (night shuk).
+7. **More shuks as expansion worlds**: Shuk HaTikva, Sarona (the posh one —
+   security guard instead of vendor), Akko's old-city market, Nachalat
+   Binyamin craft fair (Tuesdays/Fridays only — real-time gated content).
+
+## 🎨 Art direction hooks
+`press/prompts.json` should evolve with the world: per-shuk key art (Carmel =
+beach light + chaos, Levinsky = spice-jar amber, Mahane Yehuda = stone arches +
+night neon) once portal submissions need more than one cover.

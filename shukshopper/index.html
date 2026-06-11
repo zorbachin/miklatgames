@@ -120,6 +120,8 @@ const I18N={
   beatBanner:b=>`⚔️ Your friend filled ${b} basket${b===1?'':'s'} — beat that!`,
   beatWin:'🎉 You beat the challenge!',
   basketDone:'🧺 Basket full! Ima is proud',listNew:'📜 New list from Ima!',
+  zoneNew:n=>`📜 Next stand: ${n} — new list from Ima!`,
+  shukEnter:n=>`🚌 Next stop: ${n}!`,
   stumble:'😱 The vendor is RIGHT BEHIND YOU',
   magnet:'🧲 Magnet! Everything sticks',cart:'🛒 CART DASH! Unstoppable',
   shareTxt:(b,s)=>`🧺 SHUK SHOPPER — I filled ${b} basket${b===1?'':'s'} & pocketed ${s}₪ before the vendor caught me. Your turn: https://miklatgames.fun/shukshopper/?beat=${b}`},
@@ -134,6 +136,8 @@ const I18N={
   beatBanner:b=>`⚔️ חבר מילא ${b} סלסלות — תנצחו!`,
   beatWin:'🎉 ניצחתם את האתגר!',
   basketDone:'🧺 סלסלה מלאה! אמא גאה',listNew:'📜 רשימה חדשה מאמא!',
+  zoneNew:n=>`📜 הדוכן הבא: ${n} — רשימה חדשה מאמא!`,
+  shukEnter:n=>`🚌 התחנה הבאה: ${n}!`,
   stumble:'😱 המוכר ממש מאחוריך',
   magnet:'🧲 מגנט! הכל נדבק',cart:'🛒 עגלת טורבו! בלתי ניתן לעצירה',
   shareTxt:(b,s)=>`🧺 מרוץ השוק — מילאתי ${b} סלסלות עם ${s}₪ בכיס לפני שהמוכר תפס אותי. תורכם: https://miklatgames.fun/shukshopper/?beat=${b}`}
@@ -179,30 +183,82 @@ const roadY=z=>HORIZON()+(PLAYY()-HORIZON())*persp(z);
 const roadHalf=z=>W*(0.085+0.40*persp(z));
 const laneX=(lane,z)=>W/2+(lane-1)*roadHalf(z)*0.62;
 
+/* ================= world: the real shuks =================
+   The run goes Shuk HaCarmel (TLV) → Shuk Levinsky (TLV) → Mahane Yehuda (JLM),
+   district by district. Each basket completed = Ima sends you to the next stand;
+   finish a shuk's districts and you hop to the next market.
+   A district owns its list items, obstacles, awnings and vendor.
+   lows = jump over · highs = slide under (hanging) · blocks = switch lanes */
+const SHUKS={
+  carmel:{en:'Shuk HaCarmel',he:'שוק הכרמל'},
+  levinsky:{en:'Shuk Levinsky',he:'שוק לוינסקי'},
+  yehuda:{en:'Mahane Yehuda',he:'מחנה יהודה'}
+};
+const ZONES=[
+ /* —— SHUK HACARMEL: loud, crowded, everything at once —— */
+ {shuk:SHUKS.carmel,en:'Produce Row',he:'שוק הירקות',v:'🧑‍🌾',aw:['rgba(214,69,69,.85)','rgba(240,240,230,.85)'],
+  items:['🍅','🥒','🍆','🥬','🥕','🍋','🍇','🍉'],lows:['📦','🍉','👵'],highs:['🍌','🏮'],blocks:['🛒','🧔']},
+ {shuk:SHUKS.carmel,en:'Street Food Corner',he:'פלאפל ופיצה',v:'👨‍🍳',aw:['rgba(93,200,120,.85)','rgba(240,240,230,.85)'],
+  items:['🧆','🥙','🍕','🍔','🍟','🥤'],lows:['📦','🛵','🧒'],highs:['🥙','🎈'],blocks:['🛒','🧔']},
+ {shuk:SHUKS.carmel,en:'Fish Market',he:'שוק הדגים',v:'🧑‍🍳',aw:['rgba(62,230,255,.8)','rgba(255,255,255,.85)'],
+  items:['🐟','🦐','🦑','🐙','🍋'],lows:['🧊','📦','🐈'],highs:['🐟','🏮'],blocks:['🛒','🧔']},
+ {shuk:SHUKS.carmel,en:'Juice Stands',he:'דוכני המיץ',v:'👩‍🍳',aw:['rgba(255,159,67,.85)','rgba(255,255,255,.85)'],
+  items:['🍊','🥭','🍓','🍌','🥥','🍹'],lows:['📦','🍉','👵'],highs:['🍌','🎈'],blocks:['🛒','🧒']},
+ {shuk:SHUKS.carmel,en:'Tchotchke Alley',he:'סמטת החולצות',v:'🧔',aw:['rgba(255,93,115,.8)','rgba(240,240,230,.85)'],
+  items:['👕','🧢','🩴','🕶️','🧦'],lows:['📦','🧳','👵'],highs:['👕','🏮'],blocks:['🛒','🧍']},
+ /* —— SHUK LEVINSKY: the connoisseur's market —— */
+ {shuk:SHUKS.levinsky,en:'Spice Alley',he:'סמטת התבלינים',v:'👴',aw:['rgba(233,162,59,.85)','rgba(240,240,230,.85)'],
+  items:['🌶️','🧄','🧅','🍯','🌿','🫒'],lows:['📦','🧺','👵'],highs:['🌿','🏮'],blocks:['🛒','🐈']},
+ {shuk:SHUKS.levinsky,en:'Nuts & Dried Fruit',he:'פיצוחים ופירות יבשים',v:'🧓',aw:['rgba(154,122,78,.9)','rgba(240,240,230,.85)'],
+  items:['🥜','🌰','🫘','🍇','🥥','🍯'],lows:['📦','🧺','🐈'],highs:['⚖️','🏮'],blocks:['🛒','🧔']},
+ {shuk:SHUKS.levinsky,en:'Bureka & Deli',he:'בורקס ומעדנייה',v:'👨‍🍳',aw:['rgba(214,69,69,.85)','rgba(255,255,255,.85)'],
+  items:['🥟','🫓','🥖','🫒','🧀','🥚'],lows:['📦','🛵','👵'],highs:['⚖️','🏮'],blocks:['🛒','🧔']},
+ {shuk:SHUKS.levinsky,en:'Gazoz & Coffee',he:'גזוז וקפה',v:'👩‍🍳',aw:['rgba(126,200,255,.85)','rgba(255,255,255,.85)'],
+  items:['☕','🧋','🥤','🍋','🍰'],lows:['🪑','📦','🐈‍⬛'],highs:['🎈','🏮'],blocks:['🛒','🧍']},
+ /* —— MAHANE YEHUDA: the climb to Shabbat — and the night shuk —— */
+ {shuk:SHUKS.yehuda,en:'Bakery & Rugelach',he:'מאפים ורוגלך',v:'🧑‍🍳',aw:['rgba(154,122,78,.9)','rgba(240,240,230,.85)'],
+  items:['🥐','🍞','🥖','🥨','🍩','🫓'],lows:['📦','🧺','👵'],highs:['🥨','🏮'],blocks:['🛒','🧔']},
+ {shuk:SHUKS.yehuda,en:'Cheese & Dairy',he:'גבינות וחלב',v:'👩‍🌾',aw:['rgba(126,200,255,.85)','rgba(255,255,255,.85)'],
+  items:['🧀','🥛','🧈','🥚','🍦'],lows:['🧊','📦','👵'],highs:['⚖️','🏮'],blocks:['🛒','🐈‍⬛']},
+ {shuk:SHUKS.yehuda,en:'Halva Kingdom',he:'ממלכת החלווה',v:'🧔',aw:['rgba(233,162,59,.85)','rgba(255,255,255,.85)'],
+  items:['🍬','🍫','🍯','🥜','🍰','🍪'],lows:['📦','🧺','🧒'],highs:['⚖️','🏮'],blocks:['🛒','👵']},
+ {shuk:SHUKS.yehuda,en:'The Night Shuk',he:'שוק הלילה',v:'🧑‍🎤',aw:['rgba(94,60,143,.85)','rgba(26,15,8,.85)'],
+  items:['🍺','🍷','🍹','🍢','🥃'],lows:['🪑','📦','🐈‍⬛'],highs:['🪩','🏮'],blocks:['🕺','🛒']}
+];
+const ZONE_FALLBACK_DIST=12000;     // advance even if the list never fills
+const curZone=()=>ZONES[G.zone%ZONES.length];
+const zoneName=z=>lang==='he'?z.he:z.en;
+const shukName=z=>lang==='he'?z.shuk.he:z.shuk.en;
+
 /* ================= game state ================= */
-const ITEMS=['🍅','🥒','🫓','🧀','🫒','🍆','🍋','🌶️'];
-const LOWS=['📦','🍉','👵'];       // jump over (👵 sits low on a stool)
-const HIGHS=['🥙','🏮'];           // slide under (hanging)
-const BLOCKS=['🛒','🧔'];          // full-block: switch lanes
 let G=null, raf=0, last=0, running=false;
 const best=(()=>{try{return JSON.parse(localStorage.getItem('ss_best')||'{"baskets":0,"shekels":0}');}catch(e){return{baskets:0,shekels:0};}})();
 let beatTarget=0;
 try{ beatTarget=Math.max(0,parseInt(new URLSearchParams(location.search).get('beat')||'0',10)||0); }catch(e){}
 
 function newList(){
-  const pool=[...ITEMS].sort(()=>Math.random()-0.5);
+  const pool=[...curZone().items].sort(()=>Math.random()-0.5);
   return pool.slice(0,4).map(it=>({it,got:false}));
+}
+function advanceZone(){
+  const prev=curZone().shuk;
+  G.zone++; G.zoneDist=0;
+  const Z=curZone();
+  if(Z.shuk!==prev){toast(T().shukEnter(shukName(Z)));track('shuk-'+(G.zone%ZONES.length));}
+  else toast(T().zoneNew(zoneName(Z)));
 }
 function reset(){
   G={
     t:0, dist:0, speed:0.34, lane:1, laneF:1,
     jy:0, vy:0, sliding:0,
-    shekels:0, baskets:0, list:newList(),
+    zone:0, zoneDist:0,
+    shekels:0, baskets:0, list:[],
     ents:[], spawnAt:0, safeLane:1,
     vendor:0,            // >0 = vendor on your heels (seconds left of danger)
     inv:0, magnet:0, cart:0,
     shake:0, flash:0, beaten:false
   };
+  G.list=newList();
 }
 
 /* ================= input: 4 swipes + keys ================= */
@@ -241,7 +297,8 @@ function spawnRow(){
     if(Math.random()<p){
       const r=Math.random();
       const kind=r<0.4?'low':r<0.7?'high':'block';
-      const set=kind==='low'?LOWS:kind==='high'?HIGHS:BLOCKS;
+      const Z=curZone();
+      const set=kind==='low'?Z.lows:kind==='high'?Z.highs:Z.blocks;
       G.ents.push({z:0.02,lane:l,kind,it:set[(Math.random()*set.length)|0]});
     }
   }
@@ -275,7 +332,7 @@ function collect(e){
         G.baskets++; G.shekels+=10; G.speed+=0.025;
         toast(T().basketDone); track('basket');
         if(beatTarget&&!G.beaten&&G.baskets>beatTarget){G.beaten=true;toast(T().beatWin);}
-        setTimeout(()=>{if(running){G.list=newList();toast(T().listNew);}},900);
+        setTimeout(()=>{if(running){advanceZone();G.list=newList();}},900);
       }
     } else G.shekels+=2;
   }
@@ -289,6 +346,8 @@ function update(dt){
   G.speed=Math.min(1.05,G.speed+dt*0.0048);
   const zv=G.speed*dt;
   G.dist+=zv*1000;
+  G.zoneDist+=zv*1000;
+  if(G.zoneDist>ZONE_FALLBACK_DIST) advanceZone();
   G.laneF+=(G.lane-G.laneF)*Math.min(1,dt*14);
   if(G.jy>0||G.vy>0){G.vy-=dt*7.2;G.jy=Math.max(0,G.jy+G.vy*dt);if(G.jy===0)G.vy=0;}
   if(G.sliding>0)G.sliding=Math.max(0,G.sliding-dt);
@@ -342,12 +401,13 @@ function draw(){
       ctx.beginPath();ctx.moveTo(x1,roadY(z));ctx.lineTo(x2,roadY(Math.min(1,z+0.05)));ctx.stroke();
     }
   }
-  // stall awnings flanking the road
+  // stall awnings flanking the road — colors belong to the current district
+  const Z=G?curZone():ZONES[0];
   for(let z=0.06;z<1;z+=0.16){
     const s=persp(z), y=roadY(z), aw=W*0.16*s;
     for(const side of [-1,1]){
       const x=W/2+side*(roadHalf(z)+aw*0.55);
-      ctx.fillStyle=(Math.round(z/0.16)%2===0)?'rgba(214,69,69,.85)':'rgba(240,240,230,.85)';
+      ctx.fillStyle=Z.aw[Math.round(z/0.16)%2];
       ctx.beginPath();ctx.moveTo(x-aw*0.5,y);ctx.lineTo(x+aw*0.5,y);ctx.lineTo(x,y-aw*0.5);ctx.closePath();ctx.fill();
     }
   }
@@ -379,7 +439,7 @@ function draw(){
   if(G.vendor>0){
     const vf=pf*(0.8+0.25*(G.vendor/6));
     ctx.font=`${vf}px sans-serif`;ctx.globalAlpha=0.95;
-    ctx.fillText('👨‍🍳',px-pf*0.7,PLAYY()+pf*0.34);
+    ctx.fillText(Z.v,px-pf*0.7,PLAYY()+pf*0.34);
     ctx.globalAlpha=1;
   }
 
@@ -390,6 +450,12 @@ function draw(){
   ctx.fillStyle='#fdf3e3';
   ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=6;
   ctx.fillText(`🧺 ${G.baskets}   ₪ ${G.shekels}`,12,hudY+26);
+  // where you are: district · shuk
+  ctx.textAlign='center';
+  ctx.font=`700 ${Math.max(11,W*0.032)}px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.fillStyle='rgba(253,243,227,.85)';
+  ctx.fillText(`${zoneName(Z)} · ${shukName(Z)}`,W/2,hudY+50);
+  ctx.fillStyle='#fdf3e3';
   // Ima's list
   ctx.textAlign='right';
   let lx=W-12;
