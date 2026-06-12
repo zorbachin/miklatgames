@@ -1,0 +1,66 @@
+{
+  "game": "Shuk Shopper — gameplay art pack v2 (design-sprint revision; see DESIGN-SPRINT.md §1.2 for the 5 look-rules)",
+  "style": "THE SHUK SHOPPER LOOK — obey all 5 rules in every image: (1) GOLDEN HOUR ALWAYS — lit like 15:45 on a Friday, whites are cream #fdf3e3 never pure white, shadows are deep warm brown #1a0f08 never gray or black. (2) CHUNKY AND GROUNDED — thick dark-brown outlines, slightly oversized forms, bold readable silhouettes. (3) ONE HERO HUE PER SHUK — Carmel: coral #ff5d73 + Mediterranean cyan #3ee6ff; Levinsky: paprika amber #e9a23b; Yehuda: lamplight gold #ffd166 on dusk purple #5e3c8f. (4) THE LANE IS SACRED — backdrops keep the bottom third plain and quiet. (5) HAND-PAINTED NEVER CORPORATE — visible brushwork, imperfect edges, market-sign energy, no glossy vector gradients. Vibrant 3D-cartoon Subway-Surfers energy on top of these rules. CHARACTER BIBLE (repeat exactly, never drift) — THE KID: cheeky 10-year-old, olive skin, big curly dark-brown hair, thick expressive eyebrows, gap-tooth grin, bright orange t-shirt, blue shorts, brown sandals, carrying a woven wicker basket with a red gingham cloth, vegetables poking out. THE VENDORS: Carmel = burly mustachioed vendor, green apron over white tank top, wooden spoon; Levinsky = wiry elderly spice merchant, white beard, flat cap, amber-stained apron, brass spice scoop; Yehuda = young bearded vendor, black t-shirt, dark bar apron, small towel on shoulder, baguette. PIPELINE: character sprites on FLAT solid magenta #ff00ff edge to edge (game chroma-keys + bbox-crops at load) — character must FILL 85-95% of the frame height, feet touching the bottom edge, nothing clipped, NO ground shadow, NO gradient in the magenta, NO text. Backdrops are 16:9, no transparency needed, bottom third plain flat warm tan #c9a26b with NO objects (the road is drawn over it). Generate with bin/imagepack shukshopper/assets",
+  "images": [
+    {
+      "file": "bg-carmel.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Hand-painted game backdrop, vibrant 3D-cartoon style with visible brushwork, golden-hour warmth: Shuk HaCarmel, Tel Aviv, at high Mediterranean noon — LOUD and overflowing. Dense market lane: coral-red #ff5d73 and cream #fdf3e3 striped awnings, hanging t-shirts and tote bags, towering orange and pomegranate pyramids, stacked plastic crates, juice stands, a beach inflatable wedged between stalls. Hard bleached sunlight, short deep-brown #1a0f08 shadows, brilliant cyan #3ee6ff sea-bright sky with white gulls, distant Tel Aviv towers shimmering. Hero hues: coral against cyan. Composition: ALL detail in the upper two-thirds, dense at the horizon line; the bottom third fades to completely plain flat warm tan #c9a26b with NO objects, NO shadows, NO texture (the game's road renders over it). Whites are cream, never pure white. No people, no animals, no text."
+    },
+    {
+      "file": "bg-levinsky.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Hand-painted game backdrop, vibrant 3D-cartoon style with visible brushwork, golden-hour warmth: Shuk Levinsky, Tel Aviv — the connoisseur's market, intimate and amber. Narrow street of old shopfronts: rows of glass spice jars glowing like stained glass, burlap sacks of paprika and turmeric with hand-painted price signs, copper scales hanging from awning beams, bundles of dried herbs and sausages overhead, crates of nuts and dried fruit. Low warm side-light slicing between awnings, dusty god-rays, deep brown #1a0f08 shade. Almost monochrome spice-tone palette pushed to paprika amber #e9a23b and gold #ffd166, narrow strip of warm sky between curved Bauhaus rooflines. Composition: ALL detail in the upper two-thirds; bottom third fades to completely plain flat warm tan #c9a26b with NO objects, NO shadows, NO texture. Whites are cream #fdf3e3, never pure white. No people, no animals, no text."
+    },
+    {
+      "file": "bg-yehuda.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Hand-painted game backdrop, vibrant 3D-cartoon style with visible brushwork: Mahane Yehuda market, Jerusalem, at dusk before Shabbat — sacred golden hour. Jerusalem-stone arches glowing lamplight gold #ffd166, the iron market roof overhead, strings of warm bulbs just switched on, hanging challah and pretzel rings, halva wheels stacked in pyramids, rugelach trays. The dusk sky deep purple #5e3c8f behind the stone, every light source gold against it — hero contrast: gold lamplight on dusk purple. Long soft deep-brown #1a0f08 shadows, hand-painted texture in the stone. Composition: ALL detail in the upper two-thirds; bottom third fades to completely plain flat warm tan #c9a26b with NO objects, NO shadows, NO texture. Whites are cream #fdf3e3, never pure white. No people, no animals, no text."
+    },
+    {
+      "file": "bg-yehuda-night.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Hand-painted game backdrop, vibrant 3D-cartoon style with visible brushwork: Mahane Yehuda market, Jerusalem, AFTER DARK — the Night Shuk, electric and alive. The same stone arches and iron roof now near-black under a deep purple #5e3c8f night sky; the market reborn as a party street: glowing neon bar signs in coral #ff5d73 and cyan #3ee6ff, a disco ball hanging from the iron roof scattering gold #ffd166 light flecks across the stone, strings of colored lanterns, lit bar shutters, bottles glowing on shelves. Every light source is warm gold or neon against purple-black — maximum contrast, hero hue: gold-and-neon on darkness. Shadows deep warm brown-black #1a0f08. Composition: ALL detail in the upper two-thirds; bottom third fades to completely plain flat warm tan #c9a26b (the street under the lights) with NO objects, NO shadows, NO texture. No people, no animals, no text."
+    },
+    {
+      "file": "player-run.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character sprite, full body, vibrant 3D-cartoon style, thick dark-brown #1a0f08 outlines, golden-hour warm lighting: a cheeky 10-year-old kid, olive skin, big curly dark-brown hair, thick expressive eyebrows, gap-tooth grin, bright orange t-shirt, blue shorts, brown sandals — in a dynamic mid-run stride toward the viewer at a slight three-quarter angle, arms pumping, woven wicker basket with a red gingham cloth and vegetables poking out hooked on his left arm, determined joyful expression. The character FILLS 85-95% of the frame height, feet touching the bottom edge, nothing clipped. The ENTIRE background is one flat solid magenta #ff00ff edge to edge — absolutely no ground shadow, no gradient, no glow, no text."
+    },
+    {
+      "file": "player-jump.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character sprite, full body, vibrant 3D-cartoon style, thick dark-brown #1a0f08 outlines, golden-hour warm lighting: the SAME cheeky 10-year-old kid — olive skin, big curly dark-brown hair, thick expressive eyebrows, gap-tooth grin, bright orange t-shirt, blue shorts, brown sandals — caught mid-LEAP toward the viewer: knees tucked up high, body stretched tall, one arm flung up for balance, the woven wicker basket with red gingham cloth held tight to his chest with the other arm, mouth open in a gleeful whoop, hair flying upward. The character FILLS 85-95% of the frame height, toes near the bottom edge, nothing clipped. The ENTIRE background is one flat solid magenta #ff00ff edge to edge — absolutely no ground shadow, no gradient, no motion blur into the background, no text."
+    },
+    {
+      "file": "player-slide.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character sprite, full body, vibrant 3D-cartoon style, thick dark-brown #1a0f08 outlines, golden-hour warm lighting: the SAME cheeky 10-year-old kid — olive skin, big curly dark-brown hair, thick expressive eyebrows, bright orange t-shirt, blue shorts, brown sandals — in a low knee power-slide toward the viewer, leaning far back, legs extended forward so the pose is WIDER than it is tall and SPANS the full frame width, hugging the woven wicker basket with red gingham cloth tight to his chest, gritted excited gap-tooth grin, hair swept back. Pose sits low in the frame, trailing foot touching the bottom edge, nothing clipped. The ENTIRE background is one flat solid magenta #ff00ff edge to edge — absolutely no ground shadow, no dust cloud, no gradient, no text."
+    },
+    {
+      "file": "vendor-carmel.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character sprite, full body, vibrant 3D-cartoon style, thick dark-brown #1a0f08 outlines, hard noon lighting: the CARMEL VENDOR — a burly mustachioed Tel Aviv market vendor, thick black mustache, green apron over a white tank top (the white rendered warm cream #fdf3e3), sprinting furiously toward the viewer waving a wooden spoon overhead, other fist clenched, comically enraged, sweat drops flying, apron flapping. Big, chunky, instantly readable silhouette. The character FILLS 85-95% of the frame height, feet touching the bottom edge, nothing clipped. The ENTIRE background is one flat solid magenta #ff00ff edge to edge — absolutely no ground shadow, no gradient, no text."
+    },
+    {
+      "file": "vendor-levinsky.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character sprite, full body, vibrant 3D-cartoon style, thick dark-brown #1a0f08 outlines, warm amber lighting: the LEVINSKY VENDOR — a wiry elderly spice merchant, long white beard, flat cap, amber-stained apron the color of paprika #e9a23b, running toward the viewer with surprising furious speed, brandishing a brass spice scoop, a cloud of orange paprika dust puffing around his feet and shoulders (the dust stays attached to him, not touching the frame edges), comically outraged expression. Big readable silhouette. The character FILLS 85-95% of the frame height, feet touching the bottom edge, nothing clipped. The ENTIRE background is one flat solid magenta #ff00ff edge to edge — absolutely no ground shadow, no gradient, no text."
+    },
+    {
+      "file": "vendor-yehuda.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character sprite, full body, vibrant 3D-cartoon style, thick dark-brown #1a0f08 outlines, dusk gold-and-purple lighting (gold #ffd166 key light, purple #5e3c8f rim light): the YEHUDA VENDOR — a young bearded Jerusalem market vendor, dark trimmed beard, black t-shirt, dark bar apron, small towel over the shoulder, sprinting toward the viewer dramatically wielding a long baguette overhead like a sword, comically theatrical fury, apron strings flying. Big readable silhouette. The character FILLS 85-95% of the frame height, feet touching the bottom edge, nothing clipped. The ENTIRE background is one flat solid magenta #ff00ff edge to edge — absolutely no ground shadow, no gradient, no text."
+    },
+    {
+      "file": "title-wordmark.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Hand-painted game logo wordmark, the words 'SHUK SHOPPER' in big chunky hand-brushed market-sign capitals on two stacked lines — the style of a price sign above a halva stand: thick imperfect brush strokes, letters slightly crooked and bouncing, warm gold #ffd166 letters with a coral #ff5d73 offset drop-shadow and a thick deep-brown #1a0f08 outline, a tiny wicker-basket flourish dotting one letter. Painted, joyful, readable at small sizes, app-store-logo quality. The wordmark FILLS most of the frame, fully inside the edges, nothing clipped. The ENTIRE background is one flat solid magenta #ff00ff edge to edge — no gradient, no glow bleeding into the background, no extra text beyond the two words."
+    }
+  ],
+  "code_hooks_required": [
+    "bg-yehuda-night.png: in draw(), select ART['bg-yehuda-night'] instead of ART['bg-yehuda'] when the current district is The Night Shuk (~5 LOC) — see DESIGN-SPRINT.md with-art cut",
+    "player-jump.png: in the player draw branch, prefer ART['player-jump'] when G.jy>0.05 (~3 LOC)",
+    "title-wordmark.png: menu <img> replacing the .ttl text visually, text kept as fallback/alt (~8 LOC)"
+  ]
+}

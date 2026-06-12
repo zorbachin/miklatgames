@@ -1,0 +1,50 @@
+{
+  "game": "Shuk Shopper — promo art pack v2 (design-sprint revision; see DESIGN-SPRINT.md §1.2 for the 5 look-rules)",
+  "style": "THE SHUK SHOPPER LOOK — obey all 5 rules in every image: (1) GOLDEN HOUR ALWAYS — Friday-afternoon light, whites are cream #fdf3e3 never pure white, shadows deep warm brown #1a0f08 never gray. (2) CHUNKY AND GROUNDED — thick outlines, oversized forms, reads in a thumbnail. (3) ONE HERO HUE PER SHUK — Carmel: coral #ff5d73 + cyan #3ee6ff; Levinsky: paprika amber #e9a23b; Yehuda: gold #ffd166 on dusk purple #5e3c8f. (4) THE LANE IS SACRED — keep compositions bottom-light, energy up top. (5) HAND-PAINTED NEVER CORPORATE — brushwork, market-sign letterforms, no glossy vector sheen. Vibrant 3D-cartoon Subway-Surfers energy, app-store polish. CHARACTER BIBLE (repeat exactly in every image, never drift) — THE KID: cheeky 10-year-old, olive skin, big curly dark-brown hair, thick expressive eyebrows, gap-tooth grin, bright orange t-shirt, blue shorts, brown sandals, woven wicker basket with a red gingham cloth, vegetables poking out. THE VENDORS: Carmel = burly mustachioed vendor, green apron over cream tank top, wooden spoon; Levinsky = wiry elderly spice merchant, white beard, flat cap, paprika-stained apron, brass scoop; Yehuda = young bearded vendor, black t-shirt, dark bar apron, towel on shoulder, baguette held like a sword. Title lettering is always the hand-painted market-sign style: chunky brushed gold #ffd166 capitals, coral #ff5d73 drop shadow, deep-brown #1a0f08 outline. Generate with bin/imagepack shukshopper",
+  "images": [
+    {
+      "file": "keyart-16x9.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Mobile game key art, vibrant 3D-cartoon style like Subway Surfers, hand-painted texture, hard Mediterranean noon light. THE KID — cheeky 10-year-old, olive skin, big curly dark-brown hair, thick expressive eyebrows, gap-tooth grin, bright orange t-shirt, blue shorts, brown sandals — sprinting straight at the camera down a Shuk HaCarmel market lane, woven wicker basket with red gingham cloth on his arm, an orange and a tomato flying out behind him. Close behind: the CARMEL VENDOR — burly, thick black mustache, green apron over cream tank top — mid-chase waving a wooden spoon, toppling a pyramid of oranges. Coral #ff5d73 and cream #fdf3e3 striped awnings, hanging t-shirts, brilliant cyan #3ee6ff sky, deep warm brown #1a0f08 shadows. Bold chunky hand-painted market-sign title 'SHUK SHOPPER' across the top: brushed gold #ffd166 capitals with coral drop shadow and deep-brown outline. High-energy, app-store quality, readable as a thumbnail."
+    },
+    {
+      "file": "og-16x9.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Social-share preview image (Open Graph) for a mobile game, vibrant 3D-cartoon style, hand-painted texture, designed to read PERFECTLY at small WhatsApp-thumbnail size: simple bold composition, generous safe margins on all four edges, no fine detail. Center-left: THE KID — cheeky 10-year-old, olive skin, big curly dark-brown hair, gap-tooth grin, bright orange t-shirt, blue shorts, brown sandals — mid-sprint with the woven wicker basket with red gingham cloth, one orange popping out. Right edge: the grabbing hand and wooden spoon of the mustachioed vendor entering frame. Background: simplified Shuk HaCarmel — coral #ff5d73 striped awnings and cyan #3ee6ff sky, painted loose and uncluttered, golden-hour warmth, cream #fdf3e3 highlights, deep-brown #1a0f08 shadows. Big chunky hand-painted market-sign title 'SHUK SHOPPER' top-center in brushed gold #ffd166 with coral drop shadow, occupying the top quarter, fully inside the safe margins. Maximum thumbnail readability."
+    },
+    {
+      "file": "poster-9x16.png",
+      "aspect_ratio": "9:16",
+      "prompt": "Vertical mobile game poster, vibrant 3D-cartoon style, hand-painted texture — THE NIGHT SHUK scene: low-angle shot inside Mahane Yehuda market after dark, Jerusalem-stone arches near-black under a deep purple #5e3c8f sky, a glittering disco ball hanging from the iron roof scattering gold #ffd166 light flecks, neon bar signs in coral #ff5d73 and cyan #3ee6ff, strings of colored lanterns. THE KID — cheeky 10-year-old, olive skin, big curly dark-brown hair, gap-tooth grin, bright orange t-shirt glowing under the neon, blue shorts, brown sandals — leaping over a bar stool toward the camera, woven wicker basket with red gingham cloth held high. Behind him the YEHUDA VENDOR — young, bearded, black t-shirt, dark bar apron, towel on shoulder — dramatically wielding a baguette like a sword, silhouetted against the lights. Three running lanes visible on the dark stone floor. Bold chunky hand-painted market-sign title 'SHUK SHOPPER' at top in brushed gold with coral drop shadow; hand-painted banner at the bottom reading 'GRAB IMA'S LIST. DODGE THE VENDOR.' High-energy, app-store quality."
+    },
+    {
+      "file": "icon-1x1.png",
+      "aspect_ratio": "1:1",
+      "prompt": "App icon for a mobile game, vibrant 3D-cartoon style, hand-painted texture, glossy-free: a single overflowing woven wicker basket with a red gingham cloth, bursting with oranges, a pomegranate, a baguette and green herbs, leaning forward with chunky painted motion speed-lines as if sprinting, centered on a warm radial golden-yellow #ffd166 background with broad hand-painted market-awning stripes in coral #ff5d73 and cream #fdf3e3 radiating from behind it. Thick deep-brown #1a0f08 outlines, oversized chunky forms, instantly readable at 64 pixels. No text, no characters."
+    },
+    {
+      "file": "itchcover-4x3.png",
+      "aspect_ratio": "4:3",
+      "prompt": "Game cover art for itch.io, vibrant 3D-cartoon style, hand-painted texture, golden-hour light. Close crop: THE KID — cheeky 10-year-old, olive skin, big curly dark-brown hair, thick expressive eyebrows, gap-tooth grin, bright orange t-shirt, blue shorts — mid-sprint through Shuk Levinsky's spice alley, woven wicker basket with red gingham cloth under one arm, a handwritten paper shopping list fluttering away in the wind, rows of glowing glass spice jars and burlap sacks of paprika behind him in deep amber #e9a23b tones. From the left edge, the LEVINSKY VENDOR's wiry hand and brass spice scoop enter frame in a puff of orange paprika dust. Cream #fdf3e3 highlights, deep-brown #1a0f08 shadows. Bold chunky hand-painted market-sign title 'SHUK SHOPPER' across the top third in brushed gold #ffd166 with coral #ff5d73 drop shadow. Readable as a small thumbnail."
+    },
+    {
+      "file": "banner-notext-16x9.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Wide promotional banner for a mobile game, vibrant 3D-cartoon style, hand-painted texture, golden-hour Friday light, NO text anywhere. Side-scrolling chase composition: on the right, THE KID — cheeky 10-year-old, olive skin, big curly dark-brown hair, gap-tooth grin, bright orange t-shirt, blue shorts, brown sandals — sprinting right with the woven wicker basket with red gingham cloth; center air: flying oranges, a pomegranate, and a fluttering handwritten shopping list; on the left, the CARMEL VENDOR — burly, thick black mustache, green apron over cream tank top — in furious pursuit with his wooden spoon. Background: loosely painted shuk stalls with coral #ff5d73 and cream #fdf3e3 striped awnings and warm string lights, golden #ffd166 haze, deep-brown #1a0f08 shadows. Clean uncluttered negative space across the top-center for overlay text. Polished, high-energy."
+    },
+    {
+      "file": "keyart-levinsky-16x9.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Per-shuk key art: SHUK LEVINSKY, vibrant 3D-cartoon style, hand-painted texture — the connoisseur's market in deep amber-hour light. THE KID — cheeky 10-year-old, olive skin, big curly dark-brown hair, gap-tooth grin, bright orange t-shirt, blue shorts, brown sandals — power-sliding under a hanging copper scale, hugging the woven wicker basket with red gingham cloth, a trail of spilled turmeric behind him. Chasing: the LEVINSKY VENDOR — wiry, elderly, white beard, flat cap, paprika-stained apron — brandishing a brass scoop inside a billowing cloud of orange paprika dust. Setting: narrow street, rows of glowing glass spice jars, burlap sacks with hand-painted price signs, dried herb bundles overhead, dusty god-rays slicing through, near-monochrome paprika amber #e9a23b and gold #ffd166 palette with cream #fdf3e3 highlights and deep-brown #1a0f08 shade. Bold chunky hand-painted market-sign title 'SHUK SHOPPER' top corner, smaller than the main key art. Readable as a thumbnail."
+    },
+    {
+      "file": "keyart-yehuda-16x9.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Per-shuk key art: MAHANE YEHUDA AT NIGHT, vibrant 3D-cartoon style, hand-painted texture — the Night Shuk, electric. Wide shot down a dark stone market lane: Jerusalem-stone arches under a deep purple #5e3c8f night sky, disco ball scattering gold #ffd166 flecks, neon bar signs in coral #ff5d73 and cyan #3ee6ff, colored lanterns. THE KID — cheeky 10-year-old, olive skin, big curly dark-brown hair, gap-tooth grin, bright orange t-shirt, blue shorts, brown sandals — sprinting toward the camera between two dancing silhouettes, woven wicker basket with red gingham cloth held tight, pure joy on his face. Far behind, the YEHUDA VENDOR — young, bearded, black t-shirt, dark bar apron — leaping over a bar stool, baguette raised like a sword, backlit by neon. Every light source gold or neon against purple-black; deep warm #1a0f08 shadows. Bold chunky hand-painted market-sign title 'SHUK SHOPPER' top corner in brushed gold with coral drop shadow. High-energy, app-store quality."
+    }
+  ],
+  "post_generation": [
+    "Point index.html og:image at press/og-16x9.png (absolute URL) and update og:image dimensions — panel issue #8",
+    "QA every image against DESIGN-SPRINT.md §4 checklist before commit (character bible consistency, thumbnail readability, title legibility)"
+  ]
+}
