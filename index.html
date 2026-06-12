@@ -157,15 +157,6 @@
 
   <main class="main">
     <div class="cards">
-      <a class="gcard" href="whackamullah/" id="cardWhack" style="--accent:#ffd166" data-game="whackamullah">
-        <div class="coverwrap"><img class="cover" src="whackamullah/cover.png" alt="Whack-a-Mullah" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
-        <div class="body">
-          <div class="ttl"><span class="name">Whack-a-Mullah</span><span class="name-he">וואק-א-מולה</span></div>
-          <div class="hook" data-i18n="whackHook">Bonk the regime, spare the fabulous. Multi-tap, 3 strikes — how far can you go?</div>
-          <div class="meta"><span class="pill" data-i18n="offline">📵 No reception needed</span></div>
-        </div>
-      </a>
-
       <a class="gcard" href="irondome/" id="cardIron" style="--accent:#3ee6ff" data-game="irondome">
         <div class="coverwrap"><img class="cover" src="assets/irondome-cover.webp" alt="Pixel-art Iron Dome intercepting rockets over a glowing city skyline" loading="eager"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
@@ -328,7 +319,6 @@ function track(name){
 }
 document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
 document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
-document.getElementById('cardWhack').addEventListener('click',()=>track('play-whackamullah'));
 
 applyLang(); applyAudio();
 if ('serviceWorker' in navigator)
