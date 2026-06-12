@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -176,7 +176,7 @@
 
 <!-- ===== MENU ===== -->
 <div id="scrMenu" class="screen show">
-  <h1 data-i18n="title">כיפת ברזל<small>IRON DOME</small></h1>
+  <h1 data-i18n="title">IRON DOME<small>כיפת ברזל</small></h1>
   <p class="sub" data-i18n="tagline"></p>
   <button class="btn primary" id="btnPlay"></button>
   <button class="btn" id="btnDaily" style="border-color:rgba(255,209,102,.6);box-shadow:0 0 18px rgba(255,209,102,.3)"></button>
@@ -190,7 +190,7 @@
     <a class="pill" id="btnArcade" href="../" style="text-decoration:none;color:inherit;display:inline-flex;align-items:center;">🏠</a>
     <button class="pill" id="btnHow">❓</button>
     <button class="pill" id="btnCal">🎯</button>
-    <button class="pill" id="btnLang">EN</button>
+    <button class="pill" id="btnLang">עב</button>
     <button class="pill on" id="btnSound">🔊</button>
   </div>
   <div id="challenge" style="display:none;background:var(--panel2);border:1px solid rgba(255,209,102,.5);border-radius:12px;padding:10px 18px;font-size:14px;color:var(--gold);font-weight:700;max-width:90vw"></div>
@@ -303,7 +303,7 @@ const SAVE_KEY = 'irondome.save.v1';
 let _stored = {};
 try { _stored = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}') || {}; } catch (e) {}  // corrupt save must never brick boot
 const save = Object.assign({
-  lang: 'he', sound: true, coins: 0, best: 0, unlocked: 0, diff: 'normal',
+  lang: 'en', sound: true, coins: 0, best: 0, unlocked: 0, diff: 'normal',
   cal: { x: 0, y: 0, done: false },
   up: { blast: 0, speed: 0, launchers: 0, sling: 0 }
 }, _stored);
@@ -312,7 +312,7 @@ const save = Object.assign({
 save.up = Object.assign({ blast: 0, speed: 0, launchers: 0, sling: 0 }, save.up);
 for (const k in save.up) save.up[k] = Math.max(0, Math.min(k === 'launchers' ? 2 : 3, +save.up[k] || 0));
 if (!save.cal || typeof save.cal !== 'object') save.cal = { x: 0, y: 0, done: false };
-if (save.lang !== 'he' && save.lang !== 'en') save.lang = 'he';
+if (save.lang !== 'he' && save.lang !== 'en') save.lang = 'en';
 if (!['easy', 'normal', 'commando'].includes(save.diff)) save.diff = 'normal';
 save.cal.x = +save.cal.x || 0; save.cal.y = +save.cal.y || 0;
 save.coins = +save.coins || 0; save.best = +save.best || 0; save.unlocked = Math.max(0, +save.unlocked || 0);
