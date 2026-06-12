@@ -558,7 +558,7 @@ function track(event){
   }catch(e){}
 }
 /* tip jar — set TIP_URL once (Buy Me a Coffee / Ko-fi) and it goes live */
-const TIP_URL='';
+const TIP_URL='https://ko-fi.com/miklatgames';
 if(TIP_URL){const tj=$('tipJar');tj.href=TIP_URL;
   tj.hidden=false;tj.style.display='block';tj.addEventListener('click',()=>track('evt-md-tip'));}
 const QS=new URLSearchParams(location.search);

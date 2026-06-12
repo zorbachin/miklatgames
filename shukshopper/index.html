@@ -176,7 +176,7 @@ function track(name){
   try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'evt-ss-'+name,event:true}); }catch(e){}
 }
 /* tip jar — set TIP_URL once (Buy Me a Coffee / Ko-fi) and it goes live */
-const TIP_URL='';
+const TIP_URL='https://ko-fi.com/miklatgames';
 if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
   tj.hidden=false;tj.style.display='block';tj.addEventListener('click',()=>track('tip'));}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
