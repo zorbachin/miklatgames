@@ -134,6 +134,11 @@
     transform:translate(-50%,-50%) scale(.2);opacity:.9;pointer-events:none;z-index:6;animation:ringOut .32s ease-out forwards;}
   .ring.kh{border-color:var(--c-gold);border-width:4px;} .ring.ally{border-color:var(--c-pink);}
   @keyframes ringOut{to{transform:translate(-50%,-50%) scale(2.3);opacity:0;}}
+  .badge{position:absolute;top:4px;right:4px;font-size:22px;z-index:5;pointer-events:none;
+    opacity:0;transform:scale(.5);transition:opacity .12s,transform .12s;}
+  .hole.is-bad .badge{opacity:1;transform:scale(1);}
+  .hole.is-fab .badge{opacity:1;transform:scale(1);animation:glitter .55s ease-in-out infinite alternate;}
+  @keyframes glitter{to{transform:scale(1.25) rotate(15deg);}}
   .spark{position:absolute;left:50%;top:40%;font-size:18px;pointer-events:none;z-index:7;
     transform:translate(-50%,-50%);animation:sparkOut .43s ease-out forwards;}
   @keyframes sparkOut{to{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.35) rotate(120deg);opacity:0;}}
@@ -281,19 +286,22 @@ const muteBtn=document.getElementById('mute');
 function applyMute(){ muteBtn.textContent=muted?'🔇':'🔊'; try{localStorage.setItem('wm.mute',muted?'1':'0');}catch(e){} musicUpdate(); }
 muteBtn.addEventListener('pointerdown',e=>{e.stopPropagation();muted=!muted;applyMute();});
 
-/* theme song: one loop scores the title screen AND the rounds.
-   iOS forbids autoplay — the first tap anywhere unlocks it. */
-let music=null, musicWanted=true;
+/* theme song: loops on title + during play. iOS/Chrome block autoplay —
+   we unlock on the very first user gesture (capture phase, fires before game logic). */
+let music=null, musicUnlocked=false;
 try{ music=new Audio('music.mp3'); music.loop=true; music.volume=.5; music.preload='auto'; }catch(e){}
 function musicUpdate(){
-  if(!music) return;
-  const want=!muted && !document.hidden;
+  if(!music||!musicUnlocked) return;
   try{
-    if(want){ const p=music.play(); if(p&&p.catch)p.catch(()=>{musicWanted=true;}); }
+    if(!muted&&!document.hidden){ const p=music.play(); if(p&&p.catch)p.catch(()=>{}); }
     else music.pause();
   }catch(e){}
 }
-document.addEventListener('pointerdown',()=>{ if(musicWanted){ musicWanted=false; musicUpdate(); } });
+document.addEventListener('pointerdown',function unlockMusic(){
+  musicUnlocked=true;
+  document.removeEventListener('pointerdown',unlockMusic,true);
+  musicUpdate();
+},{capture:true,once:true});
 document.addEventListener('visibilitychange',musicUpdate);
 applyMute();
 
@@ -324,9 +332,9 @@ const board=document.getElementById('board');
 const holes=[];
 for(let i=0;i<9;i++){
   const h=document.createElement('div'); h.className='hole';
-  h.innerHTML=`<div class="pit"><div class="rim"></div><div class="med"><img alt="" draggable="false"></div></div><div class="fx"></div>`;
+  h.innerHTML=`<div class="pit"><div class="rim"></div><div class="med"><img alt="" draggable="false"></div><span class="badge"></span></div><div class="fx"></div>`;
   board.appendChild(h);
-  holes.push({el:h, med:h.querySelector('.med'), img:h.querySelector('img'), pit:h.querySelector('.pit'),
+  holes.push({el:h, med:h.querySelector('.med'), img:h.querySelector('img'), pit:h.querySelector('.pit'), badge:h.querySelector('.badge'),
     fx:h.querySelector('.fx'), type:null, hit:false, downT:0, lockUntil:0, retreating:0, graceT:0});
   h.addEventListener('pointerdown',ev=>{ev.preventDefault(); whack(i);});
 }
@@ -392,6 +400,8 @@ function spawnOne(){
   if(type==='fab') _fabSeen++;
   h.type=type; h.hit=false; h.retreating=0; clearTimeout(h.graceT);
   h.img.src='art/'+(type==='kh'?'khamenei':type==='stern'?'before':FABS[Math.floor(Math.random()*FABS.length)])+'.webp';
+  h.badge.textContent=type==='fab'?'✨':'❌';
+  h.el.classList.toggle('is-fab',type==='fab'); h.el.classList.toggle('is-bad',type!=='fab');
   h.med.classList.remove('hit'); h.med.classList.add('up');
   const l=L();
   const uptime = type==='kh'? l.up*0.6 : type==='fab'? l.up+200 : l.up;
@@ -406,6 +416,7 @@ function retreat(i){
   h.graceT=setTimeout(()=>{                      // 130ms grace: a tap during the slide still counts
     h.retreating=0; if(h.hit) return;
     const ty=h.type; h.type=null;
+    h.el.classList.remove('is-fab','is-bad');
     setTimeout(()=>{ if(!h.type) h.img.removeAttribute('src'); },120);
     if(!running) return;
     if(ty==='stern') strike('escape', h);
@@ -442,7 +453,7 @@ function whack(i){
     return;
   }
   const isKh=h.type==='kh';
-  h.type=null;
+  h.type=null; h.el.classList.remove('is-fab','is-bad');
   streak++; correct++;
   const pts=(isKh?50:10)*mult();
   score+=pts; bonked++;
@@ -486,6 +497,7 @@ function strike(kind, h){
 /* ================= flow ================= */
 function clearBoard(){
   holes.forEach((h,i)=>{ clearTimeout(h.downT); h.type=null; h.hit=false;
+    h.el.classList.remove('is-fab','is-bad');
     h.med.classList.remove('up','hit'); h.img.removeAttribute('src'); });
 }
 function start(){
