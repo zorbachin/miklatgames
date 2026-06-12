@@ -110,6 +110,25 @@
   #toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);z-index:60;background:var(--c-panel-2);
     border:1px solid var(--c-border-strong);border-radius:999px;color:#fff;padding:10px 20px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;}
   #toast.show{opacity:1;}
+  .metrow{display:flex;align-items:center;gap:8px;margin:5px 14px 0;}
+  .metrow .meterMini{flex:1;margin:0;}
+  .shek{flex:0 0 auto;display:inline-flex;align-items:center;background:rgba(255,209,102,.14);
+    border:1px solid var(--c-gold);color:var(--c-gold);font:800 13px var(--font-body);border-radius:999px;padding:5px 11px;white-space:nowrap;}
+  .cost{position:absolute;bottom:3px;right:3px;background:rgba(255,209,102,.95);color:#2a1d00;
+    font:800 9px var(--font-body);border-radius:6px;padding:1px 5px;pointer-events:none;}
+  .runway{position:fixed;inset:0;z-index:70;background:radial-gradient(ellipse at 50% 28%,#1c2350,#05070f);
+    display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px;}
+  .runway.open{display:flex;}
+  .runway canvas{width:auto;height:min(60vh,540px);border-radius:16px;box-shadow:0 16px 40px rgba(0,0,0,.6);background:#101633;}
+  .runway #msg{width:min(92%,420px);background:var(--c-panel);border:1px solid var(--c-border);border-radius:12px;
+    color:var(--c-ink);padding:12px 14px;font:600 14px var(--font-body);text-align:center;}
+  .rgo{display:none;gap:10px;}
+  .rgo button{min-height:48px;padding:0 24px;border:0;border-radius:13px;font:800 15px var(--font-body);cursor:pointer;
+    background:linear-gradient(180deg,#ff7bc4,#e0469b);color:#2a0a1d;}
+  .rgo #rsave{background:var(--c-panel);color:var(--c-ink);border:1px solid var(--c-border);}
+  .rclose{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);inset-inline-end:14px;width:38px;height:38px;
+    border-radius:50%;background:var(--c-panel);border:1px solid var(--c-border);color:var(--c-ink);font-size:16px;cursor:pointer;z-index:2;}
+
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
 </style>
 </head>
@@ -120,7 +139,7 @@
     <button class="occChip" id="occChip"><span id="occEmoji">🎨</span><span id="occName">Free Style</span></button>
     <button class="tbtn" id="langCtl">עברית</button>
   </div>
-  <div class="meterMini"><i id="meterBar"></i><span id="meterVal">—</span></div>
+  <div class="metrow"><div class="meterMini"><i id="meterBar"></i><span id="meterVal">—</span></div><div class="shek" id="shek">💰 80</div></div>
 
   <div class="stageWrap">
     <div class="glow" id="glow"></div>
@@ -161,6 +180,16 @@
   </div>
 
   <div class="celebrate" id="celebrate"></div>
+
+  <div class="runway" id="runway">
+    <button class="rclose" id="rclose" aria-label="close">✕</button>
+    <canvas id="cv" width="540" height="810"></canvas>
+    <input id="msg" maxlength="90" placeholder="Message to the mullah…">
+    <div class="rgo" id="rgo">
+      <button id="rsend">📤 <span data-i18n="send">Send</span></button>
+      <button id="rsave">💾 <span data-i18n="save">Save</span></button>
+    </div>
+  </div>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 
@@ -195,22 +224,44 @@ const DEFAULT={head:null,top:null,bottom:null,robe:null,neck:null,beard:null,win
 let state=Object.assign({},DEFAULT);
 
 /* ===================== render (photo layers) ===================== */
-function lyTag(slot,file,pop){const a=ANCH[slot];return `<img class="ly${pop?' pop':''}" src="art/items/${file}.webp" style="left:${a[0]}%;top:${a[1]}%;width:${a[2]}%">`;}
-let lastChanged=null;
+const ITEM_POS={
+  'top-crop':[50,45,46],'top-tee':[50,46,46],'top-blouse':[50,46,52],'top-halter':[50,46,46],'top-sequin':[50,46,48],
+  'beard-pink':[50,18.5,24],'beard-gold':[50,18.5,24],
+  'head-drag-wig':[50,12,40],'head-tiara':[50,10.5,30],'head-mohawk':[50,11.5,34],
+  'neck-pride':[50,33,18]
+};
+function posOf(slot,file){ return ITEM_POS[file] || (file==='__base__'?[50,50,100]:ANCH[slot]); }
+let LAYERS=[], lastChanged=null;
 function render(){
+  LAYERS=[];
+  if(state.cape) LAYERS.push({slot:'cape',file:TOG_FILE.cape});
+  if(state.wings) LAYERS.push({slot:'wings',file:TOG_FILE.wings});
+  LAYERS.push({slot:'base',file:'__base__'});
+  ['bottom','top','robe','head','neck','beard'].forEach(s=>{ if(state[s]) LAYERS.push({slot:s,file:s+'-'+state[s]}); });
+  if(state.fan) LAYERS.push({slot:'fan',file:TOG_FILE.fan});
   let h='';
-  if(state.cape) h+=lyTag('cape',TOG_FILE.cape,lastChanged==='cape');
-  if(state.wings) h+=lyTag('wings',TOG_FILE.wings,lastChanged==='wings');
-  h+=`<img class="ly base" src="art/base.png" style="left:50%;top:50%;width:100%">`;
-  ['bottom','top','robe','head','neck','beard'].forEach(s=>{ if(state[s]) h+=lyTag(s,s+'-'+state[s],lastChanged===s); });
-  if(state.fan) h+=lyTag('fan',TOG_FILE.fan,lastChanged==='fan');
+  LAYERS.forEach(L=>{ const a=posOf(L.slot,L.file); const src=L.file==='__base__'?'art/base.png':'art/items/'+L.file+'.webp';
+    h+=`<img class="ly${lastChanged===L.slot?' pop':''}" src="${src}" style="left:${a[0]}%;top:${a[1]}%;width:${a[2]}%">`; });
   document.getElementById('ph').innerHTML=h;
   updateMeter(); updateBubbles();
 }
-/* preload */
-[].concat(...Object.values(TRAYS).filter(c=>c.groups).map(c=>c.groups)).forEach(g=>g.items.forEach(it=>{const i=new Image();i.src='art/items/'+g.slot+'-'+it+'.webp';}));
-Object.values(TOG_FILE).forEach(f=>{const i=new Image();i.src='art/items/'+f+'.webp';});
-{const i=new Image();i.src='art/base.png';}
+const IMG={};
+function pre(file,src){ const i=new Image(); i.src=src; IMG[file]=i; }
+pre('__base__','art/base.png');
+[].concat(...Object.values(TRAYS).filter(c=>c.groups).map(c=>c.groups)).forEach(g=>g.items.forEach(it=>pre(g.slot+'-'+it,'art/items/'+g.slot+'-'+it+'.webp')));
+Object.values(TOG_FILE).forEach(f=>pre(f,'art/items/'+f+'.webp'));
+
+/* ===================== shekels economy ===================== */
+const COST={'neck-boa-pink':10,'neck-boa-rainbow':12,'neck-boa-purple':10,'neck-pride':20,wings:30,fan:20,cape:25};
+let shek=80, owned=new Set();
+try{ const sv=localStorage.getItem('fab.shek'); if(sv!=null)shek=parseInt(sv,10)||0; owned=new Set(JSON.parse(localStorage.getItem('fab.own')||'[]')); }catch(e){}
+function saveEcon(){ try{localStorage.setItem('fab.shek',String(shek));localStorage.setItem('fab.own',JSON.stringify([...owned]));}catch(e){} }
+function hudShek(){ const el=document.getElementById('shek'); if(el)el.textContent='💰 '+shek; }
+function cost(k){ return COST[k]||0; }
+function afford(k){ if(cost(k)===0||owned.has(k)) return true;
+  if(shek>=cost(k)){ shek-=cost(k); owned.add(k); saveEcon(); hudShek(); toast('💰 -'+cost(k)); return true; }
+  toast(I18N[lang].broke); return false; }
+function earn(n){ shek+=n; saveEcon(); hudShek(); }
 
 /* ===================== meter ===================== */
 function fabCount(){ let n=0; SLOTS.forEach(s=>{if(state[s])n++;}); TOGS.forEach(s=>{if(state[s])n++;}); return n; }
@@ -238,7 +289,8 @@ function buildTray(cat){
     const none=document.createElement('button'); none.className='tcard none'+(state[g.slot]?'':' on'); none.dataset.slot=g.slot; none.dataset.val='';
     none.textContent='✕'; none.onclick=()=>setSlot(g.slot,null); grid.appendChild(none);
     g.items.forEach(it=>{ const c=document.createElement('button'); c.className='tcard'+(state[g.slot]===it?' on':''); c.dataset.slot=g.slot; c.dataset.val=it;
-      c.innerHTML=`<img src="art/items/${g.slot}-${it}.webp" alt="">`;
+      const k=g.slot+'-'+it, sc=cost(k)>0&&!owned.has(k);
+      c.innerHTML=`<img src="art/items/${g.slot}-${it}.webp" alt="">`+(sc?`<span class="cost">💰${cost(k)}</span>`:'');
       c.onclick=()=>setSlot(g.slot,it); grid.appendChild(c); });
     el.appendChild(grid);
   });
@@ -246,12 +298,13 @@ function buildTray(cat){
     const hh=document.createElement('div'); hh.className='tgh'; hh.textContent=t.extras; el.appendChild(hh);
     const grid=document.createElement('div'); grid.className='tgrid';
     cfg.toggles.forEach(tg=>{ const c=document.createElement('button'); c.className='tcard'+(state[tg]?' on':''); c.dataset.tog=tg;
-      c.innerHTML=`<img src="art/items/${TOG_FILE[tg]}.webp" alt="">`;
-      c.onclick=()=>{ state[tg]=!state[tg]; lastChanged=tg; render(); syncTray(); }; grid.appendChild(c); });
+      const sc=cost(tg)>0&&!owned.has(tg);
+      c.innerHTML=`<img src="art/items/${TOG_FILE[tg]}.webp" alt="">`+(sc?`<span class="cost">💰${cost(tg)}</span>`:'');
+      c.onclick=()=>{ if(!state[tg]){ if(!afford(tg)){syncTray();return;} } state[tg]=!state[tg]; lastChanged=tg; render(); syncTray(); }; grid.appendChild(c); });
     el.appendChild(grid);
   }
 }
-function setSlot(slot,val){ state[slot]=val; lastChanged=val?slot:null; render(); syncTray(); }
+function setSlot(slot,val){ if(slot==='neck'&&val&&!afford('neck-'+val)){syncTray();return;} state[slot]=val; lastChanged=val?slot:null; render(); syncTray(); }
 function syncTray(){ document.querySelectorAll('#panel .tcard').forEach(c=>{
   if(c.dataset.tog!==undefined) c.classList.toggle('on',!!state[c.dataset.tog]);
   else if(c.dataset.slot!==undefined) c.classList.toggle('on',(state[c.dataset.slot]||'')===c.dataset.val); }); }
@@ -279,18 +332,61 @@ function confetti(n){ const cols=['#ff4d4d','#ff9f43','#ffd166','#5dffa8','#3ee6
   for(let k=0;k<n;k++){ const s=document.createElement('div'); s.className='confetti'; s.style.left=(12+Math.random()*76)+'%';
     s.style.background=cols[k%cols.length]; s.style.setProperty('--r',(Math.random()*360)+'deg');
     s.style.setProperty('--x',((Math.random()*2-1)*140).toFixed(0)+'px'); lay.appendChild(s); setTimeout(()=>s.remove(),1100); } }
-function strut(){ confetti(30); toast(I18N[lang].strut); track('strut'); }
+/* ===================== strut runway (flipbook + share) ===================== */
+let runBlob=null;
+function strut(){ earn(25); openRunway(); track('strut'); }
+function drawChar(ctx,CW,CH){ LAYERS.forEach(L=>{ const im=IMG[L.file]; if(!im||!im.complete||!im.naturalWidth)return;
+  const a=posOf(L.slot,L.file); const w=CW*a[2]/100, h=w*im.naturalHeight/im.naturalWidth;
+  ctx.drawImage(im, CW*a[0]/100-w/2, CH*a[1]/100-h/2, w, h); }); }
+function openRunway(){
+  const rw=document.getElementById('runway'); rw.classList.add('open'); runBlob=null;
+  document.getElementById('rgo').style.display='none';
+  const m=document.getElementById('msg'); if(!m.value) m.value=I18N[lang].msgDef;
+  const cv=document.getElementById('cv'); const ctx=cv&&cv.getContext&&cv.getContext('2d');
+  if(!ctx){ document.getElementById('rgo').style.display='flex'; return; }
+  const CW=cv.width, CH=cv.height;
+  const poses=[{},{rot:-.07,sx:1.03},{skew:-.13},{sy:.95,sx:1.05},{rot:.06,sx:1.02},{sx:-1}];
+  let start=performance.now(), rec=null, chunks=[];
+  try{ if(window.MediaRecorder && cv.captureStream){ const st=cv.captureStream(25);
+    const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':'video/webm';
+    rec=new MediaRecorder(st,{mimeType:mime}); rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);}; rec.start(); } }catch(e){ rec=null; }
+  confetti(30); cancelAnimationFrame(rw._raf);
+  function loop(now){ const el=now-start; const p=poses[Math.floor(el/120)%poses.length];
+    ctx.fillStyle='#101633'; ctx.fillRect(0,0,CW,CH);
+    ctx.save(); ctx.translate(CW/2,CH*0.52); ctx.rotate(p.rot||0); ctx.scale(p.sx||1,p.sy||1); ctx.transform(1,0,p.skew||0,1,0,0); ctx.translate(-CW/2,-CH*0.52);
+    drawChar(ctx,CW,CH); ctx.restore();
+    if(el<2600){ rw._raf=requestAnimationFrame(loop); } else { stopRun(rec,chunks); }
+  }
+  rw._raf=requestAnimationFrame(loop);
+}
+function stopRun(rec,chunks){ const show=()=>{document.getElementById('rgo').style.display='flex';};
+  if(rec&&rec.state&&rec.state!=='inactive'){ rec.onstop=()=>{ try{runBlob=new Blob(chunks,{type:'video/webm'});}catch(e){runBlob=null;} show(); };
+    try{rec.stop();}catch(e){show();} } else show(); }
+async function strutShare(dl){
+  const cv=document.getElementById('cv'); const msg=(document.getElementById('msg').value||I18N[lang].msgDef).trim();
+  const txt=msg+'  🏳️‍🌈 miklatgames.fun/fabatollah';
+  let file=null;
+  if(runBlob&&runBlob.size){ file=new File([runBlob],'fabatollah.webm',{type:'video/webm'}); }
+  else if(cv&&cv.toBlob){ const blob=await new Promise(r=>cv.toBlob(r,'image/png')); if(blob) file=new File([blob],'fabatollah.png',{type:'image/png'}); }
+  if(dl&&file){ const u=URL.createObjectURL(file); const a=document.createElement('a'); a.href=u; a.download=file.name; a.click(); setTimeout(()=>URL.revokeObjectURL(u),3000); track('strut-save'); return; }
+  try{ if(navigator.canShare&&file&&navigator.canShare({files:[file]})){ await navigator.share({files:[file],text:txt}); track('strut-send'); return; } }catch(e){}
+  try{ if(navigator.share){ await navigator.share({text:txt}); track('strut-send-txt'); return; } }catch(e){}
+  try{ await navigator.clipboard.writeText(txt); toast(I18N[lang].copied); }catch(e){}
+}
+function closeRunway(){ const rw=document.getElementById('runway'); cancelAnimationFrame(rw._raf); rw.classList.remove('open'); }
 
 /* ===================== i18n ===================== */
 const I18N={
  en:{dir:'ltr',where:"Where's he headed today?",whereSub:'Pick the occasion — then make him fabulous.',freestyle:'Free Style',
   surprise:'Surprise',done:'Strut!',strut:'Werk it, your holiness 💅',dcLink:'⏱️ Or race the clock — Dress Code ›',extras:'Accessories',
+  broke:'Not enough shekels 💰',send:'Send',save:'Save',msgDef:'Yalla habibi — Happy Pride 🏳️‍🌈 love, Fabatollah',
   cats:{looks:'Looks',head:'Head',top:'Top',bottom:'Bottom',robe:'Robe',face:'Face',bling:'Bling'},
   slots:{head:'Headwear',top:'Top',bottom:'Bottom',robe:'Robe',neck:'Neck',glasses:'Shades',beard:'Beard'},
   tiers:['Bare Cleric 😐','Loosening up 💅','Getting cute ✨','Fabulous 💖','Glamorous 🌈','Iconic 👑','SUPREME DIVA 🏆'],
   shareTxt:'💅🌈 I styled the Ayatollah — meet FABATOLLAH. Dress your own, free in the shelter: https://miklatgames.fun/fabatollah/',copied:'✅ Copied'},
  he:{dir:'rtl',where:'לאן הוא יוצא היום?',whereSub:'בחרו את האירוע — ואז תהפכו אותו לפאבולוס.',freestyle:'בלי אירוע',
   surprise:'הפתעה',done:'לצעוד!',strut:'תקרעי, כבוד הרב 💅',dcLink:'⏱️ או נצחו את השעון — דרס קוד ›',extras:'תוספות',
+  broke:'אין מספיק שקלים 💰',send:'שליחה',save:'שמירה',msgDef:'יאללה חביבי — חג גאווה שמח 🏳️‍🌈 באהבה, פבאטולה',
   cats:{looks:'לוקים',head:'ראש',top:'עליון',bottom:'תחתון',robe:'גלימה',face:'פנים',bling:'בלינג'},
   slots:{head:'כיסוי ראש',top:'עליון',bottom:'תחתון',robe:'גלימה',neck:'צוואר',glasses:'משקפיים',beard:'זקן'},
   tiers:['רב פשוט 😐','מתחיל להשתחרר 💅','נהיה חמוד ✨','פאבולוס 💖','זוהר 🌈','אייקוני 👑','דיווה עליונה 🏆'],
@@ -337,11 +433,14 @@ document.getElementById('trayBackdrop').onclick=closeTray;
 document.getElementById('surprise').onclick=surprise;
 document.getElementById('reset').onclick=reset;
 document.getElementById('done').onclick=strut;
+document.getElementById('rclose').onclick=closeRunway;
+document.getElementById('rsend').onclick=()=>strutShare(false);
+document.getElementById('rsave').onclick=()=>strutShare(true);
 document.getElementById('share').onclick=async()=>{ const txt=I18N[lang].shareTxt;
   try{ if(navigator.share){await navigator.share({text:txt});track('share');}
     else{await navigator.clipboard.writeText(txt);toast(I18N[lang].copied);track('share-copy');} }catch(e){} };
 
-applyLang(); render(); track('open');
+applyLang(); render(); hudShek(); track('open');
 </script>
 <script data-goatcounter="https://miklat-games.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
