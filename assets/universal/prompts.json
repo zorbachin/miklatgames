@@ -1,0 +1,46 @@
+{
+  "game": "MIKLAT UNIVERSAL — arcade-wide cast + UI kit",
+  "style": "One shared style: vibrant 3D cartoon, thick outlines, app-store polish. Cast bibles are canonical (DESIGN-SYSTEM.md) — these sheets are the reference every game pack copies. Sprites on FLAT MAGENTA #ff00ff edge to edge, no ground shadow, no text. Generate: bin/imagepack assets/universal",
+  "images": [
+    {
+      "file": "cast-savta.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character reference sheet, vibrant 3D cartoon, thick outlines: SAVTA — a feisty Israeli grandmother, short gray curls, floral dress, beige cardigan, wheeled shopping cart at her side, one slipper raised in her hand, expression of loving menace. Full body, centered, feet near bottom. ENTIRE background flat solid magenta #ff00ff, edge to edge, no shadow, no text."
+    },
+    {
+      "file": "cast-noni.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character reference sheet, vibrant 3D cartoon, thick outlines: NONI — a cheeky 10-year-old kid, curly dark-brown hair, orange t-shirt, blue shorts, sandals, holding a wicker basket overflowing with vegetables, confident grin. Full body, centered, feet near bottom. ENTIRE background flat solid magenta #ff00ff, edge to edge, no shadow, no text."
+    },
+    {
+      "file": "cast-shuki.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character reference sheet, vibrant 3D cartoon, thick outlines: SHUKI THE VENDOR — burly Israeli market vendor, thick black mustache, green apron over white tank top, brandishing a wooden spoon, comically furious but lovable. Full body, centered, feet near bottom. ENTIRE background flat solid magenta #ff00ff, edge to edge, no shadow, no text."
+    },
+    {
+      "file": "cast-tikva.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character reference sheet, vibrant 3D cartoon, thick outlines: INSPECTOR TIKVA — Israel Antiquities Authority inspector, immaculate khaki uniform, sun hat, clipboard in one hand and whistle raised in the other, stern but fair face, reading glasses on a chain. Full body, centered, feet near bottom. ENTIRE background flat solid magenta #ff00ff, edge to edge, no shadow, no text."
+    },
+    {
+      "file": "cast-rafi.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character reference sheet, vibrant 3D cartoon, thick outlines: RAFI THE WORKER — Israeli construction worker, yellow hard hat, neon orange safety vest over gray tee, pickaxe over shoulder, brass finjan (coffee pot) holstered on his belt like a sidearm, easy grin. Full body, centered, feet near bottom. ENTIRE background flat solid magenta #ff00ff, edge to edge, no shadow, no text."
+    },
+    {
+      "file": "ui-panel-wood.png",
+      "aspect_ratio": "4:3",
+      "prompt": "Game UI asset, vibrant 3D cartoon style: an empty wooden market-stall sign board with rounded corners, warm worn wood planks, subtle rope hanging loops at top corners, slight golden rim light, generous clean center area for overlay text. ENTIRE background flat solid magenta #ff00ff, no text, no characters."
+    },
+    {
+      "file": "ui-badge-gold.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game UI asset, vibrant 3D cartoon style: a round golden achievement badge/medal with a Star-of-David-free generic sunburst emboss, red ribbon tails, glossy finish, empty center area for overlay icon. ENTIRE background flat solid magenta #ff00ff, no text."
+    },
+    {
+      "file": "brand-shelf-night.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Brand key art, vibrant 3D cartoon style: a cozy underground shelter room at night converted into a glowing retro arcade — string lights, a worn couch, an old CRT cabinet glowing gold, game posters on concrete walls, a wicker basket and a lime scooter parked in the corner, warm gold light against deep navy shadows #0d1120 and #ffd166. Inviting, safe, alive. No people, no text, clean upper-center area for overlay logo."
+    }
+  ]
+}
