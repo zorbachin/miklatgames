@@ -138,6 +138,7 @@
   <div class="topbar">
     <a class="tbtn" href="../" aria-label="Arcade">‹</a>
     <button class="occChip" id="occChip"><span id="occEmoji">🎨</span><span id="occName">Free Style</span></button>
+    <button class="tbtn" id="muteBtn" aria-label="mute">🔊</button>
     <button class="tbtn" id="langCtl">עברית</button>
   </div>
   <div class="metrow"><div class="meterMini"><i id="meterBar"></i><span id="meterVal">—</span></div><div class="shek" id="shek">💰 80</div></div>
@@ -194,6 +195,7 @@
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 <audio id="strutAudio" src="strut.mp3" preload="auto" loop></audio>
+<audio id="introAudio" src="intro.mp3" preload="auto" loop></audio>
 
 <script>
 'use strict';
@@ -346,7 +348,8 @@ function drawChar(ctx,CW,CH){ LAYERS.forEach(L=>{ const im=IMG[L.file]; if(!im||
   ctx.drawImage(im, CW*a[0]/100-w/2, CH*a[1]/100, w, h); }); ctx.shadowColor='transparent'; }
 function openRunway(){
   const rw=document.getElementById('runway'); rw.classList.add('open'); runBlob=null;
-  try{ const au=document.getElementById('strutAudio'); au.currentTime=0; const p=au.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){}
+  try{ document.getElementById('introAudio').pause(); }catch(e){}
+  try{ if(!muted){ const au=document.getElementById('strutAudio'); au.currentTime=0; const p=au.play(); if(p&&p.catch)p.catch(()=>{}); } }catch(e){}
   document.getElementById('rgo').style.display='none';
   const m=document.getElementById('msg'); if(!m.value) m.value=I18N[lang].msgDef;
   const cv=document.getElementById('cv'); const ctx=cv&&cv.getContext&&cv.getContext('2d');
@@ -383,7 +386,21 @@ async function strutShare(dl){
   try{ await navigator.clipboard.writeText(txt); toast(I18N[lang].copied); }catch(e){}
 }
 function closeRunway(){ const rw=document.getElementById('runway'); cancelAnimationFrame(rw._raf); rw.classList.remove('open');
-  try{ document.getElementById('strutAudio').pause(); }catch(e){} }
+  try{ document.getElementById('strutAudio').pause(); }catch(e){}
+  if(!muted&&musicOn){ try{ document.getElementById('introAudio').play().catch(()=>{}); }catch(e){} } }
+
+/* ===== music ===== */
+let muted=false; try{muted=localStorage.getItem('fab.mute')==='1';}catch(e){}
+let musicOn=false;
+function startMusic(){ if(musicOn||muted)return; const a=document.getElementById('introAudio'); if(!a)return;
+  const p=a.play(); if(p&&p.catch)p.catch(()=>{}); musicOn=true; }
+function applyMute(){ const b=document.getElementById('muteBtn'); if(b)b.textContent=muted?'🔇':'🔊';
+  if(muted){ try{document.getElementById('introAudio').pause();}catch(e){} try{document.getElementById('strutAudio').pause();}catch(e){} }
+  else if(musicOn && !document.getElementById('runway').classList.contains('open')){ try{document.getElementById('introAudio').play().catch(()=>{});}catch(e){} }
+  try{localStorage.setItem('fab.mute',muted?'1':'0');}catch(e){} }
+document.addEventListener('pointerdown',startMusic);
+document.getElementById('muteBtn').onclick=e=>{ e.stopPropagation(); muted=!muted; applyMute(); if(!muted)startMusic(); };
+applyMute();
 
 /* ===================== i18n ===================== */
 const I18N={
