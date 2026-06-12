@@ -190,6 +190,17 @@
         </div>
       </a>
 
+      <a class="gcard" href="miklatdigger/" id="cardDigger" style="--accent:#9c6b3f" data-game="miklatdigger">
+        <div class="coverwrap"><img class="cover" src="assets/miklatdigger-cover.svg" alt="A construction worker digging a shaft through layered earth strata, artifacts buried around him, an inspector watching from the surface" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
+        <div class="body">
+          <div class="ttl"><span class="name">Miklat Digger</span><span class="name-he">חופר המקלט</span></div>
+          <div class="hook" data-i18n="diggerHook">Dig a mamad under your building — every meter down is 3,000 years of history. Brush finds clean before the Inspector whistles. Runs on coffee.</div>
+          <div class="meta">
+            <span class="pill" data-i18n="newGame">🆕 New door</span>
+          </div>
+        </div>
+      </a>
+
       <div class="ghosts">
         <div class="ghost">
           <img class="gart" src="assets/balagan-cover.webp" alt="Balagan — Tel Aviv boardwalk" loading="lazy">
@@ -242,6 +253,7 @@ const I18N={
   mamadHook:'Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.',
   ironHook:'Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.',
   shukHook:"Friday rush. Swipe through the stalls, fill Ima's list, outrun the vendor before Shabbat closes the shuk.",
+  diggerHook:"Dig a mamad under your building — every meter down is 3,000 years of history. Brush finds clean before the Inspector whistles. Runs on coffee.",
   newGame:'🆕 New door',
   soon:'DOOR OPENING SOON',
   whyTitle:'Why we exist',
@@ -258,6 +270,7 @@ const I18N={
   mamadHook:'רוצו לממ״ד לפני הבום. קופצים מעל הסבתות, מתכופפים מתחת ליונים.',
   ironHook:'מיירטים רקטות עם האצבע. עשרה שלבים משדרות ועד אילת. עובד בלי קליטה.',
   shukHook:'שישי בצהריים. מחליקים בין הדוכנים, ממלאים את הרשימה של אמא, ובורחים מהמוכר לפני שהשוק נסגר.',
+  diggerHook:'חופרים ממ"ד מתחת לבניין — כל מטר למטה הוא 3,000 שנות היסטוריה. שפשפו את הממצאים לפני שהפקחית שורקת. עובד על קפה.',
   newGame:'🆕 דלת חדשה',
   soon:'הדלת נפתחת בקרוב',
   whyTitle:'למה אנחנו קיימים',
@@ -342,6 +355,7 @@ if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
 document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
 document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
 document.getElementById('cardShuk').addEventListener('click',()=>track('play-shukshopper'));
+document.getElementById('cardDigger').addEventListener('click',()=>track('play-miklatdigger'));
 
 applyLang(); applyAudio();
 if ('serviceWorker' in navigator)

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225">
+  <!-- strata: every meter down is 3,000 years -->
+  <rect width="400" height="50" fill="#c9a26b"/>
+  <rect y="50" width="400" height="45" fill="#a87f4f"/>
+  <rect y="95" width="400" height="45" fill="#8a6038"/>
+  <rect y="140" width="400" height="45" fill="#6e4527"/>
+  <rect y="185" width="400" height="40" fill="#4f2f1a"/>
+  <!-- the dig shaft -->
+  <rect x="170" width="60" height="160" fill="#2a1a0e"/>
+  <text x="200" y="120" font-size="44" text-anchor="middle">👷</text>
+  <text x="200" y="60" font-size="30" text-anchor="middle">⛏️</text>
+  <!-- buried history -->
+  <text x="80" y="130" font-size="26" text-anchor="middle">🏺</text>
+  <text x="320" y="175" font-size="26" text-anchor="middle">🪙</text>
+  <text x="90" y="210" font-size="26" text-anchor="middle">🏛️</text>
+  <text x="310" y="80" font-size="22" text-anchor="middle">☕</text>
+  <!-- the inspector watches from the surface -->
+  <text x="320" y="38" font-size="28" text-anchor="middle">👮‍♀️</text>
+  <text x="60" y="38" font-size="24" text-anchor="middle">🏗️</text>
+</svg>

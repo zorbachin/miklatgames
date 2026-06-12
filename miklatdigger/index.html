@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#160d06">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MIKLAT DIGGER">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛏️</text></svg>">
+<meta property="og:title" content="MIKLAT DIGGER ⛏️ — every meter down is 3,000 years of history">
+<meta property="og:description" content="Dig a mamad under your building. Brush your finds clean before the Antiquities Inspector whistles. Runs on coffee. No app. One thumb.">
+<meta property="og:url" content="https://miklatgames.fun/miklatdigger/">
+<!-- placeholder: swap for press/keyart once the pack is generated -->
+<meta property="og:image" content="https://miklatgames.fun/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Mr. Driller meets Israeli archaeology, from the MIKLAT GAMES shelter arcade. Works offline.">
+<title>MIKLAT DIGGER ⛏️ — חופר המקלט</title>
+<style>
+  :root{
+    --c-bg:#160d06; --c-panel:#2a1a0e; --c-ink:#fdf3e3; --c-dim:#c9a980;
+    --c-gold:#ffd166; --c-red:#ff5d73; --c-green:#5dffa8; --c-cyan:#3ee6ff;
+    --font-display:"Courier New","Heebo",ui-monospace,Menlo,Consolas,monospace;
+    --font-body:"Heebo",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{background:var(--c-bg);height:100%;overflow:hidden;overscroll-behavior:none;
+    font-family:var(--font-body);color:var(--c-ink);
+    -webkit-user-select:none;user-select:none;touch-action:none;}
+  #wrap{position:fixed;inset:0;display:flex;justify-content:center;background:#000;}
+  #stage{position:relative;width:100%;max-width:520px;height:100%;}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block;}
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:24px;z-index:5;overflow-y:auto;
+    background:linear-gradient(180deg,rgba(22,13,6,.86),rgba(22,13,6,.95));}
+  .overlay.hidden{display:none;}
+  .ttl{font-family:var(--font-display);font-weight:700;font-size:clamp(28px,8.6vw,38px);
+    letter-spacing:.06em;text-transform:uppercase;color:var(--c-gold);
+    text-shadow:0 0 18px rgba(255,209,102,.55);line-height:1.1;}
+  .ttl-he{margin-top:6px;font-size:17px;color:var(--c-cyan);}
+  .tag{margin:12px auto 0;max-width:330px;font-size:14.5px;line-height:1.5;color:var(--c-dim);}
+  .howgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;width:min(330px,88%);}
+  .how{background:var(--c-panel);border:1px solid rgba(255,209,102,.3);border-radius:12px;
+    padding:10px 8px;font-size:12.5px;color:var(--c-ink);line-height:1.35;}
+  .how b{display:block;font-size:20px;margin-bottom:2px;}
+  .bigbtn{margin-top:18px;min-width:230px;min-height:56px;border:none;border-radius:14px;cursor:pointer;
+    background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;
+    font:900 18px var(--font-body);box-shadow:0 8px 24px rgba(233,162,59,.45);}
+  .bigbtn:active{transform:scale(.97);}
+  .ghostbtn{margin-top:10px;min-height:44px;min-width:230px;border-radius:12px;cursor:pointer;
+    background:transparent;border:1px solid rgba(253,243,227,.35);color:var(--c-ink);
+    font:700 14px var(--font-body);}
+  .rowbtns{display:flex;gap:10px;margin-top:10px;}
+  .rowbtns .ghostbtn{min-width:0;flex:1;padding:0 14px;}
+  .arcade{position:absolute;top:calc(env(safe-area-inset-top,0px) + 10px);inset-inline-start:12px;z-index:6;
+    font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--c-gold);text-decoration:none;
+    background:rgba(22,13,6,.7);border:1px solid rgba(255,209,102,.4);border-radius:999px;padding:6px 14px;}
+  .beatbanner{margin-top:12px;font-size:13.5px;font-weight:800;color:var(--c-red);
+    background:rgba(255,93,115,.12);border:1px solid rgba(255,93,115,.45);border-radius:999px;padding:7px 16px;}
+  .score-card{margin-top:14px;background:var(--c-panel);border:1px solid rgba(255,209,102,.35);
+    border-radius:16px;padding:14px 22px;font-size:15px;line-height:1.9;min-width:250px;}
+  .score-card .big{font-family:var(--font-display);font-size:26px;color:var(--c-gold);}
+  .best-line{margin-top:9px;font-size:13px;color:var(--c-dim);}
+  .panel-list{width:min(340px,90%);margin-top:14px;display:flex;flex-direction:column;gap:10px;}
+  .shop-item{display:flex;align-items:center;gap:10px;background:var(--c-panel);
+    border:1px solid rgba(255,209,102,.3);border-radius:14px;padding:10px 12px;text-align:start;}
+  .shop-item .ico{font-size:28px;}
+  .shop-item .nm{flex:1;font-size:13px;line-height:1.35;}
+  .shop-item .nm b{display:block;font-size:14px;color:var(--c-gold);}
+  .shop-item button{min-width:86px;min-height:40px;border:none;border-radius:10px;cursor:pointer;
+    font:800 13px var(--font-body);background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;}
+  .shop-item button[disabled]{background:#3a2a18;color:var(--c-green);}
+  .mus-strat{background:var(--c-panel);border:1px solid rgba(255,209,102,.3);border-radius:14px;
+    padding:10px 12px;text-align:start;}
+  .mus-strat h3{font-size:13px;color:var(--c-gold);letter-spacing:.05em;}
+  .mus-row{display:flex;gap:14px;margin-top:6px;font-size:26px;}
+  .mus-row .ct{font-size:11px;color:var(--c-dim);display:block;text-align:center;}
+  .card-emoji{font-size:64px;margin-top:6px;filter:drop-shadow(0 0 16px rgba(255,209,102,.7));}
+  .card-fact{margin:12px auto 0;max-width:300px;font-size:14.5px;line-height:1.55;color:var(--c-ink);
+    background:var(--c-panel);border:1px solid rgba(255,209,102,.4);border-radius:14px;padding:14px;}
+  #toast{position:absolute;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--c-panel);border:1px solid rgba(255,209,102,.55);border-radius:999px;
+    color:var(--c-gold);padding:10px 20px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;
+    transition:all .2s ease;z-index:50;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+  <canvas id="cv"></canvas>
+  <a class="arcade" id="arcadeBack" href="../">🚨 MIKLAT ARCADE</a>
+
+  <div class="overlay" id="menu">
+    <h1 class="ttl" data-i18n="title">MIKLAT DIGGER</h1>
+    <div class="ttl-he" data-i18n="titleAlt">חופר המקלט</div>
+    <p class="tag" data-i18n="tag">You're digging a mamad under the building. Problem: every meter down is 3,000 years of history — and the Inspector is watching.</p>
+    <div class="howgrid">
+      <div class="how"><b>⬇️</b><span data-i18n="how1">Tap / swipe — dig down, left, right</span></div>
+      <div class="how"><b>☕</b><span data-i18n="how2">Coffee is life. Empty cup = nap</span></div>
+      <div class="how"><b>🏺</b><span data-i18n="how3">Found something? RUB it clean in 3s</span></div>
+      <div class="how"><b>🧱</b><span data-i18n="how4">Never stand under a wobbling rock</span></div>
+    </div>
+    <div class="beatbanner" id="beatBanner" style="display:none"></div>
+    <button class="bigbtn" id="startBtn" data-i18n="start">DIG! ▶</button>
+    <button class="ghostbtn" id="dailyBtn">📅 DAILY DIG</button>
+    <div class="rowbtns">
+      <button class="ghostbtn" id="shopBtn" data-i18n="shop">🏗️ MAMAD SHOP</button>
+      <button class="ghostbtn" id="museumBtn" data-i18n="museum">🏛️ MUSEUM</button>
+    </div>
+    <div class="best-line" id="menuWallet"></div>
+    <div class="best-line" id="menuDaily"></div>
+    <div class="best-line" id="menuBest"></div>
+  </div>
+
+  <div class="overlay hidden" id="over">
+    <h1 class="ttl" id="ovTtl" style="color:var(--c-red);text-shadow:0 0 18px rgba(255,93,115,.5)"></h1>
+    <div style="font-size:44px;margin-top:8px" id="ovEmoji">☕</div>
+    <div class="tag" id="ovSub"></div>
+    <div class="score-card">
+      <div><span data-i18n="depth">Depth</span>: <span class="big" id="ovDepth">0</span> m</div>
+      <div><span data-i18n="finds">Finds</span>: <span class="big" id="ovFinds">0</span> 🏺</div>
+      <div><span data-i18n="banked">Shekels banked</span>: <span class="big" id="ovShekels">0</span> ₪</div>
+      <div id="ovBeat" style="display:none;color:var(--c-green);font-weight:800"></div>
+    </div>
+    <div class="best-line" id="ovBest"></div>
+    <button class="bigbtn" id="againBtn" data-i18n="again">DIG AGAIN ▶</button>
+    <button class="ghostbtn" id="shareBtn" data-i18n="share">📤 Challenge the Group Chat</button>
+    <button class="ghostbtn" id="menuBtn" data-i18n="menuB">🏠 Menu</button>
+    <a id="tipJar" hidden target="_blank" rel="noopener" style="margin-top:10px;font-size:14px;color:var(--c-gold,#ffd166);text-decoration:none;opacity:.85">☕ Keep the arcade free · תשאירו את המקלט חינם</a>
+  </div>
+
+  <div class="overlay hidden" id="paused">
+    <h1 class="ttl" data-i18n="pausedT">COFFEE BREAK</h1>
+    <button class="bigbtn" id="resumeBtn" data-i18n="resume">BACK TO THE DIG ▶</button>
+  </div>
+
+  <div class="overlay hidden" id="shopOv">
+    <h1 class="ttl" data-i18n="shopT">THE MAMAD</h1>
+    <p class="tag" data-i18n="shopTag">Every shekel from the dig builds the shelter above — and every part is a perk.</p>
+    <div class="best-line" id="shopWallet"></div>
+    <div class="panel-list" id="shopList"></div>
+    <button class="ghostbtn" id="shopClose" data-i18n="close">✖ Close</button>
+  </div>
+
+  <div class="overlay hidden" id="museumOv">
+    <h1 class="ttl" data-i18n="museumT">THE MUSEUM</h1>
+    <div class="best-line" id="musPct"></div>
+    <div class="panel-list" id="musList"></div>
+    <button class="ghostbtn" id="museumClose" data-i18n="close">✖ Close</button>
+  </div>
+
+  <div class="overlay hidden" id="card">
+    <div class="best-line" data-i18n="firstFind">NEW FIND</div>
+    <div class="card-emoji" id="cardEmoji">🏺</div>
+    <h1 class="ttl" id="cardName" style="font-size:22px"></h1>
+    <div class="best-line" id="cardStratum"></div>
+    <div class="card-fact" id="cardFact"></div>
+    <button class="bigbtn" id="cardBtn" data-i18n="backToDig">⛏️ Back to the dig</button>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+</div></div>
+
+<script>
+'use strict';
+/* ================= i18n ================= */
+const I18N={
+ en:{dir:'ltr',title:'MIKLAT DIGGER',titleAlt:'חופר המקלט',
+  tag:"You're digging a mamad under the building. Problem: every meter down is 3,000 years of history — and the Inspector is watching.",
+  how1:'Tap / swipe — dig down, left, right',how2:'Coffee is life. Empty cup = nap',
+  how3:'Found something? RUB it clean in 3s',how4:'Never stand under a wobbling rock',
+  start:'DIG! ▶',again:'DIG AGAIN ▶',resume:'BACK TO THE DIG ▶',pausedT:'COFFEE BREAK',menuB:'🏠 Menu',
+  daily:'DAILY DIG',shop:'🏗️ MAMAD SHOP',museum:'🏛️ MUSEUM',close:'✖ Close',
+  shopT:'THE MAMAD',shopTag:'Every shekel from the dig builds the shelter above — and every part is a perk.',
+  museumT:'THE MUSEUM',firstFind:'⭐ NEW FIND ⭐',backToDig:'⛏️ Back to the dig',
+  depth:'Depth',finds:'Finds',banked:'Shekels banked',
+  overCoffee:'OUT OF COFFEE',overCoffeeSub:'He sat down for a break. The break won.',
+  overCrush:'BURIED!',overCrushSub:'That block had 3,000 years of momentum.',
+  overSting:'STUNG!',overStingSub:'The scorpion was here first. By several million years.',
+  share:'📤 Challenge the Group Chat',copied:'✅ Copied — paste it in the chat',
+  dailyStreak:n=>`🔥 daily streak: ${n}`,practice:'📅 practice dig — not counted',
+  best:(d,f)=>`🏆 Your best: -${d}m · 🏺×${f}`,
+  wallet:s=>`👛 Miklat Wallet: ₪${s}`,buy:'BUY ₪',owned:'✓ BUILT',poor:'Not enough ₪ — go dig!',
+  beatBanner:d=>`⚔️ Your friend reached -${d}m — dig deeper!`,beatWin:'🎉 Deeper than your friend!',
+  taxed:t=>`👮‍♀️ Confiscated! ₪${t} dig-tax`,savta:'🪑 Savta argued with the Inspector. You keep it!',
+  setDone:n=>`🏛️ ${n} set complete! +₪100`,pipe:'💦 Pipe burst! Your coffee got soaked',
+  stratum:(n,d)=>`⛏️ ${n} — ${d}m`,scorpSquash:'🦂 squashed! +₪10',rubHint:'RUB IT CLEAN!',
+  shopPick:{n:'Pickaxe II',d:'Sharper head — digging costs 30% less coffee'},
+  shopTank:{n:'Coffee Tank',d:'A serious finjan — +40% coffee capacity'},
+  shopLadder:{n:'Ladder Rig',d:'Skip the boring part — start at -8m'},
+  shopSavta:{n:"Savta's Chair",d:'She argues away one confiscation per run'},
+  shareTxt:(d,f)=>`⛏️ MIKLAT DIGGER — reached -${d}m, 🏺 ×${f}. Beat my depth: https://miklatgames.fun/miklatdigger/?beat=${d}`,
+  shareDaily:(n,d,st)=>`📅 DAILY DIG #${n} — reached -${d}m ⛏️${st>1?` · 🔥${st}`:''}. Same dirt for everyone, once a day: https://miklatgames.fun/miklatdigger/?daily=1`},
+ he:{dir:'rtl',title:'חופר המקלט',titleAlt:'MIKLAT DIGGER',
+  tag:'אתם חופרים ממ"ד מתחת לבניין. הבעיה: כל מטר למטה הוא 3,000 שנות היסטוריה — והפקחית מחפר העתיקות צופה.',
+  how1:'הקישו / החליקו — לחפור למטה, שמאלה, ימינה',how2:'קפה זה חיים. כוס ריקה = נמנום',
+  how3:'מצאתם משהו? שפשפו לנקות תוך 3 שניות',how4:'אל תעמדו מתחת לסלע רועד',
+  start:'לחפור! ▶',again:'עוד חפירה ▶',resume:'חזרה לבור ▶',pausedT:'הפסקת קפה',menuB:'🏠 תפריט',
+  daily:'חפירה יומית',shop:'🏗️ חנות הממ"ד',museum:'🏛️ המוזיאון',close:'✖ סגירה',
+  shopT:'הממ"ד',shopTag:'כל שקל מהחפירה בונה את המקלט למעלה — וכל חלק הוא שדרוג.',
+  museumT:'המוזיאון',firstFind:'⭐ ממצא חדש ⭐',backToDig:'⛏️ חזרה לבור',
+  depth:'עומק',finds:'ממצאים',banked:'שקלים בבנק',
+  overCoffee:'נגמר הקפה',overCoffeeSub:'הוא התיישב לרגע. הרגע ניצח.',
+  overCrush:'נקברת!',overCrushSub:'לאבן הזאת היה מומנטום של 3,000 שנה.',
+  overSting:'עקיצה!',overStingSub:'העקרב היה פה קודם. בכמה מיליוני שנים.',
+  share:'📤 אתגרו את הקבוצה',copied:'✅ הועתק — הדביקו בקבוצה',
+  dailyStreak:n=>`🔥 רצף יומי: ${n}`,practice:'📅 חפירת אימון — לא נספרת',
+  best:(d,f)=>`🏆 השיא שלכם: -${d} מ׳ · 🏺×${f}`,
+  wallet:s=>`👛 ארנק המקלט: ₪${s}`,buy:'לקנות ₪',owned:'✓ נבנה',poor:'אין מספיק ₪ — לכו לחפור!',
+  beatBanner:d=>`⚔️ חבר הגיע ל־${d}- מטר — תחפרו עמוק יותר!`,beatWin:'🎉 עמוק יותר מהחבר!',
+  taxed:t=>`👮‍♀️ הוחרם! מס חפירה ₪${t}`,savta:'🪑 סבתא התווכחה עם הפקחית. זה נשאר אצלכם!',
+  setDone:n=>`🏛️ סט ${n} הושלם! +₪100`,pipe:'💦 צינור התפוצץ! הקפה נרטב',
+  stratum:(n,d)=>`⛏️ ${n} — ${d} מ׳`,scorpSquash:'🦂 נמעך! +₪10',rubHint:'שפשפו לנקות!',
+  shopPick:{n:'מכוש II',d:'ראש חד יותר — חפירה עולה 30% פחות קפה'},
+  shopTank:{n:'מיכל קפה',d:'פינג׳אן רציני — +40% קיבולת קפה'},
+  shopLadder:{n:'מערכת סולמות',d:'מדלגים על החלק המשעמם — מתחילים ב־8- מטר'},
+  shopSavta:{n:'הכיסא של סבתא',d:'היא מסדרת ביטול החרמה אחת בכל חפירה'},
+  shareTxt:(d,f)=>`⛏️ חופר המקלט — הגעתי ל־${d}- מטר, 🏺 ×${f}. תנצחו את העומק שלי: https://miklatgames.fun/miklatdigger/?beat=${d}`,
+  shareDaily:(n,d,st)=>`📅 חפירה יומית #${n} — הגעתי ל־${d}- מטר ⛏️${st>1?` · 🔥${st}`:''}. אותו עפר לכולם, פעם ביום: https://miklatgames.fun/miklatdigger/?daily=1`}
+};
+let lang='en';
+try{
+  const q=new URLSearchParams(location.search).get('lang');
+  const s=localStorage.getItem('miklat.lang');
+  lang=(q==='he'||q==='en')?q:(s==='he'||s==='en')?s:((navigator.language||'en').startsWith('he')?'he':'en');
+}catch(e){}
+const T=()=>I18N[lang];
+function applyLang(){
+  document.documentElement.lang=lang; document.documentElement.dir=T().dir;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const v=T()[el.getAttribute('data-i18n')];
+    if(typeof v==='string') el.textContent=v;
+  });
+}
+function track(name){
+  try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'evt-mdg-'+name,event:true}); }catch(e){}
+}
+/* tip jar — set TIP_URL once (Buy Me a Coffee / Ko-fi) and it goes live */
+const TIP_URL='';
+if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
+  tj.hidden=false;tj.style.display='block';tj.addEventListener('click',()=>track('tip'));}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1900);}
+
+/* ================= storage: shared wallet + game keys =================
+   'miklat.wallet' is the cross-game contract: JSON {"sh":<int>}, never
+   negative, never corrupted — read defensively, preserve foreign fields. */
+function loadJSON(k,d){try{const v=JSON.parse(localStorage.getItem(k)||'null');return (v&&typeof v==='object')?v:d;}catch(e){return d;}}
+function saveJSON(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function wRaw(){try{const o=JSON.parse(localStorage.getItem('miklat.wallet')||'{}');return (o&&typeof o==='object'&&!Array.isArray(o))?o:{};}catch(e){return{};}}
+function wGet(){const v=Math.floor(+wRaw().sh||0);return v>0?v:0;}
+function wSet(v){const o=wRaw();o.sh=Math.max(0,Math.floor(+v||0));try{localStorage.setItem('miklat.wallet',JSON.stringify(o));}catch(e){}}
+function wAdd(d){wSet(wGet()+d);}
+const best=loadJSON('mdg_best',{depth:0,finds:0});
+let daily=loadJSON('mdg_daily',{});
+function saveDaily(){saveJSON('mdg_daily',daily);}
+const museum=loadJSON('mdg_museum',{});
+const sets=loadJSON('mdg_sets',{});
+const meta=loadJSON('mdg_meta',{});
+
+/* ================= canvas ================= */
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+let W=0,H=0,DPR=1;
+function resize(){
+  const r=cv.parentElement.getBoundingClientRect();
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=r.width;H=r.height;
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize',resize);resize();
+/* iOS self-heal: if the canvas ever reports 0, re-measure (mamaddash #102 lesson) */
+setInterval(()=>{ if(cv.width===0||cv.height===0) resize(); },1500);
+
+/* ================= the strata: 6 layers, each a palette + 2 finds + 1 true line ================= */
+const BAND=15, COLS=7;
+const STRATA=[
+ {en:'TODAY',he:'היום',dirt:'#9c6b3f',dark:'#7e5430',arts:[
+   {id:'bamba',e:'🥜',en:'90s Bamba wrapper',he:'עטיפת במבה משנות ה-90',
+    fen:"Bamba launched in 1964 and is still Israel's best-selling snack — about a quarter of the whole snack market.",
+    fhe:'במבה הושקה ב-1964 והיא עדיין החטיף הנמכר בישראל — בערך רבע משוק החטיפים כולו.'},
+   {id:'agora',e:'🪙',en:'Lost agora coin',he:'אגורה אבודה',
+    fen:"The agora got its name from the Bible — 'agorat kesef', a small piece of silver (1 Samuel 2:36).",
+    fhe:'האגורה קיבלה את שמה מהתנ"ך — "אגורת כסף" (שמואל א\' ב\', ל"ו).'}]},
+ {en:'BRITISH MANDATE',he:'המנדט הבריטי',dirt:'#8a5a32',dark:'#6f4827',arts:[
+   {id:'button',e:'🔘',en:'Brass army button',he:'כפתור פליז צבאי',
+    fen:'British forces ruled here from 1917 to 1948 — their uniform buttons still surface in topsoil all over the country.',
+    fhe:'הכוחות הבריטיים שלטו כאן מ-1917 עד 1948 — כפתורי המדים שלהם עדיין צצים באדמה בכל הארץ.'},
+   {id:'radio',e:'📻',en:'Wireless set knob',he:'כפתור מקלט רדיו',
+    fen:"The Palestine Broadcasting Service went on air from Jerusalem in 1936 — radio's first Hebrew broadcasts.",
+    fhe:'שירות השידור הארץ-ישראלי עלה לאוויר מירושלים ב-1936 — שידורי הרדיו הראשונים בעברית.'}]},
+ {en:'OTTOMAN',he:"עות'מאני",dirt:'#75492a',dark:'#5d3a21',arts:[
+   {id:'finjan',e:'🫖',en:'Copper finjan',he:"פינג'אן נחושת",
+    fen:'Coffee reached this region from Yemen in the 1500s; Ottoman coffeehouses were banned by sultans — and beloved anyway.',
+    fhe:'הקפה הגיע לאזור מתימן במאה ה-16; בתי הקפה העות\'מאניים נאסרו על ידי סולטנים — ונאהבו בכל זאת.'},
+   {id:'bead',e:'🧿',en:'Glass eye bead',he:'חרוז עין הזכוכית',
+    fen:'Blue glass "eye" beads have warded off the evil eye in Levantine markets for centuries.',
+    fhe:'חרוזי "עין" מזכוכית כחולה מגנים מעין הרע בשווקי הלבנט כבר מאות שנים.'}]},
+ {en:'CRUSADER',he:'צלבני',dirt:'#62402a',dark:'#4d3120',arts:[
+   {id:'spur',e:'⚔️',en:'Rusted knight\'s spur',he:'דורבן אביר חלוד',
+    fen:'Crusader knights held Jerusalem from 1099 until Saladin took it back in 1187.',
+    fhe:'אבירים צלבנים החזיקו בירושלים מ-1099 עד שצלאח א-דין כבש אותה בחזרה ב-1187.'},
+   {id:'seal',e:'💍',en:'Signet seal ring',he:'טבעת חותם',
+    fen:'A medieval seal pressed in wax WAS your signature — lose the ring, lose your identity.',
+    fhe:'חותם ימי-ביניימי בשעווה היה החתימה שלך — איבדת את הטבעת, איבדת את הזהות.'}]},
+ {en:'BYZANTINE',he:'ביזנטי',dirt:'#523524',dark:'#3f291c',arts:[
+   {id:'mosaic',e:'💠',en:'Mosaic tile (tessera)',he:'אבן פסיפס',
+    fen:'The 6th-century Madaba map — about two million mosaic stones — is the oldest surviving map of this land.',
+    fhe:'מפת מידבא מהמאה ה-6 — כשני מיליון אבני פסיפס — היא המפה העתיקה ביותר ששרדה של הארץ.'},
+   {id:'gaza',e:'🏺',en:'Gaza wine jar',he:'קנקן יין עזתי',
+    fen:'Byzantine "Gaza jars" carried local wine to dinner tables across the whole Mediterranean.',
+    fhe:'"קנקני עזה" הביזנטיים נשאו יין מקומי לשולחנות בכל רחבי הים התיכון.'}]},
+ {en:'ROMAN · 2ND TEMPLE',he:'רומי · בית שני',dirt:'#41281b',dark:'#301d14',arts:[
+   {id:'lamp',e:'🪔',en:'Clay oil lamp',he:'נר שמן מחרס',
+    fen:'Archaeologists date a layer by its oil lamps — the styles changed every generation, like phones.',
+    fhe:'ארכיאולוגים מתארכים שכבה לפי נרות השמן — הסגנון התחלף כל דור, כמו טלפונים.'},
+   {id:'stone',e:'⚱️',en:'Stone vessel',he:'כלי אבן',
+    fen:"Second Temple Jerusalemites carved cups from soft limestone — stone, unlike clay, can't become ritually impure.",
+    fhe:'ירושלמים בימי בית שני סיתתו כוסות מאבן גיר רכה — אבן, בניגוד לחרס, אינה מקבלת טומאה.'}]}
+];
+const VAL=[6,12,20,30,45,65];          // ₪ per clean extraction, by stratum
+const SET_BONUS=100;
+const stratumAt=r=>Math.min(STRATA.length-1,Math.floor(r/BAND));
+const stName=s=>lang==='he'?s.he:s.en;
+const aName=a=>lang==='he'?a.he:a.en;
+const aFact=a=>lang==='he'?a.fhe:a.fen;
+
+/* ================= shop (the mamad, floor by floor) ================= */
+const SHOP=[
+ {id:'pick',e:'⛏️',price:150,k:'shopPick'},
+ {id:'tank',e:'🛢️',price:250,k:'shopTank'},
+ {id:'ladder',e:'🪜',price:400,k:'shopLadder'},
+ {id:'savta',e:'🪑',price:600,k:'shopSavta'}
+];
+const maxCoffee=()=>meta.tank?140:100;
+const digCost=()=>meta.pick?1.4:2;
+
+/* ================= daily dig: same dirt for everyone (seeded) ================= */
+let RNG=Math.random;
+const dayNum=()=>Math.floor(Date.now()/864e5)-20580;   // arcade launch-era epoch (house convention)
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+/* ================= world: lazy row gen, strictly in order (determinism) ================= */
+/* tiles: 0 empty · 1 dirt · 2 rock · 3 artifact · 4 finjan · 5 water pipe */
+let grid=[],artAt={},scorps=[],falls=[],tele={},parts=[],genRow=0;
+function genRowF(r){
+  const s=stratumAt(r), row=new Array(COLS).fill(1);
+  let rocks=0;
+  if(r>=2)for(let c=0;c<COLS;c++){
+    const x=RNG();
+    if(x<0.10&&rocks<3){row[c]=2;rocks++;}
+    else if(x<0.155){row[c]=3;artAt[c+','+r]=(RNG()*STRATA[s].arts.length)|0;}
+    else if(x<0.205){row[c]=4;}
+    else if(s===0&&x<0.25){row[c]=5;}
+  }
+  if(s>=1&&RNG()<0.11){               // pre-carved pocket with a resident
+    const c0=1+((RNG()*(COLS-3))|0);
+    for(let c=c0;c<c0+3;c++){row[c]=0;delete artAt[c+','+r];}
+    scorps.push({r,x:c0+1.5,dir:RNG()<0.5?-1:1,alive:true});
+  }
+  grid[r]=row;
+}
+function ensureRows(n){while(genRow<=n)genRowF(genRow++);}
+
+/* ================= game state ================= */
+let G=null,P=null,mode='play',running=false,raf=0,last=0,camY=0;
+let beatTarget=0;
+try{ beatTarget=Math.max(0,Math.min(9999,parseInt(new URLSearchParams(location.search).get('beat')||'0',10)||0)); }catch(e){}
+if(beatTarget)track('challenged');
+
+function reset(dailyMode){
+  const dn=dailyMode?dayNum():null;
+  RNG=dn?mulberry32(dn*2654435761):Math.random;
+  grid=[];artAt={};scorps=[];falls=[];tele={};parts=[];genRow=0;
+  G={daily:dn,counted:false,t:0,coffee:maxCoffee(),shekels:0,finds:0,depth:0,
+     savtaUsed:false,beaten:false,inspT:0,shake:0,flash:0,stratum:0,B:null};
+  P={c:3,r:0,dx:3,dy:0,fall:0,swing:0};
+  mode='play';
+  ensureRows(40);
+  grid[0][3]=0;delete artAt['3,0'];                       // the starting hole
+  if(meta.ladder){for(let r=0;r<=8;r++){grid[r][3]=0;delete artAt['3,'+r];}P.r=8;P.dy=8;}
+  G.depth=P.r;
+  camY=P.r*(W/COLS)-H*0.42;
+  if(dn){G.counted=daily.attDay!==dn;
+    if(G.counted){daily.attDay=dn;saveDaily();}}
+}
+
+/* ================= sound: tiny synth, sibling-style, first-gesture init ================= */
+const SND={ctx:null,on:(localStorage.getItem('mdg_snd')??'1')==='1',
+  init(){if(!this.ctx)try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}},
+  b(f0,f1,dur,type,vol){if(!this.on||!this.ctx)return;try{
+    const c=this.ctx,o=c.createOscillator(),g=c.createGain();
+    o.type=type;o.frequency.setValueAtTime(f0,c.currentTime);
+    o.frequency.exponentialRampToValueAtTime(Math.max(1,f1),c.currentTime+dur);
+    g.gain.setValueAtTime(vol,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dur);
+    o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+dur);}catch(e){}},
+  dig(){this.b(170,110,.06,'square',.08);},
+  clink(){this.b(900,780,.05,'square',.07);},
+  slurp(){this.b(300,720,.18,'sine',.12);},
+  brush(){this.b(2000,1600,.03,'triangle',.04);},
+  ding(){this.b(880,1320,.22,'triangle',.16);this.b(1100,1650,.3,'sine',.08);},
+  whistle(){this.b(2300,2500,.18,'sine',.18);this.b(2500,1900,.3,'sine',.16);},
+  crash(){this.b(140,45,.25,'sawtooth',.2);},
+  splash(){this.b(500,140,.3,'sine',.14);},
+  over(){this.b(330,82,.6,'sawtooth',.16);}
+};
+
+/* ================= dig & move (no digging up — this is not an elevator) ================= */
+function burstPipe(c,r){
+  grid[r][c]=0;
+  G.coffee=Math.max(0,G.coffee-maxCoffee()*0.25);
+  G.flash=0.4;SND.splash();toast(T().pipe);
+  for(let i=0;i<10;i++)parts.push({x:c+0.5,y:r+0.5,vx:(Math.random()-.5)*4,vy:-Math.random()*3,t:.5,col:'#3ee6ff'});
+  if(G.coffee<=0)gameOver('coffee');
+}
+function dig(dx,dy){
+  if(!running||mode!=='play')return;
+  if(dy<0)return;                                          // can't dig up
+  const c=P.c+dx,r=P.r+dy;
+  if(c<0||c>=COLS||r<0)return;
+  ensureRows(r+2);
+  const t=grid[r][c];
+  if(t===2){SND.clink();G.shake=0.15;return;}              // rock: route around (or undermine it)
+  if(t===3){startBrush(c,r);return;}
+  if(t!==0){                                               // actually digging costs coffee
+    G.coffee=Math.max(0,G.coffee-digCost());
+    SND.dig();P.swing=0.18;
+    const col=STRATA[stratumAt(r)].dirt;
+    for(let i=0;i<6;i++)parts.push({x:c+0.5,y:r+0.5,vx:(Math.random()-.5)*3,vy:-Math.random()*2.5,t:.4,col});
+  }
+  if(t===4){G.coffee=Math.min(maxCoffee(),G.coffee+maxCoffee()*0.3);SND.slurp();}
+  if(t===5){burstPipe(c,r);if(!running)return;}
+  grid[r][c]=0;
+  if(t!==0)                                                // only DIGGING shakes the ground —
+    for(const [nc,nr] of [[c-1,r],[c+1,r],[c,r-1],[c,r+1]])// walking your own tunnel is safe
+      if(nc>=0&&nc<COLS&&nr>=0&&grid[nr]&&grid[nr][nc]===5){burstPipe(nc,nr);if(!running)return;}
+  P.c=c;P.r=r;setDepth();
+  if(G.coffee<=0)gameOver('coffee');
+}
+function setDepth(){
+  if(P.r>G.depth)G.depth=P.r;
+  if(beatTarget&&!G.beaten&&G.depth>beatTarget){G.beaten=true;toast(T().beatWin);SND.ding();}
+  const s=stratumAt(P.r);
+  if(s!==G.stratum){G.stratum=s;toast(T().stratum(stName(STRATA[s]),s*BAND));SND.ding();}
+}
+
+/* ================= brush mini-game: 3 seconds, rub for your heritage ================= */
+function startBrush(c,r){
+  mode='brush';
+  G.B={c,r,s:stratumAt(r),type:artAt[c+','+r]||0,t:3,clean:0};
+  SND.ding();
+}
+function rub(d){
+  if(mode!=='brush'||!G||!G.B)return;
+  G.B.clean=Math.min(100,G.B.clean+d);
+  if(Math.random()<0.3)SND.brush();
+  if(G.B.clean>=100)finishBrush(true);
+}
+function finishBrush(ok){
+  const B=G.B,a=STRATA[B.s].arts[B.type];
+  grid[B.r][B.c]=0;delete artAt[B.c+','+B.r];
+  G.B=null;mode='play';
+  if(!ok&&meta.savta&&!G.savtaUsed){G.savtaUsed=true;ok=true;toast(T().savta);}
+  if(ok){
+    G.shekels+=VAL[B.s];G.finds++;SND.ding();track('find');
+    const first=!(museum[a.id]>0);
+    museum[a.id]=(museum[a.id]||0)+1;saveJSON('mdg_museum',museum);
+    checkSet(B.s);
+    if(first)showCard(a,B.s);
+  }else{
+    const tax=Math.ceil(G.shekels*0.10);
+    G.shekels=Math.max(0,G.shekels-tax);
+    SND.whistle();toast(T().taxed(tax));
+    mode='insp';G.inspT=1.3;G.shake=0.3;
+  }
+  P.c=B.c;P.r=B.r;setDepth();
+}
+function checkSet(s){
+  if(sets[s])return;
+  if(STRATA[s].arts.every(a=>museum[a.id]>0)){
+    sets[s]=1;saveJSON('mdg_sets',sets);
+    wAdd(SET_BONUS);toast(T().setDone(stName(STRATA[s])));track('museum-set');SND.ding();
+  }
+}
+function showCard(a,s){
+  running=false;
+  document.getElementById('cardEmoji').textContent=a.e;
+  document.getElementById('cardName').textContent=aName(a);
+  document.getElementById('cardStratum').textContent=stName(STRATA[s])+' · -'+(s*BAND)+'m+';
+  document.getElementById('cardFact').textContent=aFact(a);
+  show('card');
+}
+
+/* ================= gravity: undermined blocks wobble 0.5s, then drop ================= */
+function gravityScan(dt){
+  for(const k in tele){
+    tele[k]-=dt;
+    if(tele[k]<=0){
+      const [c,r]=k.split(',').map(Number);
+      const t=grid[r][c];
+      if(t===2||t===3){
+        falls.push({c,y:r,kind:t,e:t===3?STRATA[stratumAt(r)].arts[artAt[c+','+r]||0].e:'🪨'});
+        grid[r][c]=0;delete artAt[k];
+      }
+      delete tele[k];
+    }
+  }
+  for(let r=1;r<genRow-1;r++){
+    const row=grid[r],below=grid[r+1];
+    if(!row||!below)continue;
+    for(let c=0;c<COLS;c++){
+      const t=row[c];
+      if((t===2||t===3)&&below[c]===0&&tele[c+','+r]===undefined)tele[c+','+r]=0.5;
+    }
+  }
+}
+function updateFalls(dt){
+  for(let i=falls.length-1;i>=0;i--){
+    const f=falls[i];
+    f.y+=dt*9;
+    if(f.c===P.c&&f.y+1>=P.r+0.3&&f.y<P.r+1){             // crushed
+      falls.splice(i,1);gameOver('crush');return;
+    }
+    const r2=Math.floor(f.y)+1;
+    ensureRows(r2+1);
+    if(grid[r2]&&grid[r2][f.c]!==0&&f.y+1>=r2){           // lands → smashes (clears)
+      for(const s of scorps)                              // dropped a rock on the scorpion: pest control
+        if(s.alive&&s.r===r2-1&&Math.floor(s.x)===f.c){s.alive=false;G.shekels+=10;toast(T().scorpSquash);}
+      const col=f.kind===2?'#888':'#d8b06a';
+      for(let j=0;j<8;j++)parts.push({x:f.c+0.5,y:r2-0.5,vx:(Math.random()-.5)*4,vy:-Math.random()*3,t:.45,col});
+      G.shake=Math.max(G.shake,0.25);SND.crash();
+      falls.splice(i,1);
+    }
+  }
+}
+
+/* ================= update ================= */
+function update(dt){
+  G.t+=dt;
+  if(G.shake>0)G.shake-=dt; if(G.flash>0)G.flash-=dt; if(P.swing>0)P.swing-=dt;
+  for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.t-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=dt*8;if(p.t<=0)parts.splice(i,1);}
+  if(mode==='insp'){G.inspT-=dt;if(G.inspT<=0)mode='play';}
+  else{
+    G.coffee-=dt;                                         // life drains at 1/s, like always
+    if(G.coffee<=0){G.coffee=0;gameOver('coffee');return;}
+    if(mode==='brush'){                                   // the world holds its breath while you brush
+      G.B.t-=dt;
+      if(G.B.t<=0)finishBrush(false);
+    }else{
+      ensureRows(P.r+Math.ceil(H/(W/COLS))+8);
+      if(grid[P.r+1]&&grid[P.r+1][P.c]===0){              // floor gone — down you go
+        P.fall+=dt;
+        if(P.fall>=0.11){P.fall=0;P.r++;setDepth();}
+      }else P.fall=0;
+      for(const s of scorps){
+        if(!s.alive||Math.abs(s.r-P.r)>30)continue;
+        const nx=s.x+s.dir*dt*1.6,lead=Math.floor(nx+s.dir*0.35);
+        if(lead<0||lead>=COLS||!grid[s.r]||grid[s.r][lead]!==0)s.dir*=-1;else s.x=nx;
+        if(s.r===P.r&&Math.abs(s.x-(P.c+0.5))<0.5){gameOver('sting');return;}
+      }
+      gravityScan(dt);
+      updateFalls(dt);
+      if(!running)return;
+    }
+  }
+  P.dx+=(P.c-P.dx)*Math.min(1,dt*16);
+  P.dy+=(P.r-P.dy)*Math.min(1,dt*16);
+  const tgt=P.dy*(W/COLS)-H*0.42;
+  camY+=(Math.max(tgt,-H*0.55)-camY)*Math.min(1,dt*6);
+}
+
+/* ================= draw ================= */
+const hash2=(c,r)=>(((c*73856093)^(r*19349663))>>>0);
+function draw(){
+  const TS=W/COLS;
+  const shx=G&&G.shake>0?(Math.random()-0.5)*10*G.shake:0;
+  ctx.save();ctx.translate(shx,0);
+  ctx.fillStyle='#2a1a0e';ctx.fillRect(-12,0,W+24,H);
+  const cy=G?camY:-H*0.55;
+  // sky & the building we're digging under
+  const surfY=-cy;
+  if(surfY>0){
+    const sky=ctx.createLinearGradient(0,0,0,surfY);
+    sky.addColorStop(0,'#7ec8ff');sky.addColorStop(1,'#ffe2b0');
+    ctx.fillStyle=sky;ctx.fillRect(-12,0,W+24,surfY);
+    ctx.textAlign='center';
+    ctx.font=`${W*0.08}px sans-serif`;ctx.fillText('☀️',W*0.85,Math.max(24,surfY-H*0.42));
+    ctx.font=`${W*0.16}px sans-serif`;ctx.fillText('🏢',W*0.28,surfY-6);
+    ctx.font=`${W*0.10}px sans-serif`;ctx.fillText('🏗️',W*0.68,surfY-4);
+    let mx=W*0.84;ctx.font=`${W*0.05}px sans-serif`;          // the mamad, perk by perk
+    for(const it of SHOP)if(meta[it.id]){ctx.fillText(it.e,mx,surfY-6);mx+=W*0.055;}
+  }
+  if(!G){ctx.restore();return;}
+  const r0=Math.max(0,Math.floor(cy/TS)-1), r1=Math.floor((cy+H)/TS)+1;
+  ensureRows(r1+4);
+  ctx.textAlign='center';
+  for(let r=r0;r<=r1;r++){
+    const row=grid[r];if(!row)continue;
+    const s=stratumAt(r),ST=STRATA[s],y=r*TS-cy;
+    for(let c=0;c<COLS;c++){
+      const t=row[c];if(t===0)continue;
+      let jx=0,jy=0;
+      if(tele[c+','+r]!==undefined){jx=(Math.random()-.5)*4;jy=(Math.random()-.5)*3;}   // the wobble = the warning
+      const x=c*TS+jx,yy=y+jy;
+      ctx.fillStyle=t===2?'#4a4540':t===5?'#39505e':ST.dirt;
+      ctx.fillRect(x,yy,TS+0.5,TS+0.5);
+      const h=hash2(c,r);                                   // deterministic speckle, no flicker
+      ctx.fillStyle=ST.dark;
+      ctx.fillRect(x+(h%5)*TS/6+2,yy+((h>>3)%5)*TS/6+2,3,3);
+      ctx.fillRect(x+((h>>6)%5)*TS/6+1,yy+((h>>9)%5)*TS/6+3,2,2);
+      if(r===0){ctx.fillStyle='#5d8a3a';ctx.fillRect(x,yy,TS+0.5,4);}                  // grass on top
+      const fs=TS*0.62;ctx.font=`${fs}px sans-serif`;
+      if(t===2)ctx.fillText('🪨',x+TS/2,yy+TS*0.78);
+      else if(t===4){ctx.globalAlpha=.85;ctx.fillText('☕',x+TS/2,yy+TS*0.78);ctx.globalAlpha=1;}
+      else if(t===5)ctx.fillText('🚰',x+TS/2,yy+TS*0.78);
+      else if(t===3){                                       // finds glow softly through the dirt
+        const a=STRATA[s].arts[artAt[c+','+r]||0];
+        ctx.save();ctx.globalAlpha=.6+.2*Math.sin(G.t*4+c+r);
+        ctx.shadowColor='#ffd166';ctx.shadowBlur=12;
+        ctx.fillText(a.e,x+TS/2,yy+TS*0.78);ctx.restore();
+      }
+    }
+    if(r>0&&r%BAND===0){                                    // stratum boundary label
+      ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+      ctx.font=`800 ${Math.max(10,W*0.026)}px ${getComputedStyle(document.body).fontFamily}`;
+      ctx.fillStyle='rgba(253,243,227,.5)';
+      ctx.fillText(`— ${stName(STRATA[s])} · ${r}m —`,W/2,y+14);
+    }
+  }
+  if(beatTarget){                                           // the friend's depth line, drawn in the dirt
+    const y=(beatTarget+1)*TS-cy;
+    if(y>-20&&y<H+20){
+      ctx.strokeStyle='#ff5d73';ctx.lineWidth=2;ctx.setLineDash([8,6]);
+      ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();ctx.setLineDash([]);
+      ctx.font=`800 ${Math.max(11,W*0.03)}px sans-serif`;ctx.fillStyle='#ff5d73';
+      ctx.textAlign=lang==='he'?'left':'right';
+      ctx.fillText(`🚩 -${beatTarget}m`,lang==='he'?8:W-8,y-6);
+      ctx.textAlign='center';
+    }
+  }
+  for(const f of falls){ctx.font=`${TS*0.62}px sans-serif`;ctx.fillText(f.e,f.c*TS+TS/2,f.y*TS-cy+TS*0.78);}
+  for(const s of scorps){
+    if(!s.alive)continue;
+    const y=s.r*TS-cy;if(y<-TS||y>H+TS)continue;
+    ctx.font=`${TS*0.6}px sans-serif`;
+    ctx.save();ctx.translate(s.x*TS,y+TS*0.76);if(s.dir<0)ctx.scale(-1,1);ctx.fillText('🦂',0,0);ctx.restore();
+  }
+  for(const p of parts){ctx.globalAlpha=Math.max(0,p.t*2);ctx.fillStyle=p.col;ctx.fillRect(p.x*TS-2,p.y*TS-cy-2,4,4);ctx.globalAlpha=1;}
+  // the digger
+  const px=P.dx*TS+TS/2,py=P.dy*TS-cy+TS*0.8;
+  ctx.font=`${TS*0.78}px sans-serif`;ctx.fillText('👷',px,py);
+  if(P.swing>0){ctx.font=`${TS*0.5}px sans-serif`;ctx.fillText('⛏️',px+TS*0.4,py-TS*0.35);}
+  // brush mini-game overlay
+  if(mode==='brush'&&G.B){
+    const B=G.B;
+    ctx.fillStyle='rgba(22,13,6,.72)';ctx.fillRect(-12,0,W+24,H);
+    const a=STRATA[B.s].arts[B.type],cxm=W/2,cym=H*0.44,R=W*0.26;
+    ctx.save();ctx.shadowColor='#ffd166';ctx.shadowBlur=24;
+    ctx.font=`${R*1.5}px sans-serif`;ctx.fillText(a.e,cxm,cym+R*0.5);ctx.restore();
+    ctx.fillStyle=`rgba(110,75,40,${1-B.clean/100})`;       // the dirt you're rubbing off
+    ctx.beginPath();ctx.arc(cxm,cym,R,0,7);ctx.fill();
+    ctx.strokeStyle='#ffd166';ctx.lineWidth=6;              // timer ring
+    ctx.beginPath();ctx.arc(cxm,cym,R+14,-Math.PI/2,-Math.PI/2+(B.t/3)*Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='rgba(94,255,168,.9)';                  // clean ring
+    ctx.beginPath();ctx.arc(cxm,cym,R+24,-Math.PI/2,-Math.PI/2+(B.clean/100)*Math.PI*2);ctx.stroke();
+    ctx.font=`900 ${Math.max(15,W*0.05)}px ${getComputedStyle(document.body).fontFamily}`;
+    ctx.fillStyle='#fdf3e3';
+    ctx.fillText(T().rubHint+' 🖐️'+(Math.floor(G.t*3)%2?'✨':''),cxm,cym+R+64);
+  }
+  if(mode==='insp'){                                        // 👮‍♀️ the whistle
+    ctx.fillStyle='rgba(22,13,6,.5)';ctx.fillRect(-12,0,W+24,H);
+    const bounce=Math.abs(Math.sin(G.t*10))*12;
+    ctx.font=`${W*0.3}px sans-serif`;ctx.fillText('👮‍♀️',W/2,H*0.5-bounce);
+    ctx.font=`900 ${W*0.14}px sans-serif`;ctx.fillStyle='#ff5d73';
+    ctx.fillText('❗',W/2+W*0.2,H*0.32);
+  }
+  // HUD
+  const hudY=Math.max(54,H*0.075);
+  ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=6;
+  ctx.textAlign=lang==='he'?'right':'left';
+  const hx=lang==='he'?W-12:12;
+  ctx.font=`900 ${Math.max(17,W*0.055)}px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.fillStyle='#fdf3e3';
+  ctx.fillText(`-${G.depth}m`,hx,hudY+26);
+  ctx.font=`800 ${Math.max(13,W*0.038)}px ${getComputedStyle(document.body).fontFamily}`;
+  ctx.fillText(`₪ ${G.shekels}   🏺 ${G.finds}`,hx,hudY+50);
+  // coffee bar
+  const bw=W*0.4,bx=lang==='he'?12:W-12-bw,ratio=G.coffee/maxCoffee();
+  ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillRect(bx,hudY+12,bw,14);
+  ctx.fillStyle=ratio<0.25?(Math.floor(G.t*4)%2?'#ff5d73':'#a33'):'#b07a3e';
+  ctx.fillRect(bx,hudY+12,bw*Math.max(0,ratio),14);
+  ctx.strokeStyle='rgba(253,243,227,.5)';ctx.lineWidth=1;ctx.strokeRect(bx,hudY+12,bw,14);
+  ctx.textAlign='center';ctx.font=`${16}px sans-serif`;
+  ctx.fillText('☕',lang==='he'?bx+bw+12:bx-12,hudY+25);
+  ctx.shadowBlur=0;
+  if(G.flash>0){ctx.fillStyle=`rgba(62,230,255,${G.flash*0.4})`;ctx.fillRect(-12,0,W+24,H);}
+  ctx.restore();
+}
+
+/* ================= input: swipes + arrows; brush mode wants rubbing ================= */
+let tx=0,ty=0,tt=0,lx=0,ly=0;
+const stage=document.getElementById('stage');
+stage.addEventListener('touchstart',e=>{const t=e.changedTouches[0];tx=lx=t.clientX;ty=ly=t.clientY;tt=performance.now();},{passive:true});
+stage.addEventListener('touchmove',e=>{
+  const t=e.changedTouches[0];
+  if(running&&mode==='brush'){rub(Math.hypot(t.clientX-lx,t.clientY-ly)*0.22);}
+  lx=t.clientX;ly=t.clientY;
+},{passive:true});
+stage.addEventListener('touchend',e=>{
+  if(mode==='brush')return;                                 // rubbing, not swiping
+  const t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;
+  if(performance.now()-tt>600)return;
+  const ax=Math.abs(dx),ay=Math.abs(dy);
+  if(Math.max(ax,ay)<24){dig(0,1);return;}                  // tap = dig down (one-thumb promise)
+  if(ax>ay)dig(dx>0?1:-1,0);
+  else if(dy>0)dig(0,1);
+},{passive:true});
+let mdown=false;
+stage.addEventListener('mousedown',e=>{mdown=true;lx=e.clientX;ly=e.clientY;});
+stage.addEventListener('mousemove',e=>{
+  if(mdown&&running&&mode==='brush')rub(Math.hypot(e.clientX-lx,e.clientY-ly)*0.22);
+  lx=e.clientX;ly=e.clientY;
+});
+window.addEventListener('mouseup',()=>{mdown=false;});
+window.addEventListener('keydown',e=>{
+  const k=e.key;
+  if(mode==='brush'){if(k.startsWith('Arrow')||k===' ')rub(9);return;}
+  if(k==='ArrowLeft'||k==='a')dig(-1,0);
+  else if(k==='ArrowRight'||k==='d')dig(1,0);
+  else if(k==='ArrowDown'||k==='s'||k===' ')dig(0,1);
+});
+
+/* ================= loop & lifecycle ================= */
+function frame(ts){
+  raf=requestAnimationFrame(frame);
+  const dt=Math.min(0.05,(ts-last)/1000||0.016);last=ts;
+  try{ if(running)update(dt); draw(); }
+  catch(err){ /* contain: never freeze the thread on a frame error */ }
+}
+const OVERLAYS=['menu','over','paused','shopOv','museumOv','card'];
+function show(id){for(const o of OVERLAYS)document.getElementById(o).classList.toggle('hidden',o!==id);}
+function hideAll(){for(const o of OVERLAYS)document.getElementById(o).classList.add('hidden');}
+function start(dailyMode){
+  reset(dailyMode===true);hideAll();running=true;SND.init();
+  track(G.daily?'start-daily':'start');
+  if(G.daily&&!G.counted)toast(T().practice);
+}
+function gameOver(cause){
+  running=false;mode='play';track(G.daily?'death-daily':'death');SND.over();
+  wAdd(G.shekels);                                          // the run banks into the shared wallet
+  document.getElementById('ovTtl').textContent=T()[{coffee:'overCoffee',crush:'overCrush',sting:'overSting'}[cause]];
+  document.getElementById('ovSub').textContent=T()[{coffee:'overCoffeeSub',crush:'overCrushSub',sting:'overStingSub'}[cause]];
+  document.getElementById('ovEmoji').textContent={coffee:'☕😴',crush:'🧱👷',sting:'🦂'}[cause];
+  document.getElementById('ovDepth').textContent='-'+G.depth;
+  document.getElementById('ovFinds').textContent=G.finds;
+  document.getElementById('ovShekels').textContent=G.shekels;
+  const ob=document.getElementById('ovBeat');
+  if(beatTarget){ob.style.display='';ob.textContent=G.depth>beatTarget?T().beatWin:T().beatBanner(beatTarget);}
+  if(G.depth>best.depth||(G.depth===best.depth&&G.finds>best.finds)){
+    best.depth=G.depth;best.finds=G.finds;saveJSON('mdg_best',best);
+  }
+  document.getElementById('ovBest').textContent=T().best(best.depth,best.finds);
+  if(G.daily&&G.counted){   // one counted attempt a day; streak = consecutive attempted days
+    daily.streak=(daily.lastDay===G.daily-1)?(daily.streak||0)+1:1;
+    daily.lastDay=G.daily;daily.depth=G.depth;daily.finds=G.finds;
+    saveDaily();
+  }
+  paintMenuLines();show('over');
+}
+function paintMenuLines(){
+  const dn=dayNum();
+  document.getElementById('dailyBtn').textContent=`📅 ${T().daily} #${dn}`+(daily.lastDay===dn?` — ⛏️ -${daily.depth}m`:'');
+  document.getElementById('menuDaily').textContent=(daily.streak||0)>0?T().dailyStreak(daily.streak):'';
+  document.getElementById('menuBest').textContent=best.depth>0?T().best(best.depth,best.finds):'';
+  document.getElementById('menuWallet').textContent=T().wallet(wGet());
+}
+/* shop & museum panels are rebuilt on open — cheap and always current */
+function paintShop(){
+  document.getElementById('shopWallet').textContent=T().wallet(wGet());
+  const list=document.getElementById('shopList');list.innerHTML='';
+  for(const it of SHOP){
+    const li=T()[it.k],div=document.createElement('div');div.className='shop-item';
+    const b=document.createElement('button');
+    if(meta[it.id]){b.disabled=true;b.textContent=T().owned;}
+    else{b.textContent=`${T().buy}${it.price}`;
+      b.addEventListener('click',()=>{
+        if(wGet()>=it.price){wSet(wGet()-it.price);meta[it.id]=1;saveJSON('mdg_meta',meta);SND.ding();paintShop();}
+        else toast(T().poor);
+      });}
+    div.innerHTML=`<span class="ico">${it.e}</span><span class="nm"><b>${li.n}</b>${li.d}</span>`;
+    div.appendChild(b);list.appendChild(div);
+  }
+}
+function paintMuseum(){
+  const total=STRATA.reduce((n,s)=>n+s.arts.length,0);
+  const got=STRATA.reduce((n,s)=>n+s.arts.filter(a=>museum[a.id]>0).length,0);
+  document.getElementById('musPct').textContent=`🏛️ ${Math.round(got/total*100)}%`;
+  const list=document.getElementById('musList');list.innerHTML='';
+  STRATA.forEach((s,i)=>{
+    const div=document.createElement('div');div.className='mus-strat';
+    const done=sets[i]?' ✅':'';
+    let row='';
+    for(const a of s.arts){
+      const n=museum[a.id]||0;
+      row+=`<span>${n>0?a.e:'❓'}<span class="ct">${n>0?'×'+n:'·'}</span></span>`;
+    }
+    div.innerHTML=`<h3>${stName(s)} · ${i*BAND}m${done}</h3><div class="mus-row">${row}</div>`;
+    list.appendChild(div);
+  });
+}
+document.getElementById('startBtn').addEventListener('click',()=>start(false));
+document.getElementById('dailyBtn').addEventListener('click',()=>start(true));
+document.getElementById('againBtn').addEventListener('click',()=>start(!!(G&&G.daily)));   // replay stays in the mode you died in
+document.getElementById('menuBtn').addEventListener('click',()=>{paintMenuLines();show('menu');});
+document.getElementById('shopBtn').addEventListener('click',()=>{paintShop();show('shopOv');});
+document.getElementById('museumBtn').addEventListener('click',()=>{paintMuseum();show('museumOv');});
+document.getElementById('shopClose').addEventListener('click',()=>{paintMenuLines();show('menu');});
+document.getElementById('museumClose').addEventListener('click',()=>{paintMenuLines();show('menu');});
+document.getElementById('cardBtn').addEventListener('click',()=>{hideAll();running=true;last=performance.now();});
+document.getElementById('resumeBtn').addEventListener('click',()=>{hideAll();running=true;last=performance.now();});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden&&running){running=false;show('paused');}
+});
+document.getElementById('shareBtn').addEventListener('click',async()=>{
+  const txt=(G&&G.daily)?T().shareDaily(G.daily,daily.depth!=null?daily.depth:G.depth,daily.streak||0)
+    :T().shareTxt(G?G.depth:best.depth,G?G.finds:best.finds);
+  try{
+    if(navigator.share){await navigator.share({text:txt});track('share');}
+    else{await navigator.clipboard.writeText(txt);toast(T().copied);track('share-copy');}
+  }catch(e){}
+});
+/* arcade link must not register as a game tap */
+try{const ab=document.getElementById('arcadeBack');
+  ab.addEventListener('touchend',e=>e.stopPropagation());}catch(e){}
+
+applyLang();
+paintMenuLines();
+if(beatTarget){const b=document.getElementById('beatBanner');b.style.display='';b.textContent=T().beatBanner(beatTarget);}
+if(new URLSearchParams(location.search).get('daily')){   // daily links land on the daily button
+  const db=document.getElementById('dailyBtn');
+  db.classList.remove('ghostbtn');db.classList.add('bigbtn');
+}
+requestAnimationFrame(frame);
+if('serviceWorker' in navigator)
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+<script data-goatcounter="https://miklat-games.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

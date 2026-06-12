@@ -298,7 +298,7 @@ try{ beatTarget=Math.max(0,parseInt(new URLSearchParams(location.search).get('be
 
 function newList(){
   const pool=[...curZone().items].sort(()=>RNG()-0.5);
-  return pool.slice(0,4).map(it=>({it,got:false}));
+  return pool.slice(0,G.baskets===0?3:4).map(it=>({it,got:false}));   // first list is 3: first dopamine at ~10s
 }
 function advanceZone(){
   const prev=curZone().shuk;
@@ -406,7 +406,7 @@ function spawnRow(){
   if(move<0.4) G.safeLane=Math.max(0,Math.min(2,G.safeLane+(RNG()<0.5?-1:1)));
   for(let l=0;l<3;l++){
     if(l===G.safeLane) continue;
-    const p=0.45+0.4*d;
+    const p=0.30+0.55*d;                    // gentler first 15s, same 0.85 endgame density
     if(RNG()<p){
       const r=RNG();
       const kind=r<0.4?'low':r<0.7?'high':'block';
@@ -433,7 +433,7 @@ function spawnRow(){
 function hit(){
   if(G.inv>0||G.cart>0)return;
   if(G.vendor>0){ gameOver(); return; }
-  G.vendor=6; G.inv=1.2; G.magnet=0; G.shake=0.4; G.flash=0.5; G.flashCol='255,93,115'; G.hbAt=0; SND.thud();
+  G.vendor=4; G.inv=2.0; G.magnet=0;       // mercy window + shorter chase (playtest: halves stumble lethality) G.shake=0.4; G.flash=0.5; G.flashCol='255,93,115'; G.hbAt=0; SND.thud();
   toast(T().stumble); if(navigator.vibrate)try{navigator.vibrate(80);}catch(e){}
 }
 function collect(e){
@@ -472,7 +472,7 @@ function update(dt){
   const zv=G.speed*dt;
   G.dist+=zv*1000;
   G.zoneDist+=zv*1000;
-  if(G.zoneDist>ZONE_FALLBACK_DIST) advanceZone();
+  if(G.zoneDist>ZONE_FALLBACK_DIST){advanceZone();G.list=newList();}   // fallback advance renews the list too (bot-found bug)
   G.laneF+=(G.lane-G.laneF)*Math.min(1,dt*14);
   if(G.jy>0||G.vy>0){G.vy-=dt*7.2;G.jy=Math.max(0,G.jy+G.vy*dt);if(G.jy===0)G.vy=0;}
   if(G.prevJy>0&&G.jy===0){                     // landed: squash + dust
@@ -489,7 +489,7 @@ function update(dt){
   if(G.vendor>0){
     G.vendor=Math.max(0,G.vendor-dt);
     G.hbAt-=dt;                                  // heartbeat speeds up as he closes in
-    if(G.hbAt<=0){SND.heart();G.hbAt=1.0-0.4*(1-G.vendor/6);}
+    if(G.hbAt<=0){SND.heart();G.hbAt=1.0-0.4*(1-G.vendor/4);}
   }
   if(G.shake>0)G.shake-=dt; if(G.flash>0)G.flash-=dt;
   for(let i=G.parts.length-1;i>=0;i--){const p=G.parts[i];
@@ -607,7 +607,7 @@ function draw(){
   }
   // vendor on your heels
   if(G.vendor>0){
-    const vf=pf*(0.8+0.25*(G.vendor/6));
+    const vf=pf*(0.8+0.25*(G.vendor/4));
     ctx.fillStyle='rgba(26,15,8,.3)';
     ctx.beginPath();ctx.ellipse(px-pf*0.7,PLAYY()+8,vf*0.4,vf*0.1,0,0,6.283);ctx.fill();
     ctx.fillStyle='#fdf3e3';
@@ -642,7 +642,7 @@ function draw(){
   ctx.globalAlpha=1;
   // vendor proximity vignette: the screen itself gets nervous
   if(G.vendor>0&&VIGG){
-    ctx.globalAlpha=0.22*(G.vendor/6)*(0.8+0.2*Math.sin(G.t*9));
+    ctx.globalAlpha=0.22*(G.vendor/4)*(0.8+0.2*Math.sin(G.t*9));
     ctx.fillStyle=VIGG;ctx.fillRect(-12,0,W+24,H);
     ctx.globalAlpha=1;
   }

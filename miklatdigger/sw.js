@@ -1,23 +1,10 @@
-/* MIKLAT GAMES portal — offline-first service worker.
-   Caches the portal shell ONLY. Game scopes are bypassed —
-   each game ships its own SW and owns its own cache. */
-const CACHE = 'miklat-portal-v3';
+/* MIKLAT DIGGER — offline-first service worker (pattern: mamaddash v1) */
+const CACHE = 'miklatdigger-v1';
 const ASSETS = [
   './',
   './index.html',
-  './manifest.webmanifest',
-  './og.jpg',
-  './assets/hero-bg.webp',
-  './assets/irondome-cover.webp',
-  './assets/balagan-cover.webp',
-  './assets/fabatollah-cover.webp',
-  './assets/shukshopper-cover.svg',
-  './assets/miklatdigger-cover.svg',
-  './assets/dome-arc.svg',
-  './mamaddash/art/hero.webp',
-  './mamaddash/art/icon.png'
+  './manifest.webmanifest'
 ];
-const GAME_SCOPES = ['/irondome/', '/mamaddash/', '/shukshopper/'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -31,13 +18,9 @@ self.addEventListener('activate', e => {
   );
 });
 
+/* Navigations: network-first with a 3s cache race. Assets: cache-first. */
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  const path = new URL(e.request.url).pathname;
-  // hands off the games — their own SWs own those scopes
-  // (one exception: the two mamaddash art files the portal itself shows)
-  const isPortalAsset = ASSETS.some(a => a !== './' && path.endsWith(a.slice(1)));
-  if (!isPortalAsset && GAME_SCOPES.some(s => path.startsWith(s))) return;
   const isNav = e.request.mode === 'navigate' || e.request.destination === 'document';
   e.respondWith(
     caches.match(e.request).then(cached => {
