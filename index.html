@@ -157,6 +157,15 @@
 
   <main class="main">
     <div class="cards">
+      <a class="gcard" href="whackamullah/" id="cardWhack" style="--accent:#ffd166" data-game="whackamullah">
+        <div class="coverwrap"><img class="cover" src="whackamullah/cover.png" alt="Whack-a-Mullah" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
+        <div class="body">
+          <div class="ttl"><span class="name">Whack-a-Mullah</span><span class="name-he">וואק-א-מולה</span></div>
+          <div class="hook" data-i18n="whackHook">Bonk the regime, spare the fabulous. Multi-tap, 3 strikes — how far can you go?</div>
+          <div class="meta"><span class="pill" data-i18n="offline">📵 No reception needed</span></div>
+        </div>
+      </a>
+
       <a class="gcard" href="irondome/" id="cardIron" style="--accent:#3ee6ff" data-game="irondome">
         <div class="coverwrap"><img class="cover" src="assets/irondome-cover.webp" alt="Pixel-art Iron Dome intercepting rockets over a glowing city skyline" loading="eager"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
@@ -179,6 +188,13 @@
       </a>
 
       <div class="ghosts">
+        <div class="ghost">
+          <img class="gart" src="whackamullah/cover.png" alt="Whack-a-Mullah" loading="lazy">
+          <div class="gbody">
+            <div class="gname">🔨 WHACK-A-MULLAH</div>
+            <span class="glabel" data-i18n="soon">DOOR OPENING SOON</span>
+          </div>
+        </div>
         <div class="ghost">
           <img class="gart" src="assets/shukshopper-cover.svg" alt="Runner with a basket sprinting through a striped-awning market alley, chased by a vendor" loading="lazy">
           <div class="gbody">
@@ -338,8 +354,7 @@ if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
   tj.hidden=false;tj.addEventListener('click',()=>track('tip'));}
 document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
 document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
-document.getElementById('cardShuk').addEventListener('click',()=>track('play-shukshopper'));
-document.getElementById('cardDigger').addEventListener('click',()=>track('play-miklatdigger'));
+
 
 applyLang(); applyAudio();
 if ('serviceWorker' in navigator)

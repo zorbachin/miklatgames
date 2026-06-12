@@ -1,7 +1,7 @@
 /* MIKLAT GAMES portal — offline-first service worker.
    Caches the portal shell ONLY. Game scopes are bypassed —
    each game ships its own SW and owns its own cache. */
-const CACHE = 'miklat-portal-v3';
+const CACHE = 'miklat-portal-v4';
 const ASSETS = [
   './',
   './index.html',
