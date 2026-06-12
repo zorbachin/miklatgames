@@ -378,6 +378,7 @@ const T = {
     upSling: 'Iron Sling', upSlingD: 'Volley button 🪨: +1 charge per level',
     waveOf: 'Rockets', comboX: 'COMBO x', tapHint: '👆 TAP THE ROCKETS!', direct: 'DIRECT HIT!',
     share: '🥊 Challenge a friend', shared: '✓ Copied!',
+    dailyShare: '📅 Iron Dome Daily · {date}\n{grid}\nScore: {s}{streak}\nSame barrage for everyone today 👇\nhttps://miklatgames.fun/irondome/',
     challengeTxt: '🥊 Your friend scored {s} defending {c} — beat them!',
     lvlDone: [
       '{c} sleeps soundly tonight. You\'re welcome.',
@@ -464,6 +465,7 @@ const T = {
     upSling: 'קלע ברזל', upSlingD: 'כפתור מטח 🪨: מטען נוסף לכל שלב',
     waveOf: 'רקטות', comboX: 'קומבו ×', tapHint: '👆 לחצו על הרקטות!', direct: 'פגיעה ישירה!',
     share: '🥊 אתגרו חבר', shared: '✓ הועתק!',
+    dailyShare: '📅 אזעקת היום · {date}\n{grid}\nניקוד: {s}{streak}\nאותו מטח לכולם היום 👇\nhttps://miklatgames.fun/irondome/',
     challengeTxt: '🥊 חבר שלכם עשה {s} נקודות בהגנה על {c} — תנצחו!',
     lvlDone: [
       '{c} ישנה בשקט הלילה. על לא דבר.',
@@ -1854,7 +1856,8 @@ function endLevel(won){
               city: G.daily ? (t('daily') + ' ' + todayStr()) :
                     G.endless ? t('endlessName') : t('levels')[G.levelIdx],
               grid: G.endless ? ('🚨 ' + Math.floor(G.endlessT) + 's') :
-                    ('🟩'.repeat(gN) + '🟥'.repeat(10 - gN) + ' ' + G.killed + '/' + tot) };
+                    ('🟩'.repeat(gN) + '🟥'.repeat(10 - gN) + ' ' + G.killed + '/' + tot),
+              daily: !!G.daily };
   const total = G.spawned;
   const pct = total ? G.killed / total : 0;
   const alive = G.buildings.filter(b => b.alive).length;
@@ -1881,6 +1884,8 @@ function endLevel(won){
     $('shop').style.display = 'none'; $('coins').style.display = 'none';
     $('btnShopT1').textContent = '🛒 ' + t('upgrades') + ' · ₪' + walletGet();
     $('btnNext').textContent = t('menu');
+    $('btnShare1').textContent = '📤 ' + t('share');
+    $('btnShare1').className = 'btn primary';
     dailyEnded = true;
     show('scrEnd');
     return;
@@ -2145,18 +2150,30 @@ $('btnShopT2').onclick = e => toggleShop('shopOver', 'coinsOver', e.target);
    and we can finally measure K-factor. */
 let lastRun = { score: 0, city: '', grid: '' };
 function shareScore(btn){
-  const txt = t('shareTxt').replace('{s}', lastRun.score)
-                           .replace('{c}', lastRun.city || t('levels')[0]) +
-              (lastRun.grid ? '\n' + lastRun.grid : '');
-  const url = 'https://miklatgames.fun/irondome/?ref=share&b=' +
+  let txt;
+  if (lastRun.daily){
+    const streak = save.daily && save.daily.streak > 1 ? ' · 🔥×' + save.daily.streak : '';
+    txt = t('dailyShare')
+      .replace('{date}', todayStr())
+      .replace('{grid}', lastRun.grid || '')
+      .replace('{s}', lastRun.score)
+      .replace('{streak}', streak);
+  } else {
+    txt = t('shareTxt').replace('{s}', lastRun.score)
+                       .replace('{c}', lastRun.city || t('levels')[0]) +
+          (lastRun.grid ? '\n' + lastRun.grid : '');
+  }
+  const url = lastRun.daily ? 'https://miklatgames.fun/irondome/'
+            : 'https://miklatgames.fun/irondome/?ref=share&b=' +
               lastRun.score + '&c=' + encodeURIComponent(lastRun.city);
   if (navigator.share){
-    navigator.share({ text: txt, url })
-      .then(() => track('share'))               // count completions, not clicks
+    navigator.share(lastRun.daily ? { text: txt } : { text: txt, url })
+      .then(() => track('share'))
       .catch(() => {});
   } else {
     track('share');
-    window.open('https://wa.me/?text=' + encodeURIComponent(txt + ' ' + url), '_blank');
+    const payload = lastRun.daily ? txt : txt + ' ' + url;
+    window.open('https://wa.me/?text=' + encodeURIComponent(payload), '_blank');
   }
 }
 $('btnShare1').onclick = e => shareScore(e.target);
