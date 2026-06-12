@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675">
+  <defs>
+    <linearGradient id="r" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff4d4d"/><stop offset=".25" stop-color="#ff9f43"/>
+      <stop offset=".5" stop-color="#ffd166"/><stop offset=".7" stop-color="#3ee6ff"/>
+      <stop offset="1" stop-color="#a25bff"/>
+    </linearGradient>
+    <linearGradient id="rv" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff4d4d"/><stop offset=".2" stop-color="#ff9f43"/>
+      <stop offset=".4" stop-color="#ffd166"/><stop offset=".6" stop-color="#5dffa8"/>
+      <stop offset=".8" stop-color="#3ee6ff"/><stop offset="1" stop-color="#a25bff"/>
+    </linearGradient>
+    <radialGradient id="bg" cx=".5" cy=".2" r="1">
+      <stop offset="0" stop-color="#1c2350"/><stop offset="1" stop-color="#0a1226"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <!-- soft rainbow rays -->
+  <g opacity=".14">
+    <rect x="0" y="0" width="1200" height="113" fill="#ff4d4d"/>
+    <rect x="0" y="113" width="1200" height="113" fill="#ff9f43"/>
+    <rect x="0" y="226" width="1200" height="113" fill="#ffd166"/>
+    <rect x="0" y="339" width="1200" height="113" fill="#5dffa8"/>
+    <rect x="0" y="452" width="1200" height="113" fill="#3ee6ff"/>
+    <rect x="0" y="565" width="1200" height="113" fill="#a25bff"/>
+  </g>
+  <!-- character on the right -->
+  <g transform="translate(840 70) scale(1.05)">
+    <ellipse cx="180" cy="540" rx="120" ry="22" fill="#000" opacity=".3"/>
+    <!-- pride cape -->
+    <path d="M118 200 Q40 420 96 540 L150 540 L150 214 Z" fill="url(#rv)" opacity=".9"/>
+    <path d="M242 200 Q320 420 264 540 L210 540 L210 214 Z" fill="url(#rv)" opacity=".9"/>
+    <!-- body -->
+    <path d="M160 386 L154 528 L156 540" stroke="#e9b48a" stroke-width="30" stroke-linecap="round" fill="none"/>
+    <path d="M200 386 L208 528 L206 540" stroke="#e9b48a" stroke-width="30" stroke-linecap="round" fill="none"/>
+    <path d="M122 210 Q180 192 238 210 L230 346 Q180 362 130 346 Z" fill="#3ee6ff"/>
+    <path d="M122 210 Q180 192 238 210 L230 346 Q180 362 130 346 Z" fill="url(#r)" opacity=".25"/>
+    <rect x="166" y="160" width="28" height="32" rx="10" fill="#e9b48a"/>
+    <ellipse cx="180" cy="116" rx="50" ry="58" fill="#e9b48a"/>
+    <!-- eyes + heart shades -->
+    <path d="M161 127 C146 121,146 113,156 113 C161 113,162 117,161 119 C162 117,163 113,168 113 C178 113,178 121,161 127 Z" fill="rgba(255,80,160,.5)" stroke="#ff2e88" stroke-width="2.4"/>
+    <path d="M199 127 C184 121,184 113,194 113 C199 113,200 117,199 119 C200 117,201 113,206 113 C216 113,216 121,199 127 Z" fill="rgba(255,80,160,.5)" stroke="#ff2e88" stroke-width="2.4"/>
+    <!-- rainbow beard -->
+    <path d="M132 122 Q124 172 152 196 Q180 214 208 196 Q236 172 228 122 Q210 154 180 156 Q150 154 132 122 Z" fill="url(#rv)"/>
+    <path d="M168 162 Q180 156 192 162 Q180 170 168 162 Z" fill="#ff4fa3"/>
+    <!-- rainbow turban + jewel -->
+    <path d="M126 96 Q180 36 234 96 Q236 116 180 118 Q124 116 126 96 Z" fill="url(#r)"/>
+    <path d="M122 92 Q180 60 238 92 Q240 112 180 112 Q120 112 122 92 Z" fill="url(#r)"/>
+    <path d="M174 60 q6 -8 12 0 q-6 6 -12 0 Z" fill="#ffd166"/>
+    <!-- boa -->
+    <path d="M120 196 Q180 232 240 196" stroke="#ff6fb5" stroke-width="22" fill="none" stroke-linecap="round" opacity=".9"/>
+  </g>
+  <!-- wordmark -->
+  <text x="70" y="300" font-family="Courier New,monospace" font-weight="700" font-size="92" fill="url(#r)">FABATOLLAH</text>
+  <text x="74" y="360" font-family="Heebo,Arial,sans-serif" font-size="34" fill="#eaf2ff" opacity=".9">Pride makeover salon 🏳️‍🌈</text>
+  <text x="74" y="412" font-family="Heebo,Arial,sans-serif" font-size="26" fill="#8da3cc">Dress him · paint him · bedazzle him</text>
+</svg>
