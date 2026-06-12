@@ -47,9 +47,10 @@
     background:radial-gradient(circle, var(--glow,rgba(255,93,177,.22)) 0%, transparent 64%);filter:blur(10px);z-index:0;transition:background .4s;}
   .ph{position:relative;height:min(60vh,560px);aspect-ratio:2/3;max-width:96%;z-index:2;
     filter:drop-shadow(0 16px 30px rgba(0,0,0,.55));}
-  .ph .ly{position:absolute;transform:translate(-50%,-50%);pointer-events:none;}
+  .ph .ly{position:absolute;transform:translate(-50%,0);pointer-events:none;}
+  .ph .ly.base{inset:0;left:0;top:0;width:100%;height:100%;transform:none;}
   .ph .ly.pop{animation:pop .22s var(--ease);}
-  @keyframes pop{40%{transform:translate(-50%,-50%) scale(1.08)}}
+  @keyframes pop{40%{transform:translate(-50%,0) scale(1.06)}}
 
   .rail{position:absolute;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:13px;z-index:5;}
   .rail.left{inset-inline-start:8px;} .rail.right{inset-inline-end:8px;}
@@ -196,8 +197,8 @@
 <script>
 'use strict';
 /* ===================== item library (real AI sprites) ===================== */
-const ANCH={head:[50,13,38],top:[50,47,48],bottom:[50,67,43],robe:[50,60,80],neck:[50,36,38],
-  beard:[50,19,26],glasses:[50,14.5,21],wings:[50,43,95],gloves:[50,58,70],fan:[78,47,25],cape:[50,62,96]};
+const ANCH={head:[49.4,2,28],top:[49.4,25,45],bottom:[49.4,50,49],robe:[49.4,24,80],neck:[49.4,30,38],
+  beard:[49.4,14,24],wings:[49.4,27,96],fan:[78,42,25],cape:[49.4,24,96]};
 const TOG_FILE={wings:'wings-wings',fan:'fan-fan',cape:'cape-rainbow'};
 const TRAYS={
   looks:{type:'looks'},
@@ -225,10 +226,9 @@ let state=Object.assign({},DEFAULT);
 
 /* ===================== render (photo layers) ===================== */
 const ITEM_POS={
-  'top-crop':[50,45,46],'top-tee':[50,46,46],'top-blouse':[50,46,52],'top-halter':[50,46,46],'top-sequin':[50,46,48],
-  'beard-pink':[50,18.5,24],'beard-gold':[50,18.5,24],
-  'head-drag-wig':[50,12,40],'head-tiara':[50,10.5,30],'head-mohawk':[50,11.5,34],
-  'neck-pride':[50,33,18]
+  'head-drag-wig':[49.4,5,40],'head-tiara':[49.4,1,30],'head-mohawk':[49.4,3,34],
+  'head-rainbow-turban':[49.4,2,30],'head-white-turban':[49.4,2,28],'head-black-turban':[49.4,2,28],'head-beret':[49.4,3,26],
+  'neck-pride':[49.4,28,16]
 };
 function posOf(slot,file){ return ITEM_POS[file] || (file==='__base__'?[50,50,100]:ANCH[slot]); }
 let LAYERS=[], lastChanged=null;
@@ -240,8 +240,9 @@ function render(){
   ['bottom','top','robe','head','neck','beard'].forEach(s=>{ if(state[s]) LAYERS.push({slot:s,file:s+'-'+state[s]}); });
   if(state.fan) LAYERS.push({slot:'fan',file:TOG_FILE.fan});
   let h='';
-  LAYERS.forEach(L=>{ const a=posOf(L.slot,L.file); const src=L.file==='__base__'?'art/base.png':'art/items/'+L.file+'.webp';
-    h+=`<img class="ly${lastChanged===L.slot?' pop':''}" src="${src}" style="left:${a[0]}%;top:${a[1]}%;width:${a[2]}%">`; });
+  LAYERS.forEach(L=>{ if(L.file==='__base__'){ h+=`<img class="ly base" src="art/base.png">`; return; }
+    const a=posOf(L.slot,L.file);
+    h+=`<img class="ly${lastChanged===L.slot?' pop':''}" src="art/items/${L.file}.webp" style="left:${a[0]}%;top:${a[1]}%;width:${a[2]}%">`; });
   document.getElementById('ph').innerHTML=h;
   updateMeter(); updateBubbles();
 }
@@ -336,8 +337,9 @@ function confetti(n){ const cols=['#ff4d4d','#ff9f43','#ffd166','#5dffa8','#3ee6
 let runBlob=null;
 function strut(){ earn(25); openRunway(); track('strut'); }
 function drawChar(ctx,CW,CH){ LAYERS.forEach(L=>{ const im=IMG[L.file]; if(!im||!im.complete||!im.naturalWidth)return;
+  if(L.file==='__base__'){ ctx.drawImage(im,0,0,CW,CH); return; }
   const a=posOf(L.slot,L.file); const w=CW*a[2]/100, h=w*im.naturalHeight/im.naturalWidth;
-  ctx.drawImage(im, CW*a[0]/100-w/2, CH*a[1]/100-h/2, w, h); }); }
+  ctx.drawImage(im, CW*a[0]/100-w/2, CH*a[1]/100, w, h); }); }
 function openRunway(){
   const rw=document.getElementById('runway'); rw.classList.add('open'); runBlob=null;
   document.getElementById('rgo').style.display='none';
