@@ -1,26 +1,29 @@
-/* Iron Dome — offline-first service worker */
-const CACHE = 'irondome-v25';
+/* MAMAD DASH — offline-first service worker (pattern: irondome v25) */
+const CACHE = 'mamaddash-v1';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icon-192.png',
-  './icon-512.png',
-  './apple-touch-icon.png',
-  './menu-bg.jpg',
-  './bg/bg1.jpg',
-  './bg/bg2.jpg',
-  './bg/bg3.jpg',
-  './bg/bg4.jpg',
-  './bg/bg5.jpg',
-  './bg/bg6.jpg',
-  './bg/bg7.jpg',
-  './bg/bg8.jpg',
-  './bg/bg9.jpg',
-  './bg/bg10.jpg',
-  './bg/falafel1.png',
-  './bg/falafel2.png',
-  './bg/falafel3.png'
+  './og.jpg',
+  './art/bg-beach.webp',
+  './art/bg-florentin.webp',
+  './art/bg-night.webp',
+  './art/bg-oldnorth.webp',
+  './art/door.png',
+  './art/duck.png',
+  './art/hero.webp',
+  './art/icon.png',
+  './art/jump.png',
+  './art/keyart.webp',
+  './art/pow-magnet.png',
+  './art/pow-star.png',
+  './art/pow-time.png',
+  './art/run1.png',
+  './art/run2.png',
+  './art/savta-cart.png',
+  './art/savta-judge.png',
+  './art/savta-nu.png',
+  './art/tumble.png'
 ];
 
 self.addEventListener('install', e => {

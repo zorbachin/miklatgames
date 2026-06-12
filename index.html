@@ -74,8 +74,9 @@
     background:var(--c-panel);border:1px solid var(--c-cyan-border);box-shadow:var(--shadow-card);
     transition:transform .12s var(--ease);}
   .gcard:active{transform:scale(.98);}
+  .gcard .coverwrap{position:relative;}
   .gcard .cover{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--c-panel-2);}
-  .gcard .play{position:absolute;top:12px;inset-inline-end:12px;background:linear-gradient(180deg,#ffd166,#e9a23b);
+  .gcard .play{position:absolute;bottom:10px;inset-inline-end:10px;background:linear-gradient(180deg,#ffd166,#e9a23b);
     color:#1a1405;font-weight:900;font-size:14px;padding:9px 16px;border-radius:11px;
     box-shadow:0 6px 18px rgba(233,162,59,.45);}
   .gcard .body{padding:13px 15px 15px;border-top:2px solid var(--accent,var(--c-cyan));}
@@ -88,9 +89,18 @@
     background:var(--c-cyan-wash);color:var(--c-cyan);border:1px solid var(--c-cyan-border);}
   .pill.best{background:rgba(255,209,102,.12);color:var(--c-gold);border-color:var(--c-gold-border);}
 
-  .ghost{border:1px dashed rgba(141,163,204,.4);border-radius:18px;padding:22px 16px;text-align:center;color:var(--c-dim);
-    font-size:13.5px;background:rgba(16,27,56,.4);}
-  .ghost .q{font-size:26px;filter:saturate(.6);margin-bottom:6px;}
+  .ghosts{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .ghost{position:relative;border:1px dashed rgba(141,163,204,.45);border-radius:18px;overflow:hidden;
+    text-align:center;color:var(--c-dim);background:rgba(16,27,56,.4);}
+  .ghost .gart{width:100%;aspect-ratio:16/11;object-fit:cover;display:block;
+    filter:saturate(.75) brightness(.8);}
+  .ghost::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(0deg,rgba(10,18,38,.88) 0%,rgba(10,18,38,.25) 45%,transparent 70%);pointer-events:none;}
+  .ghost .gbody{position:absolute;left:0;right:0;bottom:10px;z-index:2;}
+  .ghost .gname{font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:.07em;color:#eaf2ff;
+    text-shadow:0 2px 8px rgba(0,0,0,.9);margin-bottom:6px;}
+  .ghost .glabel{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.11em;color:var(--c-gold);
+    background:rgba(10,14,26,.8);border:1px solid rgba(255,209,102,.4);border-radius:999px;padding:4px 9px;}
 
   /* ---- why / safety ---- */
   .panel{margin-top:22px;background:var(--c-panel);border:1px solid var(--c-cyan-border);
@@ -139,7 +149,7 @@
       <div class="wordmark-alt" data-i18n="brandAlt">משחקים למקלט</div>
       <p class="promise" data-i18n="promise">Free browser games that work in the shelter — no signal, no download, no ads.</p>
       <div class="hero-badges">
-        <span class="badge gold" data-i18n="free">Free forever</span>
+        <span class="badge gold" data-i18n="free">Free</span>
         <span class="badge cyan" data-i18n="nosignal">No signal needed</span>
       </div>
     </div>
@@ -148,34 +158,34 @@
   <main class="main">
     <div class="cards">
       <a class="gcard" href="fabatollah/" id="cardFab" style="--accent:#ff5db1" data-game="fabatollah">
-        <img class="cover" src="fabatollah/cover.png" onerror="this.onerror=null;this.src='fabatollah/cover.svg'" alt="Cartoon ayatollah in a rainbow turban and heart-shaped sunglasses getting a Pride makeover" loading="eager">
-        <span class="play" data-i18n="play">PLAY ▶</span>
+        <div class="coverwrap"><img class="cover" src="assets/fabatollah-cover.webp" alt="Fabatollah — Pride dress-up" loading="eager" style="object-position:78% center;"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
           <div class="ttl"><span class="name">Fabatollah</span><span class="name-he">פבאטולה</span></div>
-          <div class="hook" data-i18n="fabHook">Pride Month dress-up: give the Supreme Leader a glow-up. 10+ tops, drag, makeup, boas — make him fabulous.</div>
-          <div class="meta">
-            <span class="pill" data-i18n="pride">🏳️‍🌈 Pride Month</span>
-            <span class="pill" data-i18n="offline">📵 No reception needed</span>
-          </div>
+          <div class="hook" data-i18n="fabHook">Pride dress-up: style the Ayatollah for any occasion — drag, sequins, boas. Then strut.</div>
+          <div class="meta"><span class="pill" data-i18n="pride">🏳️‍🌈 Pride Month</span></div>
         </div>
       </a>
 
       <a class="gcard" href="whackamullah/" id="cardWhack" style="--accent:#ffd166" data-game="whackamullah">
-        <img class="cover" src="whackamullah/cover.png" alt="Whack-a-Mullah: cartoon mullah heads popping from holes, the fabulous one marked hands-off" loading="lazy">
-        <span class="play" data-i18n="play">PLAY ▶</span>
+        <div class="coverwrap"><img class="cover" src="whackamullah/cover.png" alt="Whack-a-Mullah" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
           <div class="ttl"><span class="name">Whack-a-Mullah</span><span class="name-he">וואק-א-מולה</span></div>
-          <div class="hook" data-i18n="whackHook">Bonk the regime, spare the fabulous. Multi-tap, 3 strikes, how far can you go?</div>
-          <div class="meta">
-            <span class="pill" data-i18n="pride">🏳️‍🌈 Pride Month</span>
-            <span class="pill" data-i18n="offline">📵 No reception needed</span>
-          </div>
+          <div class="hook" data-i18n="whackHook">Bonk the regime, spare the fabulous. Multi-tap, 3 strikes — how far can you go?</div>
+          <div class="meta"><span class="pill" data-i18n="offline">📵 No reception needed</span></div>
+        </div>
+      </a>
+
+      <a class="gcard" href="irondome/" id="cardIron" style="--accent:#3ee6ff" data-game="irondome">
+        <div class="coverwrap"><img class="cover" src="assets/irondome-cover.webp" alt="Pixel-art Iron Dome intercepting rockets over a glowing city skyline" loading="eager"><span class="play" data-i18n="play">PLAY ▶</span></div>
+        <div class="body">
+          <div class="ttl"><span class="name">Iron Dome</span><span class="name-he">כיפת ברזל</span></div>
+          <div class="hook" data-i18n="ironHook">Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.</div>
+          <div class="meta"><span class="pill" data-i18n="offline">📵 No reception needed</span></div>
         </div>
       </a>
 
       <a class="gcard" href="mamaddash/" id="cardMamad" style="--accent:#7ee8c7" data-game="mamaddash">
-        <img class="cover" src="mamaddash/art/hero.webp" alt="Cartoon runner leaping over a savta on the Tel Aviv promenade" loading="eager">
-        <span class="play" data-i18n="play">PLAY ▶</span>
+        <div class="coverwrap"><img class="cover" src="mamaddash/art/hero.webp" alt="Cartoon runner leaping over a savta on the Tel Aviv promenade" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
           <div class="ttl"><span class="name">Mamad Dash</span><span class="name-he">מקלט דאש</span></div>
           <div class="hook" data-i18n="mamadHook">Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.</div>
@@ -186,30 +196,25 @@
         </div>
       </a>
 
-      <a class="gcard" href="irondome/" id="cardIron" style="--accent:#3ee6ff" data-game="irondome">
-        <img class="cover" src="assets/irondome-cover.webp" alt="Pixel-art Iron Dome intercepting rockets over a glowing city skyline" loading="lazy">
-        <span class="play" data-i18n="play">PLAY ▶</span>
-        <div class="body">
-          <div class="ttl"><span class="name">Iron Dome</span><span class="name-he">כיפת ברזל</span></div>
-          <div class="hook" data-i18n="ironHook">Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.</div>
-          <div class="meta"><span class="pill" data-i18n="offline">📵 No reception needed</span></div>
+      <div class="ghosts">
+        <div class="ghost">
+          <img class="gart" src="assets/balagan-cover.webp" alt="Balagan — Tel Aviv boardwalk" loading="lazy">
+          <div class="gbody">
+            <div class="gname">🌀 BALAGAN</div>
+            <span class="glabel" data-i18n="soon">DOOR OPENING SOON</span>
+          </div>
         </div>
-      </a>
-
-      <div class="ghost">
-        <div class="q">❔</div>
-        <span data-i18n="soon">More games loading… two doors open next.</span>
       </div>
     </div>
 
     <section class="panel">
       <h2 class="why-title" data-i18n="whyTitle">Why we exist</h2>
-      <p class="why-body" data-i18n="why">Built for morale. Open it once with internet — after that it works with zero signal. Free forever, no ads, no sign-up, nothing to install.</p>
+      <p class="why-body" data-i18n="why">Built for morale. Open it once with internet — after that it works with zero signal. Free, no ads, no sign-up, nothing to install.</p>
       <p class="safety" data-i18n="safety">During a real alert, follow Home Front Command instructions only.</p>
     </section>
 
     <div class="share-row">
-      <button class="btn-share" id="shareSite" data-i18n="share">📤 Send to the family group</button>
+      <button class="btn-share" id="shareSite" data-i18n="share">📤 Share with the Group Chat</button>
     </div>
   </main>
 
@@ -231,32 +236,34 @@ if(/[?&](beat|daily)=/.test(qs)) location.replace('mamaddash/'+qs);
 const I18N={
  en:{dir:'ltr',brand:'MIKLAT GAMES',brandAlt:'משחקים למקלט',
   promise:'Free browser games that work in the shelter — no signal, no download, no ads.',
-  play:'PLAY ▶',daily:'📅 Today’s Siren',offline:'📵 No reception needed',pride:'🏳️‍🌈 Pride Month',
-  fabHook:'Pride Month dress-up + timed DRESS CODE challenge: style the Ayatollah for Pride, a drag brunch, the UN… beat the clock.',
-  whackHook:'Bonk the regime, spare the fabulous. Multi-tap, 3 strikes, how far can you go?',
+  play:'PLAY ▶',daily:'📅 Today’s Siren',offline:'📵 No reception needed',
   mamadHook:'Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.',
   ironHook:'Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.',
-  soon:'More games loading… one more door opens next.',
+  pride:'🏳️‍🌈 Pride Month',
+  fabHook:'Pride dress-up: style the Ayatollah for any occasion — drag, sequins, boas. Then strut.',
+  whackHook:'Bonk the regime, spare the fabulous. Multi-tap, 3 strikes — how far can you go?',
+  soon:'DOOR OPENING SOON',
   whyTitle:'Why we exist',
-  why:'Built for morale. Open it once with internet — after that it works with zero signal. Free forever, no ads, no sign-up, nothing to install.',
+  why:'Built for morale. Open it once with internet — after that it works with zero signal. Free, no ads, no sign-up, nothing to install.',
   safety:'During a real alert, follow Home Front Command instructions only.',
-  share:'📤 Send to the family group',footer:'made in a miklat 🚨',
-  free:'Free forever',nosignal:'No signal needed',best:s=>`🏆 Your best: ${s} siren${s===1?'':'s'}`,
+  share:'📤 Share with the Group Chat',footer:'made in a miklat 🚨',
+  free:'Free',nosignal:'No signal needed',best:s=>`🏆 Your best: ${s} siren${s===1?'':'s'}`,
   shareTxt:'🚨 MIKLAT GAMES — IRON DOME 🛡️ + MAMAD DASH 🏃 free from the shelter. No app, one thumb: https://miklatgames.fun/',
   copied:'✅ Copied'},
  he:{dir:'rtl',brand:'משחקים למקלט',brandAlt:'MIKLAT GAMES',
   promise:'משחקי דפדפן חינמיים שעובדים בממ״ד — בלי קליטה, בלי הורדה, בלי פרסומות.',
-  play:'שחקו ▶',daily:'📅 האזעקה של היום',offline:'📵 עובד בלי קליטה',pride:'🏳️‍🌈 חודש הגאווה',
-  fabHook:'התלבשות לחודש הגאווה + אתגר דרס-קוד בזמן: סטיילו את האייתאללה לגאווה, לבראנץ׳ דראג, לאו״ם… נצחו את השעון.',
-  whackHook:'תרביצו למשטר, תשמרו על הפאבולוסים. מולטי-טאץ׳, שלוש פסילות — עד לאן תגיעו?',
+  play:'שחקו ▶',daily:'📅 האזעקה של היום',offline:'📵 עובד בלי קליטה',
   mamadHook:'רוצו לממ״ד לפני הבום. קופצים מעל הסבתות, מתכופפים מתחת ליונים.',
   ironHook:'מיירטים רקטות עם האצבע. עשרה שלבים משדרות ועד אילת. עובד בלי קליטה.',
-  soon:'עוד משחקים בדרך… עוד דלת אחת נפתחת בקרוב.',
+  pride:'🏳️‍🌈 חודש הגאווה',
+  fabHook:'התלבשות לגאווה: סטיילו את האייתאללה לכל אירוע — דראג, נצנצים, בואות. ואז לצעוד.',
+  whackHook:'תרביצו למשטר, תשמרו על הפאבולוסים. מולטי-טאץ׳, שלוש פסילות — עד לאן תגיעו?',
+  soon:'הדלת נפתחת בקרוב',
   whyTitle:'למה אנחנו קיימים',
-  why:'בנוי בשביל המורל. פותחים פעם אחת עם אינטרנט — אחר כך זה עובד בלי שום קליטה. חינם לתמיד, בלי פרסומות, בלי הרשמה.',
+  why:'בנוי בשביל המורל. פותחים פעם אחת עם אינטרנט — אחר כך זה עובד בלי שום קליטה. חינם, בלי פרסומות, בלי הרשמה.',
   safety:'באזעקה אמיתית פועלים רק לפי הנחיות פיקוד העורף.',
-  share:'📤 שלחו לקבוצה של המשפחה',footer:'נוצר במקלט 🚨',
-  free:'חינם לתמיד',nosignal:'עובד בלי קליטה',best:s=>`🏆 השיא שלכם: ${s} אזעקות`,
+  share:'📤 שתפו בקבוצה',footer:'נוצר במקלט 🚨',
+  free:'חינם',nosignal:'עובד בלי קליטה',best:s=>`🏆 השיא שלכם: ${s} אזעקות`,
   shareTxt:'🚨 משחקים למקלט — כיפת ברזל 🛡️ + מקלט דאש 🏃 חינם, בלי אפליקציה: https://miklatgames.fun/',
   copied:'✅ הועתק'}
 };
@@ -321,12 +328,14 @@ document.getElementById('shareSite').addEventListener('click',async()=>{
 function track(name){
   try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'evt-'+name,event:true}); }catch(e){}
 }
-document.getElementById('cardFab').addEventListener('click',()=>track('play-fabatollah'));
-document.getElementById('cardWhack').addEventListener('click',()=>track('play-whackamullah'));
 document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
 document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
+document.getElementById('cardFab').addEventListener('click',()=>track('play-fabatollah'));
+document.getElementById('cardWhack').addEventListener('click',()=>track('play-whackamullah'));
 
 applyLang(); applyAudio();
+if ('serviceWorker' in navigator)
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 </script>
 <script data-goatcounter="https://miklat-games.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
