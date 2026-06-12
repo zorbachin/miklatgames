@@ -193,6 +193,7 @@
   </div>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
+<audio id="strutAudio" src="strut.mp3" preload="auto" loop></audio>
 
 <script>
 'use strict';
@@ -202,12 +203,12 @@ const ANCH={head:[49.4,2,28],top:[49.4,25,45],bottom:[49.4,50,49],robe:[49.4,24,
 const TOG_FILE={wings:'wings-wings',fan:'fan-fan',cape:'cape-rainbow'};
 const TRAYS={
   looks:{type:'looks'},
-  head:{groups:[{slot:'head',items:['white-turban','black-turban','rainbow-turban','drag-wig','tiara','mohawk','beret']}]},
+  head:{groups:[{slot:'head',items:['white-turban','black-turban','rainbow-turban','drag-wig','tiara','mohawk']}]},
   top:{groups:[{slot:'top',items:['tee','crop','halter','leopard','sequin','mesh']}]},
   bottom:{groups:[{slot:'bottom',items:['black-shorts','leather-shorts','denim-shorts','leggings','pink-skirt','gold-skirt']}]},
   robe:{groups:[{slot:'robe',items:['cleric','rainbow','sequin','blazer','military','blouse']}]},
   face:{groups:[{slot:'beard',items:['pink','gold']}]},
-  bling:{groups:[{slot:'neck',items:['boa-pink','boa-rainbow','boa-purple','pride']}],toggles:['wings','fan','cape']}
+  bling:{groups:[{slot:'neck',items:['boa-rainbow','boa-purple','pride']}],toggles:['wings','fan','cape']}
 };
 const CAT_KEYS={head:['head'],top:['top'],bottom:['bottom'],robe:['robe'],face:['beard'],bling:['neck','wings','fan','cape']};
 const LOOKS=[
@@ -229,8 +230,8 @@ const ITEM_POS={
   'top-tee':[49.4,23,40],'top-crop':[49.4,24,39],'top-halter':[49.4,25,38],'top-mesh':[49.4,24,40],'top-leopard':[49.4,23,40],'top-sequin':[49.4,23,41],
   'robe-blazer':[49.4,23,70],'robe-military':[49.4,23,72],'robe-blouse':[49.4,23,74],
   'head-drag-wig':[49.4,0,42],'head-tiara':[49.4,1,30],'head-mohawk':[49.4,1,34],
-  'head-rainbow-turban':[49.4,2,30],'head-white-turban':[49.4,2,28],'head-black-turban':[49.4,2,28],'head-beret':[49.4,2,26],
-  'neck-pride':[49.4,28,16]
+  'head-rainbow-turban':[49.4,2,30],'head-white-turban':[49.4,2,28],'head-black-turban':[49.4,0,33],
+  'neck-pride':[49.4,26,22]
 };
 function posOf(slot,file){ return ITEM_POS[file] || (file==='__base__'?[50,50,100]:ANCH[slot]); }
 let LAYERS=[], lastChanged=null;
@@ -255,7 +256,7 @@ pre('__base__','art/base.png');
 Object.values(TOG_FILE).forEach(f=>pre(f,'art/items/'+f+'.webp'));
 
 /* ===================== shekels economy ===================== */
-const COST={'neck-boa-pink':10,'neck-boa-rainbow':12,'neck-boa-purple':10,'neck-pride':20,wings:30,fan:20,cape:25};
+const COST={'neck-boa-rainbow':12,'neck-boa-purple':10,'neck-pride':20,wings:30,fan:20,cape:25};
 let shek=80, owned=new Set();
 try{ const sv=localStorage.getItem('fab.shek'); if(sv!=null)shek=parseInt(sv,10)||0; owned=new Set(JSON.parse(localStorage.getItem('fab.own')||'[]')); }catch(e){}
 function saveEcon(){ try{localStorage.setItem('fab.shek',String(shek));localStorage.setItem('fab.own',JSON.stringify([...owned]));}catch(e){} }
@@ -345,6 +346,7 @@ function drawChar(ctx,CW,CH){ LAYERS.forEach(L=>{ const im=IMG[L.file]; if(!im||
   ctx.drawImage(im, CW*a[0]/100-w/2, CH*a[1]/100, w, h); }); ctx.shadowColor='transparent'; }
 function openRunway(){
   const rw=document.getElementById('runway'); rw.classList.add('open'); runBlob=null;
+  try{ const au=document.getElementById('strutAudio'); au.currentTime=0; const p=au.play(); if(p&&p.catch)p.catch(()=>{}); }catch(e){}
   document.getElementById('rgo').style.display='none';
   const m=document.getElementById('msg'); if(!m.value) m.value=I18N[lang].msgDef;
   const cv=document.getElementById('cv'); const ctx=cv&&cv.getContext&&cv.getContext('2d');
@@ -380,7 +382,8 @@ async function strutShare(dl){
   try{ if(navigator.share){ await navigator.share({text:txt}); track('strut-send-txt'); return; } }catch(e){}
   try{ await navigator.clipboard.writeText(txt); toast(I18N[lang].copied); }catch(e){}
 }
-function closeRunway(){ const rw=document.getElementById('runway'); cancelAnimationFrame(rw._raf); rw.classList.remove('open'); }
+function closeRunway(){ const rw=document.getElementById('runway'); cancelAnimationFrame(rw._raf); rw.classList.remove('open');
+  try{ document.getElementById('strutAudio').pause(); }catch(e){} }
 
 /* ===================== i18n ===================== */
 const I18N={
