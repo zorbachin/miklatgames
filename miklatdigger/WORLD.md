@@ -1,42 +1,89 @@
-# ⛏️ MIKLAT DIGGER — world bible (stage 0: capturing Zorba's idea, needs his steer)
+# ⛏️ MIKLAT DIGGER — world bible v1 (stage 1, Zorba picked B+C fusion)
 
-**Status:** Named by Zorba 2026-06-12 ("finish tomorrow along with Shuk
-Shopper"). No prior spec exists — this doc captures interpretation OPTIONS
-for a one-line morning decision, so build can start immediately after.
+**Pitch:** You're digging a mamad under your building. Problem: this is
+Israel — **every meter down is 3,000 years of history**, and the Antiquities
+Inspector is watching. Dig deep, brush finds clean, fill your museum, and
+use the proceeds to build the shelter above. Mr. Driller DNA, Israeli soul.
 
-## The name suggests digging. Three readings:
+**The joke that carries the game:** every Israeli knows a building project
+that got frozen because the digger hit a Byzantine mosaic. You ARE that
+digger. The B-option (build the mamad) is the meta; the C-option
+(archaeology) is the run. One game, both fantasies.
 
-### Option A — "Dig Dug in the holy land" (arcade classic adaptation)
-Factory pattern proven (Subway Surfers → Shuk Shopper). Dig tunnels under an
-Israeli neighborhood, pop pita-monsters with an air pump (bicycle pump!),
-drop boulders (watermelons?). Pure arcade, fastest to ship, weakest tribe
-story.
+## CORE RUN (one thumb, 60–120s)
+Tile-grid digging — swipe to carve down/left/right through strata.
+- **⛏️ Dig physics (Mr. Driller school):** undermined blocks fall after a
+  beat — crush risk, chain-collapse setups for big clears. Simple rules,
+  endless skill ceiling.
+- **☕ The COFFEE METER (the oxygen bar, Israeli edition):** digging runs on
+  coffee. It drains; finjans/thermoses buried in the dirt refill it. Run
+  out = your guy sits down and the run ends. (Comedy + soft timer, zero war
+  imagery.)
+- **🏺 Artifacts** are embedded in special tiles per stratum. Tap a find →
+  **3-second BRUSH mini-game: literally rub the screen to clean it.**
+  Clean extraction = museum piece + shekels. Sloppy/ignored = the
+  **INSPECTOR'S WHISTLE** 👮‍♀️ — she confiscates it and slaps a dig-tax.
+  (Tactile, funny, and the antagonist every game needs.)
+- **Hazards by depth:** burst water pipes (topsoil), tree roots, scorpions,
+  ancient jar swarms, collapsing columns. All dodge/route puzzles, no combat.
 
-### Option B — "Dig down to build the miklat" (builder/digger)
-You're the kablan: dig under the building, pour the mamad level by level,
-upgrade it (blast door, generator, snack shelf, wifi). Idle-ish progression
-+ the Wallet economy. On-brand (the arcade's whole lore is the miklat), the
-resilience message is warm: digging = protecting.
+## THE STRATA (10 layers, each a palette + artifact set + 1-line real history)
+1. **Today** — bottle caps, agorot, a 90s Bamba wrapper (nostalgia hit)
+2. **British Mandate** — buttons, telegraph bits
+3. **Ottoman** — coffee cups (refill bonus theme), coins
+4. **Crusader** — rusted spurs, seals
+5. **Byzantine** — ⭐ mosaic tiles (multi-piece set = the first big chase)
+6. **Roman / Second Temple** — oil lamps, stone vessels
+7. **Hasmonean** — Hanukkah-adjacent coins 🕎
+8. **First Temple** — seals (bullae), pottery
+9. **Bronze Age** — idols, daggers
+10. **Bedrock secret** — ??? (season finale content, don't spoil in v1)
 
-### Option C — "The archaeology dig" ⭐ (panel-recommended if asked)
-Dig beneath any Israeli street and you hit 3,000 years of history — that's
-literally true and deeply tribal. Dig through strata: bottle caps → Ottoman
-coins → Crusader bits → Second Temple oil lamps → bedrock secrets. Collect
-the museum (collection meta = retention), avoid cave-ins, race the daily
-dig. Hooks: real-history flavor cards (educational = schools pipe!), holiday
-digs (find the menorah at Hanukkah), HaLuach depth boards. Strongest story,
-press-friendly ("the game that turns kids into archaeologists"), zero
-politics if curated.
+First find of each type → a flavor card with one TRUE sentence of history.
+(The schools pipe + the press angle — "the game that makes kids
+archaeologists" — for free.)
 
-**Avoid:** anything readable as military tunnels — wrong connotations; the
-factory's tone gates apply.
+## THE META: BUILD THE MAMAD (option B, as progression)
+Shekels from finds build the shelter above, floor by floor — and every part
+is a PERK, not decoration:
+- Better pickaxe → dig speed · Coffee tank → bigger meter · Ladder rig →
+  start deeper · Lighting → see artifacts through dirt · Savta's chair →
+  she guards one confiscation per run.
+- **Miklat Wallet integration:** the shared ₪ across the arcade — Shuk
+  Shopper earnings can fund your dig. The cross-game economy finally has a
+  SINK, which it's been missing.
+- Museum completion % = the collection meta (per-era sets, duplicates
+  auto-sell). The completionist loop is the D30 retention.
 
-## Whatever the pick, the invariants are free
-Single-file canvas, swipe-to-dig mobile-first, EN/HE, offline SW, evt-mdg-*
-events, ?beat= depth challenges, tip hook, prompts.json art pack, daily
-seeded dig (social layer rung 1 native), Wallet integration.
+## SOCIAL (native to the layer we built)
+- **Daily Dig:** seeded layout, one counted attempt, HaLuach depth board,
+  streaks. Share card: `⛏️ DIG #8 — reached -38m 🏺 mosaic ×3 ☕ died thirsty`.
+- **?beat= depth challenges** (house pattern) + ghost of your friend's
+  descent path drawn faintly in your dirt (rung-2 snapshot ghosts).
+- **Chavruta dig:** duo streak; later, a shared two-person excavation grid.
 
-## Morning gate (one line from Zorba)
-**A, B, or C — or say what you actually meant by Digger** (this doc is a
-net, not a guess presented as fact). Build starts same day; the factory
-pipeline (GAME-FACTORY.md stages 1–7) takes it from there.
+## HOLIDAY ENGINE (this game was born for it)
+- **Hanukkah:** menorah pieces seeded in Hasmonean stratum.
+- **Pesach: THE AFIKOMAN EVENT** — one hidden afikoman somewhere in the
+  daily dig. National treasure hunt, once a year. This alone is a press story.
+
+## Tone & art
+Warm earth palette deepening by era (topsoil tan → mosaic gold → bronze
+dark); artifacts glow softly through dirt. Emoji-sprite v1 (⛏️🏺🪙☕🦂👮‍♀️)
+ships with zero assets — prompts.json art pack upgrades it (factory stage 4,
+keyMagenta loader pattern from Shuk Shopper).
+
+## Factory invariants
+Single file, EN/HE, offline SW, evt-mdg-* funnel, tip hook, og tags,
+challenge links, daily seeded via mulberry32 (house convention).
+
+## V1 scope (2–3 days) vs LATER
+**V1:** 6 strata · dig+collapse · coffee · brush mini-game · inspector ·
+museum sets · 4 mamad upgrades · daily dig · challenge links · share card.
+**LATER:** strata 7–10 + bedrock secret, ghosts, chavruta co-op grid,
+holiday events, art pack.
+
+## Zorba gates
+1. ✅ Concept (B+C fusion) — picked 2026-06-12
+2. Inspector as lovable antagonist (she's strict, never villainized) — OK?
+3. "Coffee meter" — OK, or prefer hummus? ☕🧆
