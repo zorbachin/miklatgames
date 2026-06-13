@@ -62,4 +62,38 @@ EN-only; emoji/CSS art; no music; Rome is intentionally a stub; balance is untun
 4. **Show, don't log**, History's claw-back at the verdict.
 5. Light pass on balance + a proper share **card image** (reuse v1's canvas) and EN copy polish. (HE + full art remain pre-launch, out of slice scope.)
 📱 Still needs a real-device session for touch feel before M3 sign-off.
+
+---
+
+## ✅ MILESTONE 3 — "Does it feel good, teach itself, and read as one experience?"
+
+### Verdict: **SLICE COMPLETE — it proves the v2 thesis.** All five M3 asks are in.
+
+| M3 mandate | Result |
+|---|---|
+| Juice / consequences felt | ✅ Screen-shake + king recoil when a dagger lands; ember scale-pop on FEED; flash-red on fire damage; meter numbers bump on every change; confetti + gold flash on a changed timeline. Hits now *hurt*. |
+| First-time teach | ✅ Coached first turn on the Fire grid (points at the glowing entry tiles → block → resolve), then switches to the FEED-the-fire nudge; both meters have hover/long-press tooltips. |
+| Texture the two tactics | ✅ Fire = omnidirectional lane-intercept with directional gust arrows; Restorer = downward *advancing* threat where the dagger one step from the throne pulses as priority. Same family, different decision shape. |
+| Show, don't log, claw-back | ✅ High-paradox claw-back now flashes, shakes, toasts "⏳ History claws back −X%", and visibly drains the divergence meter before the verdict. |
+| Share card image + polish | ✅ Canvas 1080×1350 verdict card (relic emojis, timeline name, Divergent/Score/Stability stat row, "Can you beat my history?") with image→text→clipboard fallback. EN copy tightened. |
+
+---
+
+## OVERALL SLICE VERDICT: **GREENLIGHT the v2 direction.**
+
+In two events the slice now demonstrates every pillar the redesign promised:
+- **You change history, not re-enact it** — your Fire choice *cascades* into a different Rome, and your changes *persist* as relics you spend.
+- **Real skill** — perfect-information triage in Fire (grow-vs-defend) and live lane-defense vs History in Rome; performance scales how strongly the change sticks.
+- **History is a live antagonist** — it strikes mid-Rome and claws back unstable timelines.
+- **It's a build + a continuous quest** — a 3-relic draft, a Divergence×Stability verdict, and a permanent Atlas unlock feeding the next run.
+- **Events are mini-campaigns** — Rome is logic → decision → tactics, Fusion-Frenzy style.
+
+### What this slice deliberately is NOT (scope honesty)
+EN-only; emoji/CSS art; 2 events (not the full 8 eras); WebAudio bleeps, no music; balance is first-pass; 📱 **not yet device-tested** (no browser in build env — all assessments are design+code reads).
+
+### Recommended path to a real game (post-slice)
+1. **Device playtest** the slice; tune Fire winnability + Restorer difficulty on real thumbs.
+2. **Content scale**: the engines (tactics grid, deduction, lane-defense, draft) are reusable — author 6–8 more eras as data + branch bibles (the world-building track).
+3. **Relic depth**: grow to ~12–15 relics with cross-era combos.
+4. **Then** localize (HE/RTL), art pass, and decide launch surface (still unlisted until it earns the shelf).
 </content>

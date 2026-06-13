@@ -128,6 +128,17 @@
     border:1px solid var(--c-border-strong);border-radius:999px;color:var(--c-cyan);padding:9px 18px;font-size:12.5px;
     font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;}
   #toast.show{opacity:1;}
+  .app.shake{animation:appshake .3s linear;}
+  @keyframes appshake{20%{transform:translate(-5px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(4px,2px)}}
+  .bump{display:inline-block;animation:bump .32s var(--ease);}
+  @keyframes bump{40%{transform:scale(1.55);}}
+  .cell.king-hit{animation:khit .42s;} @keyframes khit{0%{transform:scale(1)}28%{transform:scale(1.3) rotate(-9deg)}60%{transform:scale(1.15) rotate(6deg)}100%{transform:scale(1)}}
+  .cell.king-safe{animation:ksafe .5s;} @keyframes ksafe{0%{transform:scale(1)}40%{transform:scale(1.28)}100%{transform:scale(1)}}
+  .cell.near{box-shadow:inset 0 0 0 2px rgba(255,93,115,.95);animation:nearpulse .8s ease-in-out infinite;}
+  @keyframes nearpulse{50%{box-shadow:inset 0 0 0 3px #ff5d73,0 0 14px rgba(255,93,115,.7);}}
+  .cell.ember.grow{animation:egrow .4s var(--ease);} @keyframes egrow{40%{transform:scale(1.35);filter:drop-shadow(0 0 16px var(--c-gold));}}
+  .confetti{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:55;pointer-events:none;}
+  @keyframes conf{to{transform:translateY(110vh) rotate(640deg);opacity:0;}}
   .proto{position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;transform:translateX(-50%);z-index:5;
     font:800 9px var(--fd);letter-spacing:.12em;color:var(--c-dim);opacity:.6;}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important;}}
@@ -140,8 +151,8 @@
   <!-- run HUD (during a run) -->
   <div class="hud" id="hud" style="visibility:hidden">
     <div class="relics" id="relics"></div>
-    <div class="meter"><div class="lab"><span>Paradox</span><span id="paraN">0</span></div><div class="bar para"><i id="paraBar"></i></div></div>
-    <div class="meter"><div class="lab"><span>Divergence</span><span id="divN">0</span></div><div class="bar div"><i id="divBar"></i></div></div>
+    <div class="meter" title="How unstable your timeline is. High Paradox lets History claw your changes back."><div class="lab"><span>Paradox</span><span id="paraN">0</span></div><div class="bar para"><i id="paraBar"></i></div></div>
+    <div class="meter" title="How far your present has diverged from real history. This is your score driver."><div class="lab"><span>Divergence</span><span id="divN">0</span></div><div class="bar div"><i id="divBar"></i></div></div>
   </div>
 
   <!-- TITLE -->
@@ -205,6 +216,13 @@ function show(s){ document.querySelectorAll('.screen').forEach(x=>x.classList.re
 function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2000); }
 function flash(c,ms){ const f=$('flash'); f.className=c+' show'; clearTimeout(f._t); f._t=setTimeout(()=>f.classList.remove('show'),ms||90); }
 function vib(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+function shakeApp(){ const a=$('app'); a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake'); }
+function bumpEl(id){ const e=$(id); if(!e)return; e.classList.remove('bump'); void e.offsetWidth; e.classList.add('bump'); }
+function pulseCell(el,cls){ if(!el)return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(()=>el.classList.remove(cls),500); }
+function confetti(n){ const cols=['#ff4d4d','#ff9f43','#ffd166','#5dffa8','#3ee6ff','#a98bff'];
+  for(let k=0;k<n;k++){ const s=document.createElement('div'); s.className='confetti'; s.style.left=(Math.random()*100)+'%';
+    s.style.background=cols[k%cols.length]; const d=900+Math.random()*700; s.style.animation=`conf ${d}ms ease-in forwards`;
+    s.style.transform=`rotate(${Math.random()*360}deg)`; document.body.appendChild(s); setTimeout(()=>s.remove(),d+50); } }
 
 /* ---- audio (lazy WebAudio) ---- */
 let AC=null,muted=false;
@@ -232,8 +250,8 @@ function newRun(){ run={ relics:[], paradox:0, divergence:0, fed:0, log:[] }; }
 function addRelic(r){ run.relics.push(r); renderHud(); }
 function hasRelic(id){ return run.relics.some(r=>r.id===id); }
 function getRelic(id){ return run.relics.find(r=>r.id===id); }
-function addParadox(n){ run.paradox=Math.max(0,Math.min(100,run.paradox+n)); renderHud(); }
-function addDivergence(n){ run.divergence=Math.max(0,Math.min(100,run.divergence+n)); renderHud(); }
+function addParadox(n){ run.paradox=Math.max(0,Math.min(100,run.paradox+n)); renderHud(); if(n) bumpEl('paraN'); }
+function addDivergence(n){ run.divergence=Math.max(0,Math.min(100,run.divergence+n)); renderHud(); if(n) bumpEl('divN'); }
 function renderHud(){
   $('hud').style.visibility='visible';
   $('relics').innerHTML = run.relics.length ? run.relics.map(r=>`<span class="relic">${r.ico} ${r.name}</span>`).join('') : '<span style="color:var(--c-dim);font-size:11px">no changes yet</span>';
@@ -259,6 +277,7 @@ function beatFire(done){
   clearStage();
   const N=5, EC=2, MAXWB=unlocks.windbreak?4:3, TURNS=4;
   let heat=unlocks.tinder?4:3, turn=1, fed=0, wbLeft=MAXWB, resolving=false;
+  let taught=false; try{ taught=localStorage.getItem('ch2.taught')==='1'; }catch(e){}
   let wbs=[];           // {r,c}
   let gusts=[];         // {axis:'row'|'col', dir:+1|-1, pending} pending=extra from feed
   const wrap=document.createElement('div');
@@ -307,7 +326,9 @@ function beatFire(done){
       else el.textContent=''; });
     renderThreat();
     $('fHeat').textContent=heat; $('fTurn').textContent=turn; $('fWb').textContent=wbLeft;
-    $('fHint').textContent = resolving?'' : 'Tap a lane tile to drop/lift a windbreak, then RESOLVE.';
+    if(resolving){ $('fHint').textContent=''; }
+    else if(!taught && turn===1){ $('fHint').innerHTML='👆 The <b style="color:var(--c-red)">red-glowing</b> tiles are where wind enters. Drop a 🪨 windbreak on one to block it, then <b style="color:var(--c-cyan)">RESOLVE WIND</b>.'; }
+    else { $('fHint').innerHTML='Block what you can — then <b style="color:var(--c-gold)">FEED</b> to grow the flame bigger (and bolder) than you can fully defend.'; }
   }
   function onCell(r,c){ if(resolving||isEmber(r,c))return; sTap();
     if(hasWb(r,c)){ wbs=wbs.filter(w=>!(w.r===r&&w.c===c)); wbLeft++; }
@@ -324,7 +345,8 @@ function beatFire(done){
     hitTiles.forEach((p,i)=>setTimeout(()=>{ const el=cellAt(p.r,p.c); el.style.background=p.blk?'rgba(62,230,255,.3)':'rgba(255,93,115,.35)';
       setTimeout(()=>el.style.background='',180); },i*60));
     setTimeout(()=>{
-      if(dmg>0){ heat-=dmg; sBad(); flash('red'); vib(60); } else { sGood(); flash('green'); }
+      if(dmg>0){ heat-=dmg; sBad(); flash('red'); vib(60); shakeApp(); } else { sGood(); flash('green'); }
+      if(!taught){ taught=true; try{localStorage.setItem('ch2.taught','1');}catch(e){} }
       render();
       if(heat<=0){ heat=0; render(); setTimeout(endFire(false),500); return; }
       if(turn>=TURNS){ setTimeout(endFire(true),400); return; }
@@ -332,7 +354,7 @@ function beatFire(done){
     }, hitTiles.length*60+260);
   }
   function feed(){ if(resolving)return; heat++; fed++; pendingFeed++; sFire(); flash('gold'); vib(20);
-    toast('Fire grows — but the wind notices (+1 gust next turn)'); render(); renderFoot(); }
+    toast('Fire grows — but the wind notices (+1 gust next turn)'); render(); pulseCell(cellAt(EC,EC),'grow'); renderFoot(); }
   function renderFoot(){
     foot.innerHTML='';
     const rb=document.createElement('button'); rb.className='btn cyan'; rb.style.marginTop='0'; rb.textContent='🌬️ RESOLVE WIND';
@@ -488,11 +510,13 @@ function romeFlow(done){
     function spawnWave(){ const n=Math.min(LANES, 2 + Math.max(0,acc.daggerBonus) + (turn>=2?1:0));
       const lanes=[...Array(LANES).keys()].sort(()=>Math.random()-0.5).slice(0,n);
       lanes.forEach(l=>daggers.push({lane:l,row:0})); }
+    const KINGC=Math.floor(LANES/2);
     function render(){
       cells.forEach(el=>{ const r=+el.dataset.r,c=+el.dataset.c; el.className='cell'; el.style.fontSize='22px'; el.textContent='';
-        if(r===TURNS){ el.classList.add('ember'); el.textContent='👑'; }
+        if(r===TURNS){ el.classList.add('ember'); el.textContent = c===KINGC?'👑':'·'; el.style.color=c===KINGC?'':'rgba(141,163,204,.35)'; }
         if(guards.includes(c) && r<TURNS){ el.classList.add('wb'); el.textContent='🛡️'; } });
-      daggers.forEach(d=>{ const el=cellAt(d.row,d.lane); if(el && d.row<TURNS){ el.textContent='🗡️'; el.classList.add('threat'); } });
+      daggers.forEach(d=>{ const el=cellAt(d.row,d.lane); if(el && d.row<TURNS){ el.textContent='🗡️'; el.classList.add('threat');
+        if(d.row===TURNS-1) el.classList.add('near'); } });   // about to strike next wave — priority
       $('rHit').textContent=hits; $('rTurn').textContent=turn; $('rG').textContent=guardsPerTurn-guards.length;
     }
     function toggleGuard(c){ if(resolving)return; sTap();
@@ -502,13 +526,14 @@ function romeFlow(done){
     }
     function resolve(){ if(resolving)return; resolving=true; renderFoot();
       // blocked daggers are those on a guarded lane at the row about to reach the king
-      const survivors=[];
-      daggers.forEach(d=>{ d.row++; if(guards.includes(d.lane)){ blocked++; }            // shield stops it
-        else if(d.row>=TURNS){ hits++; }                                                  // reached Caesar
+      const survivors=[]; let waveHits=0;
+      daggers.forEach(d=>{ d.row++; if(guards.includes(d.lane)){ blocked++; }              // shield stops it
+        else if(d.row>=TURNS){ hits++; waveHits++; }                                       // reached Caesar
         else survivors.push(d); });
-      daggers=survivors.filter(d=>!guards.includes(d.lane));
-      guards=[]; sBad(); flash(hits>0?'red':'green'); vib(40);
-      render();
+      daggers=survivors; guards=[]; render();
+      const kc=cellAt(TURNS,KINGC);
+      if(waveHits>0){ sBad(); flash('red'); vib([0,50,40,50]); shakeApp(); pulseCell(kc,'king-hit'); }
+      else { sGood(); flash('green'); pulseCell(kc,'king-safe'); }
       if(turn>=TURNS){ return setTimeout(end,500); }
       turn++; spawnWave(); resolving=false; render(); renderFoot();
     }
@@ -536,7 +561,9 @@ function startRun(){ ac(); loadUnlocks(); newRun(); renderHud(); show('stage');
       run.log.push(res2.line);
       // History's slow correction: an unstable timeline snaps partway back
       if(run.paradox>=40){ const bleed=Math.min(run.divergence, Math.floor((run.paradox-30)/6));
-        if(bleed>0){ addDivergence(-bleed); run.log.push('History clawed back '+bleed+'% over the centuries — your timeline was unstable.'); } }
+        if(bleed>0){ flash('red'); shakeApp(); toast('⏳ History claws back −'+bleed+'% divergence'); addDivergence(-bleed);
+          run.log.push('History clawed back '+bleed+'% over the centuries — your timeline was unstable.');
+          setTimeout(verdict,900); return; } }
       setTimeout(verdict,500);
     });
     if(fire.win) setTimeout(()=>draftRelic(fire, afterDraft),450);
@@ -558,6 +585,7 @@ function verdict(){
   const stab=stabilityWord(run.paradox);
   const stabFactor = Math.max(0.2, 1 - run.paradox/120);
   const score = Math.round(run.divergence * stabFactor * 10);
+  run._score=score; run._stab=stab;
   $('vName').textContent=timelineName();
   $('vDiv').textContent=run.divergence+'%';
   $('vStab').textContent=stab; $('vStab').style.color = run.paradox<=45?'var(--c-green)':run.paradox<=70?'var(--c-amber)':'var(--c-red)';
@@ -574,15 +602,42 @@ function verdict(){
   // save to atlas
   try{ const a=JSON.parse(localStorage.getItem(ATLAS_KEY)||'[]'); a.unshift({name:timelineName(),div:run.divergence,stab,score,t:Date.now()});
     localStorage.setItem(ATLAS_KEY, JSON.stringify(a.slice(0,30))); }catch(e){}
-  show('verdict'); if(run.divergence>0) sWin(); else sLose();
+  show('verdict'); if(run.divergence>0){ sWin(); confetti(40); flash('gold'); } else sLose();
 }
 function updateTitle(){ loadUnlocks(); const bits=[];
   if(unlocks.windbreak) bits.push('🪨 +1 windbreak'); if(unlocks.tinder) bits.push('🔥 Tinder');
   $('unlockLine').textContent = bits.length?('Carrying into new runs: '+bits.join(' · ')):''; }
 $('vAgain').addEventListener('pointerdown',()=>{ updateTitle(); show('title'); $('hud').style.visibility='hidden'; });
+function wrapText(ctx,text,maxW){ const words=String(text).split(' '),lines=[]; let line='';
+  for(const w of words){ const t=line?line+' '+w:w; if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w;} else line=t; } if(line)lines.push(line); return lines; }
+function renderShareCard(){
+  const W=1080,H=1350,c=document.createElement('canvas'); c.width=W;c.height=H; const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#241a5c');g.addColorStop(.5,'#141633');g.addColorStop(1,'#0a1226');
+  x.fillStyle=g; x.fillRect(0,0,W,H); x.textAlign='center'; x.textBaseline='middle';
+  x.fillStyle='#a98bff'; x.font='700 40px "Courier New",monospace'; x.fillText('🕰  CHANGING HISTORY', W/2, 108);
+  x.strokeStyle='rgba(62,230,255,.35)'; x.lineWidth=2; x.beginPath(); x.moveTo(140,168); x.lineTo(W-140,168); x.stroke();
+  x.fillStyle='#3ee6ff'; x.font='800 32px "Courier New",monospace'; x.fillText('MY TIMELINE IS NOW', W/2, 232);
+  x.font='150px serif'; x.fillText(run.relics.map(r=>r.ico).join('')||'🌍', W/2, 392);
+  let fs=88,lines; do{ x.font='900 '+fs+'px "Heebo",system-ui,sans-serif'; lines=wrapText(x,timelineName(),W-180); fs-=6; } while(lines.length>3&&fs>44);
+  x.fillStyle='#eaf2ff'; let yy=540; for(const ln of lines){ x.fillText(ln,W/2,yy); yy+=fs+18; }
+  // big stat row
+  const sy=Math.max(yy+70,830);
+  function stat(cx,big,lab,col){ x.fillStyle=col; x.font='900 76px "Heebo",system-ui,sans-serif'; x.fillText(big,cx,sy);
+    x.fillStyle='#8da3cc'; x.font='30px "Heebo",system-ui,sans-serif'; x.fillText(lab,cx,sy+62); }
+  stat(W*0.25, run.divergence+'%','Divergent','#a98bff');
+  stat(W*0.5,  (run._score||0),'Score','#ffd166');
+  stat(W*0.75, run._stab||stabilityWord(run.paradox),'Stability', run.paradox<=45?'#5dffa8':run.paradox<=70?'#ff9f43':'#ff5d73');
+  x.fillStyle='#a98bff'; x.font='800 44px "Heebo",system-ui,sans-serif'; x.fillText('Can you beat my history?', W/2, H-118);
+  x.fillStyle='#3ee6ff'; x.font='700 34px "Courier New",monospace'; x.fillText('miklatgames.fun/changinghistory', W/2, H-58);
+  return c;
+}
 $('vShare').addEventListener('pointerdown',async()=>{
-  const txt=`🕰️ CHANGING HISTORY: my timeline is now "${timelineName()}" — ${run.divergence}% divergent, ${stabilityWord(run.paradox)}. Beat my history.`;
-  try{ if(navigator.share){ await navigator.share({text:txt}); } else { await navigator.clipboard.writeText(txt); toast('Copied'); } }catch(e){}
+  const txt=`🕰️ CHANGING HISTORY: my timeline is now "${timelineName()}" — ${run.divergence}% divergent, ${run._stab||stabilityWord(run.paradox)}, score ${run._score||0}. Can you beat my history? https://miklatgames.fun/changinghistory/`;
+  try{ const canvas=renderShareCard(); const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));
+    if(blob && navigator.canShare){ const f=new File([blob],'my-timeline.png',{type:'image/png'});
+      if(navigator.canShare({files:[f]})){ await navigator.share({files:[f],text:txt}); return; } } }catch(e){}
+  try{ if(navigator.share){ await navigator.share({text:txt}); return; } }catch(e){}
+  try{ await navigator.clipboard.writeText(txt); toast('Copied'); }catch(e){}
 });
 
 /* ---- atlas (meta peek) ---- */
