@@ -47,6 +47,10 @@
   .rules{margin-top:14px;display:flex;flex-direction:column;gap:8px;width:100%;max-width:330px;}
   .rule{display:flex;align-items:center;gap:12px;background:rgba(16,27,56,.7);border:1px solid var(--c-border);border-radius:12px;padding:9px 13px;text-align:start;}
   .rule .e{font-size:26px;width:32px;text-align:center;flex-shrink:0;} .rule .t{font-size:13.5px;line-height:1.35;} .rule .t b{color:var(--c-gold);}
+  .stakes{display:flex;flex-direction:column;gap:8px;width:100%;max-width:340px;margin-top:8px;}
+  .stake{display:flex;align-items:center;gap:12px;background:rgba(16,27,56,.7);border:1px solid var(--c-border);border-radius:12px;padding:9px 13px;text-align:start;cursor:pointer;transition:all .12s var(--ease);}
+  .stake:active{transform:scale(.98);} .stake.on{border-color:rgba(255,209,102,.7);background:rgba(255,209,102,.1);}
+  .stake .e{font-size:24px;width:30px;text-align:center;flex-shrink:0;} .stake .t{font-size:13px;line-height:1.3;} .stake .t b{color:var(--c-gold);} .stake .t small{color:var(--c-dim);}
   .btn{margin-top:20px;border:0;border-radius:15px;padding:16px 38px;font-size:18px;font-weight:900;cursor:pointer;
     background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;box-shadow:0 7px 22px rgba(233,162,59,.4);transition:transform .1s var(--ease);}
   .btn:active{transform:scale(.96);}
@@ -101,9 +105,15 @@
     <div class="k">Rome · Circus Maximus · Racing</div>
     <div class="ico">🏇</div>
     <h1>THE CHARIOT RACE</h1>
-    <div class="yr">Win, and rewrite your fate</div>
-    <div class="story">A nobody slave can become a legend in the Circus Maximus. Beat the champion to the finish — and change Rome's future.</div>
-    <div class="rules">
+    <div class="yr">The Emperor's wager</div>
+    <div class="story">You're an enslaved charioteer. The Emperor offers a deal: beat his champion and you name your prize. Lose, and it's back to the mines. 150,000 watch — and in Rome, the mob makes kings.</div>
+    <div class="k" style="margin-top:16px">What are you racing for?</div>
+    <div class="stakes" id="stakes">
+      <div class="stake on" data-s="freedom"><span class="e">🔓</span><div class="t"><b>Your Freedom</b><br><small>Win → walk out a free citizen</small></div></div>
+      <div class="stake" data-s="glory"><span class="e">👑</span><div class="t"><b>Glory</b><br><small>Win → the mob makes you a legend</small></div></div>
+      <div class="stake" data-s="vengeance"><span class="e">🗡️</span><div class="t"><b>Vengeance</b><br><small>The champion wronged you — bury him</small></div></div>
+    </div>
+    <div class="rules" style="margin-top:14px">
       <div class="rule"><span class="e">⛽</span><span class="t"><b>Hold GAS</b> (bottom-left) to crack the reins and surge</span></div>
       <div class="rule"><span class="e">👉</span><span class="t"><b>Slide</b> anywhere to steer side to side</span></div>
       <div class="rule"><span class="e">🪨</span><span class="t"><b>Dodge</b> wrecks — faster = harder. A crash costs a wheel</span></div>
@@ -150,6 +160,19 @@ function fit(){ const r=cv.getBoundingClientRect(); dpr=Math.min(window.devicePi
 window.addEventListener('resize',()=>{ if(running) fit(); });
 
 /* state */
+/* what you're racing for — and what winning rewrites */
+const STAKES={
+  freedom:{ verdict:'🔓 FREEDOM WON!', tn:'The Republic of Free Hands', lost:'your freedom',
+    tb:'The Emperor frees you on the sand. You become champion of the freedmen and end Roman slavery centuries early — the Empire rebuilds itself on paid labour and never rots from the inside. 🔓' },
+  glory:{ verdict:'👑 A LEGEND IS BORN!', tn:'Rome of the Champion-Kings', lost:'your shot at glory',
+    tb:'150,000 throats roar your name. In this timeline charioteers ARE the power — emperors are crowned in the Circus, not the Senate, and to this day elections are run at 60 mph. 🏇👑' },
+  vengeance:{ verdict:'🗡️ VENGEANCE!', tn:'The People\'s Rome', lost:'your vengeance',
+    tb:'You bury the Emperor\'s champion in your dust. The Blue faction rallies behind you, the corrupt regime topples, and Rome becomes a republic of the people once more. 🗡️' }
+};
+let stake='freedom';
+(function(){ const els=[...document.querySelectorAll('.stake')];
+  els.forEach(el=>el.addEventListener('pointerdown',()=>{ stake=el.dataset.s; els.forEach(x=>x.classList.toggle('on',x===el)); try{ac();beep(440,.05,'square',.1);}catch(e){} }));
+})();
 const LANES=3; let laneX=[]; let running=false, raf=0;
 let player, obstacles, scroll, progress, rival, crashes, speedV, gas, boostT, lastSpawn, finishAt=100;
 function reset(){ fit(); laneX=[W*0.28,W*0.5,W*0.72];   // decorative dashes only
@@ -224,24 +247,24 @@ function renderCrashes(){ const s=$('crashes').children; for(let i=0;i<3;i++) s[
 function start(){ ac(); $('brief').classList.add('hidden'); $('end').classList.add('hidden'); reset(); renderCrashes(); running=true; cancelAnimationFrame(raf); raf=requestAnimationFrame(loop); }
 function finishCommon(){ running=false; cancelAnimationFrame(raf); }
 function win(){ finishCommon();
+  const s=STAKES[stake]||STAKES.freedom;
   flash('gold'); confetti(46); sWin(); vib([0,40,40,40]);
-  $('verdict').className='verdict win'; $('verdict').textContent='🏆 YOU WON THE RACE!';
-  $('tn').textContent='Rome of the Champion-Kings';
-  $('tb').innerHTML='The crowd roars your name. The slave becomes a legend, then a senator, then more. In this timeline Rome crowns its rulers by chariot race to this day — elections are held at 60 mph. 🏇👑';
-  $('stat').innerHTML=`Crashes: <b>${crashes}</b> · you beat the champion to the line`;
+  $('verdict').className='verdict win'; $('verdict').textContent=s.verdict;
+  $('tn').textContent=s.tn; $('tb').innerHTML=s.tb;
+  $('stat').innerHTML=`You beat the champion to the line · crashes: <b>${crashes}</b>`;
   $('end').classList.remove('hidden');
 }
-function loseRace(){ finishCommon(); flash('red'); sLose(); vib(120);
+function loseRace(){ finishCommon(); flash('red'); sLose(); vib(120); const s=STAKES[stake]||STAKES.freedom;
   $('verdict').className='verdict lose'; $('verdict').textContent='🏁 PIPPED AT THE POST';
   $('tn').textContent='History, Unchanged';
-  $('tb').innerHTML='The champion crosses a chariot-length ahead. So close — but history keeps its laurel. Race again and grab more ⚡ boosts to rewrite it?';
+  $('tb').innerHTML=`The champion crosses a chariot-length ahead. You lose ${s.lost} — back to the mines, and history keeps its laurel. Race again and floor the GAS to rewrite it?`;
   $('stat').innerHTML=`You finished <b>${Math.round(progress)}%</b> as the rival hit the line`;
   $('end').classList.remove('hidden');
 }
-function lose(){ finishCommon(); flash('red'); sLose(); vib(140);
+function lose(){ finishCommon(); flash('red'); sLose(); vib(140); const s=STAKES[stake]||STAKES.freedom;
   $('verdict').className='verdict lose'; $('verdict').textContent='💥 WRECKED!';
   $('tn').textContent='History, Unchanged';
-  $('tb').innerHTML='Your chariot splinters across the sand. The champion takes the laurel, history rolls on unchanged. Race again to rewrite it?';
+  $('tb').innerHTML=`Your chariot splinters across the sand. You lose ${s.lost}; the champion takes the laurel and history rolls on unchanged. Race again to rewrite it?`;
   $('stat').innerHTML=`You made it <b>${Math.round(progress)}%</b> of the way`;
   $('end').classList.remove('hidden');
 }
