@@ -1160,14 +1160,14 @@ function mkSlide(sx){ const m=G.mk; if(m&&!m.over) m.padX=clamp(sx,40,W-40); }
 function mkStrike(sx){
   const m=G.mk; if(!m||m.over||m.struck) return;
   if(sx!=null) m.padX=clamp(sx,40,W-40);
-  const b=m.ball, bp=mkBall(m), padW=Math.max(46,84-m.rally*2-(m.df-1)*30);
-  if(b.p<.72){ return; }                       // too early — the tap just re-aims, no penalty
+  const b=m.ball, bp=mkBall(m), padW=Math.max(56,98-m.rally*2-(m.df-1)*26);
+  if(b.p<.66){ return; }                       // too early — the tap just re-aims, no penalty
   m.swung=true;
   const aligned=Math.abs(m.padX-bp.x)<padW/2+bp.sz*.5;
-  const timed=b.p<=1.04;
+  const timed=b.p<=1.10;
   if(aligned&&timed){
     if(m.tut){ m.tut=false; S.taught.matkot=1; save(); }
-    const perfect=Math.abs(b.p-.92)<.07 && Math.abs(m.padX-bp.x)<padW*.3;
+    const perfect=Math.abs(b.p-.92)<.12 && Math.abs(m.padX-bp.x)<padW*.4;
     m.rally++; m.swing=.18; m.struck=true; m.retT=0;
     const got=payout((perfect?11:7)+Math.min(m.rally,12)*2,'matkot'); m.earn+=got;
     pop(m.padX,MK_LINE()-30,`+${got}₪${perfect?' PERFECT!':''}`,POP_COLS[m.rally%4],perfect); flyCoin(m.padX,MK_LINE());
@@ -1211,7 +1211,7 @@ function drawMatkot(){
   cx.strokeStyle='rgba(255,255,255,.25)';cx.lineWidth=2;cx.setLineDash([8,8]);
   cx.beginPath();cx.moveTo(0,lineY);cx.lineTo(W,lineY);cx.stroke();cx.setLineDash([]);
   if(!m.struck&&m.ball){
-    const b=m.ball, bp=mkBall(m), padW=Math.max(46,84-m.rally*2-(m.df-1)*30);
+    const b=m.ball, bp=mkBall(m), padW=Math.max(56,98-m.rally*2-(m.df-1)*26);
     // landing shadow on the line — slide your paddle here
     const lx=lerp(b.x0,b.lx,1), near=b.p>.72;
     cx.fillStyle=`rgba(0,0,0,${.15+.2*clamp(b.p,0,1)})`;
@@ -1248,7 +1248,7 @@ function drawMatkot(){
 function stStart(){
   Sound.enter(); G.state='stand'; G.pops.length=0;
   if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; } else G.runBracha=0;
-  G.st={ time:30, pitas:2, served:0, combo:0, earn:0, over:false, df:diff('stand'),
+  G.st={ time:30, pitas:3, served:0, combo:0, earn:0, over:false, df:diff('stand'),
     cook:0, burning:0, custs:[], gull:null, nextCust:.6, nextGull:rand(4,7),
     tut:!S.taught.stand };
   gameIntro('🥙','THE STAND','Cook, serve the line, shoo the gull — all at once',
@@ -1284,7 +1284,7 @@ function stUpdate(dt){
   if(s.tut) dt*=.8;
   s.time-=dt; if(s.time<=0){ s.time=0; stEnd(); return; }
   // fryer cooks continuously; overcooks if you don't plate it
-  if(s.cook<1.6) s.cook+=dt*0.62*s.df;
+  if(s.cook<1.6) s.cook+=dt*0.45*s.df;
   if(s.cook>=1.55){ s.cook=0; if(s.pitas<6) s.burning=1; }   // burns whether or not the plate is full
   if(s.burning>0) s.burning-=dt;
   // customers arrive and lose patience
@@ -1678,7 +1678,7 @@ function ctStart(){
   Sound.enter(); G.state='cats'; G.pops.length=0;
   if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; pop(W/2,groundY-210,'🙏 bracha +20%','#8ad2ff',true); } else G.runBracha=0;
   G.ct={ time:20, cats:[], nextSpawn:0, pets:0, combo:0, earn:0, over:false,
-    df:diff('cats'), tut:!S.taught.cats };
+    df:diff('cats'), tut:!S.taught.cats, goldAt:5 };
   gameIntro('🐈','STREET CATS','Pet every cat before it leaves',
     'TAP each cat while\nits ring still glows','TAP the cats');
 }
@@ -1691,9 +1691,9 @@ function ctTap(sx,sy){
     hit.gone=true;
     if(c.tut){ c.tut=false; S.taught.cats=1; save(); }
     c.pets++; c.combo++;
-    const got=payout(6+Math.min(c.combo,6)*2,'cats'); c.earn+=got;
-    pop(hit.x,hit.y-40,`+${got}₪ 😻`,POP_COLS[c.combo%4]); flyCoin(hit.x,hit.y);
-    Sound.cash(); buzz(16);
+    const got=payout((6+Math.min(c.combo,6)*2)*(hit.gold?3:1),'cats'); c.earn+=got;
+    pop(hit.x,hit.y-40,`+${got}₪ ${hit.gold?'🌟':'😻'}`,hit.gold?'#ffd166':POP_COLS[c.combo%4],hit.gold); flyCoin(hit.x,hit.y);
+    if(hit.gold){ burstConfetti(14); Sound.win(); } else Sound.cash(); buzz(hit.gold?40:16);
     if(c.combo===4||c.combo===7||c.combo===10){ burstConfetti(10);
       pop(W/2,groundY-200,rline(BARK.ctCombo),POP_COLS[c.combo%4],true); }
   }
@@ -1707,8 +1707,10 @@ function ctUpdate(dt){
     const free=CT_SPOTS.map((_,i)=>i).filter(i=>!used.includes(i));
     if(free.length){
       const sp=free[irand(0,free.length-1)], [px,py]=CT_SPOTS[sp];
+      const gold=!c.tut && c.pets>=c.goldAt;            // a golden cat every 5 pets: 3×, twice as fast
+      if(gold) c.goldAt+=5;
       c.cats.push({spot:sp,x:W*px,y:groundY-H*py*.5- (py>0.4?40:0),t:0,
-        dur:(c.tut?9:1.5)/Math.sqrt(c.df), e:['🐈','🐈‍⬛','🐱'][irand(0,2)], gone:false});
+        dur:(c.tut?9:1.5)/Math.sqrt(c.df)*(gold?.5:1), e:gold?'😺':['🐈','🐈‍⬛','🐱'][irand(0,2)], gold, gone:false});
     }
     c.nextSpawn=(c.tut?1.4:rand(.55,.95))/c.df;
   }
@@ -1738,10 +1740,13 @@ function drawCats(){
     if(k.gone) continue;
     const pop_=Math.min(1,k.t*6), left=1-(k.t/k.dur);
     const ys=k.y+(1-pop_)*30;
-    // urgency ring shrinks with time left
-    cx.strokeStyle=`rgba(126,232,199,${.4+.5*left})`;cx.lineWidth=4;
+    // urgency ring shrinks with time left (gold cats glow gold + sparkle)
+    cx.strokeStyle=k.gold?`rgba(255,209,102,${.5+.5*left})`:`rgba(126,232,199,${.4+.5*left})`;
+    cx.lineWidth=k.gold?6:4;
     cx.beginPath();cx.arc(k.x,ys,40*left+18,0,7);cx.stroke();
-    cx.save();cx.translate(k.x,ys);cx.scale(pop_,pop_);drawEmoji(k.e,0,0,52);cx.restore();
+    if(k.gold){ cx.drawImage(glow('rgba(255,220,90,.5)',40),k.x-40,ys-40);
+      drawEmoji('✨',k.x+Math.sin(G.t*9)*22,ys-26,16); }
+    cx.save();cx.translate(k.x,ys);cx.scale(pop_,pop_);drawEmoji(k.e,0,0,k.gold?56:52);cx.restore();
   }
   // hud
   cx.font='900 16px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
@@ -1756,11 +1761,11 @@ function alStart(){
   if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; pop(W/2,groundY-210,'🙏 bracha +20%','#8ad2ff',true); } else G.runBracha=0;
   const lanes=[];
   for(let i=0;i<4;i++){
-    const dir=i%2?1:-1, n=2+(i%2);
+    const dir=i%2?1:-1, n=2;
     const cars=[];
     for(let j=0;j<n;j++){ const e=['🛵','🚐','🚌'][irand(0,2)];
       cars.push({x:rand(0,W), e, w:e==='🛵'?34:e==='🚐'?56:74}); }
-    lanes.push({dir, speed:rand(95,150), cars});
+    lanes.push({dir, speed:rand(72,112), cars});
   }
   G.al={ time:25, lanes, row:0, hop:0, lives:2, crossings:0, earn:0, over:false,
     df:diff('allenby'), tut:!S.taught.allenby };
@@ -1827,7 +1832,7 @@ function drawAllenby(){
       if(l.dir<0) cx.scale(-1,1); drawEmoji(cr.e,0,0,cr.w); cx.restore(); } }
   // gap hint: glow the next lane when it's safe-ish
   if(a.row<5){ const l=a.lanes[Math.min(3,a.row)], y=AL_ROWY(a.row+1);
-    const danger=l&&l.cars.some(cr=>Math.abs(cr.x-W/2)<cr.w/2+70);
+    const danger=l&&l.cars.some(cr=>Math.abs(cr.x-W/2)<cr.w/2+48);
     if(a.row<4&&!danger){ cx.strokeStyle=`rgba(126,232,199,${.5+.4*Math.sin(G.t*8)})`;
       cx.lineWidth=3;cx.beginPath();cx.arc(W/2,y,30,0,7);cx.stroke();
       cx.font='900 16px sans-serif';cx.fillStyle='#7ee8c7';cx.fillText('GO!',W/2,y-40); } }
@@ -2669,6 +2674,19 @@ function drawFalafel(){
   const px=f.pita.x;
   cx.fillStyle='rgba(0,0,0,.2)';cx.beginPath();cx.ellipse(px,groundY+6,40,8,0,0,7);cx.fill();
   drawEmoji('🧺',px,groundY-22,52); drawEmoji('🫓',px,groundY-30,30);
+  // LIVE TRAJECTORY TELEGRAPH — show exactly where THIS power will land, so the
+  // meter→distance mapping is visible (the audit's #1 fix for falafel clarity)
+  { const vx=lerp(W*.34,W*.92,f.power), vy0=600, g=1700, tF=2*vy0/g, sx0=W*.12, sy0=groundY-40;
+    const landX=sx0+vx*tF, onTarget=Math.abs(landX-px)<40;
+    cx.strokeStyle=onTarget?'rgba(126,232,199,.85)':'rgba(255,255,255,.5)';
+    cx.lineWidth=3;cx.setLineDash([5,8]);cx.beginPath();
+    for(let t=0;t<=tF;t+=tF/14){ const x=sx0+vx*t, y=sy0-vy0*t+.5*g*t*t;
+      t===0?cx.moveTo(x,y):cx.lineTo(x,y); }
+    cx.stroke();cx.setLineDash([]);
+    cx.strokeStyle=onTarget?'#7ee8c7':'rgba(255,255,255,.6)';cx.lineWidth=3;
+    cx.beginPath();cx.ellipse(landX,groundY-34,24,8,0,0,7);cx.stroke();
+    if(onTarget){ cx.font='900 16px sans-serif';cx.textAlign='center';cx.fillStyle='#7ee8c7';
+      cx.fillText('NOW! 🥙',landX,groundY-58); } }
   // falafels in flight
   for(const fl of f.falafels) if(!fl.done) drawEmoji('🧆',fl.x,fl.y,30);
   // power meter
