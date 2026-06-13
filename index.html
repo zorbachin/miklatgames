@@ -175,15 +175,6 @@
         </div>
       </a>
 
-      <a class="gcard" href="fabatollah/" id="cardFab" style="--accent:#ff5db1" data-game="fabatollah">
-        <div class="coverwrap"><img class="cover" src="assets/fabatollah-cover.webp" alt="Fabatollah — Pride dress-up" loading="lazy" style="object-position:78% center;"><span class="play" data-i18n="play">PLAY ▶</span></div>
-        <div class="body">
-          <div class="ttl"><span class="name">Fabatollah</span><span class="name-he">פבאטולה</span></div>
-          <div class="hook" data-i18n="fabHook">Dress the Ayatollah for any occasion — drag, sequins, boas. Then strut &amp; share.</div>
-          <div class="meta"><span class="pill best" data-i18n="prideOnly">🏳️‍🌈 Only for Pride</span><span class="pill" data-i18n="offline">📵 No reception needed</span></div>
-        </div>
-      </a>
-
       <a class="gcard" href="mamaddash/" id="cardMamad" style="--accent:#7ee8c7" data-game="mamaddash">
         <div class="coverwrap"><img class="cover" src="mamaddash/art/hero.webp" alt="Cartoon runner leaping over a savta on the Tel Aviv promenade" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
@@ -197,6 +188,13 @@
       </a>
 
       <div class="ghosts">
+        <div class="ghost">
+          <img class="gart" src="assets/fabatollah-cover.webp" alt="Fabatollah" loading="lazy" style="object-position:78% center;">
+          <div class="gbody">
+            <div class="gname">🧆 FABATOLLAH</div>
+            <span class="glabel">🏳️‍🌈 COMING OUT SOON</span>
+          </div>
+        </div>
         <div class="ghost">
           <img class="gart" src="assets/shukshopper-cover.svg" alt="Runner with a basket sprinting through a striped-awning market alley, chased by a vendor" loading="lazy">
           <div class="gbody">
@@ -357,7 +355,6 @@ if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
 document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
 document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
 document.getElementById('cardWhack').addEventListener('click',()=>track('play-whackamullah'));
-document.getElementById('cardFab').addEventListener('click',()=>track('play-fabatollah'));
 
 
 applyLang(); applyAudio();
