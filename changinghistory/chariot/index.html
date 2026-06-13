@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a1226">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="robots" content="noindex,nofollow">
+<title>CHANGING HISTORY — Chariot Race (demo)</title>
+<style>
+  :root{
+    --c-bg:#0a1226; --c-panel:#101b38; --c-sand:#e8c98a; --c-sand2:#caa55f;
+    --c-cyan:#3ee6ff; --c-gold:#ffd166; --c-red:#ff5d73; --c-green:#5dffa8; --c-violet:#a98bff;
+    --c-ink:#eaf2ff; --c-dim:#8da3cc; --c-border:rgba(62,230,255,.22); --c-gold-border:rgba(255,209,102,.45);
+    --grad:radial-gradient(125% 95% at 50% -8%,#5a3a1e 0%,#2a1c30 45%,#0a1226 100%);
+    --shadow:0 12px 34px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.05);
+    --fd:"Courier New",ui-monospace,Menlo,Consolas,monospace; --fb:"Heebo",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none;background:var(--c-bg);
+    color:var(--c-ink);font-family:var(--fb);user-select:none;-webkit-user-select:none;}
+  body{display:flex;justify-content:center;}
+  .app{width:100%;max-width:520px;height:100%;background:var(--grad);position:relative;overflow:hidden;display:flex;flex-direction:column;}
+
+  .hud{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 4px;}
+  .crashes{font-size:17px;letter-spacing:2px;} .crashes span.dead{filter:grayscale(1) brightness(.4);}
+  .grow{flex:1;}
+  .spd{font:800 12px var(--fd);color:var(--c-gold);letter-spacing:.06em;}
+  .race{padding:2px 14px 0;display:flex;flex-direction:column;gap:5px;}
+  .rrow{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;color:var(--c-dim);}
+  .rrow .lab{min-width:54px;}
+  .track{flex:1;height:10px;border-radius:5px;background:#241a30;overflow:hidden;border:1px solid var(--c-border);position:relative;}
+  .track i{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:13px;transition:left .2s linear;}
+  .track.you i{filter:drop-shadow(0 0 4px var(--c-gold));}
+
+  #cv{flex:1;display:block;width:100%;touch-action:none;}
+
+  .panel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    padding:24px;z-index:20;overflow-y:auto;background:radial-gradient(ellipse at 50% 30%,rgba(40,20,10,.7),rgba(10,18,38,.96));}
+  .panel.hidden{display:none;}
+  .k{font:800 11px var(--fd);letter-spacing:.13em;text-transform:uppercase;color:var(--c-cyan);}
+  .ico{font-size:64px;margin:10px 0 4px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5));}
+  h1{font-size:clamp(24px,7vw,32px);font-weight:900;line-height:1.1;}
+  .yr{margin-top:6px;font-size:14px;color:var(--c-gold);font-weight:700;}
+  .story{margin-top:14px;font-size:15px;line-height:1.55;max-width:360px;}
+  .rules{margin-top:14px;display:flex;flex-direction:column;gap:8px;width:100%;max-width:330px;}
+  .rule{display:flex;align-items:center;gap:12px;background:rgba(16,27,56,.7);border:1px solid var(--c-border);border-radius:12px;padding:9px 13px;text-align:start;}
+  .rule .e{font-size:26px;width:32px;text-align:center;flex-shrink:0;} .rule .t{font-size:13.5px;line-height:1.35;} .rule .t b{color:var(--c-gold);}
+  .btn{margin-top:20px;border:0;border-radius:15px;padding:16px 38px;font-size:18px;font-weight:900;cursor:pointer;
+    background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;box-shadow:0 7px 22px rgba(233,162,59,.4);transition:transform .1s var(--ease);}
+  .btn:active{transform:scale(.96);}
+  .btn.violet{background:linear-gradient(180deg,#bca4ff,#8a63f0);color:#160a36;}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px;} .btn-row .btn{margin-top:0;}
+  .verdict{font-family:var(--fd);font-weight:700;font-size:clamp(22px,6.2vw,30px);}
+  .verdict.win{color:var(--c-green);text-shadow:0 0 18px rgba(93,255,168,.5);} .verdict.lose{color:var(--c-red);text-shadow:0 0 16px rgba(255,93,115,.5);}
+  .tcard{margin-top:16px;width:100%;max-width:360px;border-radius:16px;overflow:hidden;text-align:start;
+    background:linear-gradient(160deg,#3a2566,#101b38);border:1px solid rgba(169,139,255,.5);box-shadow:var(--shadow);}
+  .tcard .h{padding:12px 15px 9px;border-bottom:1px solid var(--c-border);} .tcard .hk{font:800 10px var(--fd);letter-spacing:.14em;color:var(--c-cyan);text-transform:uppercase;}
+  .tcard .hn{margin-top:6px;font-size:19px;font-weight:900;} .tcard .b{padding:12px 15px;font-size:13px;line-height:1.55;}
+  .stat{margin-top:12px;font-size:15px;} .stat b{color:var(--c-gold);}
+  #flash{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;z-index:30;}
+  #flash.red{background:radial-gradient(circle,rgba(255,93,115,.4),transparent 70%);} #flash.gold{background:radial-gradient(circle,rgba(255,209,102,.45),transparent 70%);}
+  #flash.show{opacity:1;transition:opacity .04s;}
+  #banner{position:fixed;left:50%;top:26%;transform:translate(-50%,-50%) scale(.7);z-index:25;font-family:var(--fd);font-weight:700;
+    font-size:30px;color:var(--c-gold);text-shadow:0 0 20px rgba(255,209,102,.8);opacity:0;pointer-events:none;}
+  #banner.go{animation:ban 1s var(--ease) forwards;}
+  @keyframes ban{15%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-80%) scale(1)}}
+  .app.shake{animation:shk .26s linear;} @keyframes shk{20%{transform:translate(-5px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(4px,2px)}}
+  .corner{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);inset-inline-end:12px;z-index:28;font-size:18px;
+    background:var(--c-panel);border:1px solid var(--c-border);border-radius:999px;padding:7px 11px;cursor:pointer;}
+  .confetti{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:26;pointer-events:none;} @keyframes conf{to{transform:translateY(110vh) rotate(640deg);opacity:0;}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important;}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="hud">
+    <div class="spd" id="spd">LAP 1</div>
+    <div class="grow"></div>
+    <div class="crashes" id="crashes"><span>🛞</span><span>🛞</span><span>🛞</span></div>
+  </div>
+  <div class="race">
+    <div class="rrow"><span class="lab">🟥 Rival</span><div class="track"><i id="rivalDot" style="left:0%">🐎</i></div></div>
+    <div class="rrow"><span class="lab">🟨 You</span><div class="track you"><i id="youDot" style="left:0%">🏇</i></div></div>
+  </div>
+  <canvas id="cv"></canvas>
+  <button class="corner" id="mute">🔊</button>
+
+  <div class="panel" id="brief">
+    <div class="k">Rome · Circus Maximus · Racing</div>
+    <div class="ico">🏇</div>
+    <h1>THE CHARIOT RACE</h1>
+    <div class="yr">Win, and rewrite your fate</div>
+    <div class="story">A nobody slave can become a legend in the Circus Maximus. Beat the champion to the finish — and change Rome's future.</div>
+    <div class="rules">
+      <div class="rule"><span class="e">👈👉</span><span class="t"><b>Tap a lane</b> to steer your chariot there</span></div>
+      <div class="rule"><span class="e">🪨</span><span class="t"><b>Dodge</b> rocks, wrecks & caltrops — a crash costs a wheel</span></div>
+      <div class="rule"><span class="e">⚡</span><span class="t"><b>Grab boosts</b> to surge ahead of the rival</span></div>
+    </div>
+    <button class="btn" id="startBtn">🏁 RACE</button>
+  </div>
+
+  <div class="panel hidden" id="end">
+    <div class="verdict" id="verdict"></div>
+    <div class="tcard" id="tcard"><div class="h"><div class="hk" id="tk">The present is now…</div><div class="hn" id="tn"></div></div><div class="b" id="tb"></div></div>
+    <div class="stat" id="stat"></div>
+    <div class="btn-row"><button class="btn violet" id="shareBtn">📤 Share</button><button class="btn" id="againBtn">↻ Again</button></div>
+  </div>
+
+  <div id="flash"></div><div id="banner"></div>
+</div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+function vib(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+/* audio */
+let AC=null,muted=false; try{muted=localStorage.getItem('chariot.mute')==='1';}catch(e){}
+function ac(){ if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} if(AC&&AC.state==='suspended'){try{AC.resume();}catch(e){}} return AC; }
+function beep(f,d,t,v,dl){ if(muted)return; const a=ac(); if(!a)return; try{const t0=a.currentTime+(dl||0),o=a.createOscillator(),g=a.createGain();
+  o.type=t||'square';o.frequency.setValueAtTime(f,t0);g.gain.setValueAtTime(v||.14,t0);g.gain.exponentialRampToValueAtTime(.001,t0+d);o.connect(g).connect(a.destination);o.start(t0);o.stop(t0+d);}catch(e){} }
+function noise(d,v){ if(muted)return; const a=ac(); if(!a)return; try{const n=Math.floor(a.sampleRate*d),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);
+  for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(1-i/n);const s=a.createBufferSource();s.buffer=b;const g=a.createGain();g.gain.value=v||.1;s.connect(g).connect(a.destination);s.start();}catch(e){} }
+const sCrash=()=>{noise(.22,.16);beep(120,.2,'sawtooth',.16);}, sBoost=()=>{beep(440,.1,'square',.14);beep(660,.12,'square',.14,.07);},
+      sWin=()=>[523,659,784,1047].forEach((f,i)=>beep(f,.16,'square',.16,i*.1)), sLose=()=>[392,330,262].forEach((f,i)=>beep(f,.22,'triangle',.16,i*.13));
+const mute=$('mute'); function applyMute(){mute.textContent=muted?'🔇':'🔊';try{localStorage.setItem('chariot.mute',muted?'1':'0');}catch(e){}}
+mute.addEventListener('pointerdown',e=>{e.stopPropagation();muted=!muted;applyMute();}); applyMute();
+function flash(c,ms){const f=$('flash');f.className=c+' show';clearTimeout(f._t);f._t=setTimeout(()=>f.classList.remove('show'),ms||80);}
+function banner(t){const b=$('banner');b.textContent=t;b.classList.remove('go');void b.offsetWidth;b.classList.add('go');}
+function shake(){const a=$('app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake');}
+function confetti(n){const cols=['#ff4d4d','#ff9f43','#ffd166','#5dffa8','#3ee6ff','#a98bff'];for(let k=0;k<n;k++){const s=document.createElement('div');s.className='confetti';
+  s.style.left=(Math.random()*100)+'%';s.style.background=cols[k%cols.length];const d=900+Math.random()*700;s.style.animation=`conf ${d}ms ease-in forwards`;
+  s.style.transform=`rotate(${Math.random()*360}deg)`;document.body.appendChild(s);setTimeout(()=>s.remove(),d+50);}}
+
+/* canvas */
+const cv=$('cv'); let ctx,W,H,dpr;
+function fit(){ const r=cv.getBoundingClientRect(); dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.max(2,r.width*dpr|0); cv.height=Math.max(2,r.height*dpr|0); ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; }
+window.addEventListener('resize',()=>{ if(running) fit(); });
+
+/* state */
+const LANES=3; let laneX=[]; let running=false, raf=0;
+let player, obstacles, scroll, progress, rival, crashes, speed, boostT, lastSpawn, finishAt=100;
+function laneCenter(l){ return laneX[l]; }
+function reset(){ fit(); laneX=[W*0.22,W*0.5,W*0.78];
+  player={lane:1, x:laneCenter(1), y:H*0.8, r:Math.min(W*0.1,34)};
+  obstacles=[]; scroll=0; progress=0; rival=0; crashes=0; speed=1; boostT=0; lastSpawn=0; }
+function steer(clientX){ const r=cv.getBoundingClientRect(); const x=clientX-r.left;
+  let best=0,bd=1e9; for(let i=0;i<LANES;i++){const d=Math.abs(x-laneX[i]); if(d<bd){bd=d;best=i;}} player.lane=best; }
+cv.addEventListener('pointerdown',e=>{e.preventDefault(); steer(e.clientX);});
+cv.addEventListener('pointermove',e=>{ if(e.buttons){e.preventDefault(); steer(e.clientX);} });
+
+const OBS=['🪨','🛞','🔥','🌵'];
+function spawn(){ const lane=(Math.random()*LANES)|0; const boost=Math.random()<0.16;
+  obstacles.push({lane, y:-40, boost, e: boost?'⚡':OBS[(Math.random()*OBS.length)|0], hit:false}); }
+
+function loop(ts){
+  if(!running) return;
+  // speeds
+  const boosting=boostT>0; if(boosting) boostT-=16;
+  const sc = (boosting?7.2:4.4)*speed;          // world scroll (visual)
+  scroll += sc;
+  progress += (boosting?0.075:0.042)*speed;      // ~40s clean race
+  rival += 0.038;                                 // rival steady — beatable if you boost & don't crash
+  // spawn
+  lastSpawn += sc; if(lastSpawn> (boosting?120:150)){ lastSpawn=0; spawn(); if(Math.random()<.35) spawn(); }
+  // move player toward target lane
+  const tx=laneCenter(player.lane); player.x += (tx-player.x)*0.35;
+
+  ctx.clearRect(0,0,W,H);
+  // track
+  ctx.fillStyle='#caa55f'; ctx.fillRect(W*0.12,0,W*0.76,H);
+  ctx.fillStyle='rgba(0,0,0,.10)'; for(let i=1;i<LANES;i++){ ctx.fillRect(laneX[i]-((laneX[1]-laneX[0])/2)-1,0,2,H); }
+  // dashes scrolling
+  ctx.fillStyle='rgba(255,255,255,.35)'; const off=scroll%48;
+  for(let i=0;i<LANES;i++){ for(let y=-48+off;y<H;y+=48){ ctx.fillRect(laneX[i]-2,y,4,22); } }
+  // obstacles
+  ctx.font='34px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  for(const o of obstacles){ o.y+=sc; ctx.fillText(o.e, laneX[o.lane], o.y); }
+  // collisions
+  for(const o of obstacles){ if(o.hit) continue;
+    if(o.lane===player.lane && Math.abs(o.y-player.y)< player.r+16){
+      o.hit=true;
+      if(o.boost){ boostT=1100; speed=Math.min(1.5,speed+0.04); sBoost(); flash('gold',60); banner('⚡ BOOST!'); }
+      else { crashes++; progress=Math.max(0,progress-6); speed=Math.max(0.7,speed-0.12); sCrash(); shake(); flash('red',90); vib([50,40,50]);
+        renderCrashes(); if(crashes>=3) return lose(); }
+    }
+  }
+  obstacles=obstacles.filter(o=>o.y<H+50 && !o.hit);
+  // player chariot
+  ctx.save(); ctx.font=(player.r*2)+'px serif';
+  if(boosting){ ctx.shadowColor='#ffd166'; ctx.shadowBlur=18; }
+  ctx.fillText('🏇', player.x, player.y); ctx.restore();
+  if(boosting){ ctx.font='20px serif'; ctx.fillText('💨', player.x, player.y+player.r+6); }
+  // HUD bars
+  $('youDot').style.left=Math.min(100,progress)+'%'; $('rivalDot').style.left=Math.min(100,rival)+'%';
+  $('spd').textContent = boosting?'⚡ SURGE':'RACING';
+
+  if(progress>=finishAt) return win();        // you crossed first
+  if(rival>=finishAt) return loseRace();      // champion beat you to the line
+  raf=requestAnimationFrame(loop);
+}
+function renderCrashes(){ const s=$('crashes').children; for(let i=0;i<3;i++) s[i].classList.toggle('dead', i<crashes); }
+
+function start(){ ac(); $('brief').classList.add('hidden'); $('end').classList.add('hidden'); reset(); renderCrashes(); running=true; cancelAnimationFrame(raf); raf=requestAnimationFrame(loop); }
+function finishCommon(){ running=false; cancelAnimationFrame(raf); }
+function win(){ finishCommon();
+  flash('gold'); confetti(46); sWin(); vib([0,40,40,40]);
+  $('verdict').className='verdict win'; $('verdict').textContent='🏆 YOU WON THE RACE!';
+  $('tn').textContent='Rome of the Champion-Kings';
+  $('tb').innerHTML='The crowd roars your name. The slave becomes a legend, then a senator, then more. In this timeline Rome crowns its rulers by chariot race to this day — elections are held at 60 mph. 🏇👑';
+  $('stat').innerHTML=`Crashes: <b>${crashes}</b> · you beat the champion to the line`;
+  $('end').classList.remove('hidden');
+}
+function loseRace(){ finishCommon(); flash('red'); sLose(); vib(120);
+  $('verdict').className='verdict lose'; $('verdict').textContent='🏁 PIPPED AT THE POST';
+  $('tn').textContent='History, Unchanged';
+  $('tb').innerHTML='The champion crosses a chariot-length ahead. So close — but history keeps its laurel. Race again and grab more ⚡ boosts to rewrite it?';
+  $('stat').innerHTML=`You finished <b>${Math.round(progress)}%</b> as the rival hit the line`;
+  $('end').classList.remove('hidden');
+}
+function lose(){ finishCommon(); flash('red'); sLose(); vib(140);
+  $('verdict').className='verdict lose'; $('verdict').textContent='💥 WRECKED!';
+  $('tn').textContent='History, Unchanged';
+  $('tb').innerHTML='Your chariot splinters across the sand. The champion takes the laurel, history rolls on unchanged. Race again to rewrite it?';
+  $('stat').innerHTML=`You made it <b>${Math.round(progress)}%</b> of the way`;
+  $('end').classList.remove('hidden');
+}
+$('startBtn').addEventListener('pointerdown',e=>{e.preventDefault();start();});
+$('againBtn').addEventListener('pointerdown',e=>{e.preventDefault();start();});
+$('shareBtn').addEventListener('pointerdown',async e=>{e.preventDefault();
+  const txt=`🏇 CHANGING HISTORY — I won the Circus Maximus and rewrote Rome. Beat my race: https://miklatgames.fun/changinghistory/`;
+  try{ if(navigator.share){await navigator.share({text:txt});} else { await navigator.clipboard.writeText(txt); banner('Copied'); } }catch(e){}
+});
+</script>
+</body>
+</html>
+</content>
