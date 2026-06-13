@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a1226">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="robots" content="noindex,nofollow">
+<title>CHANGING HISTORY — Stop the Asteroid (demo)</title>
+<style>
+  :root{
+    --c-bg:#070a18; --c-panel:#101b38; --c-cyan:#3ee6ff; --c-gold:#ffd166; --c-red:#ff5d73; --c-green:#5dffa8; --c-violet:#a98bff; --c-orange:#ff8a3d;
+    --c-ink:#eaf2ff; --c-dim:#8da3cc; --c-border:rgba(62,230,255,.22); --c-gold-border:rgba(255,209,102,.45);
+    --grad:radial-gradient(120% 80% at 50% 110%,#143a2a 0%,#0c1430 40%,#070a18 100%);
+    --shadow:0 12px 34px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.05);
+    --fd:"Courier New",ui-monospace,Menlo,Consolas,monospace; --fb:"Heebo",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none;background:var(--c-bg);
+    color:var(--c-ink);font-family:var(--fb);user-select:none;-webkit-user-select:none;}
+  body{display:flex;justify-content:center;}
+  .app{width:100%;max-width:520px;height:100%;background:var(--grad);position:relative;overflow:hidden;display:flex;flex-direction:column;}
+  .hud{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 4px;}
+  .score{font-family:var(--fd);font-weight:700;font-size:24px;color:var(--c-gold);min-width:64px;text-shadow:0 0 12px rgba(255,209,102,.5);}
+  .combo{font-size:13px;font-weight:800;color:var(--c-violet);opacity:0;transition:opacity .15s;} .combo.on{opacity:1;}
+  .grow{flex:1;}
+  .bars{padding:2px 14px 0;display:flex;flex-direction:column;gap:5px;}
+  .brow{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:800;letter-spacing:.04em;color:var(--c-dim);text-transform:uppercase;}
+  .brow .lab{min-width:96px;} .brow .val{min-width:40px;text-align:end;}
+  .bar{flex:1;height:9px;border-radius:5px;background:#16213f;overflow:hidden;border:1px solid var(--c-border);}
+  .bar i{display:block;height:100%;width:0%;transition:width .2s var(--ease);}
+  .bar.earth i{background:linear-gradient(90deg,#5dffa8,#3ee6ff);} .bar.storm i{background:linear-gradient(90deg,#ff8a3d,#ffd166);}
+  #cv{flex:1;display:block;width:100%;touch-action:none;}
+  .corner{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);inset-inline-end:12px;z-index:28;font-size:18px;
+    background:var(--c-panel);border:1px solid var(--c-border);border-radius:999px;padding:7px 11px;cursor:pointer;}
+  .panel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    padding:24px;z-index:20;overflow-y:auto;background:radial-gradient(ellipse at 50% 30%,rgba(10,14,30,.7),rgba(7,10,24,.96));}
+  .panel.hidden{display:none;}
+  .k{font:800 11px var(--fd);letter-spacing:.13em;text-transform:uppercase;color:var(--c-cyan);}
+  .ico{font-size:64px;margin:10px 0 4px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5));}
+  h1{font-size:clamp(24px,7vw,32px);font-weight:900;line-height:1.1;}
+  .yr{margin-top:6px;font-size:14px;color:var(--c-gold);font-weight:700;}
+  .story{margin-top:14px;font-size:15px;line-height:1.55;max-width:360px;}
+  .rules{margin-top:14px;display:flex;flex-direction:column;gap:8px;width:100%;max-width:330px;}
+  .rule{display:flex;align-items:center;gap:12px;background:rgba(16,27,56,.7);border:1px solid var(--c-border);border-radius:12px;padding:9px 13px;text-align:start;}
+  .rule .e{font-size:26px;width:32px;text-align:center;flex-shrink:0;} .rule .t{font-size:13.5px;line-height:1.35;} .rule .t b{color:var(--c-gold);}
+  .btn{margin-top:20px;border:0;border-radius:15px;padding:16px 38px;font-size:18px;font-weight:900;cursor:pointer;
+    background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;box-shadow:0 7px 22px rgba(233,162,59,.4);transition:transform .1s var(--ease);}
+  .btn:active{transform:scale(.96);} .btn.violet{background:linear-gradient(180deg,#bca4ff,#8a63f0);color:#160a36;}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px;} .btn-row .btn{margin-top:0;}
+  .verdict{font-family:var(--fd);font-weight:700;font-size:clamp(22px,6.2vw,30px);}
+  .verdict.win{color:var(--c-green);text-shadow:0 0 18px rgba(93,255,168,.5);} .verdict.lose{color:var(--c-red);text-shadow:0 0 16px rgba(255,93,115,.5);}
+  .tcard{margin-top:16px;width:100%;max-width:360px;border-radius:16px;overflow:hidden;text-align:start;
+    background:linear-gradient(160deg,#143a2a,#101b38);border:1px solid rgba(93,255,168,.45);box-shadow:var(--shadow);}
+  .tcard .h{padding:12px 15px 9px;border-bottom:1px solid var(--c-border);} .tcard .hk{font:800 10px var(--fd);letter-spacing:.14em;color:var(--c-cyan);text-transform:uppercase;}
+  .tcard .hn{margin-top:6px;font-size:19px;font-weight:900;} .tcard .b{padding:12px 15px;font-size:13px;line-height:1.55;}
+  .stat{margin-top:12px;font-size:15px;} .stat b{color:var(--c-gold);}
+  #flash{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;z-index:30;}
+  #flash.red{background:radial-gradient(circle,rgba(255,93,115,.4),transparent 70%);} #flash.gold{background:radial-gradient(circle,rgba(255,209,102,.45),transparent 70%);}
+  #flash.show{opacity:1;transition:opacity .04s;}
+  #banner{position:fixed;left:50%;top:24%;transform:translate(-50%,-50%) scale(.7);z-index:25;font-family:var(--fd);font-weight:700;
+    font-size:28px;color:var(--c-violet);text-shadow:0 0 20px rgba(169,139,255,.8);opacity:0;pointer-events:none;}
+  #banner.go{animation:ban 1s var(--ease) forwards;}
+  @keyframes ban{15%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-80%) scale(1)}}
+  .app.shake{animation:shk .26s linear;} @keyframes shk{20%{transform:translate(-5px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(4px,2px)}}
+  .confetti{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:26;pointer-events:none;} @keyframes conf{to{transform:translateY(110vh) rotate(640deg);opacity:0;}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important;}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="hud"><div class="score" id="score">0</div><div class="combo" id="combo">x2</div><div class="grow"></div></div>
+  <div class="bars">
+    <div class="brow"><span class="lab">🌍 Earth</span><div class="bar earth"><i id="earthBar" style="width:100%"></i></div><span class="val" id="earthVal">100%</span></div>
+    <div class="brow"><span class="lab">☄️ Storm</span><div class="bar storm"><i id="stormBar"></i></div><span class="val" id="stormVal">0%</span></div>
+  </div>
+  <canvas id="cv"></canvas>
+  <button class="corner" id="mute">🔊</button>
+
+  <div class="panel" id="brief">
+    <div class="k">Prehistory · 66,000,000 BCE · Tap-intercept</div>
+    <div class="ico">☄️</div>
+    <h1>STOP THE ASTEROID</h1>
+    <div class="yr">Save the dinosaurs</div>
+    <div class="story">A storm of meteors is falling toward Earth. Tap them out of the sky before they hit the ground — keep the dinosaurs alive through the whole storm.</div>
+    <div class="rules">
+      <div class="rule"><span class="e">👆</span><span class="t"><b>Tap a meteor</b> to blow it up (big ☄️ take a few taps)</span></div>
+      <div class="rule"><span class="e">🌍</span><span class="t"><b>Don't let them land</b> — every impact hurts Earth</span></div>
+      <div class="rule"><span class="e">🦖</span><span class="t"><b>Survive the storm</b> with Earth alive and they make it!</span></div>
+    </div>
+    <button class="btn" id="startBtn">☄️ DEFEND EARTH</button>
+  </div>
+
+  <div class="panel hidden" id="end">
+    <div class="verdict" id="verdict"></div>
+    <div class="tcard" id="tcard"><div class="h"><div class="hk" id="tk">The present is now…</div><div class="hn" id="tn"></div></div><div class="b" id="tb"></div></div>
+    <div class="stat" id="stat"></div>
+    <div class="btn-row"><button class="btn violet" id="shareBtn">📤 Share</button><button class="btn" id="againBtn">↻ Again</button></div>
+  </div>
+  <div id="flash"></div><div id="banner"></div>
+</div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+function vib(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+let AC=null,muted=false; try{muted=localStorage.getItem('ast.mute')==='1';}catch(e){}
+function ac(){ if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} if(AC&&AC.state==='suspended'){try{AC.resume();}catch(e){}} return AC; }
+function beep(f,d,t,v,dl){ if(muted)return; const a=ac(); if(!a)return; try{const t0=a.currentTime+(dl||0),o=a.createOscillator(),g=a.createGain();
+  o.type=t||'square';o.frequency.setValueAtTime(f,t0);g.gain.setValueAtTime(v||.14,t0);g.gain.exponentialRampToValueAtTime(.001,t0+d);o.connect(g).connect(a.destination);o.start(t0);o.stop(t0+d);}catch(e){} }
+function noise(d,v){ if(muted)return; const a=ac(); if(!a)return; try{const n=Math.floor(a.sampleRate*d),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);
+  for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(1-i/n);const s=a.createBufferSource();s.buffer=b;const g=a.createGain();g.gain.value=v||.1;s.connect(g).connect(a.destination);s.start();}catch(e){} }
+const sPop=k=>{beep(420+Math.min(k,16)*40,.07,'square',.14);noise(.04,.06);}, sCrack=()=>beep(260,.06,'square',.12),
+      sImpact=()=>{noise(.24,.18);beep(90,.22,'sawtooth',.18);}, sWin=()=>[523,659,784,1047].forEach((f,i)=>beep(f,.16,'square',.16,i*.1)),
+      sLose=()=>[300,240,180].forEach((f,i)=>beep(f,.24,'sawtooth',.16,i*.14));
+const mute=$('mute'); function applyMute(){mute.textContent=muted?'🔇':'🔊';try{localStorage.setItem('ast.mute',muted?'1':'0');}catch(e){}}
+mute.addEventListener('pointerdown',e=>{e.stopPropagation();muted=!muted;applyMute();}); applyMute();
+function flash(c,ms){const f=$('flash');f.className=c+' show';clearTimeout(f._t);f._t=setTimeout(()=>f.classList.remove('show'),ms||80);}
+function banner(t){const b=$('banner');b.textContent=t;b.classList.remove('go');void b.offsetWidth;b.classList.add('go');}
+function shake(){const a=$('app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake');}
+function confetti(n){const cols=['#ff4d4d','#ff9f43','#ffd166','#5dffa8','#3ee6ff','#a98bff'];for(let k=0;k<n;k++){const s=document.createElement('div');s.className='confetti';
+  s.style.left=(Math.random()*100)+'%';s.style.background=cols[k%cols.length];const d=900+Math.random()*700;s.style.animation=`conf ${d}ms ease-in forwards`;
+  s.style.transform=`rotate(${Math.random()*360}deg)`;document.body.appendChild(s);setTimeout(()=>s.remove(),d+50);}}
+
+const cv=$('cv'); let ctx,W,H,dpr,groundY;
+function fit(){ const r=cv.getBoundingClientRect(); dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.max(2,r.width*dpr|0); cv.height=Math.max(2,r.height*dpr|0); ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); W=r.width; H=r.height; groundY=H*0.84; }
+window.addEventListener('resize',()=>{ if(running) fit(); });
+
+const STORM_MS=42000;            // survive ~42s
+let running=false, raf=0, lastTs=0;
+let meteors, parts, score, combo, earth, stormT, spawnAcc, dinos;
+function reset(){ fit(); meteors=[]; parts=[]; score=0; combo=0; earth=100; stormT=0; spawnAcc=0;
+  dinos=['🦕','🦖','🦴'].map((e,i)=>({e, x:W*(0.2+i*0.3)})); }
+function hud(){ $('score').textContent=score; const c=$('combo'); c.textContent='x'+(1+Math.min(Math.floor(combo/4),4));
+  c.classList.toggle('on',combo>=4);
+  $('earthBar').style.width=Math.max(0,earth)+'%'; $('earthVal').textContent=Math.max(0,Math.round(earth))+'%';
+  const sp=Math.min(100,stormT/STORM_MS*100); $('stormBar').style.width=sp+'%'; $('stormVal').textContent=Math.round(sp)+'%'; }
+
+function spawn(){ const prog=stormT/STORM_MS; const big=Math.random()<0.22+prog*0.1;
+  const r=big? (26+Math.random()*10) : (15+Math.random()*7);
+  meteors.push({ x:r+Math.random()*(W-2*r), y:-r, vx:(Math.random()*2-1)*0.5, vy:(1.1+prog*1.7)*(big?0.8:1)*(0.9+Math.random()*0.4),
+    r, hp: big?(Math.random()<0.5?3:2):1, big, hit:0 }); }
+function burst(x,y,col,n){ for(let i=0;i<(n||8);i++){ const a=Math.random()*6.28, s=1+Math.random()*3;
+  parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,col}); } }
+
+function hitAt(cx,cy){ if(!running)return; const r=cv.getBoundingClientRect(); const x=cx-r.left, y=cy-r.top;
+  let best=-1,bd=1e9; for(let i=0;i<meteors.length;i++){ const m=meteors[i]; const d=Math.hypot(m.x-x,m.y-y); if(d<m.r+18 && d<bd){bd=d;best=i;} }
+  if(best<0){ combo=0; return; }
+  const m=meteors[best]; m.hp--; m.hit=6; ac();
+  if(m.hp>0){ sCrack(); burst(m.x,m.y,'#ffcaa3',5); m.r*=0.86; return; }
+  combo++; const pts=(m.big?25:10)*(1+Math.min(Math.floor(combo/4),4)); score+=pts;
+  sPop(combo); burst(m.x,m.y, m.big?'#ff8a3d':'#ffd166', m.big?14:8); flash('gold',40); vib(12);
+  if(combo>0&&combo%12===0) banner('🔥 '+combo+' STREAK!');
+  meteors.splice(best,1); hud();
+}
+cv.addEventListener('pointerdown',e=>{ e.preventDefault(); hitAt(e.clientX,e.clientY); });
+
+function loop(ts){ if(!running)return; const dt=Math.min(40, ts-lastTs||16); lastTs=ts; stormT+=dt;
+  const prog=stormT/STORM_MS;
+  spawnAcc+=dt; const gap=Math.max(280, 820-prog*560); if(spawnAcc>gap){ spawnAcc=0; spawn(); if(prog>0.5&&Math.random()<0.5) spawn(); }
+  ctx.clearRect(0,0,W,H);
+  // stars
+  ctx.fillStyle='rgba(255,255,255,.5)'; for(let i=0;i<30;i++){ ctx.fillRect((i*89)%W,(i*57)%(groundY-10),1.6,1.6); }
+  // ground + dinos
+  ctx.fillStyle='#15351f'; ctx.beginPath(); ctx.moveTo(0,groundY); ctx.quadraticCurveTo(W/2,groundY-22,W,groundY); ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+  ctx.font='30px serif'; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
+  for(const d of dinos) ctx.fillText(d.e, d.x, groundY+24);
+  // meteors
+  ctx.textBaseline='middle';
+  for(const m of meteors){ m.x+=m.vx; m.y+=m.vy*dt/16; if(m.hit>0)m.hit--;
+    // trail
+    ctx.globalAlpha=.35; ctx.fillStyle='#ff8a3d'; ctx.beginPath(); ctx.ellipse(m.x,m.y-m.r,m.r*0.6,m.r*1.1,0,0,6.28); ctx.fill(); ctx.globalAlpha=1;
+    ctx.font=(m.r*2)+'px serif'; ctx.fillText(m.hit>0?'💥':(m.big?'☄️':'🪨'), m.x, m.y);
+    if(m.hp>1){ ctx.fillStyle='#ffd166'; ctx.font='800 13px sans-serif'; ctx.fillText(m.hp,m.x,m.y+m.r+6); }
+  }
+  // impacts
+  for(let i=meteors.length-1;i>=0;i--){ const m=meteors[i]; if(m.y-m.r>groundY){ const dmg=m.big?14:6; earth-=dmg; combo=0;
+    burst(m.x,groundY,'#ff5d73',12); sImpact(); shake(); flash('red',90); vib([40,40]); meteors.splice(i,1); hud();
+    if(earth<=0){ earth=0; hud(); return lose(); } } }
+  // particles
+  for(let i=parts.length-1;i>=0;i--){ const p=parts[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.06; p.life-=0.03;
+    if(p.life<=0){parts.splice(i,1);continue;} ctx.globalAlpha=p.life; ctx.fillStyle=p.col; ctx.fillRect(p.x,p.y,3,3); ctx.globalAlpha=1; }
+  hud();
+  if(stormT>=STORM_MS) return win();
+  raf=requestAnimationFrame(loop);
+}
+function start(){ ac(); $('brief').classList.add('hidden'); $('end').classList.add('hidden'); reset(); hud(); running=true; lastTs=0; cancelAnimationFrame(raf); raf=requestAnimationFrame(loop); }
+function fin(){ running=false; cancelAnimationFrame(raf); }
+function win(){ fin(); flash('gold'); confetti(48); sWin(); vib([0,40,40,40]);
+  $('verdict').className='verdict win'; $('verdict').textContent='🦖 THE DINOSAURS LIVE!';
+  $('tn').textContent='The Dinosaur Civilization';
+  $('tb').innerHTML='The storm passes; the great reptiles never fall. 66 million years later, velociraptors run the banks, a T-rex hosts the evening news, and humans are… still working on opposable thumbs. 🦖🏙️';
+  $('stat').innerHTML=`Earth survived at <b>${Math.round(earth)}%</b> · score <b>${score}</b>`;
+  $('end').classList.remove('hidden');
+}
+function lose(){ fin(); flash('red'); sLose(); vib(160);
+  $('verdict').className='verdict lose'; $('verdict').textContent='☄️ IMPACT — EXTINCTION';
+  $('tn').textContent='History, Unchanged';
+  $('tb').innerHTML='Too many got through. The asteroid wins, the dinosaurs fall — and history rolls on exactly as it did, all the way to us. Try again to save them?';
+  $('stat').innerHTML=`You held out to <b>${Math.round(stormT/STORM_MS*100)}%</b> of the storm · score <b>${score}</b>`;
+  $('end').classList.remove('hidden');
+}
+$('startBtn').addEventListener('pointerdown',e=>{e.preventDefault();start();});
+$('againBtn').addEventListener('pointerdown',e=>{e.preventDefault();start();});
+$('shareBtn').addEventListener('pointerdown',async e=>{e.preventDefault();
+  const txt=`☄️ CHANGING HISTORY — I saved the dinosaurs from the asteroid (score ${score}). In my timeline a T-rex reads the news. Beat me: https://miklatgames.fun/changinghistory/`;
+  try{ if(navigator.share){await navigator.share({text:txt});} else { await navigator.clipboard.writeText(txt); banner('Copied'); } }catch(e){}
+});
+</script>
+</body>
+</html>
+</content>
