@@ -37,17 +37,19 @@ invariant (we ship Hebrew RTL), so the muscle exists — but Arabic adds
 **Eastern-Arabic digits** and **bidirectional plate/number layout on canvas**,
 which the stability panel flagged as the top localization reject risk (below).
 
-## The two flagships (Zorba's ideas, specced)
-Full concept docs: `games/THE-PLATE.md` and `games/BUILD-THE-BURJ.md`.
+## The three flagships (Zorba's ideas, specced)
+Concept docs: `games/THE-PLATE.md`, `games/BUILD-THE-BURJ.md`, `games/DUBAI-LIFE.md`.
+All three plug into one **corporate engine** (`CORPORATE-ENGINE.md`) — ads &
+paid experiences as a first-class shared system, not per-game bolt-ons.
 
-| | **THE PLATE** 🚗 | **BUILD THE BURJ** 🏗️ |
-|---|---|---|
-| Pitch | Win the most prestigious car plate by out-bidding whales & friends | Stack a megatower balancing budget / material / stability / height |
-| Proven base | Auction/duel tension + Trivia-Crack forfeit duel | Tower Bloxx / "Stack" (Ketchapp) + light sim |
-| Control scheme | TIME-IT (bid on the beat) / nerve-hold | TIME-IT (drop the swinging floor) |
-| Cultural hook | Plate "P7" → AED 55M charity auction; plate-code status grammar | Burj Khalifa (828m, $1.5B, wind engineering) |
-| Share unit | The plate you won + clout score ("I took plate 7 from you") | Skyline silhouette + height reached |
-| Role | **Viral flagship — ship first** | **Revenue engine + B2B play** |
+| | **THE PLATE** 🚗 | **BUILD THE BURJ** 🏗️ | **DUBAI LIFE** 🌆 |
+|---|---|---|---|
+| Pitch | Win the most prestigious car plate by out-bidding whales & friends | Stack a megatower balancing budget / material / stability / height | Survive a day in Dubai — parking, SZR traffic, the Gazebo run |
+| Proven base | Auction/duel + Trivia-Crack forfeit duel | Tower Bloxx / "Stack" + light sim | Changing-History grab-bag + Balagan daily duel |
+| Control scheme | TIME-IT bid / nerve-hold | TIME-IT (drop swinging floor) | reuses existing engines (data, not new engines) |
+| Cultural hook | Plate "P7" → AED 55M charity auction | Burj Khalifa (828m, $1.5B, wind) | relatable daily-life chaos every resident knows |
+| Share unit | plate won + clout ("I took plate 7") | skyline + height | "survived Dubai in N tries" |
+| Role | **Viral flagship — ship first** | **Revenue engine + B2B** | **Social daily + corporate-engine showcase** |
 
 ## 🏆 10M Advisor Panel Verdict (concept review, 2026-06-13)
 Panel convened pre-build (factory stage 1). Two flagships reviewed head-to-head.
@@ -80,10 +82,12 @@ Verbatim role: virality / retention / stability / monetization.
 | Phase | Item | Gate |
 |---|---|---|
 | P0 | Shared helpers: Eastern-Arabic digits, seeded int PRNG, fonts gate | reusable snippet block |
+| P0 | **Corporate engine** dormant scaffold (`CORP={}` flag, placement/funnel config) | ships off; flips per deal |
 | P0 | **THE PLATE** stages 1–5 (charity framing, URL-duel, garage) | Zorba signs the pitch + hook |
+| P1 | **DUBAI LIFE** — ship Find Parking first, then SZR + Gazebo, assemble Daily Run | reuses CH/Shuk engines |
 | P1 | **BUILD THE BURJ** stages 1–5 (daily-seed landmark race) | Zorba; anchor-developer LOI before ad model |
 | P1 | Arabic pass on existing arcade (Shuk Souk reskin candidate) | reuse Shuk Shopper engine |
-| P2 | B2B one-pager: "playable marketing for the Gulf" + 10-target list (DET, Emaar, a bank, a telco, an auto brand) | per MONETIZATION.md P3 |
+| P2 | B2B one-pager: "playable marketing for the Gulf" + 10-target list (CORPORATE-ENGINE.md map) | per MONETIZATION.md P3 |
 
 ## Zorba gates
 - ✅/❌ approve the two one-line pitches + cultural hooks (factory stage 1 gate).
