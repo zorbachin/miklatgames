@@ -166,6 +166,15 @@
         </div>
       </a>
 
+      <a class="gcard" href="whackamullah/" id="cardWhack" style="--accent:#ffd166" data-game="whackamullah">
+        <div class="coverwrap"><img class="cover" src="whackamullah/cover.png" alt="Whack-a-Mullah" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
+        <div class="body">
+          <div class="ttl"><span class="name">Whack-a-Mullah</span><span class="name-he">וואק-א-מולה</span></div>
+          <div class="hook" data-i18n="whackHook">Bonk the regime, spare the fabulous. Multi-tap, 3 strikes — how far can you go?</div>
+          <div class="meta"><span class="pill" data-i18n="offline">📵 No reception needed</span></div>
+        </div>
+      </a>
+
       <a class="gcard" href="mamaddash/" id="cardMamad" style="--accent:#7ee8c7" data-game="mamaddash">
         <div class="coverwrap"><img class="cover" src="mamaddash/art/hero.webp" alt="Cartoon runner leaping over a savta on the Tel Aviv promenade" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
@@ -180,31 +189,24 @@
 
       <div class="ghosts">
         <div class="ghost">
-          <img class="gart" src="whackamullah/cover.png" alt="Whack-a-Mullah" loading="lazy">
-          <div class="gbody">
-            <div class="gname">🔨 WHACK-A-MULLAH</div>
-            <span class="glabel" data-i18n="soon">DOOR OPENING SOON</span>
-          </div>
-        </div>
-        <div class="ghost">
           <img class="gart" src="assets/shukshopper-cover.svg" alt="Runner with a basket sprinting through a striped-awning market alley, chased by a vendor" loading="lazy">
           <div class="gbody">
             <div class="gname">🧺 SHUK SHOPPER</div>
-            <span class="glabel" data-i18n="soon">DOOR OPENING SOON</span>
+            <span class="glabel" data-i18n="soon">COMING SOON</span>
           </div>
         </div>
         <div class="ghost">
           <img class="gart" src="assets/miklatdigger-cover.svg" alt="A construction worker digging a shaft through layered earth strata, artifacts buried around him, an inspector watching from the surface" loading="lazy">
           <div class="gbody">
             <div class="gname">⛏️ MIKLAT DIGGER</div>
-            <span class="glabel" data-i18n="soon">DOOR OPENING SOON</span>
+            <span class="glabel" data-i18n="soon">COMING SOON</span>
           </div>
         </div>
         <div class="ghost">
           <img class="gart" src="assets/balagan-cover.webp" alt="Balagan — Tel Aviv boardwalk" loading="lazy">
           <div class="gbody">
             <div class="gname">🌀 BALAGAN</div>
-            <span class="glabel" data-i18n="soon">DOOR OPENING SOON</span>
+            <span class="glabel" data-i18n="soon">COMING SOON</span>
           </div>
         </div>
       </div>
@@ -246,7 +248,7 @@ const I18N={
   shukHook:"Friday rush. Swipe through the stalls, fill Ima's list, outrun the vendor before Shabbat closes the shuk.",
   diggerHook:"Dig a mamad under your building — every meter down is 3,000 years of history. Brush finds clean before the Inspector whistles. Runs on coffee.",
   newGame:'🆕 New door',
-  soon:'DOOR OPENING SOON',
+  soon:'COMING SOON',
   whyTitle:'Why we exist',
   why:'Built for morale. Open it once with internet — after that it works with zero signal. Free, no ads, no sign-up, nothing to install.',
   safety:'During a real alert, follow Home Front Command instructions only.',
@@ -263,7 +265,7 @@ const I18N={
   shukHook:'שישי בצהריים. מחליקים בין הדוכנים, ממלאים את הרשימה של אמא, ובורחים מהמוכר לפני שהשוק נסגר.',
   diggerHook:'חופרים ממ"ד מתחת לבניין — כל מטר למטה הוא 3,000 שנות היסטוריה. שפשפו את הממצאים לפני שהפקחית שורקת. עובד על קפה.',
   newGame:'🆕 דלת חדשה',
-  soon:'הדלת נפתחת בקרוב',
+  soon:'בקרוב',
   whyTitle:'למה אנחנו קיימים',
   why:'בנוי בשביל המורל. פותחים פעם אחת עם אינטרנט — אחר כך זה עובד בלי שום קליטה. חינם, בלי פרסומות, בלי הרשמה.',
   safety:'באזעקה אמיתית פועלים רק לפי הנחיות פיקוד העורף.',
@@ -345,6 +347,7 @@ if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
   tj.hidden=false;tj.addEventListener('click',()=>track('tip'));}
 document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
 document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
+document.getElementById('cardWhack').addEventListener('click',()=>track('play-whackamullah'));
 
 
 applyLang(); applyAudio();
