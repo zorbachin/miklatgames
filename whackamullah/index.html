@@ -164,6 +164,7 @@
 
 <a class="corner" id="back" href="../">‹ <span data-i18n="arcade">Arcade</span></a>
 <button class="corner" id="mute">🔊</button>
+<audio id="music" src="music.mp3" loop preload="auto"></audio>
 
 <div id="flash"></div>
 <div id="banner"></div>
@@ -278,7 +279,7 @@ function sEsc(){ beep(110,.18,'triangle',.22); }
 function sLvl(){ [440,554,659,880].forEach((f,i)=>beep(f,.1,'square',.16,i*.08)); }
 function vib(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
 const muteBtn=document.getElementById('mute');
-function applyMute(){ muteBtn.textContent=muted?'🔇':'🔊'; try{localStorage.setItem('wm.mute',muted?'1':'0');}catch(e){} }
+function applyMute(){ muteBtn.textContent=muted?'🔇':'🔊'; try{const m=document.getElementById('music'); if(muted)m.pause(); else if(running){const p=m.play();if(p&&p.catch)p.catch(()=>{});}}catch(e){} try{localStorage.setItem('wm.mute',muted?'1':'0');}catch(e){} }
 muteBtn.addEventListener('pointerdown',e=>{e.stopPropagation();muted=!muted;applyMute();});
 applyMute();
 
@@ -481,10 +482,12 @@ function start(){
   hud();
   clearTimeout(spawnTimer);
   spawnTimer=setTimeout(tick, 600);
+  try{const m=document.getElementById('music'); if(!muted){m.currentTime=0; const p=m.play(); if(p&&p.catch)p.catch(()=>{});}}catch(e){}
   track('start');
 }
 function gameOver(){
   running=false; clearTimeout(spawnTimer); clearBoard();
+  try{document.getElementById('music').pause();}catch(e){}
   const t=I18N[lang];
   const spared=Math.max(0, (fabSpawnedTotal()-fabWhacked));
   document.getElementById('finalScore').textContent=t.score(score);
