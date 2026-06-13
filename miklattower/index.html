@@ -44,7 +44,8 @@ function fit(){
   cv.style.width=(W*s)+'px'; cv.style.height=(H*s)+'px';
 }
 addEventListener('resize',fit); fit();
-const rnd=(a,b)=>a+Math.random()*(b-a);
+let RNG=Math.random;                       // swapped to seeded srand during challenge runs
+const rnd=(a,b)=>a+RNG()*(b-a);
 const ri=(a,b)=>Math.floor(rnd(a,b+1));
 const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
 const cellCX=c=>c*TILE+TILE/2, cellCY=r=>r*TILE+TILE/2;
@@ -54,6 +55,29 @@ const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},
              set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 function track(name){ try{ if(window.goatcounter&&window.goatcounter.count)
   window.goatcounter.count({path:'evt-'+name,event:true}); }catch(e){} }
+
+/* ---------------- seedable RNG (challenge links) ---------------- */
+let _seed=0;
+function setSeed(n){ _seed=n>>>0; }
+function srand(){                                   // mulberry32
+  _seed=(_seed+0x6D2B79F5)|0;
+  let t=Math.imul(_seed^_seed>>>15,1|_seed);
+  t=(t+Math.imul(t^t>>>7,61|t))^t;
+  return ((t^t>>>14)>>>0)/4294967296;
+}
+function seedForLevel(seed,lvl){ return ((seed>>>0)^Math.imul(lvl+1,0x9E3779B1))>>>0; }
+function randSeed(){ return (Math.floor(Math.random()*0xFFFFFF)+1)>>>0; }
+
+/* ---------------- difficulty ---------------- */
+const DIFFS={
+  easy:{key:'easy',name:'EASY',  sub:'שקט', hearts:4,timeMul:1.30,critMul:0.75,spdMul:0.85,rockMul:0.75,col:'#63e6be'},
+  med: {key:'med', name:'MEDIUM',sub:'רגיל',hearts:3,timeMul:1.00,critMul:1.00,spdMul:1.00,rockMul:1.00,col:'#ffd166'},
+  hard:{key:'hard',name:'HARD',  sub:'אזעקה',hearts:2,timeMul:0.80,critMul:1.30,spdMul:1.20,rockMul:1.25,col:'#ff8787'}
+};
+const _params=new URLSearchParams(location.search);
+const _seedParam=_params.get('seed'), _dParam=_params.get('d');
+const OVER_SHARE={x:W/2-152,y:Math.round(H*0.66),w:140,h:46};
+const OVER_AGAIN={x:W/2+12, y:Math.round(H*0.66),w:140,h:46};
 
 /* ---------------- sound (synth only, no assets) ---------------- */
 const Snd={
@@ -145,13 +169,22 @@ cv.addEventListener('mousedown',e=>{
 
 /* ---------------- game state ---------------- */
 const G={
-  state:'title', level:1, score:0, hearts:3, time:100, rescued:0, totalRes:3,
-  best:+(store.get('twr_best')||0),
+  state:'title', level:1, score:0, hearts:3, maxHearts:3, time:100, rescued:0, totalRes:3,
+  diffKey:(DIFFS[_dParam]?_dParam:(store.get('twr_diff')||'med')),
+  seed:null, challengeSeed:(_seedParam!=null?((parseInt(_seedParam,36)>>>0)||randSeed()):null),
+  best:0, runRescued:0,
+  lvlFalafelHits:0, lvlDogs:0, dogsRescued:0, pacifists:0, grandTours:0, overShareMsg:'',
   passable:null, rocks:[], critters:[], residents:[], supplies:[], falafels:[],
   chain:[], trail:[], parts:[], toasts:[],
   clearT:0, overReason:'', sirenT:0, shake:0
 };
 const P={ x:0,y:0, dir:null, face:'R', invuln:0, fireCd:0, anim:0, digging:false };
+// migrate the old single best into the Medium slot, then load the active difficulty's best
+if(!store.get('twr_best_med')&&store.get('twr_best')) store.set('twr_best_med',store.get('twr_best'));
+function bestKey(){ return 'twr_best_'+(G.diffKey||'med'); }
+function loadBest(){ G.best=+(store.get(bestKey())||0); }
+function setDiff(k){ if(!DIFFS[k]||G.state!=='title')return; G.diffKey=k; store.set('twr_diff',k); loadBest(); Snd.chime(); }
+loadBest();
 
 /* dirt overlay canvas */
 const dirt=document.createElement('canvas');
@@ -184,6 +217,9 @@ const rockAt=(c,r)=>G.rocks.find(k=>k.state!=='fall'&&k.c===c&&k.r===r);
 /* ---------------- level generation ---------------- */
 function genLevel(){
   const lv=G.level;
+  const diff=DIFFS[G.diffKey]||DIFFS.med;
+  // challenge runs derive each floor's layout from the shared seed; free play is pure random
+  if(G.seed!=null){ RNG=srand; setSeed(seedForLevel(G.seed,lv)); } else { RNG=Math.random; }
   // level plan: higher rescues, more of everything, pigeons from L2
   const plan={
     res:Math.min(3+((lv-1)>>1),6),            // 3,3,4,4,5,5,6
@@ -197,6 +233,7 @@ function genLevel(){
   for(let c=0;c<COLS;c++) G.passable[c][LOBBY]=true;
   G.rocks=[]; G.critters=[]; G.residents=[]; G.supplies=[]; G.falafels=[]; G.pockets=[];
   G.chain=[]; G.trail=[]; G.parts=[]; G.toasts=[]; G.rescued=0;
+  G.lvlFalafelHits=0; G.lvlDogs=0; G.dogsRescued=0;
 
   // rebuild dirt
   dctx.save(); dctx.globalCompositeOperation='source-over';
@@ -223,7 +260,7 @@ function genLevel(){
 
   // resident pockets (2 cells wide)
   const POOL=['Mr. Mizrahi','Shula','Motti','Pnina','Dudu','Mazal'];
-  const NAMES=['Savta Rivka',...POOL.sort(()=>Math.random()-0.5)];
+  const NAMES=['Savta Rivka',...POOL.sort(()=>RNG()-0.5)];
   for(let i=0;i<G.totalRes;i++){
     for(let tries=0;tries<80;tries++){
       const c=ri(1,COLS-3), r=ri(plan.resMin,plan.resMax);
@@ -239,7 +276,7 @@ function genLevel(){
   }
   G.totalRes=G.residents.length; // placement can fail on crowded boards; count real humans only
   // critter pockets (1 cell)
-  const N=plan.critters;
+  const N=Math.max(1,Math.round(plan.critters*diff.critMul));
   for(let i=0;i<N;i++){
     for(let tries=0;tries<80;tries++){
       const c=ri(1,COLS-2), r=ri(3,ROWS-4);
@@ -249,13 +286,13 @@ function genLevel(){
         G.critters.push({kind, x:cellCX(c),y:cellCY(r),
           tc:c,tr:r, state:'walk', dirX:1,dirY:0,
           ghostT:rnd(5,11)*(lv===1?1.3:1), ghostDur:0, anim:rnd(0,6),
-          spd:(kind==='pigeon'?52:44)*Math.min(1+0.05*(G.level-1),1.35)});
+          spd:(kind==='pigeon'?52:44)*Math.min(1+0.05*(G.level-1),1.35)*diff.spdMul});
         break;
       }
     }
   }
   // dogs (bonus rescues)
-  const DOGN=['Bobby','Lady','Rexi','Pitzi'].sort(()=>Math.random()-0.5);
+  const DOGN=['Bobby','Lady','Rexi','Pitzi'].sort(()=>RNG()-0.5);
   const nd=G.level>=3?2:1;
   for(let i=0;i<nd;i++){
     for(let tries=0;tries<80;tries++){
@@ -265,13 +302,14 @@ function genLevel(){
         G.pockets.push({c,r,dog:true});
         G.residents.push({dog:true,homeC:c,homeR:r,x:cellCX(c),y:cellCY(r),
           name:DOGN[i],kind:'dog',wave:rnd(0,6)});
+        G.lvlDogs++;
         break;
       }
     }
   }
   // pre-dug corridors (L2+): vary the map, give critters room to roam
   for(let i=0;i<plan.corridors;i++){
-    const horiz=Math.random()<0.6, len=ri(3,5);
+    const horiz=RNG()<0.6, len=ri(3,5);
     if(horiz){
       const r=ri(4,ROWS-3), c0=ri(0,COLS-1-len);
       for(let c=c0;c<c0+len;c++) if(free(c,r)){ take(c,r); openCell(c,r); }
@@ -283,7 +321,7 @@ function genLevel(){
     }
   }
   // armoires (falling furniture)
-  const B=plan.rocks;
+  const B=Math.max(2,Math.round(plan.rocks*diff.rockMul));
   for(let i=0;i<B;i++){
     for(let tries=0;tries<80;tries++){
       const c=ri(0,COLS-1), r=ri(3,ROWS-4);
@@ -300,9 +338,10 @@ function genLevel(){
   }
   // player to lobby
   P.x=cellCX(3); P.y=cellCY(LOBBY); P.dir=null; P.face='R'; P.invuln=0;
-  G.demand=Math.random()<0.5&&G.residents.some(f=>f.dog); G.dogSafe=false; G.refuseCd=0; G.chainGrace=0; G.shake=0;
-  G.time=Math.max(80,Math.min(125,95-3*(lv-1)+14*(G.totalRes-3)));
-  if(G.demand) G.time+=12; // Savta's dog demand adds a mandatory detour
+  G.demand=RNG()<0.5&&G.residents.some(f=>f.dog); G.dogSafe=false; G.refuseCd=0; G.chainGrace=0; G.shake=0;
+  const baseTime=Math.max(80,Math.min(125,95-3*(lv-1)+14*(G.totalRes-3)));
+  G.time=Math.round(baseTime*diff.timeMul);
+  if(G.demand) G.time+=Math.round(12*diff.timeMul); // Savta's dog demand adds a mandatory detour
   G.sirenT=0;
   toast('Level '+lv+' — rescue '+G.totalRes+' neighbors!');
   if(lv===1&&!store.get('twr_hint')){ store.set('twr_hint','1'); toast('Climb up through the balagan! ⬆'); }
@@ -405,7 +444,7 @@ function updatePlayer(dt){
   if(G.chain.length&&P.y>cellCY(LOBBY)-8&&P.x<TILE*2.2){
     let humans=0, dogs=0; const keep=[];
     for(const f of G.chain){
-      if(f.dog){ dogs++; G.dogSafe=true; addScore(750,P.x+rnd(-20,20),P.y-30); puff(P.x,P.y,'#ffd166',10); }
+      if(f.dog){ dogs++; G.dogsRescued++; G.dogSafe=true; addScore(750,P.x+rnd(-20,20),P.y-30); puff(P.x,P.y,'#ffd166',10); }
     }
     for(const f of G.chain){
       if(f.dog) continue;
@@ -413,7 +452,7 @@ function updatePlayer(dt){
       humans++; addScore(500,P.x+rnd(-20,20),P.y-30); puff(P.x,P.y,'#9ef0a0',10);
     }
     if(humans||dogs){
-      G.rescued+=humans; G.chain=keep;
+      G.rescued+=humans; G.runRescued+=humans; G.chain=keep;
       Snd.fanfare();
       G.parts.push({x:P.x,y:P.y-30,vx:0,vy:-30,t:1.0,txt:'תודה ♥',col:'#9ef0a0'});
       if(humans) toast(humans>1?humans+' neighbors safe in the miklat!':'Safe in the miklat!');
@@ -423,6 +462,9 @@ function updatePlayer(dt){
         G.state='clear'; G.clearT=2.0; track('tower-clear');
         const bonus=Math.ceil(G.time)*10;
         addScore(bonus); toast('ALL SAFE! Time bonus +'+bonus);
+        if(G.lvlFalafelHits===0){ addScore(400,P.x,P.y-52); toast('🕊 Pacifist floor — no falafel thrown! +400'); G.pacifists++; }
+        if(G.supplies.length&&G.supplies.every(s=>s.got)&&G.dogsRescued>=G.lvlDogs){
+          addScore(600,P.x,P.y-74); toast('🏆 Grand Tour — neighbors, dogs & supplies, all clear! +600'); G.grandTours++; }
       }
     } else if(keep.length&&G.refuseCd<=0){
       G.refuseCd=2.5; Snd.beep(180,0.2,'square',0.08);
@@ -459,7 +501,7 @@ function hitPlayer(){
 function gameOver(reason){
   G.state='over'; G.overReason=reason; G.toasts.length=0;
   track('tower-over');
-  if(G.score>G.best){ G.best=G.score; store.set('twr_best',G.best); }
+  if(G.score>G.best){ G.best=G.score; store.set(bestKey(),G.best); }
 }
 
 /* ---------------- critters ---------------- */
@@ -491,7 +533,7 @@ function updateCritters(dt){
         const fwd=opts.filter(([dx,dy])=>!(dx===-k.dirX&&dy===-k.dirY));
         const pool=fwd.length?fwd:opts;
         if(pool.length){
-          if(Math.random()<0.7){
+          if(RNG()<0.7){
             pool.sort((a,b)=>{
               const da=Math.abs(cellCX(k.tc+a[0])-P.x)+Math.abs(cellCY(k.tr+a[1])-P.y);
               const db=Math.abs(cellCX(k.tc+b[0])-P.x)+Math.abs(cellCY(k.tr+b[1])-P.y);
@@ -542,14 +584,14 @@ function updateFalafels(dt){
     f.x+=f.dx*sp*dt; f.y+=f.dy*sp*dt; f.trav+=sp*dt;
     if(!open){
       carve(f.x,f.y,6);
-      if(Math.random()<0.35) G.parts.push({x:f.x+rnd(-6,6),y:f.y+rnd(-6,6),
+      if(RNG()<0.35) G.parts.push({x:f.x+rnd(-6,6),y:f.y+rnd(-6,6),
         vx:rnd(-40,40),vy:rnd(-60,10),t:rnd(0.2,0.45),col:'#8a6a40'});
     }
     if(f.trav>TILE*3.4||rockAt(c,r)||f.x<8||f.x>W-8||f.y<cellCY(TOP)-20||f.y>H-8){
       f.dead=true; puff(f.x,f.y,'#d8b56a',5); continue; }
     for(const k of G.critters){
       if((k.state==='walk'||k.state==='ghost')&&dist(f.x,f.y,k.x,k.y)<22){
-        f.dead=true;
+        f.dead=true; G.lvlFalafelHits++;
         if(k.state==='ghost'){ k.state='stun'; k.stunT=2;
           if(!k.stunScored){ k.stunScored=true; addScore(100,k.x,k.y-22); } }
         else { k.state='pacified'; addScore(200,k.x,k.y-22); }
@@ -799,13 +841,14 @@ function drawHUD(){
   ctx.textAlign='left'; ctx.font='bold 15px Courier New';
   // hearts
   ctx.fillStyle='#ff6b6b';
-  for(let i=0;i<3;i++) ctx.fillText(i<G.hearts?'♥':'♡',10+i*18,21);
+  const mh=G.maxHearts||3;
+  for(let i=0;i<mh;i++) ctx.fillText(i<G.hearts?'♥':'♡',10+i*16,21);
   // score
   ctx.fillStyle='#ffe66d'; ctx.textAlign='center';
   ctx.fillText(String(G.score).padStart(6,'0'),W/2,21);
   // level + rescued
   ctx.fillStyle='#9ef0a0'; ctx.textAlign='left';
-  ctx.fillText('L'+G.level+'  ⌂'+G.rescued+'/'+G.totalRes+(G.dogSafe?' 🐾':''),70,21);
+  ctx.fillText('L'+G.level+' ⌂'+G.rescued+'/'+G.totalRes+(G.dogSafe?'🐾':''),16+mh*16+4,21);
   // timer
   const urgent=G.time<15;
   ctx.fillStyle=urgent?(Math.floor(G.time*2)%2?'#ff6b6b':'#fff'):'#fff';
@@ -860,53 +903,100 @@ function drawParts(dt){
 }
 
 /* ---------------- screens / ui ---------------- */
+function diffChips(){
+  const w=150,h=54,gap=10,y=Math.round(H*0.55),x0=Math.round(W/2-(3*w+2*gap)/2);
+  return [['easy',0],['med',1],['hard',2]].map(([k,i])=>({k,x:x0+i*(w+gap),y,w,h}));
+}
 function drawTitle(){
   drawSky(); drawBackdrop();
   ctx.drawImage(dirt,0,0,W,H);
   ctx.fillStyle='rgba(8,10,20,.62)'; ctx.fillRect(0,0,W,H);
   ctx.textAlign='center';
   ctx.fillStyle='#ffd166'; ctx.font='bold 44px Courier New';
-  ctx.fillText('MIKLAT',W/2,H*0.26);
-  ctx.fillText('TOWER',W/2,H*0.33);
+  ctx.fillText('MIKLAT',W/2,H*0.20);
+  ctx.fillText('TOWER',W/2,H*0.27);
   ctx.fillStyle='#9ef0a0'; ctx.font='bold 16px Courier New';
-  ctx.fillText('כולם למקלט!',W/2,H*0.385);
-  ctx.fillStyle='#fff'; ctx.font='14px Courier New';
+  ctx.fillText('כולם למקלט!',W/2,H*0.32);
+  if(G.challengeSeed!=null){
+    ctx.fillStyle='#ff922b'; ctx.font='bold 13px Courier New';
+    ctx.fillText('⚔ CHALLENGE — same towers · seed '+(G.challengeSeed>>>0).toString(36).toUpperCase(),W/2,H*0.355);
+  }
+  ctx.fillStyle='#fff'; ctx.font='13px Courier New';
   const lines=[
-    'The elevator is in tikun. Climb up,',
-    'clear the balagan, and bring the',
-    'neighbors DOWN to the green מקלט sign!',
-    '',
-    '🥙 Falafel calms cats & pigeons.',
-    '🗄 Don\'t stand under a wobbling armoire.',
-    '🐶 Dogs are bonus rescues! (+750)',
-    '',
-    'Move: arrows / WASD / swipe / pad',
-    'Falafel: SPACE / yellow button',
+    'Climb up · clear the balagan ·',
+    'bring the neighbors DOWN to the מקלט.',
+    '🥙 SPACE: falafel calms cats & pigeons.',
+    '🗄 Mind falling armoires · 🐶 dogs = +750',
   ];
-  lines.forEach((l,i)=>ctx.fillText(l,W/2,H*0.45+i*22));
-  if(G.best){ ctx.fillStyle='#ffe66d'; ctx.fillText('BEST: '+G.best,W/2,H*0.72); }
+  lines.forEach((l,i)=>ctx.fillText(l,W/2,H*0.40+i*22));
+  ctx.fillStyle='#9ef0a0'; ctx.font='bold 12px Courier New';
+  ctx.fillText('CHOOSE YOUR ALERT LEVEL  ·  1 / 2 / 3',W/2,H*0.515);
+  for(const ch of diffChips()){
+    const d=DIFFS[ch.k], sel=G.diffKey===ch.k;
+    ctx.fillStyle=sel?d.col:'rgba(255,255,255,.08)';
+    ctx.fillRect(ch.x,ch.y,ch.w,ch.h);
+    ctx.strokeStyle=sel?'#fff':'rgba(255,255,255,.30)'; ctx.lineWidth=sel?3:1;
+    ctx.strokeRect(ch.x,ch.y,ch.w,ch.h);
+    ctx.fillStyle=sel?'#0b0e1a':'#fff'; ctx.textAlign='center';
+    ctx.font='bold 15px Courier New'; ctx.fillText(d.name,ch.x+ch.w/2,ch.y+23);
+    ctx.font='11px Courier New'; ctx.fillText(d.sub+'  '+'♥'.repeat(d.hearts),ch.x+ch.w/2,ch.y+41);
+  }
+  if(G.best){ ctx.fillStyle='#ffe66d'; ctx.font='bold 14px Courier New';
+    ctx.fillText('BEST ('+(DIFFS[G.diffKey]||DIFFS.med).name+'): '+G.best,W/2,H*0.71); }
   if(Math.floor(performance.now()/500)%2){
     ctx.fillStyle='#ffd166'; ctx.font='bold 20px Courier New';
-    ctx.fillText('TAP / PRESS ANY KEY',W/2,H*0.8);
+    ctx.fillText('TAP / PRESS TO CLIMB',W/2,H*0.78);
   }
   ctx.fillStyle='#6b7a99'; ctx.font='11px Courier New';
   ctx.fillText('miklatgames.fun',W/2,H-16);
 }
+function drawBtn(b,label,col){
+  ctx.fillStyle=col; ctx.fillRect(b.x,b.y,b.w,b.h);
+  ctx.fillStyle='#0b0e1a'; ctx.font='bold 16px Courier New'; ctx.textAlign='center';
+  ctx.fillText(label,b.x+b.w/2,b.y+b.h/2+6);
+}
+function wrapText(text,cx,y,maxW,lh){
+  const words=text.split(' '); let line='',yy=y;
+  for(const w of words){
+    const test=line?line+' '+w:w;
+    if(ctx.measureText(test).width>maxW&&line){ ctx.fillText(line,cx,yy); line=w; yy+=lh; }
+    else line=test;
+  }
+  if(line) ctx.fillText(line,cx,yy);
+}
+function shareRun(){
+  const d=DIFFS[G.diffKey]||DIFFS.med;
+  const code=(G.seed>>>0).toString(36);
+  const url='https://miklatgames.fun/miklattower/?seed='+code+'&d='+d.key;
+  const text='MIKLAT TOWER 🏢 — saved '+G.runRescued+' neighbors, reached L'+G.level+' ('+G.score+' pts, '+d.name+').\nSame towers, your turn 👇';
+  track('tower-share');
+  if(navigator.share){
+    navigator.share({title:'MIKLAT TOWER',text,url}).then(()=>{G.overShareMsg='Shared! 🎉';}).catch(()=>{});
+  } else if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text+'\n'+url).then(()=>{G.overShareMsg='Score + challenge link copied!';}).catch(()=>{G.overShareMsg=url;});
+  } else { G.overShareMsg=url; }
+}
 function drawOver(){
-  ctx.fillStyle='rgba(8,10,20,.78)'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(8,10,20,.82)'; ctx.fillRect(0,0,W,H);
   ctx.textAlign='center';
   ctx.fillStyle='#ff8787'; ctx.font='bold 34px Courier New';
-  ctx.fillText(G.overReason.includes('stayed safe')?'TIME\'S UP!':'OY VA VOY!',W/2,H*0.33);
+  ctx.fillText(G.overReason.includes('stayed safe')?'TIME\'S UP!':'OY VA VOY!',W/2,H*0.30);
   ctx.fillStyle='#fff'; ctx.font='15px Courier New';
-  ctx.fillText(G.overReason,W/2,H*0.39);
+  wrapText(G.overReason,W/2,H*0.36,W-80,20);
   ctx.fillStyle='#ffe66d'; ctx.font='bold 24px Courier New';
-  ctx.fillText('SCORE '+G.score,W/2,H*0.48);
-  ctx.font='bold 16px Courier New';
-  ctx.fillText('BEST  '+G.best+(G.score>=G.best&&G.score>0?'  ★ NEW!':''),W/2,H*0.53);
-  if(Math.floor(performance.now()/500)%2){
-    ctx.fillStyle='#9ef0a0'; ctx.font='bold 18px Courier New';
-    ctx.fillText('TAP / ANY KEY TO TRY AGAIN',W/2,H*0.64);
+  ctx.fillText('SCORE '+G.score,W/2,H*0.46);
+  ctx.font='bold 15px Courier New';
+  ctx.fillText('BEST '+G.best+(G.score>=G.best&&G.score>0?'  ★ NEW!':'')+'  ·  '+(DIFFS[G.diffKey]||DIFFS.med).name,W/2,H*0.51);
+  if(G.pacifists||G.grandTours){
+    ctx.fillStyle='#9ef0a0'; ctx.font='13px Courier New';
+    ctx.fillText((G.pacifists?'🕊 ×'+G.pacifists+'   ':'')+(G.grandTours?'🏆 ×'+G.grandTours:''),W/2,H*0.56);
   }
+  drawBtn(OVER_SHARE,'⤴ SHARE','#4dabf7');
+  drawBtn(OVER_AGAIN,'↻ AGAIN','#9ef0a0');
+  if(G.overShareMsg){ ctx.fillStyle='#9ef0a0'; ctx.font='12px Courier New'; ctx.textAlign='center';
+    ctx.fillText(G.overShareMsg,W/2,OVER_SHARE.y+70); }
+  else { ctx.fillStyle='#6b7a99'; ctx.font='11px Courier New';
+    ctx.fillText('PRESS ANY KEY TO PLAY AGAIN',W/2,OVER_SHARE.y+70); }
 }
 function drawClear(){
   ctx.fillStyle='rgba(8,10,20,.6)'; ctx.fillRect(0,H*0.3,W,H*0.22);
@@ -919,19 +1009,36 @@ function drawClear(){
 let paused=false;
 function togglePause(){ if(G.state==='play'||paused){ paused=!paused; } }
 function startGame(){
-  G.level=1; G.score=0; G.hearts=3; G.state='play'; paused=false;
-  Inp.fire=false; track('tower-start');
+  const diff=DIFFS[G.diffKey]||DIFFS.med;
+  G.seed=(G.challengeSeed!=null?G.challengeSeed:randSeed()); G.challengeSeed=null;
+  G.level=1; G.score=0; G.hearts=diff.hearts; G.maxHearts=diff.hearts; G.state='play'; paused=false;
+  G.runRescued=0; G.pacifists=0; G.grandTours=0; G.overShareMsg='';
+  loadBest();
+  Inp.fire=false; track('tower-start-'+diff.key);
   genLevel(); Snd.fanfare();
 }
 function uiKey(key){
   if(key==='m'||key==='M'||key==='p'||key==='P'||key==='Escape')return;
-  if(G.state==='title') startGame();
-  else if(G.state==='over') startGame();
+  if(G.state==='title'){
+    if(key==='1'){ setDiff('easy'); return; }
+    if(key==='2'){ setDiff('med'); return; }
+    if(key==='3'){ setDiff('hard'); return; }
+    startGame();
+  } else if(G.state==='over') startGame();
 }
 function uiTap(x,y){
   // mute corner always tappable
   if(x>W-30&&y<34){ Snd.toggle(); return true; }
-  if(G.state==='title'||G.state==='over'){ startGame(); return true; }
+  if(G.state==='title'){
+    for(const ch of diffChips())
+      if(x>=ch.x&&x<=ch.x+ch.w&&y>=ch.y&&y<=ch.y+ch.h){ setDiff(ch.k); return true; }
+    startGame(); return true;
+  }
+  if(G.state==='over'){
+    const s=OVER_SHARE,a=OVER_AGAIN;
+    if(x>=s.x&&x<=s.x+s.w&&y>=s.y&&y<=s.y+s.h){ shareRun(); return true; }
+    startGame(); return true;   // AGAIN button or anywhere else restarts
+  }
   if(paused){ paused=false; return true; }
   return false;
 }
