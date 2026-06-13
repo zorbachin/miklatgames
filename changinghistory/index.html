@@ -817,11 +817,12 @@ function startGame(idx){
 function engAim(e, done){
   const {ctx,w,h}=fitCanvas(); cv.style.display='block';
   const P=gameParams(e); const need=P._need||Math.ceil(P.targets*0.66);
-  let left=P.targets+(P._bonusShots||0), hits=0;
+  const bonus=(P._bonusShots!=null)?P._bonusShots:2; // forgiving by default: extra shots
+  let left=P.targets+bonus, hits=0;
   setObjective(objMain(e), T().objAimSub(left)); setLives('');
   instr(state.caveman?objMain(e):T().objAim);
   const launcher={x:w/2, y:h-46};
-  let target={x:w*0.18, y:h*0.22, vx:(P.speed/60), r:24*(P._big||1), emoji:P.targetEmoji||'☄️'};
+  let target={x:w*0.18, y:h*0.22, vx:(P.speed/60), r:27*(P._big||1), emoji:P.targetEmoji||'☄️'};
   let proj=null; // {x,y,vx,vy}
   let aiming=false, ax=0, ay=0; const G=0.18;
   function resetTarget(){ const fromLeft=Math.random()<.5;
@@ -832,7 +833,7 @@ function engAim(e, done){
   function down(ev){ ev.preventDefault(); aiming=true; const p=pos(ev); ax=p.x; ay=p.y; }
   function move(ev){ if(!aiming)return; ev.preventDefault(); const p=pos(ev); ax=p.x; ay=p.y; }
   function up(ev){ if(!aiming)return; ev.preventDefault(); aiming=false;
-    const dx=launcher.x-ax, dy=launcher.y-ay; const pw=Math.min(Math.hypot(dx,dy),160)/160;
+    const dx=launcher.x-ax, dy=launcher.y-ay;
     proj={x:launcher.x,y:launcher.y,vx:dx*0.16,vy:dy*0.16}; sLaunch(); }
   cv.addEventListener('touchstart',down,{passive:false}); cv.addEventListener('touchmove',move,{passive:false});
   cv.addEventListener('touchend',up,{passive:false});
@@ -856,7 +857,7 @@ function engAim(e, done){
     // projectile
     if(proj){ proj.x+=proj.vx; proj.y+=proj.vy; proj.vy+=G;
       ctx.font='26px serif'; ctx.fillText('🚀',proj.x,proj.y);
-      if(Math.hypot(proj.x-target.x,proj.y-target.y)<target.r+12){
+      if(Math.hypot(proj.x-target.x,proj.y-target.y)<target.r+14){
         hits++; left--; sBoom(); flash('gold'); vib(40); proj=null; resetTarget();
         setObjective(objMain(e), T().objAimSub(left));
         if(hits>=need) return finish(true);
@@ -937,14 +938,14 @@ function engTiming(e, done){
     mark.style.left=`calc(${pos}% - 3px)`;
     rafId=requestAnimationFrame(loop);
   }
-  function hit(){ ac(); const inZone = pos>=z.zl && pos<=z.zl+z.zw;
+  function hit(ev){ if(ev){ev.preventDefault();} ac(); const inZone = pos>=z.zl && pos<=z.zl+z.zw;
     if(inZone){ round++; sGood(); flash('green'); vib(25); renderDots(); setObjective(state.caveman?objMain(e):T().objTiming,T().objTimingSub(round,P.rounds));
       if(round>=P.rounds) return finish(true); z=placeZone(); speed*=1.12; }
     else{ fails++; sBad(); flash('red'); vib(60); if(fails>P.allowed) return finish(false); z=placeZone(); }
   }
   function finish(win){ if(finished)return; finished=true; done(win); }
-  tap.addEventListener('click',hit);
-  cleanup=()=>{ tap.removeEventListener('click',hit); };
+  tap.addEventListener('pointerdown',hit);
+  cleanup=()=>{ tap.removeEventListener('pointerdown',hit); };
   rafId=requestAnimationFrame(loop);
 }
 
@@ -990,16 +991,16 @@ function engSeq(e, done){
     let i=0; const iv=setInterval(()=>{ if(i>=seq.length){ clearInterval(iv); accept=true; inputIdx=0; promptEl.textContent=T().seqGo; return; }
       lite(seq[i],360); i++; }, 560);
   }
-  function nextRound(){ round++; seq.push(Math.floor(Math.random()*4)); setObjective(T().objSeq,T().objSeqSub(round)); setTimeout(playSeq,500); }
-  function tapCell(ev){ const i=+ev.currentTarget.dataset.i; if(!accept)return; ac();
+  function nextRound(){ round++; seq.push(Math.floor(Math.random()*4)); setObjective(state.caveman?objMain(e):T().objSeq,T().objSeqSub(round)); setTimeout(playSeq,500); }
+  function tapCell(ev){ ev.preventDefault(); const i=+ev.currentTarget.dataset.i; if(!accept)return; ac();
     lite(i,160); vib(8);
     if(i===seq[inputIdx]){ inputIdx++;
       if(inputIdx>=seq.length){ accept=false; sGood(); flash('green');
         if(round>=P.rounds) return finish(true); setTimeout(nextRound,520); } }
     else{ accept=false; sBad(); flash('red'); vib(80); setTimeout(()=>finish(false),300); }
   }
-  cells.forEach(c=>c.addEventListener('click',tapCell));
-  cleanup=()=>{ cells.forEach(c=>c.removeEventListener('click',tapCell)); };
+  cells.forEach(c=>c.addEventListener('pointerdown',tapCell));
+  cleanup=()=>{ cells.forEach(c=>c.removeEventListener('pointerdown',tapCell)); };
   function finish(win){ if(finished)return; finished=true; done(win); }
   // start with seq length = startLen
   seq=[]; for(let k=0;k<P.startLen-1;k++) seq.push(Math.floor(Math.random()*4));
@@ -1049,11 +1050,69 @@ $('oNext').addEventListener('click',()=>{ ac();
   const ni=nextIdx(); if(ni>=0) openBrief(ni); else { renderMap(); show('map'); }
 });
 $('oMap').addEventListener('click',()=>{ renderMap(); show('map'); });
+
+/* ---- visual shareable Timeline Card (1080x1350, pure canvas → no taint) ---- */
+function wrapText(ctx,text,maxW){
+  const words=String(text).split(' '), lines=[]; let line='';
+  for(const wd of words){ const test=line?line+' '+wd:wd;
+    if(ctx.measureText(test).width>maxW && line){ lines.push(line); line=wd; } else line=test; }
+  if(line) lines.push(line); return lines;
+}
+function renderShareCard(d){
+  const W=1080,H=1350,c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,H); g.addColorStop(0,'#241a5c'); g.addColorStop(.5,'#141633'); g.addColorStop(1,'#0a1226');
+  x.fillStyle=g; x.fillRect(0,0,W,H);
+  x.textAlign='center'; x.textBaseline='middle';
+  // header
+  x.fillStyle='#a98bff'; x.font='700 40px "Courier New",monospace';
+  x.fillText('🕰  CHANGING HISTORY', W/2, 110);
+  x.strokeStyle='rgba(62,230,255,.35)'; x.lineWidth=2; x.beginPath(); x.moveTo(140,170); x.lineTo(W-140,170); x.stroke();
+  x.fillStyle='#3ee6ff'; x.font='800 34px "Courier New",monospace';
+  x.fillText((lang==='he'?'ההווה עכשיו':'THE PRESENT IS NOW'), W/2, 235);
+  // emoji
+  x.font='150px serif'; x.fillText(d.emoji||'🌍', W/2, 400);
+  // name — auto-shrink to fit up to 3 lines
+  let fs=92, lines;
+  do{ x.font='900 '+fs+'px "Heebo",system-ui,sans-serif'; lines=wrapText(x,d.name,W-180); fs-=6; }
+  while(lines.length>3 && fs>44);
+  x.fillStyle='#eaf2ff';
+  let yy=560; for(const ln of lines){ x.fillText(ln,W/2,yy); yy+=fs+18; }
+  // consequence lines
+  x.textAlign='left'; const lx=130; let cy=Math.max(yy+40,820);
+  x.font='40px "Heebo",system-ui,sans-serif';
+  (d.lines||[]).slice(0,3).forEach(l=>{
+    const wrapped=wrapText(x,l,W-300);
+    x.fillStyle='#ffd166'; x.fillText('▸', lx, cy);
+    x.fillStyle='#cdd6e8';
+    wrapped.forEach((wl,i)=>{ x.fillText(wl, lx+50, cy); cy+=52; });
+    cy+=14;
+  });
+  // footer
+  x.textAlign='center';
+  const cleared=EVENTS.filter(e=>state.cleared[e.id]).length;
+  x.fillStyle='#8da3cc'; x.font='34px "Heebo",system-ui,sans-serif';
+  x.fillText((lang==='he'?`${cleared}/${EVENTS.length} צירי זמן שונו · 💎 ${state.shards}`:`${cleared}/${EVENTS.length} timelines changed · 💎 ${state.shards}`), W/2, H-180);
+  x.fillStyle='#a98bff'; x.font='800 44px "Heebo",system-ui,sans-serif';
+  x.fillText((lang==='he'?'ומה ציר הזמן שלכם?':"What's YOUR timeline?"), W/2, H-115);
+  x.fillStyle='#3ee6ff'; x.font='700 36px "Courier New",monospace';
+  x.fillText('miklatgames.fun/changinghistory', W/2, H-58);
+  return c;
+}
 $('oShare').addEventListener('click',async()=>{
-  const name=(lastTimeline&&lastTimeline.name)||describeTimeline().name;
-  const txt=T().shareTxt(name);
-  try{ if(navigator.share){ await navigator.share({text:txt}); track('share'); }
-    else{ await navigator.clipboard.writeText(txt); toast(T().copied); track('share-copy'); } }catch(e){}
+  const d=lastTimeline||describeTimeline();
+  const txt=T().shareTxt(d.name);
+  // try a rich image share first (the viral unit), then text, then clipboard
+  try{
+    const canvas=renderShareCard(d);
+    const blob=await new Promise(res=>canvas.toBlob(res,'image/png'));
+    if(blob && navigator.canShare){
+      const file=new File([blob],'my-timeline.png',{type:'image/png'});
+      if(navigator.canShare({files:[file]})){ await navigator.share({files:[file],text:txt}); track('share-img'); return; }
+    }
+  }catch(e){}
+  try{ if(navigator.share){ await navigator.share({text:txt}); track('share'); return; } }catch(e){}
+  try{ await navigator.clipboard.writeText(txt); toast(T().copied); track('share-copy'); }catch(e){}
 });
 
 /* ---------------- MUSEUM ---------------- */
@@ -1078,6 +1137,10 @@ function renderMuseum(){
 window.addEventListener('resize',()=>{ /* canvas refit handled per-engine on start */ });
 applyMute(); applyLang(); renderMap();
 track('open');
+/* fun first: a brand-new player goes straight to the opening dare, not the map */
+(function(){ let firstRun=false; try{ firstRun=!localStorage.getItem('ch.seen'); }catch(e){}
+  if(firstRun && Object.keys(state.cleared).length===0){ try{localStorage.setItem('ch.seen','1');}catch(e){}
+    const ni=nextIdx(); if(ni>=0){ openBrief(ni); track('ftue-brief'); } } })();
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
 <script data-goatcounter="https://miklat-games.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
