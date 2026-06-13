@@ -64,14 +64,14 @@
   .beat-era{font:800 10.5px var(--fd);letter-spacing:.12em;text-transform:uppercase;color:var(--c-cyan);}
   .beat-name{margin-top:3px;font-size:18px;font-weight:900;line-height:1.15;}
   .beat-obj{margin-top:6px;font-size:13.5px;color:var(--c-violet);font-weight:700;line-height:1.4;min-height:19px;}
-  .beat-arena{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:0;padding:6px 0;}
+  .beat-arena{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:0;padding:6px 0;overflow-y:auto;}
   .beat-foot{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;padding-top:4px;}
 
   /* fire grid */
   .heat{font-size:14px;font-weight:800;color:var(--c-amber);}
   .heat b{color:var(--c-gold);font-size:18px;}
   .turnlab{font-size:12px;color:var(--c-dim);font-weight:700;}
-  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:min(86vw,330px);}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:min(82vw,300px);}
   .cell{position:relative;aspect-ratio:1;border-radius:12px;background:var(--c-panel);border:1px solid var(--c-border);
     display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;transition:all .12s var(--ease);}
   .cell:active{transform:scale(.95);}
@@ -439,7 +439,7 @@ function romeFlow(done){
       el.addEventListener('pointerdown',()=>{ pick(s,el); });
       grid.appendChild(el); });
     let locked=false;
-    function pick(s,el){ if(locked)return; locked=true; sTap();
+    function pick(s,el){ if(locked||hasRelic('oracle'))return; locked=true; sTap();
       if(s===culprit){ sGood(); flash('green'); el.style.borderColor='var(--c-green)';
         acc.lines.push(`You exposed ${culprit.n} as the ringleader.`); acc.div+=4;
         setTimeout(next,500);
@@ -579,6 +579,7 @@ function timelineName(){
   if(f&&hasL) return f.size==='roaring'?'The Burning Latin Republic':'The Ember-Lit Republic';
   if(f) return f.size==='roaring'?'The Age of the Great Flame':'The Warm Dark Age';
   if(hasL) return 'The Cautious Republic';
+  if(run.divergence>=20) return 'A Quietly Rewritten World';   // changed via fire but not carried forward
   return 'The Ordinary, Unchanged World';
 }
 function verdict(){
