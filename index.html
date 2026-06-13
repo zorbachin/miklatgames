@@ -157,15 +157,6 @@
 
   <main class="main">
     <div class="cards">
-      <a class="gcard" href="changinghistory/" id="cardHistory" style="--accent:#a98bff" data-game="changinghistory">
-        <div class="coverwrap"><img class="cover" src="assets/changinghistory-cover.svg" alt="A time-traveler standing before three glowing alternate-history portals: a surviving dinosaur, a Roman column, and a rocket" loading="eager"><span class="play" data-i18n="play">PLAY ▶</span></div>
-        <div class="body">
-          <div class="ttl"><span class="name">Changing History</span><span class="name-he">משנים היסטוריה</span></div>
-          <div class="hook" data-i18n="histHook">What if YOU could change the past? Stop the asteroid, save Caesar, sink-proof the Titanic — every change rewrites the present into a wilder one.</div>
-          <div class="meta"><span class="pill" data-i18n="new">🆕 New</span><span class="pill" data-i18n="offline">📵 No reception needed</span></div>
-        </div>
-      </a>
-
       <a class="gcard" href="irondome/" id="cardIron" style="--accent:#3ee6ff" data-game="irondome">
         <div class="coverwrap"><img class="cover" src="assets/irondome-cover.webp" alt="Pixel-art Iron Dome intercepting rockets over a glowing city skyline" loading="eager"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
@@ -251,8 +242,7 @@ if(/[?&](beat|daily)=/.test(qs)) location.replace('mamaddash/'+qs);
 const I18N={
  en:{dir:'ltr',brand:'MIKLAT GAMES',brandAlt:'משחקים למקלט',
   promise:'Free browser games that work in the shelter — no signal, no download, no ads.',
-  play:'PLAY ▶',daily:'📅 Today’s Siren',offline:'📵 No reception needed',new:'🆕 New',
-  histHook:'What if YOU could change the past? Stop the asteroid, save Caesar, sink-proof the Titanic — every change rewrites the present into a wilder one.',
+  play:'PLAY ▶',daily:'📅 Today’s Siren',offline:'📵 No reception needed',
   mamadHook:'Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.',
   ironHook:'Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.',
   shukHook:"Friday rush. Swipe through the stalls, fill Ima's list, outrun the vendor before Shabbat closes the shuk.",
@@ -269,8 +259,7 @@ const I18N={
   copied:'✅ Copied'},
  he:{dir:'rtl',brand:'משחקים למקלט',brandAlt:'MIKLAT GAMES',
   promise:'משחקי דפדפן חינמיים שעובדים בממ״ד — בלי קליטה, בלי הורדה, בלי פרסומות.',
-  play:'שחקו ▶',daily:'📅 האזעקה של היום',offline:'📵 עובד בלי קליטה',new:'🆕 חדש',
-  histHook:'מה אם אתם הייתם יכולים לשנות את העבר? עצרו את האסטרואיד, הצילו את קיסר, הצילו את הטיטניק — כל שינוי כותב מחדש את ההווה.',
+  play:'שחקו ▶',daily:'📅 האזעקה של היום',offline:'📵 עובד בלי קליטה',
   mamadHook:'רוצו לממ״ד לפני הבום. קופצים מעל הסבתות, מתכופפים מתחת ליונים.',
   ironHook:'מיירטים רקטות עם האצבע. עשרה שלבים משדרות ועד אילת. עובד בלי קליטה.',
   shukHook:'שישי בצהריים. מחליקים בין הדוכנים, ממלאים את הרשימה של אמא, ובורחים מהמוכר לפני שהשוק נסגר.',
@@ -359,7 +348,6 @@ if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
 document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
 document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
 document.getElementById('cardWhack').addEventListener('click',()=>track('play-whackamullah'));
-document.getElementById('cardHistory').addEventListener('click',()=>track('play-changinghistory'));
 
 
 applyLang(); applyAudio();
