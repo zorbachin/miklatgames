@@ -267,7 +267,7 @@ function glow(col,size){
 /* hand-drawn sprites — graceful fallback to emoji while loading / if absent.
    Drop matching PNGs into balagan/art/ and the world upgrades itself. */
 const ART={};
-for(const n of ['bg-city','stand-falafel','net-volley','shop-front','home','kiosk','matkot',
+for(const n of ['bg-city','bg-beach','bg-street','bg-shuk','stand-falafel','net-volley','shop-front','home','kiosk','matkot',
   'shawarma','aroma','cats','allenby','stand','erev',
   'char-avtali','char-savta','char-chabad','char-bro','char-hightech',
   'savta-nu']){            // savta-nu: shared with Mamad Dash — volleyball opponent + street savta
@@ -2421,10 +2421,18 @@ function mapTap(sx,sy){
 /* the town: painted horizon band, then the plaza receding toward the viewer */
 function drawTown(){
   const t=TOWN();
-  // horizon: the painted promenade panorama (sky→skyline→sea), parallax-scrolled
-  if(artOk('bg-city')){
-    const bg=ART['bg-city'], bh=t.top+34, bw=bh*bg.naturalWidth/bg.naturalHeight;
+  // horizon: each district shows ITS painted backdrop (beach/street/shuk/city),
+  // cross-fading at the boundaries so walking between zones feels like one world.
+  const dz=districtAt(G.camX+W/2), bgName='bg-'+dz.id;
+  const bgArt=artOk(bgName)?bgName:(artOk('bg-city')?'bg-city':null);
+  if(bgArt){
+    const bg=ART[bgArt], bh=t.top+34, bw=bh*bg.naturalWidth/bg.naturalHeight;
     for(let x=-((G.camX*.4)%bw);x<W;x+=bw) cx.drawImage(bg,x,0,bw+1,bh);
+    // soft seam fade near a district boundary so the swap isn't a hard cut
+    const nb=DISTRICTS.find(d=>Math.abs((G.camX+W/2)-d.x0)<W*.5 && d.id!==dz.id);
+    if(nb&&artOk('bg-'+nb.id)){ const edge=nb.x0, near=clamp(1-Math.abs((G.camX+W/2)-edge)/(W*.5),0,1);
+      cx.globalAlpha=near*.6; const b2=ART['bg-'+nb.id], bh2=t.top+34, bw2=bh2*b2.naturalWidth/b2.naturalHeight;
+      for(let x=-((G.camX*.4)%bw2);x<W;x+=bw2) cx.drawImage(b2,x,0,bw2+1,bh2); cx.globalAlpha=1; }
   } else {
     let sky=SKYG.get('tsky');
     if(!sky){ sky=cx.createLinearGradient(0,0,0,t.top+34);
