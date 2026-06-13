@@ -151,7 +151,8 @@
       <div class="big-ico">🕰️</div>
       <h1 class="title">BEAT HISTORY</h1>
       <p class="sub">History wants the past to stay exactly as it was. You don't. Make a change, carry it forward, and force it to <b>stick</b> — while History fights to undo you.</p>
-      <p class="lead">Slice: 🔥 First Fire → 🏛️ Save Caesar → your present.</p>
+      <p class="lead">Slice: 🔥 First Fire → 🧬 Draft → 🏛️ Save Caesar → your present.</p>
+      <div class="sub" id="unlockLine" style="color:var(--c-gold);font-size:12.5px;font-weight:700;min-height:0"></div>
       <button class="btn" id="startBtn">▶ START THE RUN</button>
       <div class="btn-row"><button class="btn ghost" id="atlasBtn">🗺️ Atlas</button></div>
     </div>
@@ -219,6 +220,12 @@ const sTap=()=>beep(440,.04,'square',.1), sGood=()=>{beep(660,.08,'square',.16);
       sWin=()=>[523,659,784,1047].forEach((f,i)=>beep(f,.15,'square',.16,i*.1)),
       sLose=()=>[392,330,262].forEach((f,i)=>beep(f,.2,'triangle',.15,i*.12));
 
+/* ---- permanent meta unlocks (legacy loop) ---- */
+let unlocks={};
+function loadUnlocks(){ try{ unlocks=JSON.parse(localStorage.getItem('ch2.unlocks')||'{}'); }catch(e){ unlocks={}; } }
+function grantUnlock(id){ if(!unlocks[id]){ unlocks[id]=true; try{localStorage.setItem('ch2.unlocks',JSON.stringify(unlocks));}catch(e){} return true; } return false; }
+loadUnlocks();
+
 /* ---- run state ---- */
 let run=null;
 function newRun(){ run={ relics:[], paradox:0, divergence:0, fed:0, log:[] }; }
@@ -248,10 +255,10 @@ function clearStage(){ arena.innerHTML=''; foot.innerHTML=''; }
    Survive 4 turns; final heat + feeds = how big a Flame you carry.
    ===================================================================== */
 function beatFire(done){
-  beatHead('Prehistory · ~1,000,000 BCE','🔥 First Fire','Keep the ember alive. Block the wind before it reaches the flame.');
+  beatHead('Prehistory · ~1,000,000 BCE','🔥 First Fire','Grow the fire as big as you DARE — then survive the night. A bigger flame = a bolder timeline.');
   clearStage();
-  const N=5, EC=2, MAXWB=3, TURNS=4;
-  let heat=3, turn=1, fed=0, wbLeft=MAXWB, resolving=false;
+  const N=5, EC=2, MAXWB=unlocks.windbreak?4:3, TURNS=4;
+  let heat=unlocks.tinder?4:3, turn=1, fed=0, wbLeft=MAXWB, resolving=false;
   let wbs=[];           // {r,c}
   let gusts=[];         // {axis:'row'|'col', dir:+1|-1, pending} pending=extra from feed
   const wrap=document.createElement('div');
@@ -279,9 +286,10 @@ function beatFire(done){
     return t;
   }
   function genGusts(){
-    gusts=[]; const count=Math.min(1+Math.floor(turn/2),2)+ (turn===1?0:0); // t1:1, t2:1, t3:2, t4:2
-    const base = turn>=3?2:1;
-    const total = base + pendingFeed; pendingFeed=0;
+    // escalating: t1:1, t2:2, t3:3, t4:4 — by the late turns you CANNOT block
+    // everything with 3 windbreaks, so each turn is a real triage decision.
+    gusts=[]; const TABLE=[1,2,3,4];
+    const total = (TABLE[turn-1]||4) + pendingFeed; pendingFeed=0;
     const opts=[{axis:'row',dir:1},{axis:'row',dir:-1},{axis:'col',dir:1},{axis:'col',dir:-1}];
     for(let i=0;i<total;i++){ gusts.push(opts[Math.floor(Math.random()*opts.length)]); }
   }
@@ -336,83 +344,203 @@ function beatFire(done){
   function endFire(win){ return ()=>{
     if(!win){ sLose(); flash('red'); return done({win:false}); }
     sWin(); flash('gold');
-    // mastery: surviving heat + how much you grew it
-    const size = heat>=5?'roaring':heat>=3?'steady':'flickering';
-    const div = 8 + fed*3 + Math.max(0,heat-3)*2;     // bolder fire = more divergence
-    const par = fed*4;                                  // growth destabilises
+    // mastery: the bigger the surviving flame, the bolder the timeline
+    const size = heat>=6?'roaring':heat>=4?'steady':'flickering';
+    const div = 6 + heat*3 + fed*2;                     // big fire = big divergence
+    const par = fed*3 + Math.max(0,heat-4)*2;           // pushing it destabilises
     done({win:true, heat, fed, size, div, par});
   };}
   genGusts(); render(); renderFoot();
 }
 
 /* =====================================================================
-   BEAT 2 — SAVE CAESAR  (mutated by Fire; M1 minimal: relic spend choice)
-   M2 will expand into deduction + Restorer tactics. Here it proves the
-   cascade + relic payoff + a real decision with tradeoffs.
+   RELIC DRAFT — pick 1 of 2 boons to carry. Makes the run a build.
    ===================================================================== */
-function beatRome(done){
-  const fireBig = getRelic('flame') && getRelic('flame').size!=='flickering';
-  const era='Classical · 44 BCE';
-  const name = hasRelic('flame') ? '🏛️ Caesar of the Fire-Cult Rome' : '🏛️ Save Caesar';
-  beatHead(era,name, hasRelic('flame')
-    ? 'Rome worships your flame now. The Senate still hides 23 daggers.'
-    : 'The Senate hides 23 daggers. Beware the Ides of March.');
+function draftRelic(fire, done){
+  beatHead('Crossroads · choose what you carry','🧬 Timeline DNA','Pick ONE thing to carry into Rome. This is your build.');
   clearStage();
-  const card=document.createElement('div'); card.className='card';
-  card.innerHTML=`<div class="ttl">The Ides of March</div><div class="bd">${
-    hasRelic('flame')
-      ? 'Because you carried <b style="color:var(--c-gold)">'+getRelic('flame').name+'</b>, Rome is a fire-cult — and the conspirators meet by torchlight. How do you stop them?'
-      : 'A senator slips Caesar a warning… or do they? Choose how to act.'}</div>`;
-  arena.appendChild(card);
+  const flameName = fire.win ? (fire.size==='roaring'?'Roaring Flame':fire.size==='steady'?'Steady Flame':'Flickering Flame') : null;
   const opts=document.createElement('div'); opts.className='opts'; arena.appendChild(opts);
   const choices=[];
-  if(hasRelic('flame')){
-    choices.push({ico:'🔥',nm:'Burn the conspirators\' torch-lit pact',
-      od: fireBig?'Your roaring flame engulfs every plot at once. Caesar lives — boldly.':'Your small flame burns the main plot. Caesar lives, barely.',
-      tags:[['div','+ big change'],['relic','spend 🔥']],
-      res:{win:true, div: fireBig?22:14, par: fireBig?10:6, relic:{id:'latin',ico:'🏛️',name:'Eternal Latin'}, line:'Caesar lives. Rome never falls into the old civil war.'}});
+  if(fire.win){
+    choices.push({relic:{id:'flame',ico:'🔥',name:flameName,size:fire.size},
+      nm:flameName, od:'Carry the fire. In Rome you can BURN the plot — the boldest, most divergent path.', tags:[['div','divergence']]});
   }
-  choices.push({ico:'🗡️',nm:'Quietly disarm the lead conspirator',
-    od:'Safer. A smaller divergence, less backlash from History.',
-    tags:[['div','+ small change']],
-    res:{win:true, div:9, par:3, relic:{id:'latin',ico:'🏛️',name:'Eternal Latin'}, line:'Caesar survives the day. The Republic limps on, changed but cautious.'}});
-  choices.push({ico:'🎭',nm:'Do nothing — let history happen',
-    od:'No change. History stays itself. (You can still finish the run.)',
-    tags:[['para','no risk']],
-    res:{win:false, div:0, par:0, line:'The daggers fall as they always did. This timeline barely diverged.'}});
-
+  choices.push({relic:{id:'oracle',ico:'📜',name:"Oracle's Spark"},
+    nm:"Oracle's Spark", od:'Foresight. The conspirator is revealed to you instantly — skip the guesswork.', tags:[['relic','skill assist']]});
+  choices.push({relic:{id:'ward',ico:'🛡️',name:'Ember-Ward'},
+    nm:'Ember-Ward', od:"History's Restorers strike weaker this run. Safer, more stable.", tags:[['para','stability']]});
   let sel=-1;
   choices.forEach((c,i)=>{ const el=document.createElement('div'); el.className='opt';
-    el.innerHTML=`<span class="oico">${c.ico}</span><div class="om"><div class="onm">${c.nm}</div><div class="od">${c.od}</div></div>`+
+    el.innerHTML=`<span class="oico">${c.relic.ico}</span><div class="om"><div class="onm">${c.nm}</div><div class="od">${c.od}</div></div>`+
       c.tags.map(t=>`<span class="tag ${t[0]}">${t[1]}</span>`).join('');
-    el.addEventListener('pointerdown',()=>{ sel=i; sTap(); [...opts.children].forEach(x=>x.classList.remove('on')); el.classList.add('on'); $('rGo').disabled=false; });
+    el.addEventListener('pointerdown',()=>{ sel=i; sTap(); [...opts.children].forEach(x=>x.classList.remove('on')); el.classList.add('on'); $('dGo').disabled=false; });
     opts.appendChild(el); });
-
   foot.innerHTML='';
-  const go=document.createElement('button'); go.id='rGo'; go.className='btn'; go.style.marginTop='0'; go.textContent='Commit ▶'; go.disabled=true;
-  go.addEventListener('pointerdown',()=>{ if(sel<0)return; const c=choices[sel];
-    if(c.res.win){ sGood(); flash('green'); } else { sBad(); }
-    done(c.res); });
+  const go=document.createElement('button'); go.id='dGo'; go.className='btn'; go.style.marginTop='0'; go.textContent='Take it ▶'; go.disabled=true;
+  go.addEventListener('pointerdown',()=>{ if(sel<0)return; sGood(); addRelic(choices[sel].relic); done(); });
   foot.appendChild(go);
+}
+
+/* =====================================================================
+   ROME — 3-beat mini-campaign (Fusion Frenzy style):
+   1) deduction  2) relic-spend decision  3) LIVE History Restorer defense
+   ===================================================================== */
+function romeFlow(done){
+  const fireCult=hasRelic('flame');
+  const acc={div:0, par:0, lines:[], daggerBonus:0};
+  romeDeduce(acc, ()=> romeChoice(acc, ()=> romeRestorer(acc, ()=>{
+    if(acc.div>0) addRelic({id:'latin',ico:'🏛️',name:'Eternal Latin'});
+    done({win:acc.div>0, div:acc.div, par:acc.par, line:acc.lines.join(' ')});
+  })));
+
+  function head(beat,obj){ beatHead('Classical · 44 BCE', (fireCult?'🏛️ Fire-Cult Rome':'🏛️ Save Caesar')+'  ·  '+beat, obj); }
+
+  /* Beat 1: deduction — who leads the plot? (perfect info) */
+  function romeDeduce(acc, next){
+    head('1/3 · Find the ringleader', hasRelic('oracle')?"Your Oracle's Spark already knows…":'Read the clues. Only one senator fits all of them.');
+    clearStage();
+    const senators=[{n:'Brutus',toga:'purple',ring:true,beard:false},{n:'Cassius',toga:'white',ring:true,beard:true},
+                    {n:'Casca',toga:'purple',ring:false,beard:true},{n:'Cicero',toga:'white',ring:false,beard:false}];
+    const culprit=senators[Math.floor(Math.random()*senators.length)];
+    const clues=[ culprit.toga==='purple'?'Wears a purple toga.':'Wears a white toga.',
+                  culprit.ring?'Wears a senator\'s signet ring.':'Wears no ring.',
+                  culprit.beard?'Has a beard.':'Is clean-shaven.' ];
+    const card=document.createElement('div'); card.className='card';
+    card.innerHTML=`<div class="ttl">Clues from your informant</div><div class="bd">${clues.map(c=>'• '+c).join('<br>')}</div>`;
+    arena.appendChild(card);
+    const grid=document.createElement('div'); grid.className='opts'; arena.appendChild(grid);
+    senators.forEach(s=>{ const el=document.createElement('div'); el.className='opt';
+      el.innerHTML=`<span class="oico">${s.beard?'🧔':'👨'}</span><div class="om"><div class="onm">${s.n}</div>`+
+        `<div class="od">${s.toga} toga · ${s.ring?'signet ring':'no ring'} · ${s.beard?'bearded':'clean-shaven'}</div></div>`;
+      if(hasRelic('oracle') && s===culprit) el.classList.add('on');
+      el.addEventListener('pointerdown',()=>{ pick(s,el); });
+      grid.appendChild(el); });
+    let locked=false;
+    function pick(s,el){ if(locked)return; locked=true; sTap();
+      if(s===culprit){ sGood(); flash('green'); el.style.borderColor='var(--c-green)';
+        acc.lines.push(`You exposed ${culprit.n} as the ringleader.`); acc.div+=4;
+        setTimeout(next,500);
+      } else { sBad(); flash('red'); el.style.borderColor='var(--c-red)';
+        acc.lines.push(`You accused the wrong senator — the real plot (${culprit.n}) ran deeper.`);
+        acc.par+=4; acc.daggerBonus+=1;   // a missed clue = more daggers in the Restorer beat
+        setTimeout(next,700);
+      }
+    }
+    if(hasRelic('oracle')){ // relic payoff: auto-solve after a beat
+      foot.innerHTML=''; const g=document.createElement('button'); g.className='btn'; g.style.marginTop='0';
+      g.textContent='📜 The Spark names '+culprit.n+' ▶';
+      g.addEventListener('pointerdown',()=>{ if(locked)return; locked=true; sGood(); acc.lines.push(`Your Oracle's Spark named ${culprit.n} at once.`); acc.div+=4; next(); });
+      foot.appendChild(g);
+    } else foot.innerHTML='';
+  }
+
+  /* Beat 2: relic-spend decision — the persistence payoff */
+  function romeChoice(acc, next){
+    head('2/3 · Stop the plot', fireCult?'Your flame changes what\'s possible here.':'Choose how to act.');
+    clearStage();
+    const opts=document.createElement('div'); opts.className='opts'; arena.appendChild(opts);
+    const fireBig = fireCult && getRelic('flame').size!=='flickering';
+    const choices=[];
+    if(fireCult){ choices.push({ico:'🔥',nm:'Burn the torch-lit pact',
+      od: fireBig?'Your roaring flame consumes every plot at once — Caesar lives, boldly.':'Your small flame burns the main plot — Caesar lives, barely.',
+      tags:[['div','big change'],['relic','spend 🔥']],
+      apply:()=>{ acc.div+=fireBig?20:12; acc.par+=fireBig?9:5; acc.daggerBonus-=fireBig?2:1;
+        acc.lines.push('You burned the conspiracy to ash.'); }}); }
+    choices.push({ico:'🗡️',nm:'Quietly disarm the ringleader',
+      od:'Safer. Smaller change, less backlash from History.', tags:[['div','small change']],
+      apply:()=>{ acc.div+=8; acc.par+=2; acc.lines.push('You disarmed the ringleader in the shadows.'); }});
+    choices.push({ico:'🎭',nm:'Let history happen',
+      od:'No change. (Run still ends in a verdict.)', tags:[['para','no risk']],
+      apply:()=>{ acc.lines.push('You stayed your hand; the daggers fell as they always did.'); }});
+    let sel=-1;
+    choices.forEach((c,i)=>{ const el=document.createElement('div'); el.className='opt';
+      el.innerHTML=`<span class="oico">${c.ico}</span><div class="om"><div class="onm">${c.nm}</div><div class="od">${c.od}</div></div>`+
+        c.tags.map(t=>`<span class="tag ${t[0]}">${t[1]}</span>`).join('');
+      el.addEventListener('pointerdown',()=>{ sel=i; sTap(); [...opts.children].forEach(x=>x.classList.remove('on')); el.classList.add('on'); $('cGo').disabled=false; });
+      opts.appendChild(el); });
+    foot.innerHTML=''; const go=document.createElement('button'); go.id='cGo'; go.className='btn'; go.style.marginTop='0'; go.textContent='Commit ▶'; go.disabled=true;
+    go.addEventListener('pointerdown',()=>{ if(sel<0)return; choices[sel].apply(); sGood();
+      acc._didNothing = (sel===choices.length-1 && choices[sel].ico==='🎭'); next(); });
+    foot.appendChild(go);
+  }
+
+  /* Beat 3: LIVE History Restorer — daggers advance on Caesar; intercept them */
+  function romeRestorer(acc, next){
+    if(acc._didNothing){ acc.lines.push('History needed no correction — nothing changed.'); return next(); }
+    head('3/3 · History strikes back', 'Restorers send the daggers anyway. Block the lanes before they reach Caesar.');
+    clearStage();
+    const LANES=4, TURNS=3;
+    let guardsPerTurn = hasRelic('ward')?3:2;          // Ember-Ward = stronger defense
+    let blocked=0, hits=0, turn=1, resolving=false;
+    let daggers=[];   // {lane, row}  row 0=top ... reaches Caesar at row TURNS
+    let guards=[];    // lane indices shielded THIS turn
+    const wrap=document.createElement('div'); wrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:12px;';
+    wrap.innerHTML=`<div style="display:flex;gap:16px"><span class="heat">🗡️ Through: <b id="rHit">0</b></span><span class="turnlab">Wave <span id="rTurn">1</span>/${TURNS}</span></div>
+      <div class="grid" id="rGrid" style="grid-template-columns:repeat(${LANES},1fr);width:min(86vw,300px)"></div>
+      <div class="wbtray"><span class="ico">🛡️</span> Shields this wave: <b id="rG">${guardsPerTurn}</b></div>
+      <div class="hint">Tap a lane to shield it. Each dagger that reaches Caesar weakens your change.</div>`;
+    arena.appendChild(wrap);
+    const grid=$('rGrid'); const ROWS=TURNS+1; const cells=[];
+    for(let r=0;r<ROWS;r++)for(let c=0;c<LANES;c++){ const el=document.createElement('div'); el.className='cell'; el.style.fontSize='22px';
+      el.dataset.r=r; el.dataset.c=c; if(r<TURNS) el.addEventListener('pointerdown',()=>toggleGuard(c)); grid.appendChild(el); cells.push(el); }
+    function cellAt(r,c){ return cells[r*LANES+c]; }
+    function spawnWave(){ const n=Math.min(LANES, 2 + Math.max(0,acc.daggerBonus) + (turn>=2?1:0));
+      const lanes=[...Array(LANES).keys()].sort(()=>Math.random()-0.5).slice(0,n);
+      lanes.forEach(l=>daggers.push({lane:l,row:0})); }
+    function render(){
+      cells.forEach(el=>{ const r=+el.dataset.r,c=+el.dataset.c; el.className='cell'; el.style.fontSize='22px'; el.textContent='';
+        if(r===TURNS){ el.classList.add('ember'); el.textContent='👑'; }
+        if(guards.includes(c) && r<TURNS){ el.classList.add('wb'); el.textContent='🛡️'; } });
+      daggers.forEach(d=>{ const el=cellAt(d.row,d.lane); if(el && d.row<TURNS){ el.textContent='🗡️'; el.classList.add('threat'); } });
+      $('rHit').textContent=hits; $('rTurn').textContent=turn; $('rG').textContent=guardsPerTurn-guards.length;
+    }
+    function toggleGuard(c){ if(resolving)return; sTap();
+      if(guards.includes(c)) guards=guards.filter(x=>x!==c);
+      else { if(guards.length>=guardsPerTurn){ toast('No shields left this wave'); return; } guards.push(c); }
+      render();
+    }
+    function resolve(){ if(resolving)return; resolving=true; renderFoot();
+      // blocked daggers are those on a guarded lane at the row about to reach the king
+      const survivors=[];
+      daggers.forEach(d=>{ d.row++; if(guards.includes(d.lane)){ blocked++; }            // shield stops it
+        else if(d.row>=TURNS){ hits++; }                                                  // reached Caesar
+        else survivors.push(d); });
+      daggers=survivors.filter(d=>!guards.includes(d.lane));
+      guards=[]; sBad(); flash(hits>0?'red':'green'); vib(40);
+      render();
+      if(turn>=TURNS){ return setTimeout(end,500); }
+      turn++; spawnWave(); resolving=false; render(); renderFoot();
+    }
+    function renderFoot(){ foot.innerHTML=''; const b=document.createElement('button'); b.className='btn cyan'; b.style.marginTop='0';
+      b.textContent='🛡️ HOLD THE LINE'; b.disabled=resolving; b.addEventListener('pointerdown',resolve); foot.appendChild(b); }
+    function end(){
+      // mastery: fewer hits = the change STICKS (less paradox claw-back, bonus divergence)
+      if(hits===0){ acc.div+=6; acc.lines.push('You held the line flawlessly — the new timeline is locked in.'); sWin(); flash('gold'); }
+      else { acc.par+=hits*5; acc.div=Math.max(0,acc.div-hits*2); acc.lines.push(`History pushed ${hits} dagger${hits>1?'s':''} through — your change is shakier.`); sLose(); }
+      setTimeout(next,500);
+    }
+    spawnWave(); render(); renderFoot();
+  }
 }
 
 /* =====================================================================
    RUN FLOW
    ===================================================================== */
-function startRun(){ ac(); newRun(); renderHud(); show('stage');
-  beatFire(res=>{
-    if(res.win){ addRelic({id:'flame',ico:'🔥',name:res.size==='roaring'?'Roaring Flame':res.size==='steady'?'Steady Flame':'Flickering Flame',size:res.size});
-      addDivergence(res.div); addParadox(res.par); run.log.push('Fire mastered the '+res.size+' way.'); }
-    else { run.log.push('The first fire guttered out — you carry nothing forward.'); }
-    // History pressure beat: between crossroads, paradox can rise if divergence is high
-    setTimeout(()=>beatRome(res2=>{
-      if(res2.win){ addDivergence(res2.div); addParadox(res2.par); if(res2.relic) addRelic(res2.relic); }
+function startRun(){ ac(); loadUnlocks(); newRun(); renderHud(); show('stage');
+  beatFire(fire=>{
+    if(fire.win){ addDivergence(fire.div); addParadox(fire.par); run.log.push('You raised a '+fire.size+' fire.'); }
+    else { run.log.push('The first fire guttered out — you reach Rome empty-handed.'); }
+    const afterDraft = ()=> romeFlow(res2=>{
+      if(res2.win){ addDivergence(res2.div); addParadox(res2.par); }
       run.log.push(res2.line);
-      // History's correction: high paradox bleeds a little divergence back (it "snaps back")
-      if(run.paradox>=40){ const bleed=Math.min(run.divergence, Math.floor((run.paradox-30)/6)); addDivergence(-bleed);
-        if(bleed>0) run.log.push('History clawed back '+bleed+'% — your timeline was unstable.'); }
+      // History's slow correction: an unstable timeline snaps partway back
+      if(run.paradox>=40){ const bleed=Math.min(run.divergence, Math.floor((run.paradox-30)/6));
+        if(bleed>0){ addDivergence(-bleed); run.log.push('History clawed back '+bleed+'% over the centuries — your timeline was unstable.'); } }
       setTimeout(verdict,500);
-    }), 550);
+    });
+    if(fire.win) setTimeout(()=>draftRelic(fire, afterDraft),450);
+    else setTimeout(afterDraft,450);
   });
 }
 
@@ -434,15 +562,24 @@ function verdict(){
   $('vDiv').textContent=run.divergence+'%';
   $('vStab').textContent=stab; $('vStab').style.color = run.paradox<=45?'var(--c-green)':run.paradox<=70?'var(--c-amber)':'var(--c-red)';
   $('vScore').textContent=score;
+  // legacy loop: strong runs permanently unlock a starting boon
+  let unlockedMsg='';
+  if(score>=160 && grantUnlock('windbreak')) unlockedMsg='🔓 UNLOCKED: future fires start with an extra windbreak.';
+  else if(run.divergence>=45 && grantUnlock('tinder')) unlockedMsg='🔓 UNLOCKED: Tinder — future fires start hotter.';
   $('vBody').innerHTML = run.log.map(l=>`▸ ${l}`).join('<br>') +
+    (unlockedMsg?`<br><br><b style="color:var(--c-gold)">${unlockedMsg}</b>`:'') +
     `<br><br><b style="color:var(--c-cyan)">Score = Divergence × Stability.</b> Bold <i>and</i> stable wins.`;
   $('vVerdict').textContent = run.divergence>0 ? 'YOU CHANGED HISTORY' : 'HISTORY HELD';
+  if(unlockedMsg){ flash('gold'); toast(unlockedMsg); }
   // save to atlas
   try{ const a=JSON.parse(localStorage.getItem(ATLAS_KEY)||'[]'); a.unshift({name:timelineName(),div:run.divergence,stab,score,t:Date.now()});
     localStorage.setItem(ATLAS_KEY, JSON.stringify(a.slice(0,30))); }catch(e){}
   show('verdict'); if(run.divergence>0) sWin(); else sLose();
 }
-$('vAgain').addEventListener('pointerdown',()=>{ show('title'); $('hud').style.visibility='hidden'; });
+function updateTitle(){ loadUnlocks(); const bits=[];
+  if(unlocks.windbreak) bits.push('🪨 +1 windbreak'); if(unlocks.tinder) bits.push('🔥 Tinder');
+  $('unlockLine').textContent = bits.length?('Carrying into new runs: '+bits.join(' · ')):''; }
+$('vAgain').addEventListener('pointerdown',()=>{ updateTitle(); show('title'); $('hud').style.visibility='hidden'; });
 $('vShare').addEventListener('pointerdown',async()=>{
   const txt=`🕰️ CHANGING HISTORY: my timeline is now "${timelineName()}" — ${run.divergence}% divergent, ${stabilityWord(run.paradox)}. Beat my history.`;
   try{ if(navigator.share){ await navigator.share({text:txt}); } else { await navigator.clipboard.writeText(txt); toast('Copied'); } }catch(e){}
@@ -456,6 +593,7 @@ $('atlasBtn').addEventListener('pointerdown',()=>{
 });
 
 $('startBtn').addEventListener('pointerdown',startRun);
+updateTitle();
 </script>
 </body>
 </html>

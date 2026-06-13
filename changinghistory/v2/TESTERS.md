@@ -32,4 +32,34 @@ EN-only; emoji/CSS art; no music; Rome is intentionally a stub; balance is untun
 2. Rome becomes a **3-beat mini-campaign** with a **live History Restorer** tactical beat.
 3. Add a **relic draft** so the run is a build.
 4. Atlas deposits a **permanent starting-relic unlock** (legacy loop).
+
+---
+
+## ✅ MILESTONE 2 — "Is there real skill, a build, and a live antagonist?"
+*Tests the four M1 mandates.*
+
+### Verdict: **MANDATE MET — greenlight M3 (polish/feel/world).** All four asks are in and the slice now plays like the v2 vision instead of a reskin.
+
+| M2 mandate | Result | Notes |
+|---|---|---|
+| Fire = "grow as big as you dare" + un-fully-blockable late | ✅ | Gusts now escalate 1→2→3→4 vs 3 windbreaks, so turns 3–4 force triage — you *can't* save every lane. Divergence is driven by final heat (`6 + heat×3 + fed×2`), so the skill is "how big can I grow it and still survive." The risk/reward the panel wanted is now the core, not opt-in. |
+| Live History antagonist | ✅ | Rome's 3rd beat is a real-time **Restorer** lane-defense: daggers advance on Caesar over 3 waves, you have 2 shields/turn (3 with Ember-Ward). Hits *weaken your change* (paradox up, divergence clawed back). History now acts *on screen*. |
+| Relic draft (build) | ✅ | Pick 1 of {🔥 Flame / 📜 Oracle's Spark / 🛡️ Ember-Ward}. Each visibly changes Rome: Flame unlocks the burn path + fire-cult cascade; Oracle auto-solves the deduction; Ward hardens the Restorer. Three distinct builds from one slice. |
+| Legacy unlock | ✅ | Strong runs permanently unlock a starting boon (extra windbreak / Tinder), shown on the title and applied to the next Fire. The run→meta→run loop closes. |
+| Rome = mini-campaign | ✅ (bonus) | Now 3 beats: **deduction** (perfect-info logic, uniquely solvable) → **relic-spend decision** → **live Restorer**. Fusion-Frenzy structure achieved. |
+
+### Panel reactions
+- **Subset:** "Now it's a *decision* every turn — good. Next, the Restorer and Fire are the same verb (block lanes); give them slightly different textures so the run doesn't feel repetitive." → M3.
+- **Mega Crit:** "Three real builds in a two-event slice is the right density. The pull to replay is visible. Want the relic to *combo* with the next era too." → future eras.
+- **Daviau:** "History striking live is the whole game now. Make a hit *hurt* more viscerally (camera shake, the king reacting)." → M3 juice.
+- **Duolingo UX:** "Beat objectives are clear, but first-timers need a one-line teach on the Fire grid before turn 1, and the meters need a microcopy tooltip." → M3.
+- **Mini Metro:** "Paradox finally has live teeth (it feeds the Restorer). Good. Show the claw-back happening, don't just log it." → M3.
+
+### M3 mandate (locked)
+1. **Juice & feedback**: shake on a dagger through, ember/king reactions, meter-change pings, win/lose punch. Make consequences *felt*.
+2. **First-time teach**: a one-line coached first turn on the Fire grid + meter tooltips.
+3. **Texture the two tactics** so Fire and the Restorer don't feel identical.
+4. **Show, don't log**, History's claw-back at the verdict.
+5. Light pass on balance + a proper share **card image** (reuse v1's canvas) and EN copy polish. (HE + full art remain pre-launch, out of slice scope.)
+📱 Still needs a real-device session for touch feel before M3 sign-off.
 </content>
