@@ -62,3 +62,4 @@ view drops in perfectly.)
   minigame draw calls.
 - `prop-*` set: chairs, umbrellas, dogs, doves, scooters to scatter along the
   promenade for depth.
+| `erev.png`          | a Tel Aviv skyline at golden-hour sundown — the EREV RUSH gauntlet station |

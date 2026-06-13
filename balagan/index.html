@@ -268,7 +268,7 @@ function glow(col,size){
    Drop matching PNGs into balagan/art/ and the world upgrades itself. */
 const ART={};
 for(const n of ['bg-city','stand-falafel','net-volley','shop-front','home','kiosk','matkot',
-  'shawarma','aroma','cats','allenby',
+  'shawarma','aroma','cats','allenby','erev',
   'char-avtali','char-savta','char-chabad','char-bro','char-hightech',
   'savta-nu']){            // savta-nu: shared with Mamad Dash — volleyball opponent + street savta
   const i=new Image(); i.src='art/'+n+'.png'; ART[n]=i;
@@ -325,7 +325,7 @@ const DEF={ shekels:500, day:1, dayStart:500, earnedToday:0, streak:0,
   hustle:{day:0,done:false}, hustleTotal:0,
   login:{last:0,run:0}, met:{}, gift:{}, taught:{},
   bracha:0, brachaBuff:0, soupLife:0, gossip:null, plays:{},
-  best:{volley:0,falafel:0,matkot:0,shawarma:0,aroma:0,cats:0,allenby:0,daysCleared:0,topWallet:500}, lastSeen:0 };
+  best:{volley:0,falafel:0,matkot:0,shawarma:0,aroma:0,cats:0,allenby:0,erev:0,daysCleared:0,topWallet:500}, lastSeen:0 };
 // medium baseline that creeps up the more you've played a game (caps ~+55%)
 function diff(game){ return 1+Math.min(.55,(S.plays[game]||0)*.045); }
 function bumpPlays(game){ S.plays[game]=(S.plays[game]||0)+1; }
@@ -431,6 +431,7 @@ const HUSTLE_DEFS=[
   {id:'ar_pours', min:5,max:8, desc:n=>`Pour ${n} good cold brews`,icon:'☕'},
   {id:'ct_pets',  min:8,max:12,desc:n=>`Pet ${n} street cats`,icon:'🐈'},
   {id:'al_cross', min:2,max:4, desc:n=>`Cross Allenby ${n} times`,icon:'🚌'},
+  {id:'ev_score', min:6,max:10,desc:n=>`Clear ${n} rounds of Erev Rush`,icon:'🌆'},
   {id:'combo',    min:4,max:6, desc:n=>`Hit a ×${n} falafel combo`,icon:'🔥'},
   {id:'earn',     min:5,max:8, mul:100,desc:n=>`Earn ₪${n*100} in one day`,icon:'💸'},
   {id:'double',   min:1,max:1, desc:()=>`Double your money & clear the day`,icon:'🌅'},
@@ -515,9 +516,10 @@ const STATIONS=[
   {id:'kiosk',   x:2700, ico:'👵', art:'kiosk',         label:'KIOSK',     sub:'gossip & goralot', npc:true, dep:.2},
   {id:'cats',    x:2930, ico:'🐈', art:'cats',          label:'STREET CATS',sub:'pet the council'},
   // 🚌 the city: where the traffic lives (more coming)
-  {id:'allenby', x:3330, ico:'🚌', art:'allenby',       label:'ALLENBY',   sub:'cross the traffic'},
+  {id:'allenby', x:3300, ico:'🚌', art:'allenby',       label:'ALLENBY',   sub:'cross the traffic'},
+  {id:'erev',    x:3520, ico:'🌆', art:'erev',          label:'EREV RUSH', sub:'the sundown gauntlet'},
 ];
-const MINI=['volley','falafel','matkot','shawarma','aroma','cats','allenby'];
+const MINI=['volley','falafel','matkot','shawarma','aroma','cats','allenby','erev','erev'];
 const G={
   state:'title', t:0, freeze:0,
   camX:0, player:{x:300,d:.5,dir:1,walk:0}, target:null,   // d = depth into the plaza (0 back → 1 front)
@@ -547,6 +549,11 @@ const BARK={
   mkTeach:['Tap when the ball crosses your line, achi.','Matkot has no winner — just don\'t let it drop.','Eyes on the line. SMACK it back.'],
   mkRally:['THWACK','THE BEACH HEARS YOU','NO DROPS, ALL DAY','PADDLE MASTER','THE TOURISTS STOPPED SWIMMING'],
   mkMiss:['Oy, the sand.','Pick it up, achi.','My grandson, the breeze.','It rolled to the sea.'],
+  evCombo:['ON FIRE, ACHI','THE WHOLE STREET IS WATCHING','SUNDOWN HERO','UNSTOPPABLE'],
+  evMiss:['Oof. Next one.','Savta saw that.','Focus, achi!','The sun waits for no one.'],
+  evRes:{lo:[['SUNDOWN FIZZLE','You blinked. The day blinked back.'],['SLOW START','Erev is brutal. Try again, achi.']],
+    mid:[['SOLID RUSH','You kept up with the city. Mostly.'],['NOT BAD, BOOBALEH','The street nodded between rounds.']],
+    hi:[['EREV LEGEND','You did EVERYTHING before sundown. Savta wept.'],['RUSH KING','The whole neighborhood is on its feet.']]},
   mkRes:{lo:[['SANDY','The matkot gods are unimpressed.'],['DROPPED IT','The sea took your ball. Again.']],
     mid:[['SOLID RALLY','The beach nodded. The beach is hard to impress.'],['NICE PADDLE','Tourists clapped. One filmed it.']],
     hi:[['MATKOT KING','No drops, all respect. Savta saw.'],['BEACH LEGEND','They want you on the promenade team.']]},
@@ -619,6 +626,7 @@ function onDown(sx,sy){
     else if(G.state==='aroma') arDown();
     else if(G.state==='cats') ctTap(sx,sy);
     else if(G.state==='allenby') alTap();
+    else if(G.state==='erev') erevDown(sx,sy);
   }
 }
 function onMove(sx){
@@ -630,6 +638,7 @@ function onMove(sx){
 let lastTapY=0;
 function onUp(sx){
   if(G.state==='aroma'){ arUp(); ptDown=null; return; }   // hold-and-release
+  if(G.state==='erev'){ erevUp(); ptDown=null; return; }
   if(G.state!=='hub'){ ptDown=null; return; }
   if(ptDown && !ptMoved){            // a tap: walk there, or enter a tapped building
     const wx=worldFromScreen(sx), sy=lastTapY;
@@ -674,11 +683,11 @@ window.addEventListener('keydown',e=>{
     e.preventDefault();
     if(G.intro&&G.intro.on){ G.intro.on=false; Sound.enter(); return; }
     ({volley:vbTap,matkot:()=>mkStrike(null),shawarma:swTap,allenby:alTap,falafel:faTap,
-      aroma:arDown,cats:()=>ctTap(W/2,groundY-H*.15)}[G.state])();
+      aroma:arDown,cats:()=>ctTap(W/2,groundY-H*.15),erev:()=>erevDown(W/2,H*.55)}[G.state])();
   }
 });
 window.addEventListener('keyup',e=>{
-  if((e.key===' '||e.key==='ArrowUp')&&G.state==='aroma') arUp();
+  if((e.key===' '||e.key==='ArrowUp')&&(G.state==='aroma'||G.state==='erev')){ G.state==='aroma'?arUp():erevUp(); }
 });
 // an interrupted pour (call, app switch, cursor left the window) ends gracefully
 window.addEventListener('touchcancel',()=>{ if(G.state==='aroma') arUp(); ptDown=null; });
@@ -695,6 +704,7 @@ function enterStation(st){
   if(st.id==='aroma') return arStart();
   if(st.id==='cats') return ctStart();
   if(st.id==='allenby') return alStart();
+  if(st.id==='erev') return erevStart();
   if(st.id==='chat_savta') return openChat('savta');
   if(st.id==='chat_chabad') return openChat('chabad');
   if(st.id==='kiosk') return openChat('babushka');
@@ -994,7 +1004,7 @@ function gossipBuy(){
   save();
 }
 const GLABEL={volley:'🏐 The net',falafel:'🥙 The falafel',matkot:'🏓 The paddles',
-  shawarma:'🌯 The spit',aroma:'☕ The cold brew',cats:'🐈 The cats',allenby:'🚌 The crossing'};
+  shawarma:'🌯 The spit',aroma:'☕ The cold brew',cats:'🐈 The cats',allenby:'🚌 The crossing',erev:'🌆 The Erev rush'};
 /* goralot (scratch cards): ₪50 a pull, slight house edge — a fun infinite sink.
    Winnings go to the WALLET only (never earnedToday): no gambling your way
    through the double-up goal. */
@@ -1222,6 +1232,144 @@ function drawMatkot(){
   hudPill(W/2,SAFE_TOP+30,`🏓 RALLY ${m.rally}`,'#ffd166');
   let lifeStr='';for(let i=0;i<Math.max(0,m.lives+1);i++)lifeStr+='❤️';
   cx.font='18px sans-serif';cx.fillText(lifeStr||'—',W/2,SAFE_TOP+60);
+}
+
+/* =================== EREV RUSH — the genre-fusion gauntlet ===================
+   Sundown medley (WarioWare × roguelike): the day's mini-games fire one after
+   another in fast micro-bursts. One verb each, ~3.5s shrinking, shared lives.
+   Each micro echoes a real game's STYLE so the whole roster fuses into one run. */
+const MICROS={
+  toss:{verb:'TOSS!',ico:'🥙',col:'#ffd166',
+    init(e){e.m={pos:0,dir:1,tgt:rand(.28,.72),w:.13};},
+    down(e){const m=e.m; e.res=Math.abs(m.pos-m.tgt)<m.w?'win':'fail';},
+    upd(e,dt){const m=e.m; m.pos+=m.dir*dt*1.35; if(m.pos>1){m.pos=1;m.dir=-1;} if(m.pos<0){m.pos=0;m.dir=1;}},
+    draw(e){const m=e.m,bw=W*.7,bx=(W-bw)/2,by=H*.6;
+      cx.fillStyle='#2a3450';rr(bx,by,bw,16,8);
+      cx.fillStyle='rgba(126,232,199,.5)';rr(bx+(m.tgt-m.w)*bw,by-3,2*m.w*bw,22,4);
+      cx.fillStyle='#fff';rr(bx+m.pos*bw-3,by-5,6,26,3);
+      drawEmoji('🥙',bx+m.tgt*bw,by-40,30);drawEmoji('🧺',W/2,by+70,46);}},
+  bump:{verb:'BUMP!',ico:'🏐',col:'#7ee8c7',
+    init(e){e.m={y:-.15,tgt:.74,w:.15};},
+    down(e){const m=e.m; e.res=Math.abs(m.y-m.tgt)<m.w?'win':'fail';},
+    upd(e,dt){const m=e.m; m.y+=dt*.62; if(m.y>1.05) e.res='fail';},
+    draw(e){const m=e.m,zy=H*.2+m.tgt*H*.62;
+      cx.strokeStyle='rgba(255,209,102,.7)';cx.lineWidth=4;
+      cx.beginPath();cx.ellipse(W/2,H*.2+m.tgt*H*.62,70,26,0,0,7);cx.stroke();
+      drawEmoji('🏐',W/2,H*.2+Math.max(0,m.y)*H*.62,40);}},
+  slice:{verb:'SLICE!',ico:'🌯',col:'#ffd166',
+    init(e){e.m={pos:0,dir:1,tgt:rand(.25,.75),w:.12};},
+    down(e){const m=e.m; e.res=Math.abs(m.pos-m.tgt)<m.w?'win':'fail';},
+    upd(e,dt){const m=e.m; m.pos+=m.dir*dt*1.3; if(m.pos>1){m.pos=1;m.dir=-1;} if(m.pos<0){m.pos=0;m.dir=1;}},
+    draw(e){const m=e.m,sx=W*.5,top=H*.3,L=H*.34;
+      cx.fillStyle='#a35f1d';rr(sx-26,top,52,L,8);
+      cx.fillStyle='rgba(126,232,199,.5)';rr(sx-30,top+(m.tgt-m.w)*L,60,2*m.w*L,4);
+      cx.save();cx.translate(sx+48,top+m.pos*L);drawEmoji('🔪',0,0,34);cx.restore();}},
+  pour:{verb:'POUR!',ico:'☕',col:'#8ad2ff',hold:true,
+    init(e){e.m={f:0,pouring:false,lo:.6,hi:.86};},
+    down(e){e.m.pouring=true;},
+    up(e){const m=e.m; if(!m.pouring)return; m.pouring=false; e.res=(m.f>=m.lo&&m.f<=m.hi)?'win':'fail';},
+    upd(e,dt){const m=e.m; if(m.pouring){m.f+=dt*.6; if(m.f>=1){m.f=1;e.res='fail';}}},
+    draw(e){const m=e.m,cw=80,ch=150,cxp=W/2,cy=H*.66;
+      cx.fillStyle='rgba(255,209,102,.25)';cx.fillRect(cxp-cw/2-12,cy-m.hi*ch,cw+24,(m.hi-m.lo)*ch);
+      cx.strokeStyle='#ffd166';cx.lineWidth=2;cx.strokeRect(cxp-cw/2-12,cy-m.hi*ch,cw+24,(m.hi-m.lo)*ch);
+      cx.strokeStyle='#fff';cx.lineWidth=4;cx.strokeRect(cxp-cw/2,cy-ch,cw,ch);
+      cx.fillStyle='#5a3a1f';cx.fillRect(cxp-cw/2+3,cy-m.f*ch+3,cw-6,Math.max(0,m.f*ch-6));
+      cx.font='800 13px sans-serif';cx.textAlign='center';cx.fillStyle='#cdd6e8';
+      cx.fillText(m.pouring?'…let go in the gold!':'HOLD to pour',cxp,cy+30);}},
+  pet:{verb:'PET!',ico:'🐈',col:'#ff8ad4',
+    init(e){e.m={x:rand(.22,.78),y:rand(.34,.66),e:['🐈','🐈‍⬛','🐱'][irand(0,2)]};},
+    down(e,sx,sy){const m=e.m; if(Math.hypot(sx-m.x*W,sy-m.y*H)<60) e.res='win';},
+    upd(e,dt){},
+    draw(e){const m=e.m;cx.strokeStyle=`rgba(126,232,199,${.5+.4*Math.sin(G.t*10)})`;cx.lineWidth=4;
+      cx.beginPath();cx.arc(m.x*W,m.y*H,46,0,7);cx.stroke();drawEmoji(m.e,m.x*W,m.y*H,52);}},
+  dash:{verb:'CROSS!',ico:'🚌',col:'#ff5d5d',
+    init(e){e.m={cx:Math.random(),dir:Math.random()<.5?1:-1,spd:rand(.55,.85),e:['🛵','🚐','🚌'][irand(0,2)]};},
+    down(e){const m=e.m; e.res=Math.abs(m.cx-.5)>.26?'win':'fail';},
+    upd(e,dt){const m=e.m; m.cx+=m.dir*m.spd*dt; if(m.cx>1.1)m.cx=-.1; if(m.cx<-.1)m.cx=1.1;},
+    draw(e){const m=e.m,y=H*.5; cx.fillStyle='#3a3f4d';cx.fillRect(0,y-34,W,68);
+      cx.save();cx.translate(m.cx*W,y);if(m.dir<0)cx.scale(-1,1);drawEmoji(m.e,0,0,60);cx.restore();
+      const clear=Math.abs(m.cx-.5)>.26;
+      cx.strokeStyle=clear?'#7ee8c7':'#ff5d5d';cx.lineWidth=3;cx.beginPath();cx.arc(W/2,y+58,22,0,7);cx.stroke();
+      drawEmoji('🚶',W/2,y+58,30);}},
+  duck:{verb:'MAMAD!',ico:'🛡️',col:'#ff5d5d',siren:true,
+    init(e){e.m={x:rand(.28,.72),y:.55};},
+    down(e,sx,sy){const m=e.m; e.res=Math.hypot(sx-m.x*W,sy-m.y*H)<64?'win':'fail';},
+    upd(e,dt){},
+    draw(e){const m=e.m;cx.fillStyle=`rgba(255,60,60,${.12+.1*Math.abs(Math.sin(G.t*7))})`;cx.fillRect(0,0,W,H);
+      cx.strokeStyle=`rgba(126,232,199,${.6+.4*Math.sin(G.t*11)})`;cx.lineWidth=5;
+      cx.beginPath();cx.arc(m.x*W,m.y*H,52,0,7);cx.stroke();drawEmoji('🛡️',m.x*W,m.y*H,56);}},
+};
+const MICRO_POOL=['toss','bump','slice','pour','pet','dash','duck'];
+function erevNext(){
+  const e=G.erev; e.round++;
+  let id; do{ id=MICRO_POOL[irand(0,MICRO_POOL.length-1)]; }while(id===e.lastId&&MICRO_POOL.length>1);
+  e.lastId=id; e.micro=MICROS[id]; e.res=null; e.mt=0;
+  e.dur=Math.max(1.5,(e.micro.hold?4.2:3.6)-e.round*.12)/Math.sqrt(e.df);
+  e.intro=.7; e.micro.init(e);
+  if(e.micro.siren){ Sound.alert&&Sound.alert(); flash(.2); }
+}
+function erevStart(){
+  Sound.enter(); G.state='erev'; G.pops.length=0;
+  if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; } else G.runBracha=0;
+  G.erev={ lives:2+(equipped().vlife||0), score:0, round:0, streak:0, earn:0,
+    over:false, df:diff('erev'), micro:null, m:{}, res:null, mt:0, dur:4, intro:.7, lastId:null,
+    tut:!S.taught.erev };
+  erevNext();
+  gameIntro('🌆','EREV RUSH','Sundown medley — every game, back to back, faster',
+    'ONE tap per round.\nDo the BIG WORD before time runs out','watch the word','miss 3 = the day is gone');
+}
+function erevResolve(r){
+  const e=G.erev;
+  if(r==='win'){ e.score++; e.streak++;
+    const got=payout(8+e.round+ (e.micro&&e.micro.siren?12:0),'erev'); e.earn+=got;
+    pop(W/2,H*.42,`+${got}₪`,POP_COLS[e.score%4]); flyCoin(W/2,H*.46);
+    Sound.bump(Math.min(12,e.score)); G.freeze=.04; buzz(18);
+    if(!S.taught.erev){ S.taught.erev=1; save(); }
+    if(e.streak===5||e.streak===10){ burstConfetti(12); pop(W/2,H*.3,rline(BARK.evCombo),'#ffd166',true); }
+  } else { e.streak=0; e.lives--; Sound.miss(); shake(); buzz(90);
+    pop(W/2,H*.42,'💢 '+rline(BARK.evMiss),'#ff5d5d',true);
+    if(e.lives<0){ erevEnd(); return; } }
+  erevNext();
+}
+function erevDown(sx,sy){ const e=G.erev; if(!e||e.over||e.intro>0||e.res) return;
+  e.micro.down(e,sx,sy); if(e.res&&!e.micro.hold) erevResolve(e.res); }
+function erevUp(){ const e=G.erev; if(!e||e.over||e.res) return;
+  if(e.micro.up){ e.micro.up(e); if(e.res) erevResolve(e.res); } }
+function erevUpdate(dt){
+  const e=G.erev; if(!e||e.over) return;
+  if(e.intro>0){ e.intro-=dt; return; }
+  e.micro.upd(e,dt);
+  if(e.res){ erevResolve(e.res); return; }
+  e.mt+=dt;
+  if(e.mt>=e.dur){ e.res='fail'; erevResolve('fail'); }
+}
+function erevEnd(){
+  G.erev.over=true; bumpPlays('erev');
+  if(G.erev.score>(S.best.erev||0)) S.best.erev=G.erev.score, G.result.best=true; else G.result.best=false;
+  G.result.kind='erev'; checkHustle('ev_score',G.erev.score);
+  save(); setTimeout(showResult,600);
+}
+function drawErev(){
+  const e=G.erev; if(!e) return;
+  cx.fillStyle='rgba(11,14,26,.5)';cx.fillRect(0,0,W,H);   // dusk wash
+  // the micro plays
+  if(e.micro&&e.intro<=0) e.micro.draw(e);
+  // the BIG VERB
+  if(e.micro){ const big=e.intro>0;
+    cx.font=`900 ${big?54:30}px sans-serif`;cx.textAlign='center';cx.textBaseline='middle';
+    cx.lineWidth=big?9:6;cx.strokeStyle='rgba(15,20,40,.9)';
+    const vy=big?H*.42:H*.16;
+    cx.strokeText(e.micro.verb,W/2,vy);cx.fillStyle=e.micro.col;cx.fillText(e.micro.verb,W/2,vy);
+    if(big){ drawEmoji(e.micro.ico,W/2,H*.42-66,44); } }
+  // timer bar
+  if(e.intro<=0){ const fr=clamp(1-e.mt/e.dur,0,1), bw=W*.6,bx=(W-bw)/2,by=SAFE_TOP+58;
+    cx.fillStyle='rgba(13,17,32,.6)';rr(bx-3,by-3,bw+6,12,6);
+    cx.fillStyle=fr<.3?'#ff5d5d':'#ffd166';rr(bx,by,bw*fr,6,3); }
+  // hud
+  cx.font='900 16px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+  hudPill(W/2,SAFE_TOP+30,`🌆 ROUND ${e.round} · ⚡${e.score}`,'#ffd166');
+  let lifeStr='';for(let i=0;i<Math.max(0,e.lives+1);i++)lifeStr+='❤️';
+  cx.font='18px sans-serif';cx.fillText(lifeStr||'—',W-28-((Math.max(0,e.lives+1))*9),SAFE_TOP+30);
 }
 
 /* =================== SHAWARMA CARVE — slice when the blade hits the green ===================
@@ -1680,6 +1828,10 @@ function showResult(){
     const t=rline(BARK.alRes[G.al.crossings>=4?'hi':G.al.crossings>=2?'mid':'lo']);
     $('rTitle').textContent=t[0]; $('rSub').textContent=`${t[1]} (${G.al.crossings} crossings)`;
     $('rBestLine').innerHTML=`🚌 Best run: <b>${S.best.allenby||0}</b>`;
+  } else if(r.kind==='erev'){
+    const t=rline(BARK.evRes[G.erev.score>=14?'hi':G.erev.score>=6?'mid':'lo']);
+    $('rTitle').textContent=t[0]; $('rSub').textContent=`${t[1]} (${G.erev.score} rounds cleared)`;
+    $('rBestLine').innerHTML=`🌆 Best rush: <b>${S.best.erev||0}</b>`;
   } else {
     if(G.fa.bust){ $('rTitle').textContent=rline(BARK.faBustTitle);
       $('rSub').textContent=`Three on the floor — pita reclaimed. Still landed ${G.fa.hits}.`; }
@@ -1689,7 +1841,7 @@ function showResult(){
   }
   const earned=S.earnedToday;
   const EARNS={volley:()=>G.vb.earn,matkot:()=>G.mk.earn,shawarma:()=>G.sw.earn,
-    aroma:()=>G.ar.earn,cats:()=>G.ct.earn,allenby:()=>G.al.earn,falafel:()=>G.fa.earn};
+    aroma:()=>G.ar.earn,cats:()=>G.ct.earn,allenby:()=>G.al.earn,erev:()=>G.erev.earn,falafel:()=>G.fa.earn};
   $('rEarn').textContent=money((EARNS[r.kind]||EARNS.falafel)());
   $('rGoal').textContent=dayProg()>=1
     ? '🌅 You DOUBLED your money — go HOME to sleep & bank the streak!'
@@ -1702,7 +1854,7 @@ function showResult(){
 }
 $('rAgain').addEventListener('click',()=>{ panel(null);
   ({volley:vbStart,matkot:mkStart,shawarma:swStart,aroma:arStart,
-    cats:ctStart,allenby:alStart,falafel:faStart}[G.result.kind]||faStart)(); });
+    cats:ctStart,allenby:alStart,erev:erevStart,falafel:faStart}[G.result.kind]||faStart)(); });
 $('rBack').addEventListener('click',()=>{ panel(null); G.state='hub'; });
 
 function clearDay(){
@@ -1905,6 +2057,7 @@ function update(dt){
     else if(G.state==='aroma') arUpdate(dt);
     else if(G.state==='cats') ctUpdate(dt);
     else if(G.state==='allenby') alUpdate(dt);
+    else if(G.state==='erev') erevUpdate(dt);
   }
 }
 function hubUpdate(dt){
@@ -1953,6 +2106,7 @@ function draw(){
     else if(G.state==='aroma') drawAroma();
     else if(G.state==='cats') drawCats();
     else if(G.state==='allenby') drawAllenby();
+    else if(G.state==='erev') drawErev();
     if(MINI.includes(G.state)) drawIntro(); }
   // shared FX
   for(const q of G.pops){ const a=1-q.t, rise=q.t*54;
@@ -2041,7 +2195,7 @@ function drawMap(){
   G.mapNodes=[];
   const today=dayIndex(), h=todaysHustle();
   const HUST2ST={vol_rally:'volley',mk_rally:'matkot',sw_slices:'shawarma',
-    ar_pours:'aroma',ct_pets:'cats',al_cross:'allenby'};
+    ar_pours:'aroma',ct_pets:'cats',al_cross:'allenby',ev_score:'erev'};
   const hustStation=HUST2ST[h.id]||((h.id==='earn'||h.id==='double')?'home':'falafel');
   const DECKCOL={sand:'rgba(238,215,162,.30)',wood:'rgba(202,162,106,.30)',
     cobble:'rgba(201,173,132,.30)',asphalt:'rgba(122,126,138,.32)'};
