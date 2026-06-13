@@ -158,13 +158,13 @@
   <!-- TITLE -->
   <section class="screen show" id="title">
     <div class="pad">
-      <div class="k">A run down the timeline</div>
+      <div class="k">Change one moment. Reshape the present.</div>
       <div class="big-ico">🕰️</div>
       <h1 class="title">BEAT HISTORY</h1>
-      <p class="sub">History wants the past to stay exactly as it was. You don't. Make a change, carry it forward, and force it to <b>stick</b> — while History fights to undo you.</p>
-      <p class="lead">Slice: 🔥 First Fire → 🧬 Draft → 🏛️ Save Caesar → your present.</p>
+      <p class="sub">Travel back and change history — starting tiny. <b>Your first job: keep a campfire alive.</b> Each thing you change ripples into a wilder present.</p>
+      <p class="lead">🔥 Campfire → 🏛️ Save Caesar → see your new world.</p>
       <div class="sub" id="unlockLine" style="color:var(--c-gold);font-size:12.5px;font-weight:700;min-height:0"></div>
-      <button class="btn" id="startBtn">▶ START THE RUN</button>
+      <button class="btn" id="startBtn">▶ START</button>
       <div class="btn-row"><button class="btn ghost" id="atlasBtn">🗺️ Atlas</button></div>
     </div>
   </section>
@@ -266,6 +266,30 @@ const arena=$('arena'), foot=$('foot');
 function clearStage(){ arena.innerHTML=''; foot.innerHTML=''; }
 
 /* =====================================================================
+   HOW TO PLAY — shown once before the first campfire (the FTUE fix)
+   ===================================================================== */
+function howToFire(next){
+  beatHead('How to play','🔥 Keep the campfire alive','Read this once — then you’ve got it.');
+  clearStage();
+  const card=document.createElement('div'); card.className='card';
+  card.innerHTML=`<div class="ttl">The whole thing, in 4 lines</div>
+    <div class="bd" style="line-height:1.85;color:var(--c-ink)">
+      🔥 <b>This is your campfire.</b> Keep it lit for 4 nights.<br>
+      💨 <b>Wind</b> enters along the <b style="color:var(--c-red)">red tiles</b>. If it reaches the fire, the fire shrinks.<br>
+      🪨 <b>Tap a red tile</b> to drop a rock and block that wind — then press <b style="color:var(--c-cyan)">RESOLVE WIND</b>.<br>
+      ➕ <b style="color:var(--c-gold)">FEED</b> makes the fire bigger = a bolder change to history (but it draws more wind).
+    </div>`;
+  arena.appendChild(card);
+  const note=document.createElement('div'); note.className='card'; note.style.marginTop='10px';
+  note.innerHTML=`<div class="bd">Survive the 4 nights with the fire still lit, and you’ve made your first change to history. 🎉 That change then follows you into Rome.</div>`;
+  arena.appendChild(note);
+  foot.innerHTML='';
+  const go=document.createElement('button'); go.className='btn gold'; go.style.marginTop='0'; go.textContent='Got it — light the fire ▶';
+  go.addEventListener('pointerdown',()=>{ sGood(); try{localStorage.setItem('ch2.howfire','1');}catch(e){} next(); });
+  foot.appendChild(go);
+}
+
+/* =====================================================================
    BEAT 1 — FIRST FIRE  (Into-the-Breach-style perfect-info tactics)
    5x5 grid, ember at centre. Each turn telegraphs gusts along the
    ember's row/column; place up to 3 windbreaks to intercept them on the
@@ -273,7 +297,7 @@ function clearStage(){ arena.innerHTML=''; foot.innerHTML=''; }
    Survive 4 turns; final heat + feeds = how big a Flame you carry.
    ===================================================================== */
 function beatFire(done){
-  beatHead('Prehistory · ~1,000,000 BCE','🔥 First Fire','Grow the fire as big as you DARE — then survive the night. A bigger flame = a bolder timeline.');
+  beatHead('Prehistory · ~1,000,000 BCE','🔥 The Campfire','Keep the fire alive for 4 nights. Block the wind, then RESOLVE. Bigger fire = bolder change.');
   clearStage();
   const N=5, EC=2, MAXWB=unlocks.windbreak?4:3, TURNS=4;
   let heat=unlocks.tinder?4:3, turn=1, fed=0, wbLeft=MAXWB, resolving=false;
@@ -553,6 +577,10 @@ function romeFlow(done){
    RUN FLOW
    ===================================================================== */
 function startRun(){ ac(); loadUnlocks(); newRun(); renderHud(); show('stage');
+  let seenHow=false; try{ seenHow=localStorage.getItem('ch2.howfire')==='1'; }catch(e){}
+  if(seenHow) runFire(); else howToFire(runFire);
+}
+function runFire(){
   beatFire(fire=>{
     if(fire.win){ addDivergence(fire.div); addParadox(fire.par); run.log.push('You raised a '+fire.size+' fire.'); }
     else { run.log.push('The first fire guttered out — you reach Rome empty-handed.'); }
