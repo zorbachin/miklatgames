@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a1226">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="robots" content="noindex,nofollow">
+<title>CHANGING HISTORY — Save Caesar (whack-a-mole demo)</title>
+<style>
+  :root{
+    --c-bg:#0a1226; --c-panel:#101b38; --c-panel-2:#16244a;
+    --c-cyan:#3ee6ff; --c-gold:#ffd166; --c-red:#ff5d73; --c-green:#5dffa8; --c-violet:#a98bff; --c-purple:#7c4dff;
+    --c-ink:#eaf2ff; --c-dim:#8da3cc;
+    --c-border:rgba(62,230,255,.22); --c-gold-border:rgba(255,209,102,.45);
+    --grad:radial-gradient(125% 95% at 50% -8%,#3a2566 0%,#1a1838 45%,#0a1226 100%);
+    --shadow:0 12px 34px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.05);
+    --fd:"Courier New",ui-monospace,Menlo,Consolas,monospace;
+    --fb:"Heebo",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none;background:var(--c-bg);
+    color:var(--c-ink);font-family:var(--fb);user-select:none;-webkit-user-select:none;}
+  body{display:flex;justify-content:center;}
+  .app{width:100%;max-width:520px;height:100%;background:var(--grad);position:relative;overflow:hidden;display:flex;flex-direction:column;}
+
+  /* HUD */
+  .hud{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 4px;}
+  .score{font-family:var(--fd);font-weight:700;font-size:26px;color:var(--c-gold);min-width:70px;text-shadow:0 0 12px rgba(255,209,102,.5);}
+  .combo{font-size:13px;font-weight:800;color:var(--c-violet);opacity:0;transition:opacity .15s;}
+  .combo.on{opacity:1;}
+  .grow{flex:1;}
+  .strikes span{font-size:18px;transition:all .2s;} .strikes span.dead{filter:grayscale(1) brightness(.4);transform:scale(.85);}
+  /* progress + danger bars */
+  .bars{padding:2px 14px 0;display:flex;flex-direction:column;gap:5px;}
+  .barrow{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:800;letter-spacing:.04em;color:var(--c-dim);text-transform:uppercase;}
+  .barrow .lab{min-width:96px;} .barrow .val{min-width:38px;text-align:end;}
+  .bar{flex:1;height:9px;border-radius:5px;background:#1a2550;overflow:hidden;border:1px solid var(--c-border);}
+  .bar i{display:block;height:100%;width:0%;transition:width .25s var(--ease);}
+  .bar.prog i{background:linear-gradient(90deg,#5dffa8,#3ee6ff);}
+  .bar.danger i{background:linear-gradient(90deg,#ffd166,#ff5d73);}
+
+  /* board */
+  .board{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+    padding:10px 14px calc(env(safe-area-inset-bottom,0px) + 14px);align-content:center;}
+  .seat{position:relative;aspect-ratio:1;cursor:pointer;touch-action:none;}
+  .pit{position:absolute;inset:0;border-radius:18px;overflow:hidden;
+    background:radial-gradient(120% 100% at 50% 0%,#1a1230 0%,#0a0a1c 72%);
+    border:1px solid rgba(124,77,255,.22);box-shadow:inset 0 8px 18px rgba(0,0,0,.7);}
+  .col{position:absolute;left:12%;right:12%;top:8%;height:30%;border-radius:6px 6px 0 0;
+    background:repeating-linear-gradient(90deg,#2a2150,#2a2150 4px,#221a44 4px,#221a44 8px);opacity:.5;}
+  .fig{position:absolute;left:8%;width:84%;bottom:0;aspect-ratio:1;border-radius:50% 50% 14px 14px;
+    transform:translateY(120%);transition:transform .14s var(--ease);will-change:transform;pointer-events:none;
+    display:flex;align-items:center;justify-content:center;font-size:min(13vw,58px);}
+  .fig.up{transform:translateY(8%);}
+  .fig.bonk{animation:bonk .22s cubic-bezier(.3,1.6,.4,1) forwards;}
+  @keyframes bonk{0%{transform:translateY(8%) scale(1.3,.7)}45%{transform:translateY(46%) scale(.7,1.25)}100%{transform:translateY(120%) scale(1,.5)}}
+  .seat .fx{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);font:900 20px var(--fb);
+    pointer-events:none;opacity:0;z-index:5;white-space:nowrap;}
+  .seat .fx.go{animation:floatUp .75s var(--ease) forwards;}
+  @keyframes floatUp{0%{opacity:0;transform:translate(-50%,-20%) scale(.7)}25%{opacity:1}100%{opacity:0;transform:translate(-50%,-150%) scale(1.2)}}
+  .pit.bad{border-color:rgba(255,93,115,.7);box-shadow:inset 0 8px 18px rgba(0,0,0,.7),0 0 16px rgba(255,93,115,.55);}
+
+  /* panels */
+  .panel{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:24px;z-index:20;overflow-y:auto;
+    background:radial-gradient(ellipse at 50% 30%,rgba(20,10,40,.75),rgba(10,18,38,.96));}
+  .panel.hidden{display:none;}
+  .k{font:800 11px var(--fd);letter-spacing:.14em;text-transform:uppercase;color:var(--c-cyan);}
+  .ico{font-size:64px;line-height:1;margin:10px 0 4px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5));}
+  h1{font-size:clamp(24px,7vw,32px);font-weight:900;line-height:1.1;}
+  .yr{margin-top:6px;font-size:14px;color:var(--c-gold);font-weight:700;}
+  .story{margin-top:14px;font-size:15px;line-height:1.55;color:var(--c-ink);max-width:360px;}
+  .rules{margin-top:14px;display:flex;flex-direction:column;gap:8px;width:100%;max-width:340px;}
+  .rule{display:flex;align-items:center;gap:12px;background:var(--c-panel);border:1px solid var(--c-border);border-radius:12px;padding:9px 13px;text-align:start;}
+  .rule .e{font-size:28px;flex-shrink:0;width:34px;text-align:center;}
+  .rule .t{font-size:13.5px;line-height:1.35;} .rule .t b{color:var(--c-gold);}
+  .rule.no .t b{color:var(--c-red);}
+  .btn{margin-top:20px;border:0;border-radius:15px;padding:16px 38px;font-size:18px;font-weight:900;cursor:pointer;
+    background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;box-shadow:0 7px 22px rgba(233,162,59,.4);transition:transform .1s var(--ease);}
+  .btn:active{transform:scale(.96);}
+  .btn.violet{background:linear-gradient(180deg,#bca4ff,#8a63f0);color:#160a36;box-shadow:0 7px 22px rgba(138,99,240,.4);}
+  .btn.ghost{background:transparent;color:#cdd6e8;border:1px solid #46506b;box-shadow:none;font-weight:700;font-size:15px;padding:12px 26px;}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px;}
+  .btn-row .btn{margin-top:0;}
+  .verdict{font-family:var(--fd);font-weight:700;font-size:clamp(22px,6.4vw,30px);letter-spacing:.03em;}
+  .verdict.win{color:var(--c-green);text-shadow:0 0 18px rgba(93,255,168,.5);}
+  .verdict.lose{color:var(--c-red);text-shadow:0 0 16px rgba(255,93,115,.5);}
+  .tcard{margin-top:16px;width:100%;max-width:360px;border-radius:16px;overflow:hidden;text-align:start;
+    background:linear-gradient(160deg,#241a5c,#101b38);border:1px solid rgba(124,77,255,.5);box-shadow:var(--shadow);}
+  .tcard .h{padding:12px 15px 9px;border-bottom:1px solid var(--c-border);}
+  .tcard .hk{font:800 10px var(--fd);letter-spacing:.14em;color:var(--c-cyan);text-transform:uppercase;}
+  .tcard .hn{margin-top:6px;font-size:19px;font-weight:900;line-height:1.15;}
+  .tcard .b{padding:12px 15px;font-size:13px;line-height:1.55;color:var(--c-ink);}
+  .stat{margin-top:12px;font-size:15px;color:#cdd6e8;} .stat b{color:var(--c-gold);}
+
+  #flash{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;z-index:30;}
+  #flash.gold{background:radial-gradient(circle,rgba(255,209,102,.5),transparent 70%);}
+  #flash.green{background:radial-gradient(circle,rgba(93,255,168,.45),transparent 70%);}
+  #flash.red{background:radial-gradient(circle,rgba(255,93,115,.42),transparent 70%);}
+  #flash.show{opacity:1;transition:opacity .04s;}
+  #banner{position:fixed;left:50%;top:30%;transform:translate(-50%,-50%) scale(.7);z-index:25;
+    font-family:var(--fd);font-weight:700;font-size:30px;color:var(--c-violet);text-shadow:0 0 20px rgba(124,77,255,.8);
+    opacity:0;pointer-events:none;} #banner.go{animation:ban 1s var(--ease) forwards;}
+  @keyframes ban{15%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-80%) scale(1)}}
+  .app.shake{animation:shk .26s linear;} @keyframes shk{20%{transform:translate(-5px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(4px,2px)}}
+  .corner{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);inset-inline-end:12px;z-index:28;font-size:18px;
+    background:var(--c-panel);border:1px solid var(--c-border);border-radius:999px;padding:7px 11px;cursor:pointer;}
+  .confetti{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:26;pointer-events:none;}
+  @keyframes conf{to{transform:translateY(110vh) rotate(640deg);opacity:0;}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important;}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="hud">
+    <div class="score" id="score">0</div>
+    <div class="combo" id="combo">x2</div>
+    <div class="grow"></div>
+    <div class="strikes" id="strikes"><span>🛡️</span><span>🛡️</span><span>🛡️</span></div>
+  </div>
+  <div class="bars">
+    <div class="barrow"><span class="lab">🗡️ Plot foiled</span><div class="bar prog"><i id="progBar"></i></div><span class="val" id="progVal">0/14</span></div>
+    <div class="barrow"><span class="lab">⚠️ Danger to Caesar</span><div class="bar danger"><i id="dangerBar"></i></div><span class="val" id="dangerVal">0%</span></div>
+  </div>
+  <div class="board" id="board"></div>
+
+  <button class="corner" id="mute">🔊</button>
+
+  <!-- BRIEF -->
+  <div class="panel" id="brief">
+    <div class="k">Rome · 44 BCE · Whack-a-mole</div>
+    <div class="ico">🏛️</div>
+    <h1>SAVE CAESAR</h1>
+    <div class="yr">The Ides of March</div>
+    <div class="story">Sixty senators are hiding daggers, ready to strike. Bonk the plotters as they pop up — but some senators are <b>loyal</b>. Hit the wrong one and you tip off the plot.</div>
+    <div class="rules">
+      <div class="rule"><span class="e">😠🗡️</span><span class="t"><b>Conspirator</b> — BONK him! (+points)</span></div>
+      <div class="rule no"><span class="e">😇</span><span class="t"><b>Loyal senator</b> — do NOT hit him!</span></div>
+      <div class="rule no"><span class="e">👑</span><span class="t"><b>Caesar himself</b> — never bonk Caesar!</span></div>
+    </div>
+    <button class="btn" id="startBtn">▶ DEFEND CAESAR</button>
+  </div>
+
+  <!-- END -->
+  <div class="panel hidden" id="end">
+    <div class="verdict" id="verdict"></div>
+    <div class="tcard" id="tcard">
+      <div class="h"><div class="hk" id="tk">The present is now…</div><div class="hn" id="tn"></div></div>
+      <div class="b" id="tb"></div>
+    </div>
+    <div class="stat" id="stat"></div>
+    <div class="btn-row">
+      <button class="btn violet" id="shareBtn">📤 Share</button>
+      <button class="btn" id="againBtn">↻ Again</button>
+    </div>
+  </div>
+
+  <div id="flash"></div>
+  <div id="banner"></div>
+</div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const TARGET=14;            // conspirators to foil = win
+const STRIKES=3;
+function vib(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+
+/* audio */
+let AC=null,muted=false; try{muted=localStorage.getItem('caesar.mute')==='1';}catch(e){}
+function ac(){ if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}} if(AC&&AC.state==='suspended'){try{AC.resume();}catch(e){}} return AC; }
+function beep(f,d,t,v,dl){ if(muted)return; const a=ac(); if(!a)return; try{const t0=a.currentTime+(dl||0),o=a.createOscillator(),g=a.createGain();
+  o.type=t||'square';o.frequency.setValueAtTime(f,t0);g.gain.setValueAtTime(v||.14,t0);g.gain.exponentialRampToValueAtTime(.001,t0+d);
+  o.connect(g).connect(a.destination);o.start(t0);o.stop(t0+d);}catch(e){} }
+function noise(d,v){ if(muted)return; const a=ac(); if(!a)return; try{const n=Math.floor(a.sampleRate*d),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);
+  for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(1-i/n);const s=a.createBufferSource();s.buffer=b;const g=a.createGain();g.gain.value=v||.08;s.connect(g).connect(a.destination);s.start();}catch(e){} }
+const sBonk=k=>{beep(300+Math.min(k,18)*40,.09,'square',.16);beep(90,.07,'triangle',.16);noise(.05,.07);};
+const sWrong=()=>{beep(200,.18,'sawtooth',.18);noise(.1,.08);};
+const sWin=()=>[523,659,784,1047].forEach((f,i)=>beep(f,.16,'square',.16,i*.1));
+const sLose=()=>[392,330,262,196].forEach((f,i)=>beep(f,.22,'triangle',.16,i*.13));
+const mute=$('mute'); function applyMute(){mute.textContent=muted?'🔇':'🔊';try{localStorage.setItem('caesar.mute',muted?'1':'0');}catch(e){}}
+mute.addEventListener('pointerdown',e=>{e.stopPropagation();muted=!muted;applyMute();}); applyMute();
+
+/* fx */
+function flash(c,ms){const f=$('flash');f.className=c+' show';clearTimeout(f._t);f._t=setTimeout(()=>f.classList.remove('show'),ms||80);}
+function banner(t){const b=$('banner');b.textContent=t;b.classList.remove('go');void b.offsetWidth;b.classList.add('go');}
+function shake(){const a=$('app');a.classList.remove('shake');void a.offsetWidth;a.classList.add('shake');}
+function confetti(n){const cols=['#ff4d4d','#ff9f43','#ffd166','#5dffa8','#3ee6ff','#a98bff'];for(let k=0;k<n;k++){const s=document.createElement('div');s.className='confetti';
+  s.style.left=(Math.random()*100)+'%';s.style.background=cols[k%cols.length];const d=900+Math.random()*700;s.style.animation=`conf ${d}ms ease-in forwards`;
+  s.style.transform=`rotate(${Math.random()*360}deg)`;document.body.appendChild(s);setTimeout(()=>s.remove(),d+50);}}
+
+/* board */
+const board=$('board'), seats=[];
+for(let i=0;i<9;i++){ const el=document.createElement('div'); el.className='seat';
+  el.innerHTML=`<div class="pit"><div class="col"></div></div><div class="fig"></div><div class="fx"></div>`;
+  board.appendChild(el);
+  seats.push({el, pit:el.querySelector('.pit'), fig:el.querySelector('.fig'), fx:el.querySelector('.fx'), type:null, hit:false, down:0, grace:0});
+  el.addEventListener('pointerdown',ev=>{ev.preventDefault();whack(i);});
+}
+
+/* state */
+let running=false, score=0, foiled=0, strikes=0, danger=0, streak=0, spawnT=null, speed=1;
+function mult(){ return Math.min(1+Math.floor(streak/4),4); }
+function hud(){
+  $('score').textContent=score;
+  const c=$('combo'); c.textContent='x'+mult(); c.classList.toggle('on',mult()>1);
+  const s=$('strikes').children; for(let i=0;i<3;i++) s[i].classList.toggle('dead',i<strikes);
+  $('progBar').style.width=Math.min(100,foiled/TARGET*100)+'%'; $('progVal').textContent=foiled+'/'+TARGET;
+  $('dangerBar').style.width=Math.min(100,danger)+'%'; $('dangerVal').textContent=Math.round(danger)+'%';
+}
+function pop(seat,txt,col){ seat.fx.textContent=txt; seat.fx.style.color=col||'#fff'; seat.fx.classList.remove('go'); void seat.fx.offsetWidth; seat.fx.classList.add('go'); }
+
+/* spawn */
+const CONS=['😠','😡','🤬','😤'];
+function emptySeats(){ return seats.map((s,i)=>s.type?-1:i).filter(i=>i>=0); }
+function upCount(){ return seats.filter(s=>s.type).length; }
+function pickType(){ const r=Math.random(); if(r<0.06) return 'caesar'; if(r<0.36) return 'loyal'; return 'cons'; }
+function spawnOne(){
+  const free=emptySeats(); const maxUp=2+Math.floor(foiled/5); if(!free.length||upCount()>=maxUp) return;
+  const i=free[(Math.random()*free.length)|0], s=seats[i], type=pickType();
+  s.type=type; s.hit=false;
+  s.fig.textContent = type==='caesar'?'👑' : type==='loyal'?'😇' : CONS[(Math.random()*CONS.length)|0]+'🗡️';
+  s.fig.style.fontSize = type==='cons' ? 'min(10vw,46px)' : 'min(13vw,58px)';
+  s.fig.classList.remove('bonk'); s.fig.classList.add('up');
+  const life = type==='caesar' ? 1300 : type==='cons' ? Math.max(700, 1250-foiled*30) : 1050;
+  s.down=setTimeout(()=>retreat(i), life);
+}
+function retreat(i){ const s=seats[i]; if(!s.type||s.hit) return;
+  s.fig.classList.remove('up'); const ty=s.type; clearTimeout(s.grace);
+  s.grace=setTimeout(()=>{ if(s.hit)return; s.type=null; if(!running)return;
+    if(ty==='cons'){ danger+=11; flash('red',60); hud(); if(danger>=100) return lose(); }   // a plotter slipped away
+  },140);
+}
+function tick(){ if(!running)return; spawnOne(); if(Math.random()<0.25+Math.min(.3,foiled*0.02)) spawnOne();
+  spawnT=setTimeout(tick, Math.max(360, 760-foiled*22)); }
+
+/* whack */
+function whack(i){ if(!running)return; const s=seats[i]; if(!s.type||s.hit) return; s.hit=true; clearTimeout(s.down); clearTimeout(s.grace);
+  const ty=s.type;
+  if(ty==='cons'){ s.type=null; streak++; foiled++; const pts=10*mult(); score+=pts;
+    s.fig.classList.add('bonk'); pop(s,'+'+pts,'#5dffa8'); sBonk(streak); vib(15); flash('gold',50);
+    if(mult()>=3 && streak%4===0) banner('🔥 ON FIRE!');
+    hud();
+    if(foiled>=TARGET) return win();
+  } else { // loyal or caesar — mistake
+    streak=0; strikes++; s.type=null;
+    s.pit.classList.add('bad'); setTimeout(()=>s.pit.classList.remove('bad'),350);
+    s.fig.classList.remove('up');
+    if(ty==='caesar'){ danger=Math.min(100,danger+20); pop(s,'NOT CAESAR! 👑','#ff5d73'); }
+    else { danger=Math.min(100,danger+8); pop(s,'He was loyal!','#ff5d73'); }
+    sWrong(); shake(); flash('red',90); vib([40,40,40]); hud();
+    if(strikes>=STRIKES || danger>=100) return lose();
+  }
+}
+
+/* flow */
+function clearBoard(){ seats.forEach(s=>{ clearTimeout(s.down); clearTimeout(s.grace); s.type=null; s.hit=false; s.fig.classList.remove('up','bonk'); s.fig.textContent=''; }); }
+function start(){ ac(); $('brief').classList.add('hidden'); $('end').classList.add('hidden'); clearBoard();
+  running=true; score=0; foiled=0; strikes=0; danger=0; streak=0; hud();
+  clearTimeout(spawnT); spawnT=setTimeout(tick,600);
+}
+function win(){ running=false; clearTimeout(spawnT); clearBoard(); flash('gold'); confetti(40); sWin(); vib([0,40,40,40]);
+  $('verdict').className='verdict win'; $('verdict').textContent='CAESAR LIVES! 🏛️';
+  $('tn').textContent='The Eternal Roman Republic';
+  $('tb').innerHTML='Caesar survives the Ides. Rome never falls into civil war — and 2,000 years later everyone still speaks Latin, the Senate meets on Zoom in togas, and group chats open with “SALVE”. 🏛️';
+  $('stat').innerHTML=`You foiled <b>${foiled}</b> conspirators · score <b>${score}</b>`;
+  $('end').classList.remove('hidden');
+}
+function lose(){ running=false; clearTimeout(spawnT); clearBoard(); flash('red'); sLose(); vib(120);
+  $('verdict').className='verdict lose'; $('verdict').textContent='THE IDES CLAIMED HIM 🗡️';
+  $('tn').textContent='History, Unchanged';
+  $('tb').innerHTML='The daggers found Caesar after all. History rolls on exactly as it did — civil war, then the Empire. Try again to rewrite it?';
+  $('stat').innerHTML=`You foiled <b>${foiled}</b> of ${TARGET} · score <b>${score}</b>`;
+  $('end').classList.remove('hidden');
+}
+$('startBtn').addEventListener('pointerdown',e=>{e.preventDefault();start();});
+$('againBtn').addEventListener('pointerdown',e=>{e.preventDefault();start();});
+$('shareBtn').addEventListener('pointerdown',async e=>{e.preventDefault();
+  const txt=`🏛️ CHANGING HISTORY — I foiled the plot and SAVED CAESAR (score ${score}). In my timeline Rome never fell. Can you? https://miklatgames.fun/changinghistory/`;
+  try{ if(navigator.share){await navigator.share({text:txt});} else { await navigator.clipboard.writeText(txt); banner('Copied'); } }catch(e){}
+});
+document.addEventListener('touchstart',e=>{ if(e.target.closest('.board')) e.preventDefault(); },{passive:false});
+</script>
+</body>
+</html>
+</content>
