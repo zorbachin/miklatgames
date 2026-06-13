@@ -235,16 +235,48 @@ function genLevel(){
   G.chain=[]; G.trail=[]; G.parts=[]; G.toasts=[]; G.rescued=0;
   G.lvlFalafelHits=0; G.lvlDogs=0; G.dogsRescued=0;
 
-  // rebuild dirt
+  // rebuild dirt (facade you tunnel through — decorated, then carved away as you dig)
   dctx.save(); dctx.globalCompositeOperation='source-over';
   dctx.clearRect(0,0,W,H);
+  // deterministic per-tower cosmetic hash — keeps decoration off the seeded gameplay RNG
+  const seedBase=(G.seed||0)>>>0;
+  const dh=(c,r)=>{ let x=Math.imul(((c+1)*73856093)^((r+1)*19349663)^seedBase,2654435761); return ((x^x>>>15)>>>0)/4294967296; };
   for(let r=TOP;r<LOBBY;r++){
     dctx.fillStyle=strataCol(r); dctx.fillRect(0,r*TILE,W,TILE);
+    dctx.fillStyle='rgba(0,0,0,.05)';                                       // faint pilaster seams
+    for(let c=1;c<COLS;c++) dctx.fillRect(c*TILE,r*TILE,1,TILE);
     dctx.fillStyle='#9c8757'; dctx.fillRect(0,(r+1)*TILE-3,W,3);            // floor slab
-    dctx.fillStyle='rgba(255,255,255,.10)'; dctx.fillRect(0,r*TILE,W,2);     // slab highlight
-    for(let c=1;c<COLS;c+=2){                                                // window grid
-      dctx.fillStyle='#2b3550'; dctx.fillRect(c*TILE+11,r*TILE+9,18,20);
-      dctx.fillStyle='rgba(255,255,255,.14)'; dctx.fillRect(c*TILE+11,r*TILE+9,18,3);
+    dctx.fillStyle='rgba(0,0,0,.10)'; dctx.fillRect(0,(r+1)*TILE-5,W,2);    // slab undershadow
+    dctx.fillStyle='rgba(255,255,255,.12)'; dctx.fillRect(0,r*TILE,W,2);    // slab highlight
+    for(let c=1;c<COLS;c+=2){
+      const wx=c*TILE+9, wy=r*TILE+8, lit=dh(c,r)>0.62;
+      dctx.fillStyle='#8a7456'; dctx.fillRect(wx-2,wy-2,24,26);             // recessed frame
+      dctx.fillStyle=lit?'#ffe9a8':'#2b3550'; dctx.fillRect(wx,wy,20,20);
+      if(lit){ dctx.fillStyle='#ffd166'; dctx.fillRect(wx+2,wy+9,16,9); }   // warm room glow
+      else   { dctx.fillStyle='rgba(255,255,255,.16)'; dctx.fillRect(wx,wy,20,4); } // sky reflection
+      dctx.fillStyle='#6e5c40'; dctx.fillRect(wx+9,wy,2,20); dctx.fillRect(wx,wy+9,20,2); // mullion
+      dctx.fillStyle='#b7a17a'; dctx.fillRect(wx-3,wy+20,26,3);             // sill
+      dctx.fillStyle='rgba(0,0,0,.12)'; dctx.fillRect(wx-3,wy+23,26,1);
+      if(dh(c+5,r)>0.7){                                                    // half-closed shutter (tris)
+        const sh=6+Math.floor(dh(c,r+3)*8);
+        dctx.fillStyle='#c2b18c'; dctx.fillRect(wx,wy,20,sh);
+        dctx.fillStyle='rgba(0,0,0,.18)';
+        for(let s=2;s<sh;s+=3) dctx.fillRect(wx,wy+s,20,1);
+      }
+      if(dh(c+1,r)>0.66){                                                   // balcony rail
+        dctx.fillStyle='#7c6a4c'; dctx.fillRect(wx-4,wy+23,28,2);
+        for(let b=0;b<6;b++) dctx.fillRect(wx-3+b*5,wy+23,1,5);
+      }
+      if(dh(c+2,r+2)>0.82){                                                 // facade AC box
+        dctx.fillStyle='#dfe3e6'; dctx.fillRect(wx+20,wy+4,8,10);
+        dctx.fillStyle='#b8bdc2'; dctx.fillRect(wx+20,wy+4,8,2);
+      }
+    }
+    if(dh(r,7)>0.72){                                                       // laundry line
+      const ly=r*TILE+6; dctx.strokeStyle='rgba(40,30,20,.5)'; dctx.lineWidth=1;
+      dctx.beginPath(); dctx.moveTo(TILE*1.5,ly); dctx.lineTo(TILE*5.5,ly+3); dctx.stroke();
+      const cols=['#e8590c','#4dabf7','#fff','#f06595'];
+      for(let i=0;i<4;i++){ dctx.fillStyle=cols[i]; dctx.fillRect(TILE*1.5+18+i*28,ly+1+i,8,11); }
     }
   }
   dctx.restore();
@@ -631,23 +663,47 @@ function updateRocks(dt){
 }
 
 /* ---------------- drawing ---------------- */
+function drawDudShemesh(x){
+  const y=TOP*TILE-14;
+  // angled solar panel
+  ctx.fillStyle='#1c2740'; ctx.beginPath();
+  ctx.moveTo(x,y-2); ctx.lineTo(x+34,y-12); ctx.lineTo(x+34,y-4); ctx.lineTo(x,y+2); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#3b5170'; ctx.lineWidth=1;
+  for(let i=1;i<4;i++){ const t=i/4; ctx.beginPath(); ctx.moveTo(x+34*t,y-2-10*t); ctx.lineTo(x+34*t,y+2-4*t); ctx.stroke(); }
+  // horizontal storage tank (cylinder)
+  ctx.fillStyle='#cfd4d8'; ctx.fillRect(x+2,y-22,30,9);
+  ctx.fillStyle='#eef1f3'; ctx.fillRect(x+2,y-22,30,3);
+  ctx.fillStyle='#aab1b7'; ctx.beginPath(); ctx.ellipse(x+2,y-17.5,4,4.5,0,0,7); ctx.fill();
+}
 function drawSky(){
   // sky above the roof
   const g=ctx.createLinearGradient(0,0,0,TOP*TILE);
-  g.addColorStop(0,'#8fd3f0'); g.addColorStop(1,'#d8f0fa');
+  g.addColorStop(0,'#7cc6ee'); g.addColorStop(1,'#cdeefb');
   ctx.fillStyle=g; ctx.fillRect(0,0,W,TOP*TILE);
-  ctx.fillStyle='#fcc419'; ctx.beginPath(); ctx.arc(W-60,28,16,0,7); ctx.fill();
-  ctx.fillStyle='rgba(255,255,255,.85)';
-  ctx.beginPath(); ctx.ellipse(120,28,26,9,0,0,7); ctx.ellipse(152,32,18,7,0,0,7); ctx.fill();
-  // roof: chunky parapet, dudei shemesh, antenna
+  // sun with soft glow
+  ctx.fillStyle='rgba(255,221,120,.30)'; ctx.beginPath(); ctx.arc(W-60,28,25,0,7); ctx.fill();
+  ctx.fillStyle='#fcc419'; ctx.beginPath(); ctx.arc(W-60,28,15,0,7); ctx.fill();
+  ctx.fillStyle='#ffe066'; ctx.beginPath(); ctx.arc(W-64,24,6,0,7); ctx.fill();
+  // clouds
+  ctx.fillStyle='rgba(255,255,255,.9)';
+  ctx.beginPath(); ctx.ellipse(120,26,26,9,0,0,7); ctx.ellipse(150,30,18,7,0,0,7); ctx.ellipse(96,31,15,6,0,0,7); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.55)';
+  ctx.beginPath(); ctx.ellipse(300,20,18,6,0,0,7); ctx.ellipse(322,23,12,5,0,0,7); ctx.fill();
+  // roof parapet
   ctx.fillStyle='#5d5142'; ctx.fillRect(0,TOP*TILE-14,W,14);
   ctx.fillStyle='#7a6c58'; ctx.fillRect(0,TOP*TILE-14,W,3);
-  for(const hx of [60,240,410]){
-    ctx.fillStyle='#e9ecef'; ctx.fillRect(hx,TOP*TILE-32,44,16);
-    ctx.fillStyle='#3b4754'; ctx.fillRect(hx-16,TOP*TILE-26,17,12);
-    ctx.fillStyle='#adb5bd'; ctx.fillRect(hx+6,TOP*TILE-36,4,6);
-  }
+  ctx.fillStyle='rgba(0,0,0,.16)'; ctx.fillRect(0,TOP*TILE-4,W,4);
+  // rooftop kit: two solar water heaters, white AC, black water tank, antenna
+  drawDudShemesh(40); drawDudShemesh(150);
+  ctx.fillStyle='#e9ecef'; ctx.fillRect(250,TOP*TILE-30,40,16);
+  ctx.fillStyle='#ced4da'; ctx.fillRect(252,TOP*TILE-28,36,3);
+  ctx.strokeStyle='#adb5bd'; ctx.lineWidth=1;
+  for(let i=1;i<5;i++){ ctx.beginPath(); ctx.moveTo(250+i*8,TOP*TILE-26); ctx.lineTo(250+i*8,TOP*TILE-16); ctx.stroke(); }
+  ctx.fillStyle='#2b2f36'; ctx.fillRect(320,TOP*TILE-34,26,20);
+  ctx.fillStyle='#3b424b'; ctx.beginPath(); ctx.ellipse(333,TOP*TILE-34,13,4,0,0,7); ctx.fill();
   ctx.fillStyle='#444'; ctx.fillRect(477,TOP*TILE-46,4,34);
+  ctx.fillStyle=(Math.floor(performance.now()/600)%2)?'#ff5b5b':'#7a2b2b';
+  ctx.beginPath(); ctx.arc(479,TOP*TILE-48,3,0,7); ctx.fill();
 }
 function drawBackdrop(){
   // building interior behind the balagan
@@ -660,7 +716,10 @@ function drawBackdrop(){
   ctx.fillStyle='#23242c'; ctx.fillRect(0,LOBBY*TILE,W,TILE);
   ctx.fillStyle='#2e3038';
   for(let x=0;x<W;x+=26) ctx.fillRect(x,LOBBY*TILE+TILE-6,22,4);
-  // miklat entrance (bottom-left): stair doorway + green sign
+  // miklat entrance (bottom-left): inviting glow + stair doorway + green sign
+  const mg=ctx.createRadialGradient(73,LOBBY*TILE+18,4,73,LOBBY*TILE+18,48);
+  mg.addColorStop(0,'rgba(110,219,116,.30)'); mg.addColorStop(1,'rgba(110,219,116,0)');
+  ctx.fillStyle=mg; ctx.fillRect(0,LOBBY*TILE-22,160,TILE+26);
   ctx.fillStyle='#15161c'; ctx.fillRect(6,LOBBY*TILE+2,40,36);
   ctx.fillStyle='#2e7d32'; ctx.fillRect(48,LOBBY*TILE+4,50,26);
   ctx.fillStyle='#fff'; ctx.font='bold 12px Courier New'; ctx.textAlign='center';
@@ -1044,6 +1103,8 @@ function uiTap(x,y){
 }
 
 /* ---------------- main loop ---------------- */
+const vignette=(()=>{ const g=ctx.createRadialGradient(W/2,H*0.46,H*0.34,W/2,H*0.5,H*0.74);
+  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(6,8,16,.26)'); return g; })();
 let last=performance.now();
 genLevel(); // pretty dirt behind the title
 function loop(now){
@@ -1091,6 +1152,9 @@ function loop(now){
   drawPlayer();
   drawParts(paused?0:dt);
   ctx.restore();
+
+  // soft depth vignette
+  ctx.fillStyle=vignette; ctx.fillRect(0,0,W,H);
 
   // siren tint
   if(G.state==='play'&&G.time<13&&Math.floor(G.time*2)%2===0){
