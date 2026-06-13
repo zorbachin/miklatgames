@@ -521,7 +521,7 @@ const STATIONS=[
   {id:'allenby', x:3300, ico:'🚌', art:'allenby',       label:'ALLENBY',   sub:'cross the traffic'},
   {id:'erev',    x:3520, ico:'🌆', art:'erev',          label:'EREV RUSH', sub:'the sundown gauntlet'},
 ];
-const MINI=['volley','falafel','matkot','shawarma','aroma','cats','allenby','stand','erev','erev'];
+const MINI=['volley','falafel','matkot','shawarma','aroma','cats','allenby','stand','erev'];
 const G={
   state:'title', t:0, freeze:0,
   camX:0, player:{x:300,d:.5,dir:1,walk:0}, target:null,   // d = depth into the plaza (0 back → 1 front)
@@ -1169,7 +1169,7 @@ function mkStrike(sx){
     if(m.tut){ m.tut=false; S.taught.matkot=1; save(); }
     const perfect=Math.abs(b.p-.92)<.07 && Math.abs(m.padX-bp.x)<padW*.3;
     m.rally++; m.swing=.18; m.struck=true; m.retT=0;
-    const got=payout((perfect?11:7)+m.rally*2,'matkot'); m.earn+=got;
+    const got=payout((perfect?11:7)+Math.min(m.rally,12)*2,'matkot'); m.earn+=got;
     pop(m.padX,MK_LINE()-30,`+${got}₪${perfect?' PERFECT!':''}`,POP_COLS[m.rally%4],perfect); flyCoin(m.padX,MK_LINE());
     Sound.bump(m.rally); G.freeze=.05; flash(perfect?.2:.1); buzz(perfect?40:20);
     if(m.rally===5||m.rally===10||m.rally===15){ burstConfetti(12);
@@ -1264,7 +1264,7 @@ function stDown(sx,sy){
   const c=s.custs.find(c=>!c.leaving && Math.abs(sx-c.x)<46 && sy>groundY-150);
   if(c){
     if(s.pitas>0){ s.pitas--; c.leaving=1; c.happy=1; s.served++; s.combo++;
-      const tip=Math.round((10+Math.min(s.combo,8)*2)*(0.6+0.4*(c.patience/c.max)));
+      const tip=Math.round((8+Math.min(s.combo,6)*1.5)*(0.6+0.4*(c.patience/c.max)));
       const got=payout(tip,'stand'); s.earn+=got;
       pop(c.x,groundY-150,`+${got}₪${s.combo>2?` ×${s.combo}`:''}`,POP_COLS[s.combo%4],s.combo>3);
       flyCoin(c.x,groundY-160); Sound.cash(); G.freeze=.03; buzz(16);
@@ -1285,7 +1285,7 @@ function stUpdate(dt){
   s.time-=dt; if(s.time<=0){ s.time=0; stEnd(); return; }
   // fryer cooks continuously; overcooks if you don't plate it
   if(s.cook<1.6) s.cook+=dt*0.62*s.df;
-  if(s.cook>=1.55 && s.pitas<6){ s.cook=0; s.burning=1; }   // burnt — wasted a batch
+  if(s.cook>=1.55){ s.cook=0; if(s.pitas<6) s.burning=1; }   // burns whether or not the plate is full
   if(s.burning>0) s.burning-=dt;
   // customers arrive and lose patience
   s.nextCust-=dt;
@@ -1441,7 +1441,7 @@ function erevStart(){
 function erevResolve(r){
   const e=G.erev;
   if(r==='win'){ e.score++; e.streak++;
-    const got=payout(8+e.round+ (e.micro&&e.micro.siren?12:0),'erev'); e.earn+=got;
+    const got=payout(8+Math.min(e.round,12)+(e.micro&&e.micro.siren?8:0),'erev'); e.earn+=got;   // capped, no runaway
     pop(W/2,H*.42,`+${got}₪`,POP_COLS[e.score%4]); flyCoin(W/2,H*.46);
     Sound.bump(Math.min(12,e.score)); G.freeze=.04; buzz(18);
     if(!S.taught.erev){ S.taught.erev=1; save(); }
