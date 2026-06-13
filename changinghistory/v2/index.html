@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a1226">
+<meta name="robots" content="noindex,nofollow">
+<title>CHANGING HISTORY v2 — Beat History (prototype)</title>
+<style>
+  :root{
+    --c-bg:#0a1226; --c-panel:#101b38; --c-panel-2:#16244a;
+    --c-cyan:#3ee6ff; --c-gold:#ffd166; --c-pink:#ff5db1; --c-red:#ff5d73; --c-green:#5dffa8; --c-violet:#a98bff; --c-amber:#ff9f43;
+    --c-ink:#eaf2ff; --c-dim:#8da3cc;
+    --c-border:rgba(62,230,255,.22); --c-border-strong:rgba(62,230,255,.55); --c-wash:rgba(62,230,255,.08);
+    --c-gold-border:rgba(255,209,102,.45);
+    --grad:radial-gradient(125% 95% at 50% -8%,#241a5c 0%,#141633 42%,#0a1226 100%);
+    --shadow:0 12px 34px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.05);
+    --fd:"Courier New",ui-monospace,Menlo,Consolas,monospace;
+    --fb:"Heebo",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --ease:cubic-bezier(.2,.7,.2,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--c-bg);color:var(--c-ink);
+    font-family:var(--fb);user-select:none;-webkit-user-select:none;}
+  body{display:flex;justify-content:center;}
+  .app{width:100%;max-width:520px;height:100%;background:var(--grad);position:relative;overflow:hidden;display:flex;flex-direction:column;}
+
+  /* run HUD */
+  .hud{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 9px) 12px 6px;font-size:12px;}
+  .hud .relics{flex:1;display:flex;gap:5px;align-items:center;min-height:24px;flex-wrap:wrap;}
+  .relic{display:inline-flex;align-items:center;gap:3px;background:rgba(255,209,102,.12);border:1px solid var(--c-gold-border);
+    border-radius:999px;padding:3px 8px;font-weight:800;color:var(--c-gold);font-size:11.5px;}
+  .meter{display:flex;flex-direction:column;gap:2px;min-width:96px;}
+  .meter .lab{display:flex;justify-content:space-between;font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--c-dim);text-transform:uppercase;}
+  .bar{height:7px;border-radius:4px;background:#1a2550;overflow:hidden;border:1px solid var(--c-border);}
+  .bar i{display:block;height:100%;width:0%;transition:width .35s var(--ease);}
+  .bar.para i{background:linear-gradient(90deg,#ff9f43,#ff5d73);}
+  .bar.div i{background:linear-gradient(90deg,#a98bff,#3ee6ff);}
+
+  .screen{flex:1;display:none;flex-direction:column;min-height:0;}
+  .screen.show{display:flex;}
+
+  /* generic centered pad */
+  .pad{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    padding:22px;gap:0;overflow-y:auto;}
+  .k{font:800 11px var(--fd);letter-spacing:.14em;text-transform:uppercase;color:var(--c-cyan);}
+  .big-ico{font-size:70px;line-height:1;margin:12px 0 6px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5));}
+  h1.title{font-family:var(--fd);font-weight:700;font-size:clamp(26px,7.4vw,34px);letter-spacing:.04em;line-height:1.08;}
+  .sub{margin-top:10px;font-size:14.5px;line-height:1.5;color:var(--c-dim);max-width:360px;}
+  .lead{margin-top:14px;font-size:16px;font-weight:800;color:var(--c-violet);max-width:360px;line-height:1.4;}
+  .btn{margin-top:20px;border:0;border-radius:15px;padding:16px 34px;font-size:17px;font-weight:900;cursor:pointer;
+    background:linear-gradient(180deg,#bca4ff,#8a63f0);color:#160a36;box-shadow:0 7px 22px rgba(138,99,240,.4);transition:transform .1s var(--ease);}
+  .btn:active{transform:scale(.96);}
+  .btn.gold{background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;box-shadow:0 7px 22px rgba(233,162,59,.4);}
+  .btn.cyan{background:linear-gradient(180deg,#5ff0ff,#2bb6d6);color:#04222a;}
+  .btn.ghost{background:transparent;color:#cdd6e8;border:1px solid #46506b;box-shadow:none;font-weight:700;font-size:15px;padding:12px 24px;}
+  .btn:disabled{opacity:.4;cursor:default;}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px;}
+  .btn-row .btn{margin-top:0;}
+
+  /* stage (beats) */
+  #stage{padding:0 14px calc(env(safe-area-inset-bottom,0px) + 12px);}
+  .beat-head{text-align:center;padding:6px 6px 2px;}
+  .beat-era{font:800 10.5px var(--fd);letter-spacing:.12em;text-transform:uppercase;color:var(--c-cyan);}
+  .beat-name{margin-top:3px;font-size:18px;font-weight:900;line-height:1.15;}
+  .beat-obj{margin-top:6px;font-size:13.5px;color:var(--c-violet);font-weight:700;line-height:1.4;min-height:19px;}
+  .beat-arena{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:0;padding:6px 0;}
+  .beat-foot{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;padding-top:4px;}
+
+  /* fire grid */
+  .heat{font-size:14px;font-weight:800;color:var(--c-amber);}
+  .heat b{color:var(--c-gold);font-size:18px;}
+  .turnlab{font-size:12px;color:var(--c-dim);font-weight:700;}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:min(86vw,330px);}
+  .cell{position:relative;aspect-ratio:1;border-radius:12px;background:var(--c-panel);border:1px solid var(--c-border);
+    display:flex;align-items:center;justify-content:center;font-size:26px;cursor:pointer;transition:all .12s var(--ease);}
+  .cell:active{transform:scale(.95);}
+  .cell.ember{background:radial-gradient(circle at 50% 45%,#3a2a10,#0e1430);border-color:var(--c-gold-border);cursor:default;}
+  .cell.wb{background:linear-gradient(180deg,#2a3666,#1a2550);border-color:var(--c-border-strong);}
+  .cell.threat{box-shadow:inset 0 0 0 2px rgba(255,93,115,.65);}
+  .cell.threat.entry{background:rgba(255,93,115,.16);}
+  .cell .arr{position:absolute;font-size:18px;pointer-events:none;filter:drop-shadow(0 0 4px rgba(255,93,115,.9));}
+  .pips{display:flex;gap:5px;}
+  .pips i{width:9px;height:9px;border-radius:50%;background:#2a3666;}
+  .pips i.on{background:var(--c-amber);box-shadow:0 0 7px var(--c-amber);}
+  .wbtray{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--c-dim);font-weight:700;}
+  .wbtray .ico{font-size:18px;}
+  .hint{font-size:12px;color:var(--c-dim);max-width:320px;text-align:center;line-height:1.4;}
+
+  /* rome / choices */
+  .card{width:100%;max-width:380px;background:var(--c-panel);border:1px solid var(--c-border);border-radius:16px;
+    padding:15px;box-shadow:var(--shadow);text-align:start;}
+  .card .ttl{font-size:15px;font-weight:800;margin-bottom:6px;}
+  .card .bd{font-size:13.5px;line-height:1.5;color:var(--c-dim);}
+  .opts{display:flex;flex-direction:column;gap:10px;width:100%;max-width:380px;}
+  .opt{display:flex;gap:11px;align-items:center;background:var(--c-panel);border:1px solid var(--c-border);border-radius:14px;
+    padding:13px 14px;cursor:pointer;transition:all .12s var(--ease);text-align:start;}
+  .opt:active{transform:scale(.98);}
+  .opt.on{border-color:var(--c-border-strong);background:var(--c-wash);}
+  .opt .oico{font-size:26px;flex-shrink:0;}
+  .opt .om{flex:1;}
+  .opt .onm{font-size:14px;font-weight:800;}
+  .opt .od{font-size:11.5px;color:var(--c-dim);margin-top:2px;line-height:1.35;}
+  .opt .tag{font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;white-space:nowrap;}
+  .tag.div{background:rgba(169,139,255,.15);color:var(--c-violet);border:1px solid rgba(169,139,255,.4);}
+  .tag.para{background:rgba(255,93,115,.14);color:var(--c-red);border:1px solid rgba(255,93,115,.4);}
+  .tag.relic{background:rgba(255,209,102,.14);color:var(--c-gold);border:1px solid var(--c-gold-border);}
+
+  /* verdict */
+  .vcard{width:100%;max-width:380px;border-radius:18px;overflow:hidden;background:linear-gradient(160deg,#1b1450,#101b38);
+    border:1px solid var(--c-border-strong);box-shadow:0 14px 40px rgba(0,0,0,.6);}
+  .vcard .vt{padding:14px 16px 10px;border-bottom:1px solid var(--c-border);}
+  .vcard .vk{font:800 10px var(--fd);letter-spacing:.16em;color:var(--c-cyan);text-transform:uppercase;}
+  .vcard .vn{margin-top:7px;font-size:21px;font-weight:900;line-height:1.15;}
+  .vcard .vstats{display:flex;gap:0;border-top:1px solid var(--c-border);}
+  .vcard .vstat{flex:1;padding:12px;text-align:center;border-inline-end:1px solid var(--c-border);}
+  .vcard .vstat:last-child{border-inline-end:0;}
+  .vcard .vstat .n{font-size:22px;font-weight:900;}
+  .vcard .vstat .l{font-size:10px;color:var(--c-dim);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+  .vbody{padding:13px 16px;font-size:13px;line-height:1.5;color:var(--c-ink);text-align:start;}
+
+  #flash{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;z-index:30;}
+  #flash.gold{background:radial-gradient(circle,rgba(255,209,102,.5),transparent 70%);}
+  #flash.green{background:radial-gradient(circle,rgba(93,255,168,.45),transparent 70%);}
+  #flash.red{background:radial-gradient(circle,rgba(255,93,115,.42),transparent 70%);}
+  #flash.show{opacity:1;transition:opacity .04s;}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;background:var(--c-panel-2);
+    border:1px solid var(--c-border-strong);border-radius:999px;color:var(--c-cyan);padding:9px 18px;font-size:12.5px;
+    font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;}
+  #toast.show{opacity:1;}
+  .proto{position:fixed;top:calc(env(safe-area-inset-top,0px) + 6px);left:50%;transform:translateX(-50%);z-index:5;
+    font:800 9px var(--fd);letter-spacing:.12em;color:var(--c-dim);opacity:.6;}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important;}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="proto">PROTOTYPE · v2 SLICE · M1</div>
+
+  <!-- run HUD (during a run) -->
+  <div class="hud" id="hud" style="visibility:hidden">
+    <div class="relics" id="relics"></div>
+    <div class="meter"><div class="lab"><span>Paradox</span><span id="paraN">0</span></div><div class="bar para"><i id="paraBar"></i></div></div>
+    <div class="meter"><div class="lab"><span>Divergence</span><span id="divN">0</span></div><div class="bar div"><i id="divBar"></i></div></div>
+  </div>
+
+  <!-- TITLE -->
+  <section class="screen show" id="title">
+    <div class="pad">
+      <div class="k">A run down the timeline</div>
+      <div class="big-ico">🕰️</div>
+      <h1 class="title">BEAT HISTORY</h1>
+      <p class="sub">History wants the past to stay exactly as it was. You don't. Make a change, carry it forward, and force it to <b>stick</b> — while History fights to undo you.</p>
+      <p class="lead">Slice: 🔥 First Fire → 🏛️ Save Caesar → your present.</p>
+      <button class="btn" id="startBtn">▶ START THE RUN</button>
+      <div class="btn-row"><button class="btn ghost" id="atlasBtn">🗺️ Atlas</button></div>
+    </div>
+  </section>
+
+  <!-- STAGE (hosts beats) -->
+  <section class="screen" id="stage">
+    <div class="beat-head">
+      <div class="beat-era" id="beatEra"></div>
+      <div class="beat-name" id="beatName"></div>
+      <div class="beat-obj" id="beatObj"></div>
+    </div>
+    <div class="beat-arena" id="arena"></div>
+    <div class="beat-foot" id="foot"></div>
+  </section>
+
+  <!-- VERDICT -->
+  <section class="screen" id="verdict">
+    <div class="pad">
+      <div class="k" id="vVerdict">PRESENT DAY</div>
+      <div class="vcard" style="margin-top:14px">
+        <div class="vt"><div class="vk">Your timeline is now</div><div class="vn" id="vName"></div></div>
+        <div class="vstats">
+          <div class="vstat"><div class="n" style="color:var(--c-violet)" id="vDiv">0%</div><div class="l">Divergent</div></div>
+          <div class="vstat"><div class="n" id="vStab">—</div><div class="l">Stability</div></div>
+          <div class="vstat"><div class="n" style="color:var(--c-gold)" id="vScore">0</div><div class="l">Score</div></div>
+        </div>
+        <div class="vbody" id="vBody"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn gold" id="vShare">📤 Share</button>
+        <button class="btn cyan" id="vAgain">↻ New run</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="flash"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+'use strict';
+/* ===================================================================
+   CHANGING HISTORY v2 — vertical slice (Fire -> Rome -> verdict).
+   M1: run persistence + Into-the-Breach-style Fire tactics + Paradox/
+   Divergence + relic carry + Present-Day verdict + Atlas. EN-only proto.
+   =================================================================== */
+const $=id=>document.getElementById(id);
+function show(s){ document.querySelectorAll('.screen').forEach(x=>x.classList.remove('show')); $(s).classList.add('show'); }
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2000); }
+function flash(c,ms){ const f=$('flash'); f.className=c+' show'; clearTimeout(f._t); f._t=setTimeout(()=>f.classList.remove('show'),ms||90); }
+function vib(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+
+/* ---- audio (lazy WebAudio) ---- */
+let AC=null,muted=false;
+function ac(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } if(AC&&AC.state==='suspended'){try{AC.resume();}catch(e){}} return AC; }
+function beep(f,d,t,v,dl){ if(muted)return; const a=ac(); if(!a)return; try{ const t0=a.currentTime+(dl||0),o=a.createOscillator(),g=a.createGain();
+  o.type=t||'square'; o.frequency.setValueAtTime(f,t0); g.gain.setValueAtTime(v||.14,t0); g.gain.exponentialRampToValueAtTime(.001,t0+d);
+  o.connect(g).connect(a.destination); o.start(t0); o.stop(t0+d);}catch(e){} }
+function noise(d,v){ if(muted)return; const a=ac(); if(!a)return; try{ const n=Math.floor(a.sampleRate*d),b=a.createBuffer(1,n,a.sampleRate),ch=b.getChannelData(0);
+  for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(1-i/n); const s=a.createBufferSource(); s.buffer=b; const g=a.createGain(); g.gain.value=v||.08;
+  s.connect(g).connect(a.destination); s.start();}catch(e){} }
+const sTap=()=>beep(440,.04,'square',.1), sGood=()=>{beep(660,.08,'square',.16);beep(880,.09,'square',.16,.06);},
+      sBad=()=>{beep(180,.16,'sawtooth',.16);noise(.1,.07);}, sFire=()=>{noise(.18,.12);beep(150,.18,'sawtooth',.14);},
+      sWin=()=>[523,659,784,1047].forEach((f,i)=>beep(f,.15,'square',.16,i*.1)),
+      sLose=()=>[392,330,262].forEach((f,i)=>beep(f,.2,'triangle',.15,i*.12));
+
+/* ---- run state ---- */
+let run=null;
+function newRun(){ run={ relics:[], paradox:0, divergence:0, fed:0, log:[] }; }
+function addRelic(r){ run.relics.push(r); renderHud(); }
+function hasRelic(id){ return run.relics.some(r=>r.id===id); }
+function getRelic(id){ return run.relics.find(r=>r.id===id); }
+function addParadox(n){ run.paradox=Math.max(0,Math.min(100,run.paradox+n)); renderHud(); }
+function addDivergence(n){ run.divergence=Math.max(0,Math.min(100,run.divergence+n)); renderHud(); }
+function renderHud(){
+  $('hud').style.visibility='visible';
+  $('relics').innerHTML = run.relics.length ? run.relics.map(r=>`<span class="relic">${r.ico} ${r.name}</span>`).join('') : '<span style="color:var(--c-dim);font-size:11px">no changes yet</span>';
+  $('paraN').textContent=run.paradox; $('divN').textContent=run.divergence;
+  $('paraBar').style.width=run.paradox+'%'; $('divBar').style.width=run.divergence+'%';
+}
+
+/* ---- beat helpers ---- */
+function beatHead(era,name,obj){ $('beatEra').textContent=era; $('beatName').textContent=name; $('beatObj').textContent=obj||''; }
+function setObj(o){ $('beatObj').textContent=o||''; }
+const arena=$('arena'), foot=$('foot');
+function clearStage(){ arena.innerHTML=''; foot.innerHTML=''; }
+
+/* =====================================================================
+   BEAT 1 — FIRST FIRE  (Into-the-Breach-style perfect-info tactics)
+   5x5 grid, ember at centre. Each turn telegraphs gusts along the
+   ember's row/column; place up to 3 windbreaks to intercept them on the
+   lane before they reach the ember. FEED grows heat but spawns a gust.
+   Survive 4 turns; final heat + feeds = how big a Flame you carry.
+   ===================================================================== */
+function beatFire(done){
+  beatHead('Prehistory · ~1,000,000 BCE','🔥 First Fire','Keep the ember alive. Block the wind before it reaches the flame.');
+  clearStage();
+  const N=5, EC=2, MAXWB=3, TURNS=4;
+  let heat=3, turn=1, fed=0, wbLeft=MAXWB, resolving=false;
+  let wbs=[];           // {r,c}
+  let gusts=[];         // {axis:'row'|'col', dir:+1|-1, pending} pending=extra from feed
+  const wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:12px;';
+  wrap.innerHTML=`
+    <div style="display:flex;gap:16px;align-items:center">
+      <span class="heat">🔥 Heat <b id="fHeat">3</b></span>
+      <span class="turnlab">Turn <span id="fTurn">1</span>/${TURNS}</span>
+    </div>
+    <div class="grid" id="fGrid"></div>
+    <div class="wbtray"><span class="ico">🪨</span> Windbreaks left: <b id="fWb">${MAXWB}</b></div>
+    <div class="hint" id="fHint"></div>`;
+  arena.appendChild(wrap);
+  const grid=$('fGrid'); const cells=[];
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){ const el=document.createElement('div'); el.className='cell'; el.dataset.r=r; el.dataset.c=c;
+    el.addEventListener('pointerdown',()=>onCell(r,c)); grid.appendChild(el); cells.push(el); }
+  function cellAt(r,c){ return cells[r*N+c]; }
+  function isEmber(r,c){ return r===EC&&c===EC; }
+  function hasWb(r,c){ return wbs.some(w=>w.r===r&&w.c===c); }
+  // path tiles a gust crosses before the ember (ordered from entry)
+  function pathTiles(g){
+    const t=[];
+    if(g.axis==='row'){ if(g.dir>0){ for(let c=0;c<EC;c++)t.push({r:EC,c}); } else { for(let c=N-1;c>EC;c--)t.push({r:EC,c}); } }
+    else{ if(g.dir>0){ for(let r=0;r<EC;r++)t.push({r,c:EC}); } else { for(let r=N-1;r>EC;r--)t.push({r,c:EC}); } }
+    return t;
+  }
+  function genGusts(){
+    gusts=[]; const count=Math.min(1+Math.floor(turn/2),2)+ (turn===1?0:0); // t1:1, t2:1, t3:2, t4:2
+    const base = turn>=3?2:1;
+    const total = base + pendingFeed; pendingFeed=0;
+    const opts=[{axis:'row',dir:1},{axis:'row',dir:-1},{axis:'col',dir:1},{axis:'col',dir:-1}];
+    for(let i=0;i<total;i++){ gusts.push(opts[Math.floor(Math.random()*opts.length)]); }
+  }
+  let pendingFeed=0;
+  function renderThreat(){
+    cells.forEach(el=>{ el.classList.remove('threat','entry'); const a=el.querySelector('.arr'); if(a)a.remove(); });
+    gusts.forEach(g=>{ const path=pathTiles(g); path.forEach((p,i)=>{ const el=cellAt(p.r,p.c); el.classList.add('threat');
+      if(i===0){ el.classList.add('entry'); const ar=document.createElement('span'); ar.className='arr';
+        ar.textContent = g.axis==='row' ? (g.dir>0?'➡️':'⬅️') : (g.dir>0?'⬇️':'⬆️'); el.appendChild(ar); } }); });
+  }
+  function render(){
+    cells.forEach(el=>{ const r=+el.dataset.r,c=+el.dataset.c; el.className='cell';
+      if(isEmber(r,c)){ el.classList.add('ember'); el.textContent=heat>0?'🔥':'💨'; }
+      else if(hasWb(r,c)){ el.classList.add('wb'); el.textContent='🪨'; }
+      else el.textContent=''; });
+    renderThreat();
+    $('fHeat').textContent=heat; $('fTurn').textContent=turn; $('fWb').textContent=wbLeft;
+    $('fHint').textContent = resolving?'' : 'Tap a lane tile to drop/lift a windbreak, then RESOLVE.';
+  }
+  function onCell(r,c){ if(resolving||isEmber(r,c))return; sTap();
+    if(hasWb(r,c)){ wbs=wbs.filter(w=>!(w.r===r&&w.c===c)); wbLeft++; }
+    else { if(wbLeft<=0){ toast('No windbreaks left — lift one first'); return; } wbs.push({r,c}); wbLeft--; }
+    render();
+  }
+  function resolve(){
+    if(resolving)return; resolving=true; renderFoot();
+    let dmg=0; const hitTiles=[];
+    gusts.forEach(g=>{ const path=pathTiles(g); let blocked=false;
+      for(const p of path){ if(hasWb(p.r,p.c)){ blocked=true; hitTiles.push({...p,blk:true}); break; } hitTiles.push({...p,blk:false}); }
+      if(!blocked) dmg++; });
+    // animate
+    hitTiles.forEach((p,i)=>setTimeout(()=>{ const el=cellAt(p.r,p.c); el.style.background=p.blk?'rgba(62,230,255,.3)':'rgba(255,93,115,.35)';
+      setTimeout(()=>el.style.background='',180); },i*60));
+    setTimeout(()=>{
+      if(dmg>0){ heat-=dmg; sBad(); flash('red'); vib(60); } else { sGood(); flash('green'); }
+      render();
+      if(heat<=0){ heat=0; render(); setTimeout(endFire(false),500); return; }
+      if(turn>=TURNS){ setTimeout(endFire(true),400); return; }
+      turn++; genGusts(); resolving=false; render(); renderFoot();
+    }, hitTiles.length*60+260);
+  }
+  function feed(){ if(resolving)return; heat++; fed++; pendingFeed++; sFire(); flash('gold'); vib(20);
+    toast('Fire grows — but the wind notices (+1 gust next turn)'); render(); renderFoot(); }
+  function renderFoot(){
+    foot.innerHTML='';
+    const rb=document.createElement('button'); rb.className='btn cyan'; rb.style.marginTop='0'; rb.textContent='🌬️ RESOLVE WIND';
+    rb.disabled=resolving; rb.addEventListener('pointerdown',resolve);
+    const fb=document.createElement('button'); fb.className='btn gold'; fb.style.marginTop='0'; fb.textContent='➕ FEED (risk)';
+    fb.disabled=resolving; fb.addEventListener('pointerdown',feed);
+    foot.appendChild(fb); foot.appendChild(rb);
+  }
+  function endFire(win){ return ()=>{
+    if(!win){ sLose(); flash('red'); return done({win:false}); }
+    sWin(); flash('gold');
+    // mastery: surviving heat + how much you grew it
+    const size = heat>=5?'roaring':heat>=3?'steady':'flickering';
+    const div = 8 + fed*3 + Math.max(0,heat-3)*2;     // bolder fire = more divergence
+    const par = fed*4;                                  // growth destabilises
+    done({win:true, heat, fed, size, div, par});
+  };}
+  genGusts(); render(); renderFoot();
+}
+
+/* =====================================================================
+   BEAT 2 — SAVE CAESAR  (mutated by Fire; M1 minimal: relic spend choice)
+   M2 will expand into deduction + Restorer tactics. Here it proves the
+   cascade + relic payoff + a real decision with tradeoffs.
+   ===================================================================== */
+function beatRome(done){
+  const fireBig = getRelic('flame') && getRelic('flame').size!=='flickering';
+  const era='Classical · 44 BCE';
+  const name = hasRelic('flame') ? '🏛️ Caesar of the Fire-Cult Rome' : '🏛️ Save Caesar';
+  beatHead(era,name, hasRelic('flame')
+    ? 'Rome worships your flame now. The Senate still hides 23 daggers.'
+    : 'The Senate hides 23 daggers. Beware the Ides of March.');
+  clearStage();
+  const card=document.createElement('div'); card.className='card';
+  card.innerHTML=`<div class="ttl">The Ides of March</div><div class="bd">${
+    hasRelic('flame')
+      ? 'Because you carried <b style="color:var(--c-gold)">'+getRelic('flame').name+'</b>, Rome is a fire-cult — and the conspirators meet by torchlight. How do you stop them?'
+      : 'A senator slips Caesar a warning… or do they? Choose how to act.'}</div>`;
+  arena.appendChild(card);
+  const opts=document.createElement('div'); opts.className='opts'; arena.appendChild(opts);
+  const choices=[];
+  if(hasRelic('flame')){
+    choices.push({ico:'🔥',nm:'Burn the conspirators\' torch-lit pact',
+      od: fireBig?'Your roaring flame engulfs every plot at once. Caesar lives — boldly.':'Your small flame burns the main plot. Caesar lives, barely.',
+      tags:[['div','+ big change'],['relic','spend 🔥']],
+      res:{win:true, div: fireBig?22:14, par: fireBig?10:6, relic:{id:'latin',ico:'🏛️',name:'Eternal Latin'}, line:'Caesar lives. Rome never falls into the old civil war.'}});
+  }
+  choices.push({ico:'🗡️',nm:'Quietly disarm the lead conspirator',
+    od:'Safer. A smaller divergence, less backlash from History.',
+    tags:[['div','+ small change']],
+    res:{win:true, div:9, par:3, relic:{id:'latin',ico:'🏛️',name:'Eternal Latin'}, line:'Caesar survives the day. The Republic limps on, changed but cautious.'}});
+  choices.push({ico:'🎭',nm:'Do nothing — let history happen',
+    od:'No change. History stays itself. (You can still finish the run.)',
+    tags:[['para','no risk']],
+    res:{win:false, div:0, par:0, line:'The daggers fall as they always did. This timeline barely diverged.'}});
+
+  let sel=-1;
+  choices.forEach((c,i)=>{ const el=document.createElement('div'); el.className='opt';
+    el.innerHTML=`<span class="oico">${c.ico}</span><div class="om"><div class="onm">${c.nm}</div><div class="od">${c.od}</div></div>`+
+      c.tags.map(t=>`<span class="tag ${t[0]}">${t[1]}</span>`).join('');
+    el.addEventListener('pointerdown',()=>{ sel=i; sTap(); [...opts.children].forEach(x=>x.classList.remove('on')); el.classList.add('on'); $('rGo').disabled=false; });
+    opts.appendChild(el); });
+
+  foot.innerHTML='';
+  const go=document.createElement('button'); go.id='rGo'; go.className='btn'; go.style.marginTop='0'; go.textContent='Commit ▶'; go.disabled=true;
+  go.addEventListener('pointerdown',()=>{ if(sel<0)return; const c=choices[sel];
+    if(c.res.win){ sGood(); flash('green'); } else { sBad(); }
+    done(c.res); });
+  foot.appendChild(go);
+}
+
+/* =====================================================================
+   RUN FLOW
+   ===================================================================== */
+function startRun(){ ac(); newRun(); renderHud(); show('stage');
+  beatFire(res=>{
+    if(res.win){ addRelic({id:'flame',ico:'🔥',name:res.size==='roaring'?'Roaring Flame':res.size==='steady'?'Steady Flame':'Flickering Flame',size:res.size});
+      addDivergence(res.div); addParadox(res.par); run.log.push('Fire mastered the '+res.size+' way.'); }
+    else { run.log.push('The first fire guttered out — you carry nothing forward.'); }
+    // History pressure beat: between crossroads, paradox can rise if divergence is high
+    setTimeout(()=>beatRome(res2=>{
+      if(res2.win){ addDivergence(res2.div); addParadox(res2.par); if(res2.relic) addRelic(res2.relic); }
+      run.log.push(res2.line);
+      // History's correction: high paradox bleeds a little divergence back (it "snaps back")
+      if(run.paradox>=40){ const bleed=Math.min(run.divergence, Math.floor((run.paradox-30)/6)); addDivergence(-bleed);
+        if(bleed>0) run.log.push('History clawed back '+bleed+'% — your timeline was unstable.'); }
+      setTimeout(verdict,500);
+    }), 550);
+  });
+}
+
+/* ---- verdict ---- */
+const ATLAS_KEY='ch2.atlas';
+function stabilityWord(p){ return p<=20?'rock-solid':p<=45?'stable':p<=70?'shaky':'collapsing'; }
+function timelineName(){
+  const f=getRelic('flame'), hasL=hasRelic('latin');
+  if(f&&hasL) return f.size==='roaring'?'The Burning Latin Republic':'The Ember-Lit Republic';
+  if(f) return f.size==='roaring'?'The Age of the Great Flame':'The Warm Dark Age';
+  if(hasL) return 'The Cautious Republic';
+  return 'The Ordinary, Unchanged World';
+}
+function verdict(){
+  const stab=stabilityWord(run.paradox);
+  const stabFactor = Math.max(0.2, 1 - run.paradox/120);
+  const score = Math.round(run.divergence * stabFactor * 10);
+  $('vName').textContent=timelineName();
+  $('vDiv').textContent=run.divergence+'%';
+  $('vStab').textContent=stab; $('vStab').style.color = run.paradox<=45?'var(--c-green)':run.paradox<=70?'var(--c-amber)':'var(--c-red)';
+  $('vScore').textContent=score;
+  $('vBody').innerHTML = run.log.map(l=>`▸ ${l}`).join('<br>') +
+    `<br><br><b style="color:var(--c-cyan)">Score = Divergence × Stability.</b> Bold <i>and</i> stable wins.`;
+  $('vVerdict').textContent = run.divergence>0 ? 'YOU CHANGED HISTORY' : 'HISTORY HELD';
+  // save to atlas
+  try{ const a=JSON.parse(localStorage.getItem(ATLAS_KEY)||'[]'); a.unshift({name:timelineName(),div:run.divergence,stab,score,t:Date.now()});
+    localStorage.setItem(ATLAS_KEY, JSON.stringify(a.slice(0,30))); }catch(e){}
+  show('verdict'); if(run.divergence>0) sWin(); else sLose();
+}
+$('vAgain').addEventListener('pointerdown',()=>{ show('title'); $('hud').style.visibility='hidden'; });
+$('vShare').addEventListener('pointerdown',async()=>{
+  const txt=`🕰️ CHANGING HISTORY: my timeline is now "${timelineName()}" — ${run.divergence}% divergent, ${stabilityWord(run.paradox)}. Beat my history.`;
+  try{ if(navigator.share){ await navigator.share({text:txt}); } else { await navigator.clipboard.writeText(txt); toast('Copied'); } }catch(e){}
+});
+
+/* ---- atlas (meta peek) ---- */
+$('atlasBtn').addEventListener('pointerdown',()=>{
+  let a=[]; try{ a=JSON.parse(localStorage.getItem(ATLAS_KEY)||'[]'); }catch(e){}
+  if(!a.length){ toast('Atlas empty — finish a run to deposit a timeline'); return; }
+  toast(`Atlas: ${a.length} timeline${a.length>1?'s':''} · best score ${Math.max(...a.map(x=>x.score))}`);
+});
+
+$('startBtn').addEventListener('pointerdown',startRun);
+</script>
+</body>
+</html>
+</content>
