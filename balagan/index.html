@@ -268,7 +268,7 @@ function glow(col,size){
    Drop matching PNGs into balagan/art/ and the world upgrades itself. */
 const ART={};
 for(const n of ['bg-city','stand-falafel','net-volley','shop-front','home','kiosk','matkot',
-  'shawarma','aroma','cats','allenby','erev',
+  'shawarma','aroma','cats','allenby','stand','erev',
   'char-avtali','char-savta','char-chabad','char-bro','char-hightech',
   'savta-nu']){            // savta-nu: shared with Mamad Dash — volleyball opponent + street savta
   const i=new Image(); i.src='art/'+n+'.png'; ART[n]=i;
@@ -325,7 +325,7 @@ const DEF={ shekels:500, day:1, dayStart:500, earnedToday:0, streak:0,
   hustle:{day:0,done:false}, hustleTotal:0,
   login:{last:0,run:0}, met:{}, gift:{}, taught:{},
   bracha:0, brachaBuff:0, soupLife:0, gossip:null, plays:{},
-  best:{volley:0,falafel:0,matkot:0,shawarma:0,aroma:0,cats:0,allenby:0,erev:0,daysCleared:0,topWallet:500}, lastSeen:0 };
+  best:{volley:0,falafel:0,matkot:0,shawarma:0,aroma:0,cats:0,allenby:0,stand:0,erev:0,daysCleared:0,topWallet:500}, lastSeen:0 };
 // medium baseline that creeps up the more you've played a game (caps ~+55%)
 function diff(game){ return 1+Math.min(.55,(S.plays[game]||0)*.045); }
 function bumpPlays(game){ S.plays[game]=(S.plays[game]||0)+1; }
@@ -432,6 +432,7 @@ const HUSTLE_DEFS=[
   {id:'ct_pets',  min:8,max:12,desc:n=>`Pet ${n} street cats`,icon:'🐈'},
   {id:'al_cross', min:2,max:4, desc:n=>`Cross Allenby ${n} times`,icon:'🚌'},
   {id:'ev_score', min:6,max:10,desc:n=>`Clear ${n} rounds of Erev Rush`,icon:'🌆'},
+  {id:'st_served', min:8,max:14,desc:n=>`Serve ${n} at the stand`,icon:'🍳'},
   {id:'combo',    min:4,max:6, desc:n=>`Hit a ×${n} falafel combo`,icon:'🔥'},
   {id:'earn',     min:5,max:8, mul:100,desc:n=>`Earn ₪${n*100} in one day`,icon:'💸'},
   {id:'double',   min:1,max:1, desc:()=>`Double your money & clear the day`,icon:'🌅'},
@@ -510,6 +511,7 @@ const STATIONS=[
   {id:'falafel', x:1300, ico:'🥙', art:'stand-falafel', label:'FALAFEL',   sub:'toss for tips'},
   {id:'chat_chabad',x:1580,ico:'🧔',label:'CHABAD',     sub:'tefillin?',   npc:true, dep:.16},
   {id:'shawarma',x:1860, ico:'🌯', art:'shawarma',      label:'SHAWARMA',  sub:'carve the spit'},
+  {id:'stand',   x:1440, ico:'🍳', art:'stand',          label:'THE STAND', sub:'lunch rush: 3 jobs at once'},
   // 🛍 the shuk: commerce & gossip
   {id:'shop',    x:2150, ico:'🛍️', art:'shop-front',    label:'SHUK SHOP', sub:'spend your shekels'},
   {id:'aroma',   x:2430, ico:'☕', art:'aroma',          label:'ICED AROMA',sub:'pour the cold brew'},
@@ -519,7 +521,7 @@ const STATIONS=[
   {id:'allenby', x:3300, ico:'🚌', art:'allenby',       label:'ALLENBY',   sub:'cross the traffic'},
   {id:'erev',    x:3520, ico:'🌆', art:'erev',          label:'EREV RUSH', sub:'the sundown gauntlet'},
 ];
-const MINI=['volley','falafel','matkot','shawarma','aroma','cats','allenby','erev','erev'];
+const MINI=['volley','falafel','matkot','shawarma','aroma','cats','allenby','stand','erev','erev'];
 const G={
   state:'title', t:0, freeze:0,
   camX:0, player:{x:300,d:.5,dir:1,walk:0}, target:null,   // d = depth into the plaza (0 back → 1 front)
@@ -549,6 +551,9 @@ const BARK={
   mkTeach:['Tap when the ball crosses your line, achi.','Matkot has no winner — just don\'t let it drop.','Eyes on the line. SMACK it back.'],
   mkRally:['THWACK','THE BEACH HEARS YOU','NO DROPS, ALL DAY','PADDLE MASTER','THE TOURISTS STOPPED SWIMMING'],
   mkMiss:['Oy, the sand.','Pick it up, achi.','My grandson, the breeze.','It rolled to the sea.'],
+  stRes:{lo:[['THE LINE LEFT','Three customers, zero patience. Rough shift.'],['MELTDOWN','The gull ate better than the customers.']],
+    mid:[['SOLID SHIFT','You fed the street. Mostly on time.'],['NOT BAD, CHEF','The lunch crowd nodded.']],
+    hi:[['LUNCH-RUSH LEGEND','Pitas flying, gull crying, line smiling.'],['THE FALAFEL KING','They\'re queuing around the block for you.']]},
   evCombo:['ON FIRE, ACHI','THE WHOLE STREET IS WATCHING','SUNDOWN HERO','UNSTOPPABLE'],
   evMiss:['Oof. Next one.','Savta saw that.','Focus, achi!','The sun waits for no one.'],
   evRes:{lo:[['SUNDOWN FIZZLE','You blinked. The day blinked back.'],['SLOW START','Erev is brutal. Try again, achi.']],
@@ -626,6 +631,7 @@ function onDown(sx,sy){
     else if(G.state==='aroma') arDown();
     else if(G.state==='cats') ctTap(sx,sy);
     else if(G.state==='allenby') alTap();
+    else if(G.state==='stand') stDown(sx,sy);
     else if(G.state==='erev') erevDown(sx,sy);
   }
 }
@@ -683,7 +689,7 @@ window.addEventListener('keydown',e=>{
     e.preventDefault();
     if(G.intro&&G.intro.on){ G.intro.on=false; Sound.enter(); return; }
     ({volley:vbTap,matkot:()=>mkStrike(null),shawarma:swTap,allenby:alTap,falafel:faTap,
-      aroma:arDown,cats:()=>ctTap(W/2,groundY-H*.15),erev:()=>erevDown(W/2,H*.55)}[G.state])();
+      aroma:arDown,cats:()=>ctTap(W/2,groundY-H*.15),erev:()=>erevDown(W/2,H*.55),stand:()=>stDown(W/2,groundY-230)}[G.state])();
   }
 });
 window.addEventListener('keyup',e=>{
@@ -704,6 +710,7 @@ function enterStation(st){
   if(st.id==='aroma') return arStart();
   if(st.id==='cats') return ctStart();
   if(st.id==='allenby') return alStart();
+  if(st.id==='stand') return stStart();
   if(st.id==='erev') return erevStart();
   if(st.id==='chat_savta') return openChat('savta');
   if(st.id==='chat_chabad') return openChat('chabad');
@@ -1004,7 +1011,7 @@ function gossipBuy(){
   save();
 }
 const GLABEL={volley:'🏐 The net',falafel:'🥙 The falafel',matkot:'🏓 The paddles',
-  shawarma:'🌯 The spit',aroma:'☕ The cold brew',cats:'🐈 The cats',allenby:'🚌 The crossing',erev:'🌆 The Erev rush'};
+  shawarma:'🌯 The spit',aroma:'☕ The cold brew',cats:'🐈 The cats',allenby:'🚌 The crossing',erev:'🌆 The Erev rush',stand:'🍳 The stand'};
 /* goralot (scratch cards): ₪50 a pull, slight house edge — a fun infinite sink.
    Winnings go to the WALLET only (never earnedToday): no gambling your way
    through the double-up goal. */
@@ -1232,6 +1239,119 @@ function drawMatkot(){
   hudPill(W/2,SAFE_TOP+30,`🏓 RALLY ${m.rally}`,'#ffd166');
   let lifeStr='';for(let i=0;i<Math.max(0,m.lives+1);i++)lifeStr+='❤️';
   cx.font='18px sans-serif';cx.fillText(lifeStr||'—',W/2,SAFE_TOP+60);
+}
+
+/* =================== THE STAND — layered fusion: cook + serve + defend at once ===================
+   Fusion Frenzy on one screen. Keep falafel FRYING (tap to plate when ready),
+   SERVE the queue before patience runs out, and SHOO the seagull before it
+   steals your stock. Three jobs, two hands, one thumb. */
+function stStart(){
+  Sound.enter(); G.state='stand'; G.pops.length=0;
+  if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; } else G.runBracha=0;
+  G.st={ time:30, pitas:2, served:0, combo:0, earn:0, over:false, df:diff('stand'),
+    cook:0, burning:0, custs:[], gull:null, nextCust:.6, nextGull:rand(4,7),
+    tut:!S.taught.stand };
+  gameIntro('🥙','THE STAND','Cook, serve the line, shoo the gull — all at once',
+    'TAP the fryer to plate · TAP a\ncustomer to serve · TAP the gull','juggle all three','an empty plate = no tips');
+}
+function stCustWant(){ return 1; }
+function stDown(sx,sy){
+  const s=G.st; if(!s||s.over) return;
+  // 1) the gull first (it's the threat)
+  if(s.gull && Math.hypot(sx-s.gull.x,sy-s.gull.y)<60){
+    s.gull=null; Sound.bump(2); buzz(20); pop(sx,sy-20,'SHOO! 🐦',POP_COLS[1]); return; }
+  // 2) a customer (bottom row)
+  const c=s.custs.find(c=>!c.leaving && Math.abs(sx-c.x)<46 && sy>groundY-150);
+  if(c){
+    if(s.pitas>0){ s.pitas--; c.leaving=1; c.happy=1; s.served++; s.combo++;
+      const tip=Math.round((10+Math.min(s.combo,8)*2)*(0.6+0.4*(c.patience/c.max)));
+      const got=payout(tip,'stand'); s.earn+=got;
+      pop(c.x,groundY-150,`+${got}₪${s.combo>2?` ×${s.combo}`:''}`,POP_COLS[s.combo%4],s.combo>3);
+      flyCoin(c.x,groundY-160); Sound.cash(); G.freeze=.03; buzz(16);
+      if(!S.taught.stand){ S.taught.stand=1; save(); }
+    } else { Sound.no(); pop(c.x,groundY-150,'no pita! 🫓','#ff8a8a'); }
+    return;
+  }
+  // 3) the fryer (top) — plate a ready falafel
+  if(sy<groundY-180){
+    if(s.cook>=1){ s.cook=0; s.pitas=Math.min(6,s.pitas+1); Sound.serve(s.pitas);
+      pop(W*.5,groundY-230,'🫓 plated!','#7ee8c7'); buzz(12); }
+    else Sound.no();
+  }
+}
+function stUpdate(dt){
+  const s=G.st; if(!s||s.over) return;
+  if(s.tut) dt*=.8;
+  s.time-=dt; if(s.time<=0){ s.time=0; stEnd(); return; }
+  // fryer cooks continuously; overcooks if you don't plate it
+  if(s.cook<1.6) s.cook+=dt*0.62*s.df;
+  if(s.cook>=1.55 && s.pitas<6){ s.cook=0; s.burning=1; }   // burnt — wasted a batch
+  if(s.burning>0) s.burning-=dt;
+  // customers arrive and lose patience
+  s.nextCust-=dt;
+  if(s.nextCust<=0 && s.custs.filter(c=>!c.leaving).length<4){
+    const slots=[0.2,0.4,0.6,0.8].map(f=>40+f*(W-80)).filter(x=>!s.custs.some(c=>!c.leaving&&Math.abs(c.x-x)<60));
+    if(slots.length){ const max=rand(5,8)/s.df;
+      s.custs.push({x:slots[irand(0,slots.length-1)],patience:max,max,leaving:0,e:['🧍','🧔','🧕','🧑','👲'][irand(0,4)]}); }
+    s.nextCust=rand(1.4,2.6)/s.df;
+  }
+  for(const c of s.custs){
+    if(c.leaving){ c.leaving+=dt; continue; }
+    c.patience-=dt;
+    if(c.patience<=0){ c.leaving=1; c.angry=1; s.combo=0; Sound.miss(); shake();
+      pop(c.x,groundY-150,'left angry 😤','#ff5d5d'); }
+  }
+  s.custs=s.custs.filter(c=>!c.leaving||c.leaving<1);
+  // the seagull raids
+  s.nextGull-=dt;
+  if(!s.gull && s.nextGull<=0){ s.gull={x:rand(W*.2,W*.8),y:groundY-250,t:0,vx:rand(-30,30)}; s.nextGull=rand(5,9)/s.df; }
+  if(s.gull){ s.gull.t+=dt; s.gull.x+=s.gull.vx*dt;
+    if(s.gull.t>1.6){ if(s.pitas>0){ s.pitas--; pop(s.gull.x,s.gull.y,'stole a pita! 🐦','#ff5d5d',true); Sound.miss(); shake(); }
+      s.gull=null; } }
+}
+function stEnd(){
+  G.st.over=true; bumpPlays('stand');
+  if(G.st.served>(S.best.stand||0)) S.best.stand=G.st.served, G.result.best=true; else G.result.best=false;
+  G.result.kind='stand'; checkHustle('st_served',G.st.served);
+  save(); setTimeout(showResult,500);
+}
+function drawStand(){
+  const s=G.st; if(!s) return;
+  cx.fillStyle='rgba(11,14,26,.28)';cx.fillRect(0,0,W,H);
+  // the stand counter
+  cx.fillStyle='#b98a52';rr(0,groundY-110,W,40,0);
+  cx.fillStyle='#caa26a';rr(0,groundY-118,W,10,0);
+  // FRYER (top) — fill ring shows when a batch is ready to plate
+  const fx=W*.5, fy=groundY-230;
+  drawEmoji('🍳',fx,fy,46);
+  const ck=clamp(s.cook,0,1.6);
+  cx.strokeStyle=s.burning>0?'#ff5d5d':ck>=1?`rgba(126,232,199,${.6+.4*Math.sin(G.t*10)})`:'rgba(255,209,102,.6)';
+  cx.lineWidth=5;cx.beginPath();cx.arc(fx,fy,34,-Math.PI/2,-Math.PI/2+Math.min(ck,1)*Math.PI*2);cx.stroke();
+  if(s.burning>0){ cx.font='800 13px sans-serif';cx.fillStyle='#ff8a8a';cx.textAlign='center';cx.fillText('burnt! 🔥',fx,fy-44); }
+  else if(ck>=1){ cx.font='900 14px sans-serif';cx.fillStyle='#7ee8c7';cx.textAlign='center';cx.fillText('TAP TO PLATE',fx,fy-44); }
+  // pita stock on the counter
+  cx.textAlign='left';
+  for(let i=0;i<s.pitas;i++) drawEmoji('🫓',W*.5-((s.pitas-1)*15)/2+i*15,groundY-150,24);
+  // customers + patience bars
+  for(const c of s.custs){
+    const yy=groundY-90+(c.leaving?c.leaving*60:0), a=c.leaving?1-c.leaving:1;
+    cx.globalAlpha=clamp(a,0,1);
+    drawEmoji(c.happy?'😄':c.angry?'😤':c.e,c.x,yy,46);
+    if(!c.leaving){ const pw=44, pf=clamp(c.patience/c.max,0,1);
+      cx.fillStyle='rgba(13,17,32,.6)';rr(c.x-pw/2,yy-44,pw,7,3);
+      cx.fillStyle=pf<.3?'#ff5d5d':pf<.6?'#ffd166':'#7ee8c7';rr(c.x-pw/2,yy-44,pw*pf,7,3);
+      drawEmoji('🫓',c.x,yy-58,16); }
+    cx.globalAlpha=1;
+  }
+  // the gull
+  if(s.gull){ const g=s.gull;
+    cx.strokeStyle=`rgba(255,93,93,${.5+.4*Math.sin(G.t*12)})`;cx.lineWidth=4;
+    cx.beginPath();cx.arc(g.x,g.y,40,0,7);cx.stroke();
+    drawEmoji('🐦',g.x,g.y+Math.sin(G.t*8)*4,44); }
+  // hud
+  cx.font='900 16px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+  hudPill(W/2,SAFE_TOP+30,`⏱️ ${Math.ceil(s.time)}s · 🥙 ${s.served}`, s.time<6?'#ff5d5d':'#ffd166');
+  if(s.combo>1){ cx.fillStyle='#ff8ad4';cx.font='900 20px sans-serif';cx.fillText(`🔥 ${s.combo} combo`,W/2,SAFE_TOP+62); }
 }
 
 /* =================== EREV RUSH — the genre-fusion gauntlet ===================
@@ -1832,6 +1952,10 @@ function showResult(){
     const t=rline(BARK.evRes[G.erev.score>=14?'hi':G.erev.score>=6?'mid':'lo']);
     $('rTitle').textContent=t[0]; $('rSub').textContent=`${t[1]} (${G.erev.score} rounds cleared)`;
     $('rBestLine').innerHTML=`🌆 Best rush: <b>${S.best.erev||0}</b>`;
+  } else if(r.kind==='stand'){
+    const t=rline(BARK.stRes[G.st.served>=12?'hi':G.st.served>=6?'mid':'lo']);
+    $('rTitle').textContent=t[0]; $('rSub').textContent=`${t[1]} (${G.st.served} served)`;
+    $('rBestLine').innerHTML=`🍳 Best shift: <b>${S.best.stand||0}</b>`;
   } else {
     if(G.fa.bust){ $('rTitle').textContent=rline(BARK.faBustTitle);
       $('rSub').textContent=`Three on the floor — pita reclaimed. Still landed ${G.fa.hits}.`; }
@@ -1841,7 +1965,7 @@ function showResult(){
   }
   const earned=S.earnedToday;
   const EARNS={volley:()=>G.vb.earn,matkot:()=>G.mk.earn,shawarma:()=>G.sw.earn,
-    aroma:()=>G.ar.earn,cats:()=>G.ct.earn,allenby:()=>G.al.earn,erev:()=>G.erev.earn,falafel:()=>G.fa.earn};
+    aroma:()=>G.ar.earn,cats:()=>G.ct.earn,allenby:()=>G.al.earn,erev:()=>G.erev.earn,stand:()=>G.st.earn,falafel:()=>G.fa.earn};
   $('rEarn').textContent=money((EARNS[r.kind]||EARNS.falafel)());
   $('rGoal').textContent=dayProg()>=1
     ? '🌅 You DOUBLED your money — go HOME to sleep & bank the streak!'
@@ -1854,7 +1978,7 @@ function showResult(){
 }
 $('rAgain').addEventListener('click',()=>{ panel(null);
   ({volley:vbStart,matkot:mkStart,shawarma:swStart,aroma:arStart,
-    cats:ctStart,allenby:alStart,erev:erevStart,falafel:faStart}[G.result.kind]||faStart)(); });
+    cats:ctStart,allenby:alStart,erev:erevStart,stand:stStart,falafel:faStart}[G.result.kind]||faStart)(); });
 $('rBack').addEventListener('click',()=>{ panel(null); G.state='hub'; });
 
 function clearDay(){
@@ -2057,6 +2181,7 @@ function update(dt){
     else if(G.state==='aroma') arUpdate(dt);
     else if(G.state==='cats') ctUpdate(dt);
     else if(G.state==='allenby') alUpdate(dt);
+    else if(G.state==='stand') stUpdate(dt);
     else if(G.state==='erev') erevUpdate(dt);
   }
 }
@@ -2106,6 +2231,7 @@ function draw(){
     else if(G.state==='aroma') drawAroma();
     else if(G.state==='cats') drawCats();
     else if(G.state==='allenby') drawAllenby();
+    else if(G.state==='stand') drawStand();
     else if(G.state==='erev') drawErev();
     if(MINI.includes(G.state)) drawIntro(); }
   // shared FX
@@ -2195,7 +2321,7 @@ function drawMap(){
   G.mapNodes=[];
   const today=dayIndex(), h=todaysHustle();
   const HUST2ST={vol_rally:'volley',mk_rally:'matkot',sw_slices:'shawarma',
-    ar_pours:'aroma',ct_pets:'cats',al_cross:'allenby',ev_score:'erev'};
+    ar_pours:'aroma',ct_pets:'cats',al_cross:'allenby',ev_score:'erev',st_served:'stand'};
   const hustStation=HUST2ST[h.id]||((h.id==='earn'||h.id==='double')?'home':'falafel');
   const DECKCOL={sand:'rgba(238,215,162,.30)',wood:'rgba(202,162,106,.30)',
     cobble:'rgba(201,173,132,.30)',asphalt:'rgba(122,126,138,.32)'};

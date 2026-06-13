@@ -63,3 +63,4 @@ view drops in perfectly.)
 - `prop-*` set: chairs, umbrellas, dogs, doves, scooters to scatter along the
   promenade for depth.
 | `erev.png`          | a Tel Aviv skyline at golden-hour sundown — the EREV RUSH gauntlet station |
+| `stand.png`         | a busy falafel/lunch stand storefront — THE STAND (layered juggle) station |
