@@ -70,6 +70,14 @@
   .corner{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);inset-inline-end:12px;z-index:28;font-size:18px;
     background:var(--c-panel);border:1px solid var(--c-border);border-radius:999px;padding:7px 11px;cursor:pointer;}
   .confetti{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:26;pointer-events:none;} @keyframes conf{to{transform:translateY(110vh) rotate(640deg);opacity:0;}}
+  .gas{position:absolute;left:calc(env(safe-area-inset-left,0px) + 16px);bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:18;
+    width:104px;height:104px;border-radius:50%;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    background:radial-gradient(circle at 38% 32%,#ffe39a,#e9a23b);color:#1a1405;font-weight:900;font-size:30px;
+    box-shadow:0 8px 22px rgba(233,162,59,.5),inset 0 -6px 14px rgba(0,0,0,.2);touch-action:none;}
+  .gas small{font-size:12px;letter-spacing:.1em;}
+  .gas.on{transform:scale(.93);background:radial-gradient(circle at 38% 32%,#fff0c0,#ffb43b);box-shadow:0 0 26px rgba(255,209,102,.8),inset 0 -4px 12px rgba(0,0,0,.25);}
+  .steerhint{position:absolute;right:calc(env(safe-area-inset-right,0px) + 18px);bottom:calc(env(safe-area-inset-bottom,0px) + 50px);z-index:17;
+    font-size:12px;font-weight:800;color:rgba(234,242,255,.55);pointer-events:none;}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important;}}
 </style>
 </head>
@@ -85,6 +93,8 @@
     <div class="rrow"><span class="lab">🟨 You</span><div class="track you"><i id="youDot" style="left:0%">🏇</i></div></div>
   </div>
   <canvas id="cv"></canvas>
+  <button class="gas" id="gas" aria-label="Gas">⛽<small>GAS</small></button>
+  <div class="steerhint" id="steerhint">slide to steer →</div>
   <button class="corner" id="mute">🔊</button>
 
   <div class="panel" id="brief">
@@ -94,9 +104,9 @@
     <div class="yr">Win, and rewrite your fate</div>
     <div class="story">A nobody slave can become a legend in the Circus Maximus. Beat the champion to the finish — and change Rome's future.</div>
     <div class="rules">
-      <div class="rule"><span class="e">👈👉</span><span class="t"><b>Tap a lane</b> to steer your chariot there</span></div>
-      <div class="rule"><span class="e">🪨</span><span class="t"><b>Dodge</b> rocks, wrecks & caltrops — a crash costs a wheel</span></div>
-      <div class="rule"><span class="e">⚡</span><span class="t"><b>Grab boosts</b> to surge ahead of the rival</span></div>
+      <div class="rule"><span class="e">⛽</span><span class="t"><b>Hold GAS</b> (bottom-left) to crack the reins and surge</span></div>
+      <div class="rule"><span class="e">👉</span><span class="t"><b>Slide</b> anywhere to steer side to side</span></div>
+      <div class="rule"><span class="e">🪨</span><span class="t"><b>Dodge</b> wrecks — faster = harder. A crash costs a wheel</span></div>
     </div>
     <button class="btn" id="startBtn">🏁 RACE</button>
   </div>
@@ -141,32 +151,40 @@ window.addEventListener('resize',()=>{ if(running) fit(); });
 
 /* state */
 const LANES=3; let laneX=[]; let running=false, raf=0;
-let player, obstacles, scroll, progress, rival, crashes, speed, boostT, lastSpawn, finishAt=100;
-function laneCenter(l){ return laneX[l]; }
-function reset(){ fit(); laneX=[W*0.22,W*0.5,W*0.78];
-  player={lane:1, x:laneCenter(1), y:H*0.8, r:Math.min(W*0.1,34)};
-  obstacles=[]; scroll=0; progress=0; rival=0; crashes=0; speed=1; boostT=0; lastSpawn=0; }
-function steer(clientX){ const r=cv.getBoundingClientRect(); const x=clientX-r.left;
-  let best=0,bd=1e9; for(let i=0;i<LANES;i++){const d=Math.abs(x-laneX[i]); if(d<bd){bd=d;best=i;}} player.lane=best; }
+let player, obstacles, scroll, progress, rival, crashes, speedV, gas, boostT, lastSpawn, finishAt=100;
+function reset(){ fit(); laneX=[W*0.28,W*0.5,W*0.72];   // decorative dashes only
+  player={x:W*0.5, tx:W*0.5, y:H*0.8, r:Math.min(W*0.1,32)};
+  obstacles=[]; scroll=0; progress=0; rival=0; crashes=0; speedV=0.55; gas=false; boostT=0; lastSpawn=0; }
+function steer(clientX){ const r=cv.getBoundingClientRect(); player.tx=Math.max(W*0.15,Math.min(W*0.85, clientX-r.left)); }
 cv.addEventListener('pointerdown',e=>{e.preventDefault(); steer(e.clientX);});
 cv.addEventListener('pointermove',e=>{ if(e.buttons){e.preventDefault(); steer(e.clientX);} });
+/* GAS pedal — hold to crack the reins and surge */
+const gasBtn=$('gas');
+function setGas(v){ gas=v; gasBtn.classList.toggle('on',v); }
+gasBtn.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();ac();setGas(true);beep(150,.08,'sawtooth',.12);});
+gasBtn.addEventListener('pointerup',e=>{e.preventDefault();setGas(false);});
+gasBtn.addEventListener('pointerleave',()=>setGas(false));
+gasBtn.addEventListener('pointercancel',()=>setGas(false));
 
 const OBS=['🪨','🛞','🔥','🌵'];
-function spawn(){ const lane=(Math.random()*LANES)|0; const boost=Math.random()<0.16;
-  obstacles.push({lane, y:-40, boost, e: boost?'⚡':OBS[(Math.random()*OBS.length)|0], hit:false}); }
+function spawn(){ const boost=Math.random()<0.15;
+  obstacles.push({x:W*(0.2+Math.random()*0.6), y:-40, boost, e: boost?'⚡':OBS[(Math.random()*OBS.length)|0], hit:false}); }
 
 function loop(ts){
   if(!running) return;
-  // speeds
+  // speed: hold GAS to surge toward fast, release to coast; ⚡ pickups add a brief extra
   const boosting=boostT>0; if(boosting) boostT-=16;
-  const sc = (boosting?7.2:4.4)*speed;          // world scroll (visual)
+  const gasTarget = gas?1.55:0.55;
+  speedV += (gasTarget-speedV)*0.06;
+  const eff = speedV*(boosting?1.4:1);
+  const sc = 3.0 + eff*4.6;                       // obstacles fall faster the faster you go
   scroll += sc;
-  progress += (boosting?0.075:0.042)*speed;      // ~40s clean race
-  rival += 0.038;                                 // rival steady — beatable if you boost & don't crash
-  // spawn
-  lastSpawn += sc; if(lastSpawn> (boosting?120:150)){ lastSpawn=0; spawn(); if(Math.random()<.35) spawn(); }
-  // move player toward target lane
-  const tx=laneCenter(player.lane); player.x += (tx-player.x)*0.35;
+  progress += eff*0.05;                            // floor it to out-race the rival
+  rival += 0.040;                                  // ~42s steady pace — beatable if you gas & don't crash
+  // spawn (denser the faster you push)
+  lastSpawn += sc; if(lastSpawn> 150){ lastSpawn=0; spawn(); if(eff>1.1 && Math.random()<.45) spawn(); }
+  // ease toward where you're steering
+  player.x += (player.tx-player.x)*0.30;
 
   ctx.clearRect(0,0,W,H);
   // track
@@ -177,13 +195,13 @@ function loop(ts){
   for(let i=0;i<LANES;i++){ for(let y=-48+off;y<H;y+=48){ ctx.fillRect(laneX[i]-2,y,4,22); } }
   // obstacles
   ctx.font='34px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  for(const o of obstacles){ o.y+=sc; ctx.fillText(o.e, laneX[o.lane], o.y); }
-  // collisions
+  for(const o of obstacles){ o.y+=sc; ctx.fillText(o.e, o.x, o.y); }
+  // collisions (free x — overlap in both axes)
   for(const o of obstacles){ if(o.hit) continue;
-    if(o.lane===player.lane && Math.abs(o.y-player.y)< player.r+16){
+    if(Math.abs(o.x-player.x)< player.r+16 && Math.abs(o.y-player.y)< player.r+14){
       o.hit=true;
-      if(o.boost){ boostT=1100; speed=Math.min(1.5,speed+0.04); sBoost(); flash('gold',60); banner('⚡ BOOST!'); }
-      else { crashes++; progress=Math.max(0,progress-6); speed=Math.max(0.7,speed-0.12); sCrash(); shake(); flash('red',90); vib([50,40,50]);
+      if(o.boost){ boostT=1000; sBoost(); flash('gold',60); banner('⚡ BOOST!'); }
+      else { crashes++; progress=Math.max(0,progress-4); speedV=Math.max(0.3,speedV-0.3); sCrash(); shake(); flash('red',90); vib([50,40,50]);
         renderCrashes(); if(crashes>=3) return lose(); }
     }
   }
@@ -195,7 +213,7 @@ function loop(ts){
   if(boosting){ ctx.font='20px serif'; ctx.fillText('💨', player.x, player.y+player.r+6); }
   // HUD bars
   $('youDot').style.left=Math.min(100,progress)+'%'; $('rivalDot').style.left=Math.min(100,rival)+'%';
-  $('spd').textContent = boosting?'⚡ SURGE':'RACING';
+  $('spd').textContent = boosting?'⚡ SURGE':gas?'⛽ GAS':'COAST';
 
   if(progress>=finishAt) return win();        // you crossed first
   if(rival>=finishAt) return loseRace();      // champion beat you to the line
