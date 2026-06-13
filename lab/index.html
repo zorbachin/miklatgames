@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0e1a">
+<!-- INTERNAL STAGING — keep it out of search and off social cards -->
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="googlebot" content="noindex,nofollow">
+<meta property="og:title" content="">
+<title>MIKLAT · LAB</title>
+<style>
+  :root{--navy:#0b0e1a;--gold:#ffd166;--teal:#7ee8c7;--coral:#ff5d5d;--cream:#f4ecdd;}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{background:#070910;color:#e8ecf6;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;
+    min-height:100%;overscroll-behavior:none;}
+  body{padding:calc(env(safe-area-inset-top,0px) + 20px) 16px calc(env(safe-area-inset-bottom,0px) + 28px);
+    max-width:540px;margin:0 auto;
+    background:radial-gradient(ellipse at 50% -10%,rgba(126,232,199,.06),transparent 60%);}
+  .tape{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;
+    color:#0b0e1a;background:repeating-linear-gradient(45deg,#ffd166 0 16px,#1a1405 16px 22px);
+    padding:7px 12px;border-radius:8px;margin-bottom:18px;}
+  .tape b{background:#0b0e1a;color:#ffd166;padding:3px 8px;border-radius:5px;}
+  header{margin-bottom:18px;}
+  .logo{font-size:clamp(28px,8vw,40px);font-weight:900;letter-spacing:.02em;line-height:1;}
+  .logo .lab{background:linear-gradient(180deg,#9ff0d6,#34b89a);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{margin-top:8px;font-size:13px;color:#8b95ad;line-height:1.5;}
+  .sub b{color:var(--teal);}
+  .card{display:block;position:relative;border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;
+    background:#10162b;border:1px solid #20294a;margin-bottom:14px;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:transform .12s;}
+  .card:active{transform:scale(.985);}
+  .card .art{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
+  .card .body{padding:14px 16px 16px;}
+  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .name{font-size:21px;font-weight:900;}
+  .badge{font-size:10.5px;font-weight:800;letter-spacing:.1em;padding:4px 9px;border-radius:999px;}
+  .badge.dev{background:rgba(255,209,102,.14);color:var(--gold);border:1px solid rgba(255,209,102,.35);}
+  .hook{margin-top:6px;font-size:13.5px;color:#aab4c8;line-height:1.45;}
+  .play{display:inline-block;margin-top:14px;background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;
+    font-weight:900;font-size:15px;padding:11px 24px;border-radius:12px;box-shadow:0 6px 18px rgba(233,162,59,.4);}
+  .meta{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;font-size:11.5px;color:#6b7694;}
+  .meta a{color:var(--teal);text-decoration:none;}
+  .pill{font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;background:rgba(126,232,199,.1);
+    color:var(--teal);border:1px solid rgba(126,232,199,.28);}
+  .empty{border:1px dashed #2a3450;border-radius:16px;padding:18px;text-align:center;color:#6b7694;font-size:13px;margin-bottom:14px;}
+  footer{margin-top:18px;color:#5b647e;font-size:11.5px;line-height:1.7;text-align:center;}
+  .note{background:#0c1322;border:1px solid #1d2742;border-radius:12px;padding:12px 14px;font-size:12.5px;
+    color:#9aa5bd;line-height:1.55;margin-bottom:16px;}
+  .note b{color:var(--cream);}
+  /* soft team gate */
+  #gate{position:fixed;inset:0;background:#070910;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:30px;z-index:50;}
+  #gate .logo{margin-bottom:10px;}
+  #gate input{margin-top:18px;background:#10162b;border:1px solid #2a3450;border-radius:12px;color:#fff;
+    font-size:16px;padding:13px 16px;width:min(280px,80vw);text-align:center;letter-spacing:.1em;}
+  #gate button{margin-top:12px;background:linear-gradient(180deg,#7ee8c7,#34b89a);color:#06231c;border:0;
+    border-radius:12px;font-weight:800;font-size:15px;padding:12px 28px;cursor:pointer;}
+  #gate .hint{margin-top:14px;font-size:12px;color:#6b7694;}
+  .hidden{display:none!important;}
+</style>
+</head>
+<body>
+
+<!-- soft team gate: obscurity, not security (static site) -->
+<div id="gate">
+  <div class="logo">🚧 MIKLAT <span class="lab">LAB</span></div>
+  <div class="sub" style="max-width:320px;">Internal build hub. Not public, not launched.<br>Enter the team word to continue.</div>
+  <input id="code" type="password" autocomplete="off" placeholder="team word" autofocus>
+  <button id="enter">ENTER ▶</button>
+  <div class="hint">Set by the team. Ask the boss. (Hint: the room you run to.)</div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="tape">🚧 INTERNAL <b>NOT FOR PUBLIC</b> · staging only</div>
+
+  <header>
+    <div class="logo">MIKLAT <span class="lab">LAB</span></div>
+    <div class="sub">Backend playtest hub for games <b>in development</b>. Nothing here is on
+      <b>miklatgames.fun</b>'s home screen — this page is unlinked and de-indexed. Share the URL only with the team.</div>
+  </header>
+
+  <div class="note">▶ <b>How to use:</b> tap PLAY to open the live build. Progress saves locally
+    in this browser (separate from production). Found a bug or a feel issue? Note the game + the exact
+    moment it happened — that's the fastest fix.</div>
+
+  <a class="card" href="../balagan/" id="cardBalagan">
+    <img class="art" src="../balagan/tile.jpg" alt="BALAGAN" loading="eager">
+    <div class="body">
+      <div class="row">
+        <div class="name">🌴 BALAGAN</div>
+        <span class="badge dev">IN DEV</span>
+      </div>
+      <div class="hook">Tel Aviv life-sim. Unemployed on ₪500 of avtala — double your money before
+        sundown across the beach, street, shuk &amp; city. 7 mini-games, NPC encounters, a growing universe.</div>
+      <span class="play">PLAY THE BUILD ▶</span>
+      <div class="meta">
+        <span class="pill">7 mini-games</span>
+        <span class="pill">4 districts</span>
+        <span class="pill">art: placeholder</span>
+      </div>
+    </div>
+  </a>
+
+  <div class="empty">More in-dev games land here as they spin up. 🧪</div>
+
+  <footer>
+    MIKLAT LAB · internal · de-indexed (noindex)<br>
+    Production: <a href="../" style="color:#7ee8c7">miklatgames home</a> ·
+    when a build is ready, it graduates to the public shelf.
+  </footer>
+</div>
+
+<script>
+'use strict';
+// soft obscurity gate — NOT security (this is a static site; anyone with the
+// URL can view source). It just keeps casual eyes out of the staging hub.
+(function(){
+  var KEY='miklat_lab_ok';
+  function open(){ document.getElementById('gate').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden'); }
+  if(sessionStorage.getItem(KEY)==='1') open();
+  function tryCode(){
+    var v=(document.getElementById('code').value||'').trim().toLowerCase();
+    if(v==='mamad'||v==='miklat'){ sessionStorage.setItem(KEY,'1'); open(); }
+    else { document.getElementById('code').value=''; document.getElementById('code').placeholder='nope — try again'; }
+  }
+  document.getElementById('enter').addEventListener('click',tryCode);
+  document.getElementById('code').addEventListener('keydown',function(e){ if(e.key==='Enter') tryCode(); });
+})();
+</script>
+</body>
+</html>
