@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="r" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff4d4d"/><stop offset=".25" stop-color="#ff9f43"/>
+      <stop offset=".5" stop-color="#ffd166"/><stop offset=".7" stop-color="#3ee6ff"/>
+      <stop offset="1" stop-color="#a25bff"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="52" fill="#0a1226"/>
+  <!-- rainbow turban -->
+  <path d="M70 118 Q128 36 186 118 Q188 142 128 144 Q68 142 70 118 Z" fill="url(#r)"/>
+  <path d="M64 112 Q128 70 192 112 Q194 136 128 136 Q62 136 64 112 Z" fill="url(#r)"/>
+  <path d="M120 78 q8 -10 16 0 q-8 8 -16 0 Z" fill="#ffd166"/>
+  <!-- face -->
+  <ellipse cx="128" cy="150" rx="52" ry="58" fill="#e9b48a"/>
+  <ellipse cx="108" cy="150" rx="9" ry="7" fill="#fff"/>
+  <ellipse cx="148" cy="150" rx="9" ry="7" fill="#fff"/>
+  <circle cx="110" cy="151" r="4" fill="#2a1d12"/>
+  <circle cx="146" cy="151" r="4" fill="#2a1d12"/>
+  <!-- beard -->
+  <path d="M80 156 Q72 206 100 230 Q128 248 156 230 Q184 206 176 156 Q158 188 128 190 Q98 188 80 156 Z" fill="#cfd6e2"/>
+  <!-- lips -->
+  <path d="M116 196 Q128 190 140 196 Q128 204 116 196 Z" fill="#ff4fa3"/>
+  <!-- heart shades -->
+  <text x="128" y="234" font-size="30" text-anchor="middle">💖</text>
+</svg>
