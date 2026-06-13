@@ -614,7 +614,7 @@ function onDown(sx,sy){
     if(G.intro&&G.intro.on){ G.intro.on=false; Sound.enter(); return; }   // first tap = "I'm ready"
     if(G.state==='volley') vbTap();
     else if(G.state==='falafel') faTap();
-    else if(G.state==='matkot') mkTap();
+    else if(G.state==='matkot') mkStrike(sx);
     else if(G.state==='shawarma') swTap();
     else if(G.state==='aroma') arDown();
     else if(G.state==='cats') ctTap(sx,sy);
@@ -622,9 +622,10 @@ function onDown(sx,sy){
   }
 }
 function onMove(sx){
-  // top-down: no drag-scroll (it fought the camera-follow). A drag just cancels
-  // the tap; the camera always follows the player.
+  // top-down hub: a drag just cancels the tap (camera follows the player)
   if(G.state==='hub'&&ptDown&&Math.abs(sx-ptDown.sx)>10) ptMoved=true;
+  // matkot: drag your paddle along the bottom (the slider)
+  else if(G.state==='matkot') mkSlide(sx);
 }
 let lastTapY=0;
 function onUp(sx){
@@ -655,7 +656,7 @@ window.addEventListener('touchmove',e=>{ if(ptDown===null&&G.state==='hub') retu
   e.preventDefault(); if(e.touches[0]) onMove(e.touches[0].clientX); },{passive:false});
 window.addEventListener('touchend',e=>{ const t=e.changedTouches[0]; onUp(t?t.clientX:0); },{passive:false});
 window.addEventListener('mousedown',e=>{ if(e.target.closest('button')) return; onDown(e.clientX,e.clientY); });
-window.addEventListener('mousemove',e=>{ if(ptDown) onMove(e.clientX); });
+window.addEventListener('mousemove',e=>{ if(ptDown||G.state==='matkot') onMove(e.clientX); });
 window.addEventListener('mouseup',e=>{ onUp(e.clientX); });
 window.addEventListener('contextmenu',e=>e.preventDefault());
 window.addEventListener('keydown',e=>{
@@ -667,10 +668,12 @@ window.addEventListener('keydown',e=>{
     if(k==='arrowup'||k==='w') G.target={x:p.x,d:clamp(p.d-.4,0,1)};
     if(k==='arrowdown'||k==='s') G.target={x:p.x,d:clamp(p.d+.4,0,1)};
     if(k===' '||k==='enter'){ const st=STATIONS.find(s=>Math.abs(s.x-p.x)<110&&p.d<.38); if(st) enterStation(st); }
+  } else if(G.state==='matkot'&&(k==='arrowleft'||k==='a'||k==='arrowright'||k==='d')){
+    if(G.mk) mkSlide(G.mk.padX+((k==='arrowleft'||k==='a')?-40:40));   // keyboard slider
   } else if((k===' '||k==='arrowup')&&MINI.includes(G.state)){
     e.preventDefault();
     if(G.intro&&G.intro.on){ G.intro.on=false; Sound.enter(); return; }
-    ({volley:vbTap,matkot:mkTap,shawarma:swTap,allenby:alTap,falafel:faTap,
+    ({volley:vbTap,matkot:()=>mkStrike(null),shawarma:swTap,allenby:alTap,falafel:faTap,
       aroma:arDown,cats:()=>ctTap(W/2,groundY-H*.15)}[G.state])();
   }
 });
@@ -1106,71 +1109,69 @@ function vbEnd(){
 /* =================== MATKOT — beach paddle: tap when the ball crosses your line ===================
    Cooperative (no winner): keep the rally alive. Flat, zippy, reaction-timing —
    a different feel from volleyball's lob. Medium; creeps up the more you play. */
-/* =================== MATKOT — POV: the ball flies AT you; strike it in the ring ===================
-   First-person beach paddle. The partner across the sand smacks the ball toward
-   the camera; it grows as it nears (z:1 far → 0 at your face). Tap when it's
-   inside the strike ring (z in the window). Combo builds; the window tightens. */
+/* =================== MATKOT — pong: slide your paddle under the ball, TAP to bat ===================
+   Down-the-court view: the partner is far at the top, you're at the bottom. The
+   ball arcs down toward you with a clear shadow marking where it'll land. SLIDE
+   the paddle (drag) under that shadow, then TAP the instant it reaches the line
+   to bat it back. Aim (slider) + timing (tap) — plausible, readable, real. */
+const MK_LINE=()=>H-110;                     // your paddle's hit line
+const MK_TOP=()=>H*.26;                       // the partner's serve line
 function mkServe(m,first){
-  // first few serves float in slowly; they quicken with the rally and replays
-  const ramp=m.rally<2?1.5:m.rally<4?1.3:rand(1.0,1.25);
-  m.ball={ z:1, x:rand(-.16,.16), y:rand(-.05,.12), spin:rand(-3,3),
-    dur:(first?1.7:ramp)/Math.sqrt(m.df), t:0 };
-  m.struck=false; m.buf=0; m.retT=0;   // clear the return timer so the next tap counts
+  const lineY=MK_LINE(), topY=MK_TOP();
+  const lx=clamp(W*.5+rand(-1,1)*W*.34, 50, W-50);   // where it'll come down
+  m.ball={ p:0, x0:W*.5+rand(-.1,.1)*W, lx, topY, lineY,
+    dur:(first?1.5:rand(.95,1.2))/Math.sqrt(m.df), apex:rand(140,210) };
+  m.struck=false; m.retT=0; m.swung=false;
 }
 function mkStart(){
   Sound.enter(); G.state='matkot'; G.pops.length=0;
   let lives=2+(equipped().vlife||0);
-  if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; pop(W/2,groundY-210,'🙏 bracha +20%','#8ad2ff',true); } else G.runBracha=0;
+  if(S.brachaBuff){ S.brachaBuff=0; G.runBracha=.2; pop(W/2,H*.4,'🙏 bracha +20%','#8ad2ff',true); } else G.runBracha=0;
   G.mk={ rally:0, lives, maxLives:lives, over:false, df:diff('matkot'), earn:0,
-    swing:0, tut:!S.taught.matkot, hold:false, ball:null, struck:false, retT:0 };
+    swing:0, tut:!S.taught.matkot, ball:null, struck:false, retT:0, padX:W*.5 };
   mkServe(G.mk,true);
-  gameIntro('🏓','MATKOT','Keep the rally alive — every strike pays',
-    'The ball flies AT you —\nTAP when it\'s in the ring','TAP = strike');
+  gameIntro('🏓','MATKOT','Bat the ball back — every rally pays',
+    'SLIDE your paddle under the\nshadow, TAP when it lands','SLIDE + TAP','keep the rally alive');
 }
-// hittable window on z: generous, tightening with rally & replay
-const mkWin=m=>({lo:0.05, hi:0.36-Math.min(.14,m.rally*.012)-(m.df-1)*.12});
-function mkHit(perfect){
-  const m=G.mk; m.rally++; m.swing=.18; m.struck=true; m.retT=0;
-  const got=payout((perfect?11:7)+m.rally*2,'matkot'); m.earn+=got;
-  pop(W/2,H*.46,`+${got}₪${perfect?' PERFECT!':''}`,POP_COLS[m.rally%4],perfect); flyCoin(W/2,H*.5);
-  Sound.bump(m.rally); G.freeze=.05; flash(perfect?.2:.1); buzz(perfect?40:20);
-  if(m.rally===5||m.rally===10||m.rally===15){ burstConfetti(12);
-    pop(W/2,H*.34,rline(BARK.mkRally),POP_COLS[m.rally%4],true); }
+function mkBall(m){ // current ball screen pos from progress p (arc down the court)
+  const b=m.ball, p=b.p;
+  const x=lerp(b.x0,b.lx,p), y=lerp(b.topY,b.lineY,p)-Math.sin(p*Math.PI)*b.apex,
+        sz=16+p*30;
+  return {x,y,sz};
 }
-function mkTap(){
-  const m=G.mk; if(!m||m.over) return;
-  if(m.hold){ m.hold=false; m.tut=false; S.taught.matkot=1; save(); m.struck=true; m.retT=0; m.rally++;
-    const got=payout(9,'matkot'); m.earn+=got; pop(W/2,H*.46,`+${got}₪`,'#ffd166'); flyCoin(W/2,H*.5);
-    Sound.bump(1); return; }
-  if(m.struck||m.retT>0) return;
-  const z=m.ball.z, w=mkWin(m);
-  if(z<=w.hi && z>=w.lo){ mkHit(Math.abs(z-(w.lo+w.hi)/2)<(w.hi-w.lo)*.28); }
-  else if(z>w.hi){ m.buf=G.t; Sound.no(); }            // too far — held; connects when it enters the ring
-  else { m.struck=true; m.retT=0; mkMiss(); }           // swung too late = whiff
+function mkSlide(sx){ const m=G.mk; if(m&&!m.over) m.padX=clamp(sx,40,W-40); }
+function mkStrike(sx){
+  const m=G.mk; if(!m||m.over||m.struck) return;
+  if(sx!=null) m.padX=clamp(sx,40,W-40);
+  const b=m.ball, bp=mkBall(m), padW=Math.max(46,84-m.rally*2-(m.df-1)*30);
+  if(b.p<.72){ return; }                       // too early — the tap just re-aims, no penalty
+  m.swung=true;
+  const aligned=Math.abs(m.padX-bp.x)<padW/2+bp.sz*.5;
+  const timed=b.p<=1.04;
+  if(aligned&&timed){
+    if(m.tut){ m.tut=false; S.taught.matkot=1; save(); }
+    const perfect=Math.abs(b.p-.92)<.07 && Math.abs(m.padX-bp.x)<padW*.3;
+    m.rally++; m.swing=.18; m.struck=true; m.retT=0;
+    const got=payout((perfect?11:7)+m.rally*2,'matkot'); m.earn+=got;
+    pop(m.padX,MK_LINE()-30,`+${got}₪${perfect?' PERFECT!':''}`,POP_COLS[m.rally%4],perfect); flyCoin(m.padX,MK_LINE());
+    Sound.bump(m.rally); G.freeze=.05; flash(perfect?.2:.1); buzz(perfect?40:20);
+    if(m.rally===5||m.rally===10||m.rally===15){ burstConfetti(12);
+      pop(W/2,H*.4,rline(BARK.mkRally),POP_COLS[m.rally%4],true); }
+  } else { mkMiss(aligned?'mistimed!':'too far over!'); }   // swung and whiffed
 }
-function mkMiss(){
-  const m=G.mk; m.lives--; Sound.miss(); shake(); buzz(80);
-  pop(W/2,H*.5,'💢 '+rline(BARK.mkMiss),'#ff5d5d',true);
+function mkMiss(why){
+  const m=G.mk; m.struck=true; m.retT=0; m.lives--; Sound.miss(); shake(); buzz(80);
+  pop(W/2,MK_LINE()-40,'💢 '+(why||rline(BARK.mkMiss)),'#ff5d5d',true);
 }
 function mkUpdate(dt){
   const m=G.mk; if(!m||m.over) return;
-  if(m.hold) return;
-  if(m.tut) dt*=.5;
   if(m.swing>0) m.swing-=dt;
-  if(m.struck){                       // ball flies back to the partner, then they return it
-    m.retT+=dt;
-    if(m.retT>.55){
-      if(m.lives<0){ mkEnd(); return; }
-      mkServe(m, false);
-    }
-    return;
-  }
-  const b=m.ball; b.t+=dt; b.z=1-b.t/b.dur;
-  // a buffered early tap connects the instant it enters the window
-  const w=mkWin(m);
-  if(m.buf&&b.z<=w.hi&&b.z>=w.lo&&G.t-m.buf<.25){ m.buf=0; mkHit(false); return; }
-  if(b.z<=w.hi&&b.z>w.hi-0.02){ if(m.tut){ m.hold=true; pop(W/2,H*.4,'👇 TAP NOW!','#ffd166',true); } }
-  if(b.z<=0){ m.struck=true; m.retT=0; mkMiss(); }   // blew past you into the sand
+  if(m.struck){ m.retT+=dt;
+    if(m.retT>.5){ if(m.lives<0){ mkEnd(); return; } mkServe(m,false); }
+    return; }
+  if(m.tut) dt*=.55;
+  m.ball.p+=dt/m.ball.dur;
+  if(m.ball.p>=1.12 && !m.swung){ mkMiss('it dropped!'); }   // never swung — ball hit the sand
 }
 function mkEnd(){
   G.mk.over=true; bumpPlays('matkot');
@@ -1181,33 +1182,41 @@ function mkEnd(){
 }
 function drawMatkot(){
   const m=G.mk; if(!m) return;
-  const cxn=W/2, cyn=H*.5, w=mkWin(m);
-  // the partner, small, far across the sand
-  drawEmoji('🧑',cxn,H*.30,30+ (m.struck?Math.min(20,m.retT*40):0));
-  if(m.struck&&m.retT<.5) drawEmoji('🏓',cxn,H*.32,18);
-  // depth guide rings: where the ball will be hittable (the strike zone)
-  const ringR=z=>30+(1-z)*Math.min(W,H)*.62;
-  cx.strokeStyle='rgba(255,255,255,.18)';cx.lineWidth=2;
-  for(let z=.85;z>0;z-=.17){ cx.beginPath();cx.arc(cxn,cyn,ringR(z),0,7);cx.stroke(); }
-  // THE STRIKE RING (between window lo..hi) — glows when the ball is inside it
-  const rIn=ringR(w.hi), rOut=ringR(w.lo);
-  const inZone=!m.struck && m.ball && m.ball.z<=w.hi && m.ball.z>=w.lo;
-  cx.strokeStyle=inZone?`rgba(126,232,199,${.7+.3*Math.sin(G.t*12)})`:'rgba(255,209,102,.55)';
-  cx.lineWidth=inZone?7:4;
-  cx.beginPath();cx.arc(cxn,cyn,(rIn+rOut)/2,0,7);cx.stroke();
-  // the ball, growing toward the camera
-  if(!m.struck&&m.ball){ const b=m.ball, r=ringR(b.z),
-        bx=cxn+b.x*W*(1-b.z*.5), by=cyn+b.y*H*(1-b.z*.4), bs=14+(1-b.z)*120;
-    cx.drawImage(glow('rgba(0,0,0,.28)',bs*.7),cxn-bs*.7,cyn+r-bs*.4);   // shadow on the strike plane
-    cx.save();cx.translate(bx,by);cx.rotate(b.spin*b.t);
-    cx.drawImage(glow('rgba(255,220,90,.55)',bs*.7),-bs*.7,-bs*.7);
-    drawEmoji('🟡',0,0,bs);cx.restore();
-    if(inZone){ cx.font='900 30px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
-      cx.lineWidth=7;cx.strokeStyle='rgba(15,20,40,.85)';cx.strokeText('TAP!',cxn,cyn-rIn-24);
-      cx.fillStyle='#7ee8c7';cx.fillText('TAP!',cxn,cyn-rIn-24); } }
-  // your paddle at the bottom, swings on contact
-  cx.save();cx.translate(cxn,H-90);cx.rotate(m.swing>0?-.5+m.swing*2.4:0);
-  cx.scale(2.4,2.4);drawEmoji('🏓',0,0,30);cx.restore();
+  const lineY=MK_LINE(), topY=MK_TOP();
+  // the court receding to the partner (perspective lines)
+  cx.strokeStyle='rgba(255,255,255,.14)';cx.lineWidth=2;
+  cx.beginPath();cx.moveTo(W*.5-30,topY+10);cx.lineTo(40,lineY+30);cx.stroke();
+  cx.beginPath();cx.moveTo(W*.5+30,topY+10);cx.lineTo(W-40,lineY+30);cx.stroke();
+  // the partner, far up the court
+  cx.save();cx.translate(W*.5,topY);cx.scale(-1,1);drawEmoji('🧑',0,0,40);cx.restore();
+  if(m.struck&&m.retT<.4) drawEmoji('🏓',W*.5,topY+10,18);
+  // your paddle line
+  cx.strokeStyle='rgba(255,255,255,.25)';cx.lineWidth=2;cx.setLineDash([8,8]);
+  cx.beginPath();cx.moveTo(0,lineY);cx.lineTo(W,lineY);cx.stroke();cx.setLineDash([]);
+  if(!m.struck&&m.ball){
+    const b=m.ball, bp=mkBall(m), padW=Math.max(46,84-m.rally*2-(m.df-1)*30);
+    // landing shadow on the line — slide your paddle here
+    const lx=lerp(b.x0,b.lx,1), near=b.p>.72;
+    cx.fillStyle=`rgba(0,0,0,${.15+.2*clamp(b.p,0,1)})`;
+    cx.beginPath();cx.ellipse(b.lx,lineY,26-b.p*8,8,0,0,7);cx.fill();
+    if(near){ cx.strokeStyle=`rgba(126,232,199,${.5+.4*Math.sin(G.t*10)})`;cx.lineWidth=3;
+      cx.beginPath();cx.ellipse(b.lx,lineY,30,10,0,0,7);cx.stroke(); }
+    // the ball arcing down
+    cx.drawImage(glow('rgba(255,220,90,.5)',bp.sz),bp.x-bp.sz,bp.y-bp.sz);
+    drawEmoji('🟡',bp.x,bp.y,bp.sz);
+    // TAP cue when it's near the line
+    if(near){ cx.font='900 26px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+      cx.lineWidth=6;cx.strokeStyle='rgba(15,20,40,.85)';cx.strokeText('TAP!',b.lx,lineY-66);
+      cx.fillStyle='#7ee8c7';cx.fillText('TAP!',b.lx,lineY-66); }
+    // your paddle (slider)
+    const aligned=Math.abs(m.padX-b.lx)<padW/2+18;
+    cx.save();cx.translate(m.padX,lineY+8);cx.rotate(m.swing>0?-.6+m.swing*3:0);
+    cx.fillStyle=aligned&&near?'#7ee8c7':'#caa26a';rr(-padW/2,-8,padW,14,7);
+    drawEmoji('🏓',0,-16,30);cx.restore();
+  } else {
+    cx.save();cx.translate(m.padX,lineY+8);cx.rotate(m.swing>0?-.6+m.swing*3:0);
+    cx.fillStyle='#caa26a';rr(-30,-8,60,14,7);drawEmoji('🏓',0,-16,30);cx.restore();
+  }
   // hud
   cx.font='900 16px sans-serif';cx.textAlign='center';cx.textBaseline='middle';
   hudPill(W/2,SAFE_TOP+30,`🏓 RALLY ${m.rally}`,'#ffd166');
