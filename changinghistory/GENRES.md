@@ -2,42 +2,62 @@
 
 **The model (locked):** every historical event is a *different, instantly-recognizable
 arcade game* — Fusion Frenzy / WarioWare style — wrapped in the change-history
-backstory and an alternate-timeline payoff. Variety of **genre** is the whole point;
-the "changing history" layer ties them together and stacks your wild timeline.
+backstory and an alternate-timeline payoff. Variety of **genre** is the point; the
+"changing history" layer ties them together and stacks your wild timeline.
 
-Each game must pass the bar the whack-a-mole set: **clear in 3 seconds, fun on tap 1,
-its own distinct feel.**
+Bar every game must clear: **clear in 3 seconds, fun on tap 1, its own distinct feel.**
+
+---
+
+## THE LIMITS (locked rules)
+
+### Rule 1 — a fixed control vocabulary (don't invent a new control every time)
+Every game is built from **one** of these ~6 reusable schemes. Variety comes from
+theme + backstory, not from new controls. This keeps the collection learnable and
+fast to build.
+
+| Scheme | Input | Feel | Used by |
+|---|---|---|---|
+| **TAP-TARGETS** | tap things that appear/fall; spare the wrong ones | reflex/precision | Save Caesar (whack), **Stop the Asteroid** |
+| **TAP-LANE** | 3 lanes, tap to switch/occupy | snap decisions | *(reserved)* Hold the Gate / Dodge the Volley |
+| **SLIDE + GAS** | slide to steer freely, hold pedal to surge | racing/runner | Chariot Race, Escape Pompeii, Titanic |
+| **DRAG-AIM** | pull back, aim the arc, release | slingshot/bow | The First Hunt, Archimedes' Mirror, Catapult |
+| **TIME-IT** | stop a marker / release a charge at the right moment | rhythm/skill | The Joust, Build the Pyramid |
+| **TAP-JUMP** | tap to jump/climb | platformer | Storm the Bastille, Donkey-Kong Pyramid |
+
+*(Tap-a-lane is parked here on purpose — it's a good control, just for a different
+game than the chariot.)*
+
+### Rule 2 — every game has built-in limits (stakes + a definite end)
+No endless toys. Each game ships with a **fail limit** and a **clear win/lose end**:
+- a **lives/health limit** (e.g. 3 strikes, 3 crashes, Earth health), and/or
+- a **timer or finish line** (survive the storm, reach the line, N rounds).
+
+Win → alternate-timeline payoff card. Lose → "history unchanged, try again."
+
+---
 
 ## Status
 
-| Genre | Feel | Event (backstory) | State | Link |
-|---|---|---|---|---|
-| 🔨 Whack-a-mole | tap targets, spare decoys | **Save Caesar** — bonk the dagger-senators, spare the loyal | ✅ built | `/changinghistory/v3/` |
-| 🏇 Chariot race | lane-dodge racing vs a rival | **Circus Maximus** — beat the champion | ✅ built | `/changinghistory/chariot/` |
-| 🎯 Tap-intercept (Iron Dome) | tap falling objects | **Stop the Asteroid** — save the dinosaurs | planned |  |
-| 🏃 Endless runner (Mamad Dash) | steer & dodge, flee | **Escape Pompeii** — outrun the eruption | planned |  |
-| ⛏️ Dig Dug | tunnel a grid, grab & evade | **Library of Alexandria** — save the scrolls | planned |  |
-| 🍄 Platformer (Mario) | run & jump | **Storm the Bastille** | planned |  |
-| 🐴 Joust | charge + aim + time the lance | **The Tournament** — unhorse the black knight | planned |  |
-| 🏹 Hunt | drag-aim-release (slingshot/bow) | **The First Hunt** — feed the tribe | planned |  |
-| 🛢️ Donkey Kong | climb, dodge rolling barrels | **Build the Pyramid** / a tyrant at the top | planned |  |
+| Genre | Scheme | Event (backstory) | Limit | State | Link |
+|---|---|---|---|---|---|
+| 🔨 Whack-a-mole | TAP-TARGETS | **Save Caesar** | 3 strikes + danger meter | ✅ | `/changinghistory/v3/` |
+| 🏇 Chariot race | SLIDE + GAS | **Circus Maximus** | 3 crashes, beat rival to line | ✅ | `/changinghistory/chariot/` |
+| ☄️ Tap-intercept | TAP-TARGETS | **Stop the Asteroid** | Earth health + survive the storm | ✅ | `/changinghistory/asteroid/` |
+| 🏹 Hunt | DRAG-AIM | **The First Hunt** | limited arrows | planned | |
+| 🐴 Joust | TIME-IT | **Unhorse the Black Knight** | best of N passes | planned | |
+| 🏃 Runner | SLIDE + GAS | **Escape Pompeii** | 3 hits before the lava | planned | |
+| ⛏️ Dig Dug | *(new? cap reached)* | **Library of Alexandria** | timer to grab scrolls | planned | |
+| 🍄 Platformer | TAP-JUMP | **Storm the Bastille** | 3 lives | planned | |
+| 🛢️ Donkey Kong | TAP-JUMP | **Build the Pyramid** | 3 lives | planned | |
+| 🛡️ Lane-defense | TAP-LANE | **Hold the Gate** | wall health | planned | |
 
-## Why this works
-- **Reuses proven fun:** the arcade already shipped a whack-a-mole (Whack-a-Mullah), a
-  tap-intercept (Iron Dome) and a runner (Mamad Dash). Each is a ready template to
-  reskin to a historical moment.
-- **No sameness:** different input every time (tap / steer / drag-aim / jump / dig).
-- **Backstory + payoff** make each one "change history," and a run can chain several
-  into a stacked alternate present (the timeline/Atlas layer from the v2 spec can sit
-  on top later — but the FUN is the genre, first).
+> Note: Dig Dug needs a 7th scheme (dig/tunnel). Per Rule 1's spirit, we either add it
+> as the **last** allowed scheme or skip Dig Dug — a deliberate limit, not endless sprawl.
 
-## Build order (proposed)
-1. ✅ Whack-a-mole (Save Caesar)
-2. ✅ Chariot race (Circus Maximus)
-3. Tap-intercept asteroid (most different again; reuses Iron Dome craft)
-4. Hunt (drag-aim) — another new input
-5. Then platformer / Dig Dug / joust / Donkey Kong as the genre net widens
-
-Each ships as its own self-contained file, unlisted, until the set is strong enough to
-assemble into one "pick an era → play its game" hub.
+## Build order
+1. ✅ Whack-a-mole · 2. ✅ Chariot · 3. ✅ Asteroid · 4. Hunt (drag-aim) ·
+5. Joust (time-it) · 6. then platformer / lane-defense as the net fills.
+Each ships self-contained + unlisted, until the set is strong enough to assemble into
+one "pick an era → play its game" hub.
 </content>
