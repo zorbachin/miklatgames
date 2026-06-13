@@ -47,6 +47,7 @@
     background:radial-gradient(circle, var(--glow,rgba(255,93,177,.22)) 0%, transparent 64%);filter:blur(10px);z-index:0;transition:background .4s;}
   .ph{position:relative;height:min(60vh,560px);aspect-ratio:2/3;max-width:96%;z-index:2;
     filter:drop-shadow(0 16px 30px rgba(0,0,0,.55));}
+  .ph canvas{width:100%;height:100%;display:block;}
   .ph .ly{position:absolute;transform:translate(-50%,0);pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.42));}
   .ph .ly.base{inset:0;left:0;top:0;width:100%;height:100%;transform:none;filter:none;}
   .ph .ly.pop{animation:pop .22s var(--ease);}
@@ -145,7 +146,7 @@
 
   <div class="stageWrap">
     <div class="glow" id="glow"></div>
-    <div class="ph" id="ph"></div>
+    <div class="ph" id="ph"><canvas id="phc" width="600" height="900"></canvas></div>
     <div class="rail left">
       <button class="bubble" data-cat="looks"><span class="bem">✨</span><span class="blab"></span></button>
       <button class="bubble" data-cat="head"><span class="bem">👳</span><span class="blab"></span></button>
@@ -200,7 +201,7 @@
 <script>
 'use strict';
 /* ===================== item library (real AI sprites) ===================== */
-const ANCH={head:[49.4,2,28],top:[49.4,25,45],bottom:[49.4,50,46],robe:[49.4,24,80],neck:[49.4,30,38],
+const ANCH={head:[49.4,2,28],top:[49.4,25,45],bottom:[49.4,50,46],robe:[49.4,24,68],neck:[49.4,30,38],
   beard:[49.4,14,24],wings:[49.4,27,96],fan:[78,42,25],cape:[49.4,24,96]};
 const TOG_FILE={wings:'wings-wings',fan:'fan-fan',cape:'cape-rainbow'};
 const TRAYS={
@@ -244,16 +245,29 @@ function render(){
   LAYERS.push({slot:'base',file:'__base__'});
   ['bottom','top','robe','head','neck','beard'].forEach(s=>{ if(state[s]) LAYERS.push({slot:s,file:s+'-'+state[s]}); });
   if(state.fan) LAYERS.push({slot:'fan',file:TOG_FILE.fan});
-  let h='';
-  LAYERS.forEach(L=>{ if(L.file==='__base__'){ h+=`<img class="ly base" src="art/base.png">`; return; }
-    const a=posOf(L.slot,L.file);
-    h+=`<img class="ly${lastChanged===L.slot?' pop':''}" src="art/items/${L.file}.webp" style="left:${a[0]}%;top:${a[1]}%;width:${a[2]}%">`; });
-  document.getElementById('ph').innerHTML=h;
+  const cv=document.getElementById('phc');
+  if(cv){ const ctx=cv.getContext('2d'); if(ctx){ ctx.clearRect(0,0,cv.width,cv.height); drawCharMasked(ctx,cv.width,cv.height); } }
   updateMeter(); updateBubbles();
 }
-const IMG={};
-function pre(file,src){ const i=new Image(); i.src=src; IMG[file]=i; }
+/* ---- canvas compositor: clip worn garments to the body silhouette (fashion-tech masking) ---- */
+const IMG={}, CLIP_SLOTS={top:1,bottom:1,robe:1}, _off=document.createElement('canvas');
+let _rq=false;
+function queueRender(){ if(_rq)return; _rq=true; requestAnimationFrame(()=>{_rq=false; try{render();}catch(e){}}); }
+function pre(file,src){ const i=new Image(); i.onload=queueRender; i.src=src; IMG[file]=i; }
+function drawGarment(ctx,CW,CH,L){
+  const im=IMG[L.file]; if(!im||!im.complete||!im.naturalWidth)return;
+  const a=posOf(L.slot,L.file), w=CW*a[2]/100, h=w*im.naturalHeight/im.naturalWidth, x=CW*a[0]/100-w/2, y=CH*a[1]/100;
+  if(CLIP_SLOTS[L.slot]){ const mk=IMG['__mask__'];
+    _off.width=CW; _off.height=CH; const o=_off.getContext('2d'); o.clearRect(0,0,CW,CH); o.drawImage(im,x,y,w,h);
+    if(mk&&mk.complete&&mk.naturalWidth){ o.globalCompositeOperation='destination-in'; o.drawImage(mk,0,0,CW,CH); o.globalCompositeOperation='source-over'; }
+    ctx.save(); ctx.shadowColor='rgba(0,0,0,.34)'; ctx.shadowBlur=4; ctx.shadowOffsetY=2; ctx.drawImage(_off,0,0); ctx.restore();
+  } else { ctx.save(); ctx.shadowColor='rgba(0,0,0,.34)'; ctx.shadowBlur=3; ctx.shadowOffsetY=2; ctx.drawImage(im,x,y,w,h); ctx.restore(); }
+}
+function drawCharMasked(ctx,CW,CH){
+  LAYERS.forEach(L=>{ if(L.file==='__base__'){ const im=IMG['__base__']; if(im&&im.complete&&im.naturalWidth) ctx.drawImage(im,0,0,CW,CH); return; } drawGarment(ctx,CW,CH,L); });
+}
 pre('__base__','art/base.png');
+pre('__mask__','art/bodymask.png');
 [].concat(...Object.values(TRAYS).filter(c=>c.groups).map(c=>c.groups)).forEach(g=>g.items.forEach(it=>pre(g.slot+'-'+it,'art/items/'+g.slot+'-'+it+'.webp')));
 Object.values(TOG_FILE).forEach(f=>pre(f,'art/items/'+f+'.webp'));
 
@@ -366,7 +380,7 @@ function openRunway(){
   function loop(now){ const el=now-start; const p=poses[Math.floor(el/120)%poses.length];
     ctx.fillStyle='#101633'; ctx.fillRect(0,0,CW,CH);
     ctx.save(); ctx.translate(CW/2,CH*0.52); ctx.rotate(p.rot||0); ctx.scale(p.sx||1,p.sy||1); ctx.transform(1,0,p.skew||0,1,0,0); ctx.translate(-CW/2,-CH*0.52);
-    drawChar(ctx,CW,CH); ctx.restore();
+    drawCharMasked(ctx,CW,CH); ctx.restore();
     ctx.save(); const bh=Math.round(CH*0.066);
     ctx.fillStyle='rgba(8,10,22,.55)'; ctx.fillRect(0,CH-bh,CW,bh);
     ctx.textAlign='center'; ctx.font='bold '+Math.round(CW*0.05)+'px "Courier New",monospace';
