@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="1200" height="675" role="img" aria-label="Changing History — three glowing alternate-history portals">
+  <defs>
+    <radialGradient id="sky" cx="50%" cy="8%" r="120%">
+      <stop offset="0%" stop-color="#2a1f63"/>
+      <stop offset="45%" stop-color="#141633"/>
+      <stop offset="100%" stop-color="#0a1226"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a98bff"/>
+      <stop offset="100%" stop-color="#3ee6ff"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="9" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="675" fill="url(#sky)"/>
+  <!-- starfield -->
+  <g fill="#ffffff" opacity="0.5">
+    <circle cx="120" cy="90" r="2"/><circle cx="300" cy="60" r="1.6"/><circle cx="520" cy="110" r="1.8"/>
+    <circle cx="760" cy="70" r="1.6"/><circle cx="980" cy="120" r="2"/><circle cx="1080" cy="60" r="1.5"/>
+    <circle cx="200" cy="180" r="1.4"/><circle cx="640" cy="190" r="1.4"/><circle cx="900" cy="200" r="1.6"/>
+  </g>
+  <!-- three portals -->
+  <g filter="url(#glow)">
+    <ellipse cx="300" cy="370" rx="118" ry="150" fill="none" stroke="url(#ring)" stroke-width="9"/>
+    <ellipse cx="600" cy="350" rx="128" ry="162" fill="none" stroke="url(#ring)" stroke-width="10"/>
+    <ellipse cx="900" cy="370" rx="118" ry="150" fill="none" stroke="url(#ring)" stroke-width="9"/>
+  </g>
+  <ellipse cx="300" cy="370" rx="108" ry="140" fill="#10173a" opacity="0.85"/>
+  <ellipse cx="600" cy="350" rx="118" ry="152" fill="#10173a" opacity="0.85"/>
+  <ellipse cx="900" cy="370" rx="108" ry="140" fill="#10173a" opacity="0.85"/>
+  <text x="300" y="410" font-size="120" text-anchor="middle" dominant-baseline="middle">🦖</text>
+  <text x="600" y="392" font-size="130" text-anchor="middle" dominant-baseline="middle">🏛️</text>
+  <text x="900" y="410" font-size="120" text-anchor="middle" dominant-baseline="middle">🚀</text>
+  <!-- title -->
+  <text x="600" y="600" font-family="'Courier New',monospace" font-weight="700" font-size="62" letter-spacing="3"
+        text-anchor="middle" fill="#eaf2ff" filter="url(#glow)">CHANGING HISTORY</text>
+  <text x="600" y="645" font-family="'Heebo',system-ui,sans-serif" font-size="26" text-anchor="middle" fill="#a98bff">Rewrite the past. Laugh at the present.</text>
+</svg>

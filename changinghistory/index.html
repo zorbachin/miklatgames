@@ -1,0 +1,1086 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a1226">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CHANGING HISTORY">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:title" content="CHANGING HISTORY — what if YOU could change the past?">
+<meta property="og:description" content="Stop the asteroid. Save Caesar. Sink-proof the Titanic. Every change rewrites the present into a wilder one. Fast, funny, free — no app, one thumb.">
+<meta property="og:url" content="https://miklatgames.fun/changinghistory/">
+<meta property="og:image" content="https://miklatgames.fun/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<title>CHANGING HISTORY 🕰️ — rewrite the past</title>
+<style>
+  :root{
+    --c-bg:#0a1226; --c-panel:#101b38; --c-panel-2:#16244a;
+    --c-cyan:#3ee6ff; --c-gold:#ffd166; --c-pink:#ff5db1; --c-red:#ff5d73; --c-green:#5dffa8; --c-violet:#a98bff;
+    --c-ink:#eaf2ff; --c-dim:#8da3cc;
+    --c-border:rgba(62,230,255,.22); --c-border-strong:rgba(62,230,255,.55);
+    --c-wash:rgba(62,230,255,.08); --c-gold-border:rgba(255,209,102,.45);
+    --gradient-sky:radial-gradient(125% 95% at 50% -8%,#221a4d 0%,#141633 42%,#0a1226 100%);
+    --glow-cyan:0 0 18px rgba(62,230,255,.7);
+    --shadow-card:0 12px 34px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.05);
+    --font-display:"Courier New",ui-monospace,Menlo,Consolas,monospace;
+    --font-body:"Heebo",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --ease:cubic-bezier(.2,.7,.2,1);
+    --rainbow:linear-gradient(90deg,#ff4d4d,#ff9f43,#ffd166,#5dffa8,#3ee6ff,#a98bff);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--c-bg);
+    color:var(--c-ink);font-family:var(--font-body);user-select:none;-webkit-user-select:none;}
+  body{display:flex;justify-content:center;}
+  .app{width:100%;max-width:520px;height:100%;background:var(--gradient-sky);position:relative;overflow:hidden;}
+
+  /* ---------- generic screen ---------- */
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;
+    transform:translateY(8px);transition:opacity .22s var(--ease),transform .22s var(--ease);z-index:1;}
+  .screen.show{opacity:1;pointer-events:auto;transform:none;z-index:2;}
+
+  /* ---------- top bar ---------- */
+  .top{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 8px;}
+  .tbtn{min-width:42px;height:42px;display:inline-flex;align-items:center;justify-content:center;gap:5px;
+    background:var(--c-panel);border:1px solid var(--c-border);border-radius:999px;color:var(--c-dim);
+    font:700 13px var(--font-body);cursor:pointer;padding:0 12px;transition:all .12s var(--ease);text-decoration:none;}
+  .tbtn:active{transform:scale(.95);}
+  .tbtn.on{background:var(--c-wash);border-color:var(--c-border-strong);color:var(--c-cyan);}
+  .tbtn.gold{color:var(--c-gold);}
+  .grow{flex:1;}
+  .shards{display:inline-flex;align-items:center;gap:5px;font-weight:800;color:var(--c-gold);font-size:14px;
+    background:rgba(255,209,102,.1);border:1px solid var(--c-gold-border);border-radius:999px;padding:7px 12px;}
+
+  /* ---------- MAP ---------- */
+  .maphead{text-align:center;padding:6px 18px 4px;}
+  .wordmark{font-family:var(--font-display);font-weight:700;font-size:clamp(26px,7.6vw,34px);letter-spacing:.05em;
+    text-transform:uppercase;line-height:1.05;background:var(--rainbow);-webkit-background-clip:text;background-clip:text;
+    color:transparent;filter:drop-shadow(0 0 14px rgba(169,139,255,.45));}
+  .submark{margin-top:5px;font-size:13.5px;color:var(--c-dim);}
+  .now{margin:10px 14px 4px;background:var(--c-panel);border:1px solid var(--c-border);border-radius:16px;
+    padding:12px 14px;box-shadow:var(--shadow-card);}
+  .now-label{font:800 10.5px var(--font-display);letter-spacing:.14em;color:var(--c-cyan);text-transform:uppercase;}
+  [dir="rtl"] .now-label{letter-spacing:.02em;}
+  .now-name{margin-top:4px;font-size:17px;font-weight:800;line-height:1.25;}
+  .now-line{margin-top:5px;font-size:13px;color:var(--c-dim);line-height:1.45;}
+
+  .scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:8px 14px calc(env(safe-area-inset-bottom,0px) + 18px);
+    -webkit-overflow-scrolling:touch;}
+  .era{margin-top:16px;}
+  .era-h{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .era-h .dot{width:9px;height:9px;border-radius:50%;background:var(--c-violet);box-shadow:0 0 10px var(--c-violet);}
+  .era-h .ttl{font:800 12px var(--font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--c-ink);}
+  [dir="rtl"] .era-h .ttl{letter-spacing:.02em;}
+  .era-h .yr{font-size:11px;color:var(--c-dim);}
+  .era-h .ln{flex:1;height:1px;background:linear-gradient(90deg,var(--c-border),transparent);}
+  .nodes{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .node{position:relative;border-radius:16px;padding:13px 12px;text-align:center;cursor:pointer;
+    background:var(--c-panel);border:1px solid var(--c-border);box-shadow:var(--shadow-card);
+    transition:transform .12s var(--ease);min-height:104px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:5px;}
+  .node:active{transform:scale(.97);}
+  .node .ico{font-size:34px;line-height:1;filter:drop-shadow(0 3px 6px rgba(0,0,0,.5));}
+  .node .nm{font-size:12.5px;font-weight:800;line-height:1.2;}
+  .node .st{font-size:10.5px;color:var(--c-dim);}
+  .node.done{border-color:var(--c-gold-border);}
+  .node.done .ico{filter:drop-shadow(0 0 10px rgba(255,209,102,.5));}
+  .node.done .check{position:absolute;top:7px;inset-inline-end:8px;font-size:14px;}
+  .node.locked{opacity:.5;cursor:default;}
+  .node.locked .ico{filter:grayscale(1) brightness(.7);}
+  .node.next{border-color:var(--c-border-strong);animation:nodepulse 1.8s ease-in-out infinite;}
+  @keyframes nodepulse{50%{box-shadow:var(--shadow-card),0 0 16px rgba(62,230,255,.4);}}
+
+  /* ---------- BRIEF / OUTCOME panels ---------- */
+  .pad{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+    padding:20px 22px;gap:0;overflow-y:auto;}
+  .era-tag{font:800 11px var(--font-display);letter-spacing:.12em;text-transform:uppercase;color:var(--c-cyan);}
+  [dir="rtl"] .era-tag{letter-spacing:.02em;}
+  .big-ico{font-size:74px;line-height:1;margin:14px 0 6px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5));}
+  .ev-name{font-size:clamp(23px,6.6vw,30px);font-weight:900;line-height:1.1;}
+  .ev-year{margin-top:6px;font-size:14px;color:var(--c-gold);font-weight:700;}
+  .ev-brief{margin-top:14px;font-size:15px;line-height:1.5;color:var(--c-ink);max-width:360px;}
+  .dare{margin-top:14px;font-size:16px;font-weight:800;color:var(--c-violet);max-width:360px;line-height:1.4;}
+  .hist-box{margin-top:16px;max-width:380px;background:var(--c-panel);border:1px solid var(--c-gold-border);
+    border-radius:14px;padding:13px 15px;text-align:start;}
+  .hist-box .h{font:800 10.5px var(--font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--c-gold);margin-bottom:6px;}
+  [dir="rtl"] .hist-box .h{letter-spacing:.02em;}
+  .hist-box .b{font-size:13px;line-height:1.5;color:var(--c-ink);}
+  .btn{margin-top:20px;border:0;border-radius:15px;padding:16px 36px;font-size:17px;font-weight:900;cursor:pointer;
+    background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;box-shadow:0 7px 22px rgba(233,162,59,.4);
+    transition:transform .1s var(--ease);}
+  .btn:active{transform:scale(.96);}
+  .btn.cyan{background:linear-gradient(180deg,#5ff0ff,#2bb6d6);color:#04222a;box-shadow:0 7px 22px rgba(43,182,214,.35);}
+  .btn.violet{background:linear-gradient(180deg,#bca4ff,#8a63f0);color:#1a0a3a;box-shadow:0 7px 22px rgba(138,99,240,.35);}
+  .btn.ghost{background:transparent;color:#cdd6e8;border:1px solid #46506b;box-shadow:none;font-weight:700;font-size:15px;padding:13px 28px;}
+  .btn.share{background:linear-gradient(180deg,#ff7bc4,#e0469b);color:#2a0a1d;}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px;}
+  .btn-row .btn{margin-top:0;}
+
+  /* ---------- OUTCOME / timeline reveal ---------- */
+  .verdict{font-family:var(--font-display);font-weight:700;font-size:clamp(22px,6.4vw,30px);letter-spacing:.04em;}
+  .verdict.win{color:var(--c-green);text-shadow:0 0 18px rgba(93,255,168,.5);}
+  .verdict.lose{color:var(--c-red);text-shadow:0 0 16px rgba(255,93,115,.5);}
+  .tcard{margin-top:18px;width:100%;max-width:380px;border-radius:18px;overflow:hidden;
+    background:linear-gradient(160deg,#1b1450,#101b38);border:1px solid var(--c-border-strong);
+    box-shadow:0 14px 40px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);}
+  .tcard .tc-top{padding:14px 16px 10px;border-bottom:1px solid var(--c-border);}
+  .tcard .tc-k{font:800 10px var(--font-display);letter-spacing:.16em;color:var(--c-cyan);text-transform:uppercase;}
+  [dir="rtl"] .tcard .tc-k{letter-spacing:.02em;}
+  .tcard .tc-name{margin-top:7px;font-size:21px;font-weight:900;line-height:1.15;}
+  .tcard .tc-emoji{font-size:30px;margin-top:8px;letter-spacing:2px;}
+  .tcard .tc-body{padding:13px 16px 16px;text-align:start;}
+  .tcard .tc-line{font-size:13.5px;line-height:1.55;color:var(--c-ink);display:flex;gap:8px;margin-top:6px;}
+  .tcard .tc-line:first-child{margin-top:0;}
+  .tcard .tc-line .b{color:var(--c-gold);flex-shrink:0;}
+  .reward{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .rchip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:800;
+    background:var(--c-wash);border:1px solid var(--c-border);border-radius:999px;padding:8px 13px;color:var(--c-cyan);}
+  .rchip.gold{background:rgba(255,209,102,.12);border-color:var(--c-gold-border);color:var(--c-gold);}
+
+  /* ---------- STAGE (mini-games) ---------- */
+  #stage{background:radial-gradient(125% 95% at 50% 0%,#1a2350 0%,#0e1430 55%,#0a1226 100%);}
+  .gtop{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 4px;z-index:5;}
+  .gobj{flex:1;text-align:center;font-size:13.5px;font-weight:800;color:var(--c-ink);}
+  .gobj small{display:block;font-size:11px;color:var(--c-dim);font-weight:600;margin-top:2px;}
+  .lives{font-size:15px;letter-spacing:2px;min-width:54px;text-align:end;}
+  .arena{flex:1;position:relative;margin:6px 0 0;overflow:hidden;}
+  #cv{position:absolute;inset:0;width:100%;height:100%;display:none;touch-action:none;}
+  #glayer{position:absolute;inset:0;display:none;}
+
+  /* timing engine */
+  .tm-wrap{position:absolute;left:0;right:0;bottom:0;top:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:22px;padding:24px;}
+  .tm-prompt{font-size:16px;font-weight:800;color:var(--c-violet);text-align:center;max-width:320px;line-height:1.4;}
+  .tm-bar{position:relative;width:100%;max-width:380px;height:46px;border-radius:14px;background:var(--c-panel);
+    border:1px solid var(--c-border);overflow:hidden;}
+  .tm-zone{position:absolute;top:0;bottom:0;background:rgba(93,255,168,.22);border-inline:2px solid var(--c-green);}
+  .tm-mark{position:absolute;top:-3px;bottom:-3px;width:6px;background:var(--c-gold);border-radius:3px;
+    box-shadow:0 0 12px var(--c-gold);}
+  .tm-tap{width:100%;max-width:380px;height:84px;border-radius:18px;border:0;cursor:pointer;font-size:20px;font-weight:900;
+    background:linear-gradient(180deg,#5ff0ff,#2bb6d6);color:#04222a;box-shadow:0 8px 24px rgba(43,182,214,.4);}
+  .tm-tap:active{transform:scale(.98);}
+  .tm-dots{display:flex;gap:7px;}
+  .tm-dots i{width:11px;height:11px;border-radius:50%;background:#2a3666;display:block;}
+  .tm-dots i.ok{background:var(--c-green);box-shadow:0 0 8px var(--c-green);}
+  .tm-dots i.bad{background:var(--c-red);}
+
+  /* mash engine */
+  .ms-wrap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px;}
+  .ms-prompt{font-size:16px;font-weight:800;color:var(--c-violet);text-align:center;max-width:320px;line-height:1.4;}
+  .ms-track{width:100%;max-width:360px;height:30px;border-radius:15px;background:var(--c-panel);
+    border:1px solid var(--c-border);overflow:hidden;}
+  .ms-fill{height:100%;width:0%;background:linear-gradient(90deg,#5dffa8,#3ee6ff);transition:width .08s linear;}
+  .ms-goal{position:relative;width:100%;max-width:360px;height:0;}
+  .ms-goal i{position:absolute;top:-26px;width:2px;height:20px;background:var(--c-gold);}
+  .ms-btn{width:200px;height:200px;border-radius:50%;border:0;cursor:pointer;font-size:46px;
+    background:radial-gradient(circle at 38% 32%,#ffe39a,#e9a23b);color:#1a1405;
+    box-shadow:0 10px 30px rgba(233,162,59,.5),inset 0 -8px 18px rgba(0,0,0,.2);}
+  .ms-btn:active{transform:scale(.94);}
+  .ms-time{font-size:15px;font-weight:800;color:var(--c-gold);}
+
+  /* sequence engine */
+  .sq-wrap{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;}
+  .sq-prompt{font-size:15px;font-weight:800;color:var(--c-violet);text-align:center;max-width:320px;line-height:1.4;min-height:42px;}
+  .sq-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:320px;}
+  .sq-cell{aspect-ratio:1;border-radius:18px;border:2px solid var(--c-border);cursor:pointer;font-size:40px;
+    display:flex;align-items:center;justify-content:center;background:var(--c-panel);transition:all .12s var(--ease);}
+  .sq-cell.lit{background:var(--c-wash);border-color:var(--c-gold);box-shadow:0 0 22px rgba(255,209,102,.55);transform:scale(1.04);}
+  .sq-cell:active{transform:scale(.97);}
+  .sq-round{font-size:13px;color:var(--c-dim);font-weight:700;}
+
+  /* aim/dodge instruction toast */
+  .ginstr{position:absolute;left:50%;top:14%;transform:translateX(-50%);text-align:center;
+    background:rgba(10,18,38,.78);border:1px solid var(--c-border);border-radius:14px;padding:10px 16px;
+    font-size:13.5px;font-weight:700;color:var(--c-ink);max-width:88%;z-index:6;pointer-events:none;
+    transition:opacity .3s;line-height:1.4;}
+
+  /* ---------- MUSEUM ---------- */
+  .mu-intro{text-align:center;padding:4px 18px 2px;}
+  .mu-sub{font-size:13px;color:var(--c-dim);margin-top:4px;}
+  .ex{display:flex;gap:13px;align-items:flex-start;background:var(--c-panel);border:1px solid var(--c-border);
+    border-radius:16px;padding:13px 14px;margin-top:12px;box-shadow:var(--shadow-card);}
+  .ex .ico{font-size:38px;line-height:1;flex-shrink:0;filter:drop-shadow(0 3px 6px rgba(0,0,0,.5));}
+  .ex .meta{text-align:start;flex:1;}
+  .ex .nm{font-size:14.5px;font-weight:800;}
+  .ex .desc{margin-top:4px;font-size:12.5px;color:var(--c-dim);line-height:1.45;}
+  .ex .fig{margin-top:6px;font-size:11.5px;color:var(--c-gold);font-weight:700;}
+  .mu-empty{text-align:center;color:var(--c-dim);font-size:14px;margin-top:40px;line-height:1.6;padding:0 30px;}
+
+  /* ---------- fx ---------- */
+  #flash{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;z-index:30;}
+  #flash.gold{background:radial-gradient(circle,rgba(255,209,102,.5),transparent 70%);}
+  #flash.green{background:radial-gradient(circle,rgba(93,255,168,.45),transparent 70%);}
+  #flash.red{background:radial-gradient(circle,rgba(255,93,115,.4),transparent 70%);}
+  #flash.show{opacity:1;transition:opacity .04s;}
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:60;background:var(--c-panel-2);
+    border:1px solid var(--c-border-strong);border-radius:999px;color:var(--c-cyan);padding:10px 20px;
+    font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;}
+  #toast.show{opacity:1;}
+  .confetti{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:55;pointer-events:none;}
+  @keyframes conf{to{transform:translateY(110vh) rotate(640deg);opacity:0;}}
+  *:focus-visible{outline:2px solid var(--c-cyan);outline-offset:2px;}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important;}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ============ MAP ============ -->
+  <section class="screen show" id="map">
+    <div class="top">
+      <span class="shards">💎 <b id="shardCount">0</b></span>
+      <span class="grow"></span>
+      <button class="tbtn" id="muBtn">🏛️ <span data-i18n="museum">Museum</span></button>
+      <button class="tbtn" id="caveBtn" data-i18n="caveOff">🦴 Caveman</button>
+      <button class="tbtn" id="histBtn" data-i18n="histOff">📖 History</button>
+      <button class="tbtn" id="muteBtn">🔊</button>
+      <button class="tbtn" id="langBtn">עברית</button>
+    </div>
+    <div class="maphead">
+      <div class="wordmark">CHANGING HISTORY</div>
+      <div class="submark" data-i18n="tagline">Rewrite the past. Laugh at the present.</div>
+    </div>
+    <div class="now" id="nowCard">
+      <div class="now-label" data-i18n="nowLabel">Your present timeline</div>
+      <div class="now-name" id="nowName">The Ordinary, Unchanged World</div>
+      <div class="now-line" id="nowLine" data-i18n="nowEmpty">Nothing changed yet. Pick an event below and meddle.</div>
+    </div>
+    <div class="scroll" id="mapScroll"></div>
+  </section>
+
+  <!-- ============ BRIEF ============ -->
+  <section class="screen" id="brief">
+    <div class="top">
+      <button class="tbtn" id="briefBack">‹ <span data-i18n="map">Map</span></button>
+      <span class="grow"></span>
+      <button class="tbtn" id="caveBtn2" data-i18n="caveOff">🦴 Caveman</button>
+      <button class="tbtn" id="histBtn2" data-i18n="histOff">📖 History</button>
+    </div>
+    <div class="pad">
+      <div class="era-tag" id="bEra"></div>
+      <div class="big-ico" id="bIco">🦖</div>
+      <div class="ev-name" id="bName"></div>
+      <div class="ev-year" id="bYear"></div>
+      <div class="ev-brief" id="bBrief"></div>
+      <div class="dare" id="bDare"></div>
+      <div class="hist-box" id="bHist" style="display:none">
+        <div class="h" data-i18n="realH">What really happened</div>
+        <div class="b" id="bHistBody"></div>
+      </div>
+      <button class="btn violet" id="bGo" data-i18n="changeIt">⚡ CHANGE IT</button>
+    </div>
+  </section>
+
+  <!-- ============ STAGE ============ -->
+  <section class="screen" id="stage">
+    <div class="gtop">
+      <button class="tbtn" id="gBack">✕</button>
+      <div class="gobj"><span id="gObj"></span><small id="gSub"></small></div>
+      <div class="lives" id="gLives"></div>
+    </div>
+    <div class="arena" id="arena">
+      <canvas id="cv"></canvas>
+      <div id="glayer"></div>
+      <div class="ginstr" id="ginstr" style="display:none"></div>
+    </div>
+  </section>
+
+  <!-- ============ OUTCOME ============ -->
+  <section class="screen" id="outcome">
+    <div class="pad">
+      <div class="verdict" id="oVerdict"></div>
+      <div class="tcard" id="oCard">
+        <div class="tc-top">
+          <div class="tc-k" data-i18n="newPresent">The present is now…</div>
+          <div class="tc-name" id="oName"></div>
+          <div class="tc-emoji" id="oEmoji"></div>
+        </div>
+        <div class="tc-body" id="oBody"></div>
+      </div>
+      <div class="reward" id="oReward"></div>
+      <div class="hist-box" id="oHist" style="display:none">
+        <div class="h" data-i18n="realH">What really happened</div>
+        <div class="b" id="oHistBody"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn share" id="oShare" data-i18n="shareCard">📤 Share timeline</button>
+        <button class="btn cyan" id="oNext" data-i18n="next">Next ▶</button>
+      </div>
+      <button class="btn ghost" id="oMap" data-i18n="toMap">‹ World map</button>
+    </div>
+  </section>
+
+  <!-- ============ MUSEUM ============ -->
+  <section class="screen" id="museum">
+    <div class="top">
+      <button class="tbtn" id="muBack">‹ <span data-i18n="map">Map</span></button>
+      <span class="grow"></span>
+      <span class="shards">💎 <b id="shardCount2">0</b></span>
+    </div>
+    <div class="mu-intro">
+      <div class="wordmark" style="font-size:22px">🏛️ <span data-i18n="museumTitle">MUSEUM OF CHANGED HISTORY</span></div>
+      <div class="mu-sub" id="muProgress"></div>
+    </div>
+    <div class="scroll" id="muScroll"></div>
+  </section>
+
+  <div id="flash"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+'use strict';
+/* ===================================================================
+   CHANGING HISTORY — single-file, offline, EN/HE. House arcade build.
+   Mechanics are reusable engines; events are data (scales to 500+).
+   =================================================================== */
+
+/* ---------------- i18n ---------------- */
+const I18N = {
+ en:{dir:'ltr',
+  tagline:'Rewrite the past. Laugh at the present.',
+  museum:'Museum', map:'Map', histOff:'📖 History', histOn:'📖 History ✓',
+  nowLabel:'Your present timeline', nowEmpty:'Nothing changed yet. Pick an event below and meddle.',
+  changeIt:'⚡ CHANGE IT', realH:'What really happened', newPresent:'The present is now…',
+  shareCard:'📤 Share timeline', next:'Next ▶', toMap:'‹ World map',
+  museumTitle:'MUSEUM OF CHANGED HISTORY',
+  locked:'🔒 Locked', tapPlay:'Tap to change', changed:'Changed ✓', replay:'Replay',
+  win:'TIMELINE REWRITTEN!', lose:'HISTORY RESISTED',
+  rShard:n=>`+${n} 💎 Shards`, rExhibit:'🏛️ New exhibit', rFigure:n=>`🃏 ${n} joined`,
+  muProg:(a,b)=>`${a} of ${b} exhibits unlocked`,
+  muEmpty:'Your museum is empty. Go change something — every event you win becomes an exhibit here.',
+  failLine:"History snapped back. The present is unchanged… for now. Try again?",
+  retry:'↻ Try again', giveBack:'Give up',
+  // engine objectives
+  objAim:'Tap–hold–drag to aim, release to launch', objAimSub:n=>`${n} left`,
+  objDodge:'Drag to steer. Survive the gauntlet.', objDodgeSub:'Distance',
+  objTiming:'Tap when the marker hits the green', objTimingSub:(a,b)=>`${a}/${b}`,
+  objMash:'Tap as fast as you can!', objMashSub:'',
+  objSeq:'Watch, then repeat the pattern', objSeqSub:n=>`Round ${n}`,
+  seqWatch:'Watch carefully…', seqGo:'Your turn! Repeat it.', seqRound:n=>`Round ${n}`,
+  msGo:'GO!', msTime:n=>`${n.toFixed(1)}s`,
+  copied:'✅ Copied — paste anywhere',
+  shareTxt:(name)=>`🕰️ CHANGING HISTORY: in my timeline it's now "${name}". What's yours? https://miklatgames.fun/changinghistory/`,
+  worldDefault:'The Ordinary, Unchanged World',
+  // caveman mode (ultra-simple, big, grunty — the opposite of History Mode)
+  caveOff:'🦴 Caveman', caveOn:'🦴 Caveman ✓',
+  cvSmash:'🦴 SMASH IT', cvWin:'YOU CHANGE IT! 🦴', cvLose:'NO CHANGE. TRY MORE.',
+  cvFail:'HISTORY TOO STRONG. SMASH AGAIN!',
+  cv_aim:'HIT IT! 🎯', cv_dodge:'RUN! NO TOUCH! 🏃', cv_timing:'TAP GREEN! 🟢',
+  cv_mash:'TAP TAP TAP! 👆', cv_sequence:'COPY LIGHTS! ✨'},
+ he:{dir:'rtl',
+  tagline:'שנו את העבר. צחקו על ההווה.',
+  museum:'מוזיאון', map:'מפה', histOff:'📖 היסטוריה', histOn:'📖 היסטוריה ✓',
+  nowLabel:'ציר הזמן הנוכחי שלכם', nowEmpty:'עוד לא שיניתם כלום. בחרו אירוע למטה והתחילו להתערב.',
+  changeIt:'⚡ שנו את זה', realH:'מה באמת קרה', newPresent:'ההווה עכשיו…',
+  shareCard:'📤 שתפו ציר זמן', next:'הבא ▶', toMap:'‹ מפת העולם',
+  museumTitle:'מוזיאון ההיסטוריה ששונתה',
+  locked:'🔒 נעול', tapPlay:'הקישו לשנות', changed:'שונה ✓', replay:'שחקו שוב',
+  win:'ציר הזמן נכתב מחדש!', lose:'ההיסטוריה התנגדה',
+  rShard:n=>`+${n} 💎 רסיסים`, rExhibit:'🏛️ תצוגה חדשה', rFigure:n=>`🃏 ${n} הצטרף`,
+  muProg:(a,b)=>`${a} מתוך ${b} תצוגות נפתחו`,
+  muEmpty:'המוזיאון ריק. לכו לשנות משהו — כל אירוע שתנצחו בו הופך כאן לתצוגה.',
+  failLine:'ההיסטוריה חזרה לעצמה. ההווה לא השתנה… בינתיים. לנסות שוב?',
+  retry:'↻ נסו שוב', giveBack:'ויתור',
+  objAim:'געו–החזיקו–גררו לכיוון, שחררו לשיגור', objAimSub:n=>`נשארו ${n}`,
+  objDodge:'גררו כדי להגה. שרדו את המסלול.', objDodgeSub:'מרחק',
+  objTiming:'הקישו כשהסמן בירוק', objTimingSub:(a,b)=>`${a}/${b}`,
+  objMash:'הקישו הכי מהר שאתם יכולים!', objMashSub:'',
+  objSeq:'צפו, ואז חזרו על הרצף', objSeqSub:n=>`סבב ${n}`,
+  seqWatch:'צפו בריכוז…', seqGo:'תורכם! חזרו על זה.', seqRound:n=>`סבב ${n}`,
+  msGo:'קדימה!', msTime:n=>`${n.toFixed(1)} ש׳`,
+  copied:'✅ הועתק — הדביקו איפשהו',
+  shareTxt:(name)=>`🕰️ משחק "שינוי ההיסטוריה": בציר הזמן שלי עכשיו זה "${name}". ומה אצלכם? https://miklatgames.fun/changinghistory/`,
+  worldDefault:'העולם הרגיל, ללא שינוי',
+  caveOff:'🦴 מערות', caveOn:'🦴 מערות ✓',
+  cvSmash:'🦴 לרסק!', cvWin:'אתם שינה! 🦴', cvLose:'לא שינה. עוד פעם.',
+  cvFail:'היסטוריה חזק מדי. לרסק עוד!',
+  cv_aim:'לפגוע! 🎯', cv_dodge:'לרוץ! לא לגעת! 🏃', cv_timing:'ללחוץ ירוק! 🟢',
+  cv_mash:'ללחוץ ללחוץ ללחוץ! 👆', cv_sequence:'להעתיק אורות! ✨'}
+};
+let lang='en';
+try{ const q=new URLSearchParams(location.search).get('lang'); const s=localStorage.getItem('ch.lang')||localStorage.getItem('miklat.lang');
+  lang=(q==='he'||q==='en')?q:(s==='he'||s==='en')?s:((navigator.language||'en').startsWith('he')?'he':'en'); }catch(e){}
+const T=()=>I18N[lang];
+
+/* ---------------- ERAS + EVENTS (data; add rows to grow content) ----------------
+   Each event: id, era, ico, game engine + params, bilingual text, and a
+   `tl` (timeline) block: adjective + world noun + consequence lines + exhibit. */
+const ERAS = [
+  {id:'pre', en:'Prehistory', he:'פרהיסטוריה', yr:'66M–10k BCE'},
+  {id:'anc', en:'Ancient World', he:'העולם העתיק', yr:'3000–500 BCE'},
+  {id:'cla', en:'Classical Era', he:'התקופה הקלאסית', yr:'500 BCE–500 CE'},
+  {id:'med', en:'Middle Ages', he:'ימי הביניים', yr:'500–1400'},
+  {id:'exp', en:'Age of Exploration', he:'עידן התגליות', yr:'1400–1700'},
+  {id:'ind', en:'Industrial Era', he:'העידן התעשייתי', yr:'1700–1900'},
+  {id:'mod', en:'Modern Era', he:'העידן המודרני', yr:'1900–2000'},
+  {id:'fut', en:'The Future', he:'העתיד', yr:'20XX'}
+];
+
+const EVENTS = [
+ // ---------- PREHISTORY ----------
+ {id:'asteroid', era:'pre', ico:'🦖', game:'aim',
+  name:{en:'Stop the Asteroid', he:'עצרו את האסטרואיד'}, year:{en:'66 million BCE', he:'לפני 66 מיליון שנה'},
+  brief:{en:'A 10-km rock is about to end the dinosaurs and 75% of all life.',
+         he:'סלע בגודל 10 ק״מ עומד לחסל את הדינוזאורים ו-75% מהחיים על כדור הארץ.'},
+  dare:{en:'What if the dinosaurs never died?', he:'מה אם הדינוזאורים אף פעם לא נכחדו?'},
+  params:{targets:3, speed:130, label:{en:'Blast the asteroid out of the sky', he:'פוצצו את האסטרואיד בשמיים'}, targetEmoji:'☄️'},
+  tl:{tag:'DINOS', adj:{en:'Dinosaur', he:'דינוזאורי'},
+      cons:[{en:'CEOs are velociraptors. Bonuses paid in goats.', he:'המנכ״לים הם ולוסירפטורים. בונוסים משולמים בעיזים.'},
+            {en:'The morning commute is by pterodactyl.', he:'הנסיעה לעבודה היא על פטרודקטיל.'}],
+      exhibit:{en:'Dinosaur pocket calculator (made of teeth)', he:'מחשבון כיס דינוזאורי (עשוי משיניים)'},
+      figure:{en:'Rex the Raptor-Mayor', he:'רקס ראש-עיר-הרפטור'}},
+  real:{en:'The Chicxulub impact (~66 Mya) caused a mass extinction that wiped out non-avian dinosaurs — clearing the way for mammals, and eventually us. Birds are living dinosaurs.',
+        he:'פגיעת צ׳יקסולוב (לפני ~66 מ׳ שנה) גרמה להכחדה המונית שחיסלה את הדינוזאורים הלא-עופיים — ופינתה מקום ליונקים, ובסוף לנו. ציפורים הן דינוזאורים חיים.'}},
+
+ {id:'fire', era:'pre', ico:'🔥', game:'mash',
+  name:{en:'Light the First Fire', he:'הציתו את האש הראשונה'}, year:{en:'~1 million BCE', he:'לפני ~מיליון שנה'},
+  brief:{en:'A faint ember sits in your hands. The tribe is cold and hungry.',
+         he:'גחלת קלושה בידיכם. השבט קפוא ורעב.'},
+  dare:{en:'Spark civilization a little early?', he:'להצית את הציוויליזציה קצת מוקדם?'},
+  params:{seconds:6, goal:80, label:{en:'Blow on the ember — fast!', he:'נשפו על הגחלת — מהר!'}, btn:'🔥'},
+  tl:{tag:'FIRE', adj:{en:'Fire-Mastering', he:'שולטת-באש'},
+      cons:[{en:'Everyone is a champion BBQ pitmaster by age 4.', he:'כולם אלופי על-האש כבר בגיל 4.'},
+            {en:'Candles are the global reserve currency.', he:'נרות הם מטבע הרזרבה העולמי.'}],
+      exhibit:{en:'The original lighter (two damp sticks)', he:'המצית המקורי (שני מקלות לחים)'},
+      figure:{en:'Oog, Keeper of the Flame', he:'אוג, שומר הלהבה'}},
+  real:{en:'Controlled fire (1.5M–400k years ago) let humans cook food, unlocking calories that helped grow our brains, and extended the day past sunset. Arguably our first true technology.',
+        he:'שליטה באש (לפני 1.5 מ׳–400 אלף שנה) אפשרה בישול מזון, שחרר קלוריות שעזרו למוח שלנו לגדול, והאריך את היום אחרי השקיעה. ככל הנראה הטכנולוגיה האמיתית הראשונה שלנו.'}},
+
+ // ---------- ANCIENT ----------
+ {id:'pyramid', era:'anc', ico:'🔺', game:'timing',
+  name:{en:'Stack the Great Pyramid', he:'בנו את הפירמידה הגדולה'}, year:{en:'2560 BCE', he:'2560 לפנה״ס'},
+  brief:{en:'2.3 million blocks. The pharaoh wants it perfect, and yesterday.',
+         he:'2.3 מיליון אבנים. פרעה רוצה אותה מושלמת, ועדיף אתמול.'},
+  dare:{en:'Build it flawlessly and become legend?', he:'לבנות אותה ללא דופי ולהפוך לאגדה?'},
+  params:{rounds:5, allowed:2, speed:1.0, zone:0.26, label:{en:'Drop each block dead-centre', he:'הניחו כל אבן בול במרכז'}},
+  tl:{tag:'PYRAMID', adj:{en:'Pyramid-Perfect', he:'פירמידלית-מושלמת'},
+      cons:[{en:'All buildings are legally required to be triangular.', he:'כל בניין חייב חוקית להיות משולש.'},
+            {en:'IKEA ships everything as 2-ton limestone blocks.', he:'איקאה שולחת הכול כאבני גיר במשקל 2 טון.'}],
+      exhibit:{en:"Pharaoh's spirit level (gold, useless)", he:'פלס הרוח של פרעה (זהב, חסר תועלת)'},
+      figure:{en:'Imhotep, Chief Stacker', he:'אימחותפ, מהנדס ראשי'}},
+  real:{en:'The Great Pyramid of Giza, built for Khufu, stood ~146m tall and was the tallest human structure for ~3,800 years. Likely built by paid, fed laborers — not slaves, as the myth goes.',
+        he:'הפירמידה הגדולה בגיזה, שנבנתה לח׳ופו, התנשאה לגובה ~146 מ׳ והייתה המבנה הגבוה בעולם במשך ~3,800 שנה. כנראה נבנתה בידי פועלים שכירים ומוזנים — לא עבדים, כמו שהמיתוס טוען.'}},
+
+ {id:'library', era:'anc', ico:'📜', game:'sequence',
+  name:{en:'Save the Library of Alexandria', he:'הצילו את ספריית אלכסנדריה'}, year:{en:'48 BCE', he:'48 לפנה״ס'},
+  brief:{en:'Flames are spreading. Grab the irreplaceable scrolls in the right order!',
+         he:'הלהבות מתפשטות. הצילו את המגילות שאין להן תחליף בסדר הנכון!'},
+  dare:{en:'What if humanity never lost that knowledge?', he:'מה אם האנושות לא הייתה מאבדת את הידע הזה?'},
+  params:{startLen:3, rounds:4, label:{en:'Memorise the scroll order, then repeat', he:'שננו את סדר המגילות, ואז חזרו'}},
+  tl:{tag:'LIBRARY', adj:{en:'Hyper-Educated', he:'משכילה-במיוחד'},
+      cons:[{en:'Humanity hit the Moon in the year 900.', he:'האנושות נחתה על הירח בשנת 900.'},
+            {en:'Toddlers cite their sources.', he:'פעוטות מצטטים מקורות.'}],
+      exhibit:{en:'Scroll #1,000,000 (overdue 2,000 years)', he:'מגילה מס׳ 1,000,000 (באיחור של 2,000 שנה)'},
+      figure:{en:'Hypatia, Head Librarian', he:'היפטיה, הספרנית הראשית'}},
+  real:{en:'The Library of Alexandria aimed to collect all the world\'s knowledge. It declined over centuries (not one dramatic fire). Lost works may have set science back — a favourite "what if" of historians.',
+        he:'ספריית אלכסנדריה שאפה לאסוף את כל ידע העולם. היא דעכה לאורך מאות שנים (לא בשריפה דרמטית אחת). יצירות שאבדו אולי עיכבו את המדע — "מה אם" אהוב על היסטוריונים.'}},
+
+ // ---------- CLASSICAL ----------
+ {id:'caesar', era:'cla', ico:'🏛️', game:'timing',
+  name:{en:'Save Julius Caesar', he:'הצילו את יוליוס קיסר'}, year:{en:'March 15, 44 BCE', he:'15 במרץ, 44 לפנה״ס'},
+  brief:{en:'The Senate hides 23 daggers. Time your warnings — beware the Ides of March.',
+         he:'בסנאט מסתתרים 23 פגיונות. תזמנו את האזהרות — היזהרו מאידי מרץ.'},
+  dare:{en:'What if Rome never fell into civil war?', he:'מה אם רומא לא הייתה שוקעת במלחמת אזרחים?'},
+  params:{rounds:5, allowed:1, speed:1.35, zone:0.2, label:{en:'Warn Caesar at the safe moment', he:'הזהירו את קיסר ברגע הבטוח'}},
+  tl:{tag:'CAESAR', adj:{en:'Eternal-Roman', he:'רומית-נצחית'},
+      cons:[{en:'Everyone still speaks Latin. Group chats open with "SALVE".', he:'כולם עדיין מדברים לטינית. קבוצות וואטסאפ נפתחות ב-"SALVE".'},
+            {en:'The Senate meets on Zoom. Toga required.', he:'הסנאט מתכנס בזום. טוגה חובה.'}],
+      exhibit:{en:"Caesar's smartphone (laurel case)", he:'הסמארטפון של קיסר (כיסוי עלי דפנה)'},
+      figure:{en:'Julius Caesar, Emperor-for-Life', he:'יוליוס קיסר, קיסר לכל החיים'}},
+  real:{en:'Caesar was assassinated by ~60 senators fearing he\'d made himself king. His death triggered more civil war and the rise of his heir Augustus — the start of the Roman Empire, not its end.',
+        he:'קיסר נרצח בידי ~60 סנאטורים שחששו שהפך עצמו למלך. מותו הצית מלחמת אזרחים נוספת ואת עליית יורשו אוגוסטוס — תחילת האימפריה הרומית, לא סופה.'}},
+
+ {id:'archimedes', era:'cla', ico:'🔆', game:'aim',
+  name:{en:"Archimedes' Heat Ray", he:'קרן החום של ארכימדס'}, year:{en:'212 BCE', he:'212 לפנה״ס'},
+  brief:{en:'Roman ships besiege Syracuse. Aim the legendary mirror and set sails ablaze.',
+         he:'ספינות רומא צרות על סירקוז. כוונו את המראה האגדית והציתו את המפרשים.'},
+  dare:{en:'What if ancient Greece weaponised the sun?', he:'מה אם יוון העתיקה הייתה הופכת את השמש לנשק?'},
+  params:{targets:3, speed:95, label:{en:'Torch the Roman ships with sunlight', he:'הציתו את ספינות רומא באור שמש'}, targetEmoji:'⛵'},
+  tl:{tag:'ARCHIMEDES', adj:{en:'Solar-Powered', he:'מונעת-שמש'},
+      cons:[{en:'Every roof is a death-ray. Sunscreen is national defence.', he:'כל גג הוא קרן-מוות. קרם הגנה הוא ביטחון לאומי.'},
+            {en:'Cloudy days are declared national emergencies.', he:'ימים מעוננים מוכרזים כמצב חירום לאומי.'}],
+      exhibit:{en:'The Eureka bathtub (still warm)', he:'אמבט "אאוריקה" (עדיין חמים)'},
+      figure:{en:'Archimedes, Sun-Lord of Syracuse', he:'ארכימדס, אדון-השמש של סירקוז'}},
+  real:{en:'Legend says Archimedes used mirrors to burn Roman ships. Modern tests suggest it was impractical — but his real inventions (levers, pulleys, the screw pump, π) genuinely shaped engineering.',
+        he:'האגדה מספרת שארכימדס השתמש במראות לשרוף ספינות רומא. ניסויים מודרניים מראים שזה לא מעשי — אבל המצאותיו האמיתיות (מנופים, גלגלות, בורג ארכימדס, π) באמת עיצבו את ההנדסה.'}},
+
+ // ---------- MIDDLE AGES ----------
+ {id:'vikings', era:'med', ico:'⛵', game:'mash',
+  name:{en:'Vikings Reach America First', he:'הוויקינגים מגיעים לאמריקה ראשונים'}, year:{en:'1000 CE', he:'1000 לספירה'},
+  brief:{en:'Leif Erikson eyes a new land across the cold Atlantic. Row, row, ROW!',
+         he:'לייף אריקסון רואה יבשה חדשה מעבר לאוקיינוס הקפוא. חתרו, חתרו, חתרו!'},
+  dare:{en:'What if Vikings settled the New World for good?', he:'מה אם הוויקינגים היו מתיישבים בעולם החדש לתמיד?'},
+  params:{seconds:7, goal:90, label:{en:'Row the longship to the new land', he:'חתרו עם הספינה אל היבשה החדשה'}, btn:'🚣'},
+  tl:{tag:'VIKINGS', adj:{en:'Viking', he:'ויקינגי'},
+      cons:[{en:'New York is "Newjorvik". The NFL plays with axes.', he:'ניו יורק היא "ניו-יורוויק". ה-NFL משחק עם גרזנים.'},
+            {en:'Every coffee chain serves mead. Venti = a horn.', he:'כל רשת קפה מגישה מי-דבש. ונטי = קרן שתייה.'}],
+      exhibit:{en:'Viking Statue of Liberty (holds an axe)', he:'פסל החירות הוויקינגי (אוחז בגרזן)'},
+      figure:{en:'Leif Erikson, the First American', he:'לייף אריקסון, האמריקאי הראשון'}},
+  real:{en:'Vikings DID reach North America ~500 years before Columbus — a settlement at L\'Anse aux Meadows, Newfoundland, is proven. They didn\'t stay, so the contact left little lasting mark.',
+        he:'הוויקינגים אכן הגיעו לצפון אמריקה ~500 שנה לפני קולומבוס — יישוב באנס-או-מדוז שבניופאונדלנד הוכח. הם לא נשארו, ולכן המגע כמעט לא הותיר חותם.'}},
+
+ {id:'plague', era:'med', ico:'🐀', game:'dodge',
+  name:{en:'Outrun the Black Death', he:'ברחו מהמוות השחור'}, year:{en:'1347', he:'1347'},
+  brief:{en:'Plague rats flood the streets. Carry the medicine through without being bitten.',
+         he:'עכברושי המגפה מציפים את הרחובות. העבירו את התרופה בלי שיינשכו אתכם.'},
+  dare:{en:'What if a third of Europe never died?', he:'מה אם שליש מאירופה לא היה מת?'},
+  params:{distance:100, speed:1.0, density:1.0, label:{en:'Dodge the rats, deliver the cure', he:'התחמקו מהעכברושים, מסרו את התרופה'}, obstacle:'🐀'},
+  tl:{tag:'PLAGUE', adj:{en:'Plague-Free', he:'נטולת-מגפות'},
+      cons:[{en:'Europe is wildly overcrowded; the Renaissance happened twice.', he:'אירופה צפופה בטירוף; הרנסאנס קרה פעמיים.'},
+            {en:'Doctors\' beak-masks became a luxury fashion brand.', he:'מסכות-המקור של הרופאים הפכו למותג אופנה יוקרתי.'}],
+      exhibit:{en:'Plague doctor mask (now a perfume bottle)', he:'מסכת רופא המגפה (היום בקבוק בושם)'},
+      figure:{en:'Beatrix the Cure-Runner', he:'ביאטריקס שליחת-התרופה'}},
+  real:{en:'The Black Death (1347–51) killed 30–60% of Europe. Horrific, but it reshaped society: labour shortages raised wages, weakened feudalism, and helped set the stage for the Renaissance.',
+        he:'המוות השחור (1347–51) הרג 30–60% מאוכלוסיית אירופה. נורא, אך הוא עיצב מחדש את החברה: מחסור בעובדים העלה שכר, החליש את הפיאודליזם, וסייע להכין את הקרקע לרנסאנס.'}},
+
+ // ---------- EXPLORATION ----------
+ {id:'voyage', era:'exp', ico:'🧭', game:'dodge',
+  name:{en:'Navigate the Great Voyage', he:'נווטו את המסע הגדול'}, year:{en:'1492', he:'1492'},
+  brief:{en:'Open ocean, no maps, mutiny brewing. Steer through storms and reefs.',
+         he:'אוקיינוס פתוח, בלי מפות, מרד מתבשל. נווטו דרך סערות ושוניות.'},
+  dare:{en:'What if the sea routes opened a century early?', he:'מה אם נתיבי הים היו נפתחים מאה שנה מוקדם יותר?'},
+  params:{distance:120, speed:1.2, density:1.15, label:{en:'Steer the ship past storms & reefs', he:'נווטו את הספינה בין סערות ושוניות'}, obstacle:'🌊'},
+  tl:{tag:'VOYAGE', adj:{en:'Sea-Trading', he:'סוחרת-ימים'},
+      cons:[{en:'Pirates are a respectable white-collar profession.', he:'פיראטים הם מקצוע צווארון-לבן מכובד.'},
+            {en:'GPS still just says "there be dragons".', he:'ה-GPS עדיין אומר רק "כאן יש דרקונים".'}],
+      exhibit:{en:'A map labelled entirely "HERE BE DRAGONS"', he:'מפה שכתוב עליה רק "כאן יש דרקונים"'},
+      figure:{en:'Captain Marina, Reef-Dodger', he:'קפטן מרינה, מתחמקת-השוניות'}},
+  real:{en:'15th–16th c. ocean voyages connected continents, sparking global trade — and also colonisation, conquest, and the Columbian Exchange of crops, animals, and devastating diseases.',
+        he:'מסעות הים של המאות ה-15–16 חיברו יבשות, והציתו סחר עולמי — וגם קולוניאליזם, כיבוש, וה"חילופים הקולומביאניים" של גידולים, בעלי חיים ומחלות הרסניות.'}},
+
+ // ---------- INDUSTRIAL ----------
+ {id:'tesla', era:'ind', ico:'⚡', game:'timing',
+  name:{en:'Tesla Wins the Current War', he:'טסלה מנצח במלחמת הזרמים'}, year:{en:'1893', he:'1893'},
+  brief:{en:'Charge the Tesla coil to a perfect resonance and electrify the world — wirelessly.',
+         he:'הטעינו את סליל טסלה לתהודה מושלמת וחשמלו את העולם — בלי חוטים.'},
+  dare:{en:'What if power was free and wireless?', he:'מה אם החשמל היה חינמי ואלחוטי?'},
+  params:{rounds:5, allowed:2, speed:1.5, zone:0.22, label:{en:'Lock the coil at peak charge', he:'נעלו את הסליל בשיא הטעינה'}},
+  tl:{tag:'TESLA', adj:{en:'Tesla-Powered', he:'מונעת-טסלה'},
+      cons:[{en:'Phones never need charging. Chargers are in museums.', he:'טלפונים לא צריכים טעינה. מטענים נמצאים במוזיאונים.'},
+            {en:'Pigeons are revered as engineers.', he:'יונים נערצות כמהנדסות.'}],
+      exhibit:{en:'Wireless lightbulb (glows from vibes)', he:'נורה אלחוטית (זוהרת מאנרגיה טובה)'},
+      figure:{en:'Nikola Tesla, Lord of Lightning', he:'ניקולה טסלה, אדון הברק'}},
+  real:{en:'In the "War of Currents," Tesla & Westinghouse\'s alternating current (AC) beat Edison\'s direct current (DC) for power grids. Tesla dreamed of wireless power — still not practical at large scale.',
+        he:'ב"מלחמת הזרמים", הזרם החילופין (AC) של טסלה וווסטינגהאוס ניצח את הזרם הישר (DC) של אדיסון עבור רשתות חשמל. טסלה חלם על חשמל אלחוטי — עדיין לא מעשי בקנה מידה גדול.'}},
+
+ // ---------- MODERN ----------
+ {id:'titanic', era:'mod', ico:'🚢', game:'dodge',
+  name:{en:'Save the Titanic', he:'הצילו את הטיטניק'}, year:{en:'1912', he:'1912'},
+  brief:{en:'"Unsinkable," they said. Iceberg field ahead — steer her through to New York.',
+         he:'"בלתי טביעה", הם אמרו. שדה קרחונים מלפנים — נווטו אותה בשלום לניו יורק.'},
+  dare:{en:'What if the Titanic arrived safely?', he:'מה אם הטיטניק הייתה מגיעה בשלום?'},
+  params:{distance:130, speed:1.25, density:1.2, label:{en:'Steer the Titanic around the icebergs', he:'נווטו את הטיטניק סביב הקרחונים'}, obstacle:'🧊'},
+  tl:{tag:'TITANIC', adj:{en:'Unsinkable', he:'בלתי-טביעה'},
+      cons:[{en:'Every cruise ship is named Titanic II–MMVII. Confusing.', he:'כל ספינת תענוגות נקראת טיטניק II–MMVII. מבלבל.'},
+            {en:'That one movie was a 3-hour documentary about boats arriving fine.', he:'הסרט ההוא היה דוקו של 3 שעות על ספינות שמגיעות בסדר.'}],
+      exhibit:{en:'The iceberg (it apologised)', he:'הקרחון (הוא התנצל)'},
+      figure:{en:'Captain Smith, Iceberg-Whisperer', he:'קפטן סמית׳, לוחש-הקרחונים'}},
+  real:{en:'The RMS Titanic sank on its maiden voyage after hitting an iceberg; ~1,500 died, partly from too few lifeboats. The disaster forced new maritime safety laws still in force today.',
+        he:'הטיטניק טבעה במסע הבכורה שלה לאחר שפגעה בקרחון; ~1,500 נספו, בין היתר בשל מחסור בסירות הצלה. האסון חולל חוקי בטיחות ימית חדשים שתקפים עד היום.'}},
+
+ {id:'mars', era:'mod', ico:'🚀', game:'aim',
+  name:{en:'Land on Mars in 1969', he:'נחתו על מאדים ב-1969'}, year:{en:'1969', he:'1969'},
+  brief:{en:'Forget the Moon — aim the rocket and stick a landing on the Red Planet.',
+         he:'תשכחו מהירח — כוונו את הרקטה ובצעו נחיתה על הכוכב האדום.'},
+  dare:{en:'What if the Space Race went all the way to Mars?', he:'מה אם מרוץ החלל היה מגיע עד מאדים?'},
+  params:{targets:3, speed:120, label:{en:'Land the rocket on Mars', he:'הנחיתו את הרקטה על מאדים'}, targetEmoji:'🔴'},
+  tl:{tag:'MARS', adj:{en:'Interplanetary', he:'בין-כוכבית'},
+      cons:[{en:'Half of humanity lives on Mars. The other half complains about the commute.', he:'חצי מהאנושות חי על מאדים. החצי השני מתלונן על הנסיעה.'},
+            {en:'"Going to the moon" is what you say when you pop to the shops.', he:'"לקפוץ לירח" זה מה שאומרים כשרצים לסופר.'}],
+      exhibit:{en:'First Martian falafel stand sign', he:'שלט דוכן הפלאפל המאדימי הראשון'},
+      figure:{en:'Commander Vega, First on Mars', he:'מפקדת וגה, הראשונה על מאדים'}},
+  real:{en:'In 1969 Apollo 11 landed humans on the Moon — not Mars. We still have never sent people to Mars; the trip takes ~7 months each way and is a central goal of modern spaceflight.',
+        he:'ב-1969 אפולו 11 הנחיתה בני אדם על הירח — לא על מאדים. עדיין מעולם לא שלחנו אנשים למאדים; המסע אורך ~7 חודשים לכל כיוון והוא יעד מרכזי של תעופת החלל המודרנית.'}},
+
+ // ---------- FUTURE ----------
+ {id:'ai', era:'fut', ico:'🤖', game:'sequence',
+  name:{en:'Teach the First AI Kindness', he:'למדו את ה-AI הראשון להיות טוב'}, year:{en:'20XX', he:'20XX'},
+  brief:{en:'A new mind wakes up. Mirror its patterns and raise it right.',
+         he:'תודעה חדשה מתעוררת. שקפו את הדפוסים שלה וגדלו אותה כראוי.'},
+  dare:{en:'What if the first superintelligence just… liked us?', he:'מה אם הבינה העל-אנושית הראשונה פשוט… חיבבה אותנו?'},
+  params:{startLen:3, rounds:4, label:{en:'Mirror the AI\'s thought pattern', he:'שקפו את דפוס המחשבה של ה-AI'}},
+  tl:{tag:'ROBOTS', adj:{en:'Robot-Friendly', he:'ידידותית-לרובוטים'},
+      cons:[{en:'AIs do all the chores and insist you take breaks.', he:'הרובוטים עושים את כל המטלות ומתעקשים שתנוחו.'},
+            {en:'The toaster gives unsolicited but excellent life advice.', he:'הטוסטר נותן עצות חיים שלא ביקשתם — אבל מצוינות.'}],
+      exhibit:{en:'A robot\'s "World\'s Best Human" mug', he:'ספל "ההומאן הכי טוב בעולם" של רובוט'},
+      figure:{en:'C.L.A.U.D.E., the Kind Machine', he:'ק.ל.א.ו.ד., המכונה הטובה'}},
+  real:{en:'AI alignment — making powerful AI systems pursue goals that match human values — is a real, active field of research. The friendly vs. risky outcome may depend on choices we make now.',
+        he:'יישור AI — לגרום למערכות בינה מלאכותית חזקות לרדוף אחר מטרות התואמות לערכים אנושיים — הוא תחום מחקר אמיתי ופעיל. התוצאה הידידותית מול המסוכנת עשויה להיות תלויה בבחירות שאנחנו עושים עכשיו.'}}
+];
+
+/* ---------------- timeline generator ----------------
+   Special combos fire when their full tag set is active; otherwise the
+   present is composed from stacked adjectives + a noun. */
+const COMBOS = [
+  {tags:['DINOS','CAESAR','TESLA'], name:{en:'The Dino-Roman Cyber Empire', he:'האימפריה הדינו-רומית הסייברית'}, emoji:'🦖🏛️⚡'},
+  {tags:['DINOS','CAESAR'], name:{en:'The Jurassic Roman Republic', he:'הרפובליקה הרומית היורסית'}, emoji:'🦖🏛️'},
+  {tags:['VIKINGS','MARS'], name:{en:'The Viking Mars Colony', he:'מושבת מאדים הוויקינגית'}, emoji:'⚔️🚀'},
+  {tags:['TESLA','ROBOTS'], name:{en:'The Wireless Robot Utopia', he:'אוטופיית הרובוטים האלחוטית'}, emoji:'⚡🤖'},
+  {tags:['LIBRARY','MARS'], name:{en:'The Enlightened Space Civilization', he:'ציוויליזציית החלל הנאורה'}, emoji:'📜🚀'},
+  {tags:['DINOS','MARS'], name:{en:'The Interplanetary Dinosaur Federation', he:'פדרציית הדינוזאורים הבין-כוכבית'}, emoji:'🦖🚀'}
+];
+const WORLD_NOUN = {en:'World', he:'עולם'};
+
+function describeTimeline(){
+  const active = EVENTS.filter(e=>state.cleared[e.id]).map(e=>e.tl);
+  if(active.length===0) return {name:T().worldDefault, emoji:'🌍', lines:[]};
+  const tagset = active.map(t=>t.tag);
+  // best special combo (most tags matched)
+  let best=null;
+  for(const c of COMBOS){ if(c.tags.every(tg=>tagset.includes(tg))){ if(!best||c.tags.length>best.tags.length) best=c; } }
+  let name, emoji;
+  if(best){ name=best.name[lang]; emoji=best.emoji; }
+  else{
+    const adjs=active.slice(0,3).map(t=>t.adj[lang]);
+    name = (lang==='en')
+      ? `The ${adjs.join(', ')} ${WORLD_NOUN.en}`
+      : `${WORLD_NOUN.he} ה${adjs.join(', ')}`;
+    emoji = active.slice(0,4).map(t=>EVENTS.find(e=>e.tl.tag===t.tag).ico).join('');
+  }
+  // up to 3 consequence lines, newest events first
+  const lines=[];
+  for(let i=active.length-1;i>=0 && lines.length<3;i--){
+    const pool=active[i].cons; lines.push(pool[(state.seed+i)%pool.length][lang]);
+  }
+  return {name, emoji, lines};
+}
+
+/* ---------------- state ---------------- */
+const state = (()=>{
+  let s={cleared:{}, shards:0, seed:Math.floor(Math.random()*9999), mute:false, history:false, caveman:false};
+  try{ const raw=localStorage.getItem('ch.save'); if(raw){ const p=JSON.parse(raw); s.cleared=p.cleared||{}; s.shards=p.shards||0; } }catch(e){}
+  try{ s.mute=localStorage.getItem('ch.mute')==='1'; }catch(e){}
+  try{ s.history=localStorage.getItem('ch.history')==='1'; }catch(e){}
+  try{ s.caveman=localStorage.getItem('ch.caveman')==='1'; }catch(e){}
+  return s;
+})();
+function save(){ try{ localStorage.setItem('ch.save', JSON.stringify({cleared:state.cleared, shards:state.shards})); }catch(e){} }
+function isUnlocked(idx){ return idx===0 || !!state.cleared[EVENTS[idx-1].id]; }
+function nextIdx(){ for(let i=0;i<EVENTS.length;i++){ if(isUnlocked(i)&&!state.cleared[EVENTS[i].id]) return i; } return -1; }
+/* Caveman Mode eases every engine so anyone (or a caveman) can win. */
+function gameParams(e){
+  const p=Object.assign({}, e.params);
+  if(!state.caveman) return p;
+  switch(e.game){
+    case 'aim':      p.speed*=0.5;  p._need=1; p._bonusShots=4; p._big=1.7; break;
+    case 'dodge':    p.speed*=0.65; p.density*=0.6; p.distance*=0.7; p._lives=6; break;
+    case 'timing':   p.zone=Math.min(0.6,p.zone*2.0); p.allowed+=5; p.speed*=0.55; p.rounds=Math.max(3,p.rounds-1); break;
+    case 'mash':     p.goal*=0.55; p.seconds+=3; break;
+    case 'sequence': p.startLen=2; p.rounds=Math.max(2,p.rounds-2); break;
+  }
+  return p;
+}
+/* main objective text: grunty in caveman mode, normal otherwise */
+function objMain(e){ return state.caveman ? (T()['cv_'+e.game]||'GO!') : (e.params.label?e.params.label[lang]:''); }
+
+/* ---------------- helpers ---------------- */
+function $(id){ return document.getElementById(id); }
+function show(scr){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('show')); $(scr).classList.add('show'); }
+function track(n){ try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'evt-ch-'+n,event:true}); }catch(e){} }
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); }
+function flash(cls,ms){ const f=$('flash'); f.className=cls+' show'; clearTimeout(f._t); f._t=setTimeout(()=>f.classList.remove('show'),ms||90); }
+function vib(p){ try{ if(navigator.vibrate) navigator.vibrate(p); }catch(e){} }
+function confetti(n){ const cols=['#ff4d4d','#ff9f43','#ffd166','#5dffa8','#3ee6ff','#a98bff'];
+  for(let k=0;k<n;k++){ const s=document.createElement('div'); s.className='confetti';
+    s.style.left=(Math.random()*100)+'%'; s.style.background=cols[k%cols.length];
+    const dur=900+Math.random()*700; s.style.animation=`conf ${dur}ms ease-in forwards`;
+    s.style.transform=`rotate(${Math.random()*360}deg)`; document.body.appendChild(s);
+    setTimeout(()=>s.remove(),dur+50); } }
+
+/* ---------------- audio (lazy WebAudio, no files) ---------------- */
+let AC=null, BUS=null;
+function ac(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+  if(AC&&AC.state==='suspended'){ try{AC.resume();}catch(e){} } return AC; }
+function bus(){ const a=ac(); if(!a)return null; if(!BUS){ BUS=a.createDynamicsCompressor(); BUS.connect(a.destination); } return BUS; }
+function beep(f,dur,type,vol,delay){ if(state.mute)return; const a=ac(); if(!a)return;
+  try{ const t0=a.currentTime+(delay||0); const o=a.createOscillator(), g=a.createGain();
+    o.type=type||'square'; o.frequency.setValueAtTime(f,t0);
+    g.gain.setValueAtTime(vol||.14,t0); g.gain.exponentialRampToValueAtTime(.001,t0+dur);
+    o.connect(g).connect(bus()||a.destination); o.start(t0); o.stop(t0+dur);}catch(e){} }
+function noise(dur,vol,delay){ if(state.mute)return; const a=ac(); if(!a)return;
+  try{ const t0=a.currentTime+(delay||0); const n=Math.max(1,Math.floor(a.sampleRate*dur));
+    const buf=a.createBuffer(1,n,a.sampleRate); const ch=buf.getChannelData(0);
+    for(let i=0;i<n;i++) ch[i]=(Math.random()*2-1)*(1-i/n);
+    const s=a.createBufferSource(); s.buffer=buf; const g=a.createGain(); g.gain.value=vol||.08;
+    const f=a.createBiquadFilter(); f.type='lowpass'; f.frequency.value=1400;
+    s.connect(f).connect(g).connect(bus()||a.destination); s.start(t0);}catch(e){} }
+const sTap=()=>beep(420,.05,'square',.1);
+const sGood=()=>{ beep(660,.08,'square',.16); beep(880,.1,'square',.16,.06); };
+const sBad=()=>{ beep(200,.16,'sawtooth',.18); noise(.1,.08); };
+const sLaunch=()=>{ beep(180,.18,'sawtooth',.16); beep(420,.12,'triangle',.12,.05); };
+const sBoom=()=>{ noise(.22,.18); beep(120,.2,'sawtooth',.18); };
+const sWin=()=>{ [523,659,784,1047].forEach((f,i)=>beep(f,.16,'square',.16,i*.1)); };
+const sLose=()=>{ [392,330,262].forEach((f,i)=>beep(f,.2,'triangle',.16,i*.12)); };
+const muteBtn=$('muteBtn');
+function applyMute(){ muteBtn.textContent=state.mute?'🔇':'🔊'; try{localStorage.setItem('ch.mute',state.mute?'1':'0');}catch(e){} }
+muteBtn.addEventListener('click',()=>{ state.mute=!state.mute; applyMute(); });
+
+/* ---------------- language + chrome ---------------- */
+function applyLang(){
+  const t=T(); document.documentElement.lang=lang; document.documentElement.dir=t.dir;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ const v=t[el.getAttribute('data-i18n')]; if(typeof v==='string') el.textContent=v; });
+  $('langBtn').textContent = lang==='en' ? 'עברית' : 'EN';
+  applyHistChrome(); applyCaveChrome(); renderNow(); try{localStorage.setItem('ch.lang',lang);}catch(e){}
+}
+$('langBtn').addEventListener('click',()=>{ lang=lang==='en'?'he':'en'; applyLang(); renderMap(); track('lang-'+lang); });
+function applyHistChrome(){ const lbl=state.history?T().histOn:T().histOff;
+  ['histBtn','histBtn2'].forEach(id=>{ const b=$(id); if(b){ b.textContent=lbl; b.classList.toggle('on',state.history); } }); }
+function toggleHistory(){ state.history=!state.history; try{localStorage.setItem('ch.history',state.history?'1':'0');}catch(e){}
+  applyHistChrome(); if($('brief').classList.contains('show')) fillBrief(currentIdx); track('history-'+(state.history?'on':'off')); }
+$('histBtn').addEventListener('click',toggleHistory);
+$('histBtn2').addEventListener('click',toggleHistory);
+function applyCaveChrome(){ const lbl=state.caveman?T().caveOn:T().caveOff;
+  ['caveBtn','caveBtn2'].forEach(id=>{ const b=$(id); if(b){ b.textContent=lbl; b.classList.toggle('on',state.caveman); } }); }
+function toggleCaveman(){ state.caveman=!state.caveman; try{localStorage.setItem('ch.caveman',state.caveman?'1':'0');}catch(e){}
+  applyCaveChrome(); if($('brief').classList.contains('show')) fillBrief(currentIdx); track('caveman-'+(state.caveman?'on':'off')); }
+$('caveBtn').addEventListener('click',toggleCaveman);
+$('caveBtn2').addEventListener('click',toggleCaveman);
+
+/* ---------------- MAP ---------------- */
+function renderNow(){
+  const d=describeTimeline();
+  $('nowName').textContent=d.name;
+  if(d.lines.length){ $('nowLine').textContent=d.lines[0]; }
+  else{ $('nowLine').textContent=T().nowEmpty; }
+}
+function renderMap(){
+  $('shardCount').textContent=state.shards; $('shardCount2').textContent=state.shards;
+  renderNow();
+  const wrap=$('mapScroll'); wrap.innerHTML='';
+  const nIdx=nextIdx();
+  ERAS.forEach(era=>{
+    const evs=EVENTS.map((e,i)=>({e,i})).filter(x=>x.e.era===era.id);
+    if(!evs.length) return;
+    const sec=document.createElement('div'); sec.className='era';
+    sec.innerHTML=`<div class="era-h"><span class="dot"></span><span class="ttl">${era[lang]}</span><span class="yr">${era.yr}</span><span class="ln"></span></div>`;
+    const grid=document.createElement('div'); grid.className='nodes';
+    evs.forEach(({e,i})=>{
+      const unlocked=isUnlocked(i), done=!!state.cleared[e.id];
+      const node=document.createElement('div');
+      node.className='node'+(done?' done':'')+(!unlocked?' locked':'')+(i===nIdx?' next':'');
+      const status = done?T().changed : unlocked?T().tapPlay : T().locked;
+      node.innerHTML=`${done?'<span class="check">✅</span>':''}<div class="ico">${unlocked?e.ico:'🔒'}</div>`+
+        `<div class="nm">${e.name[lang]}</div><div class="st">${status}</div>`;
+      if(unlocked) node.addEventListener('click',()=>{ ac(); openBrief(i); });
+      grid.appendChild(node);
+    });
+    sec.appendChild(grid); wrap.appendChild(sec);
+  });
+}
+
+/* ---------------- BRIEF ---------------- */
+let currentIdx=-1;
+function fillBrief(idx){
+  const e=EVENTS[idx], era=ERAS.find(r=>r.id===e.era);
+  $('bEra').textContent=era[lang]+' · '+era.yr;
+  $('bIco').textContent=e.ico; $('bName').textContent=e.name[lang];
+  $('bYear').textContent=e.year[lang];
+  // Caveman Mode: hide the wordy brief + history, show only the big dare
+  $('bBrief').style.display = state.caveman ? 'none' : '';
+  $('bBrief').textContent=e.brief[lang];
+  $('bDare').textContent=e.dare[lang];
+  $('bHist').style.display = (state.history && !state.caveman) ? '' : 'none';
+  $('bHistBody').textContent=e.real[lang];
+  $('bGo').textContent = state.caveman ? T().cvSmash : T().changeIt;
+}
+function openBrief(idx){ currentIdx=idx; fillBrief(idx); show('brief'); track('brief-'+EVENTS[idx].id); }
+$('briefBack').addEventListener('click',()=>{ show('map'); });
+$('bGo').addEventListener('click',()=>{ ac(); startGame(currentIdx); });
+
+/* ---------------- STAGE plumbing ---------------- */
+let cleanup=null, rafId=0;
+const cv=$('cv'), glayer=$('glayer'), ginstr=$('ginstr');
+function stopEngine(){ if(rafId){ cancelAnimationFrame(rafId); rafId=0; } if(cleanup){ try{cleanup();}catch(e){} cleanup=null; }
+  cv.style.display='none'; glayer.style.display='none'; glayer.innerHTML=''; ginstr.style.display='none'; }
+$('gBack').addEventListener('click',()=>{ stopEngine(); show('map'); });
+
+function setObjective(text,sub){ $('gObj').textContent=text; $('gSub').textContent=sub||''; }
+function setLives(html){ $('gLives').innerHTML=html||''; }
+function instr(text){ ginstr.textContent=text; ginstr.style.display=''; ginstr.style.opacity='1';
+  clearTimeout(ginstr._t); ginstr._t=setTimeout(()=>{ ginstr.style.opacity='0'; },2600); }
+
+function fitCanvas(){ const r=$('arena').getBoundingClientRect();
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=Math.max(2,Math.floor(r.width*dpr)); cv.height=Math.max(2,Math.floor(r.height*dpr));
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); return {ctx, w:r.width, h:r.height}; }
+
+function startGame(idx){
+  const e=EVENTS[idx]; currentIdx=idx; show('stage'); track('play-'+e.id);
+  const done=(success)=>{ stopEngine(); setTimeout(()=>showOutcome(idx,success),250); };
+  const ENG={aim:engAim, dodge:engDodge, timing:engTiming, mash:engMash, sequence:engSeq};
+  (ENG[e.game]||engTiming)(e, done);
+}
+
+/* ============ ENGINE: AIM ============ */
+function engAim(e, done){
+  const {ctx,w,h}=fitCanvas(); cv.style.display='block';
+  const P=gameParams(e); const need=P._need||Math.ceil(P.targets*0.66);
+  let left=P.targets+(P._bonusShots||0), hits=0;
+  setObjective(objMain(e), T().objAimSub(left)); setLives('');
+  instr(state.caveman?objMain(e):T().objAim);
+  const launcher={x:w/2, y:h-46};
+  let target={x:w*0.18, y:h*0.22, vx:(P.speed/60), r:24*(P._big||1), emoji:P.targetEmoji||'☄️'};
+  let proj=null; // {x,y,vx,vy}
+  let aiming=false, ax=0, ay=0; const G=0.18;
+  function resetTarget(){ const fromLeft=Math.random()<.5;
+    target.x=fromLeft?-30:w+30; target.vx=(fromLeft?1:-1)*(P.speed/60)*(1+hits*0.18);
+    target.y=h*(0.14+Math.random()*0.22); }
+  function pos(ev){ const r=cv.getBoundingClientRect(); const p=ev.touches?ev.touches[0]:ev;
+    return {x:p.clientX-r.left, y:p.clientY-r.top}; }
+  function down(ev){ ev.preventDefault(); aiming=true; const p=pos(ev); ax=p.x; ay=p.y; }
+  function move(ev){ if(!aiming)return; ev.preventDefault(); const p=pos(ev); ax=p.x; ay=p.y; }
+  function up(ev){ if(!aiming)return; ev.preventDefault(); aiming=false;
+    const dx=launcher.x-ax, dy=launcher.y-ay; const pw=Math.min(Math.hypot(dx,dy),160)/160;
+    proj={x:launcher.x,y:launcher.y,vx:dx*0.16,vy:dy*0.16}; sLaunch(); }
+  cv.addEventListener('touchstart',down,{passive:false}); cv.addEventListener('touchmove',move,{passive:false});
+  cv.addEventListener('touchend',up,{passive:false});
+  cv.addEventListener('mousedown',down); cv.addEventListener('mousemove',move); window.addEventListener('mouseup',up);
+  cleanup=()=>{ cv.removeEventListener('touchstart',down); cv.removeEventListener('touchmove',move);
+    cv.removeEventListener('touchend',up); cv.removeEventListener('mousedown',down);
+    cv.removeEventListener('mousemove',move); window.removeEventListener('mouseup',up); };
+  function loop(){
+    ctx.clearRect(0,0,w,h);
+    // stars
+    ctx.fillStyle='rgba(255,255,255,.5)'; for(let i=0;i<24;i++){ const sx=(i*97%w), sy=(i*53%(h*0.7)); ctx.fillRect(sx,sy,1.5,1.5); }
+    // target
+    target.x+=target.vx; if(target.x<-40||target.x>w+40) resetTarget();
+    ctx.font='38px serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(target.emoji,target.x,target.y);
+    // launcher
+    ctx.font='34px serif'; ctx.fillText('🛡️',launcher.x,launcher.y);
+    // aim guide
+    if(aiming){ const dx=launcher.x-ax, dy=launcher.y-ay; let px=launcher.x,py=launcher.y,vx=dx*0.16,vy=dy*0.16;
+      ctx.fillStyle='rgba(255,209,102,.7)';
+      for(let i=0;i<18;i++){ px+=vx; py+=vy; vy+=G; if(py>h)break; ctx.beginPath(); ctx.arc(px,py,2.2,0,7); ctx.fill(); } }
+    // projectile
+    if(proj){ proj.x+=proj.vx; proj.y+=proj.vy; proj.vy+=G;
+      ctx.font='26px serif'; ctx.fillText('🚀',proj.x,proj.y);
+      if(Math.hypot(proj.x-target.x,proj.y-target.y)<target.r+12){
+        hits++; left--; sBoom(); flash('gold'); vib(40); proj=null; resetTarget();
+        setObjective(objMain(e), T().objAimSub(left));
+        if(hits>=need) return finish(true);
+        if(left<=0) return finish(false);
+      } else if(proj.y>h+30 || proj.x<-30 || proj.x>w+30){ left--; proj=null; sBad();
+        setObjective(objMain(e), T().objAimSub(left));
+        if(left<=0) return finish(hits>=need); }
+    }
+    rafId=requestAnimationFrame(loop);
+  }
+  let finished=false;
+  function finish(win){ if(finished)return; finished=true; done(win); }
+  resetTarget(); loop();
+}
+
+/* ============ ENGINE: DODGE ============ */
+function engDodge(e, done){
+  const {ctx,w,h}=fitCanvas(); cv.style.display='block';
+  const P=gameParams(e); const total=P._lives||3; let dist=0, lives=total, finished=false;
+  setObjective(objMain(e), T().objDodgeSub); setLives('❤️'.repeat(total)); instr(state.caveman?objMain(e):T().objDodge);
+  const player={x:w/2, y:h-70, r:20, emoji:e.ico};
+  let obs=[]; let spawnT=0; const baseSpeed=2.0*P.speed;
+  function pos(ev){ const r=cv.getBoundingClientRect(); const p=ev.touches?ev.touches[0]:ev; return p.clientX-r.left; }
+  function move(ev){ ev.preventDefault(); player.x=Math.max(24,Math.min(w-24,pos(ev))); }
+  function dragMove(ev){ if(ev.buttons) move(ev); }
+  cv.addEventListener('touchstart',move,{passive:false}); cv.addEventListener('touchmove',move,{passive:false});
+  cv.addEventListener('mousedown',move); cv.addEventListener('mousemove',dragMove);
+  cleanup=()=>{ cv.removeEventListener('touchstart',move); cv.removeEventListener('touchmove',move);
+    cv.removeEventListener('mousedown',move); cv.removeEventListener('mousemove',dragMove); };
+  function finish(win){ if(finished)return; finished=true; done(win); }
+  function loop(){
+    ctx.clearRect(0,0,w,h);
+    // scrolling water lines
+    ctx.strokeStyle='rgba(62,230,255,.12)'; ctx.lineWidth=2;
+    const off=(dist*4)%40; for(let y=-40+off;y<h;y+=40){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    // spawn
+    spawnT--; if(spawnT<=0){ obs.push({x:24+Math.random()*(w-48), y:-30, r:18, emoji:P.obstacle||'🧊'});
+      spawnT=Math.max(16, 44-dist*0.12)/P.density; }
+    const spd=baseSpeed*(1+dist*0.004);
+    ctx.font='34px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    for(const o of obs){ o.y+=spd; ctx.fillText(o.emoji,o.x,o.y); }
+    // collisions
+    for(const o of obs){ if(o.hit)continue; if(Math.hypot(o.x-player.x,o.y-player.y)<o.r+player.r-6){
+      o.hit=true; lives--; sBad(); flash('red'); vib(60); setLives('❤️'.repeat(Math.max(0,lives))+'🖤'.repeat(total-Math.max(0,lives)));
+      if(lives<=0) return finish(false); } }
+    obs=obs.filter(o=>o.y<h+40 && !o.hit);
+    // player
+    ctx.font='36px serif'; ctx.fillText(player.emoji,player.x,player.y);
+    // progress
+    dist+=0.18*P.speed; const pct=Math.min(100,Math.floor(dist/P.distance*100));
+    setObjective(objMain(e), T().objDodgeSub+' '+pct+'%');
+    ctx.fillStyle='rgba(255,255,255,.15)'; ctx.fillRect(0,0,w,5);
+    ctx.fillStyle='#5dffa8'; ctx.fillRect(0,0,w*pct/100,5);
+    if(dist>=P.distance) return finish(true);
+    rafId=requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/* ============ ENGINE: TIMING ============ */
+function engTiming(e, done){
+  glayer.style.display='block';
+  const P=gameParams(e); let round=0, fails=0, finished=false;
+  glayer.innerHTML=`<div class="tm-wrap">
+    <div class="tm-prompt">${objMain(e)}</div>
+    <div class="tm-dots" id="tmDots"></div>
+    <div class="tm-bar"><div class="tm-zone" id="tmZone"></div><div class="tm-mark" id="tmMark"></div></div>
+    <button class="tm-tap" id="tmTap">🎯</button></div>`;
+  const dots=$('tmDots'), zone=$('tmZone'), mark=$('tmMark'), tap=$('tmTap');
+  setObjective(state.caveman?objMain(e):T().objTiming, T().objTimingSub(0,P.rounds)); setLives('');
+  function renderDots(){ let html=''; for(let i=0;i<P.rounds;i++){ const cls=i<round?'ok':''; html+=`<i class="${cls}"></i>`; } dots.innerHTML=html; }
+  function placeZone(){ const zw=P.zone*100; const zl=Math.random()*(100-zw); zone.style.width=zw+'%'; zone.style.left=zl+'%'; return {zl,zw}; }
+  let z=placeZone(); renderDots();
+  let pos=0, dir=1, speed=P.speed*(0.9), t0=performance.now();
+  function loop(now){
+    const dt=Math.min(40,now-t0)/16.67; t0=now;
+    pos+=dir*speed*dt; if(pos>=100){pos=100;dir=-1;} if(pos<=0){pos=0;dir=1;}
+    mark.style.left=`calc(${pos}% - 3px)`;
+    rafId=requestAnimationFrame(loop);
+  }
+  function hit(){ ac(); const inZone = pos>=z.zl && pos<=z.zl+z.zw;
+    if(inZone){ round++; sGood(); flash('green'); vib(25); renderDots(); setObjective(state.caveman?objMain(e):T().objTiming,T().objTimingSub(round,P.rounds));
+      if(round>=P.rounds) return finish(true); z=placeZone(); speed*=1.12; }
+    else{ fails++; sBad(); flash('red'); vib(60); if(fails>P.allowed) return finish(false); z=placeZone(); }
+  }
+  function finish(win){ if(finished)return; finished=true; done(win); }
+  tap.addEventListener('click',hit);
+  cleanup=()=>{ tap.removeEventListener('click',hit); };
+  rafId=requestAnimationFrame(loop);
+}
+
+/* ============ ENGINE: MASH ============ */
+function engMash(e, done){
+  glayer.style.display='block';
+  const P=gameParams(e); let val=0, finished=false, t=P.seconds;
+  glayer.innerHTML=`<div class="ms-wrap">
+    <div class="ms-prompt">${objMain(e)}</div>
+    <div class="ms-track"><div class="ms-fill" id="msFill"></div></div>
+    <div class="ms-btn-wrap"><button class="ms-btn" id="msBtn">${P.btn||'👆'}</button></div>
+    <div class="ms-time" id="msTime"></div></div>`;
+  const fill=$('msFill'), btn=$('msBtn'), timeEl=$('msTime');
+  setObjective(state.caveman?objMain(e):T().objMash,''); setLives('');
+  function render(){ fill.style.width=Math.min(100,val)+'%'; timeEl.textContent=T().msTime(Math.max(0,t)); }
+  function bump(ev){ ev.preventDefault(); val+=4.2; sTap(); vib(8);
+    btn.style.transform='scale(.9)'; setTimeout(()=>btn.style.transform='',60);
+    if(val>=P.goal) return finish(true); render(); }
+  btn.addEventListener('touchstart',bump,{passive:false}); btn.addEventListener('mousedown',bump);
+  render();
+  let last=performance.now();
+  function loop(now){ const dt=(now-last)/1000; last=now; t-=dt; val=Math.max(0,val-dt*6); render();
+    if(t<=0) return finish(val>=P.goal*0.92 ? true : false); rafId=requestAnimationFrame(loop); }
+  function finish(win){ if(finished)return; finished=true; done(win); }
+  cleanup=()=>{ btn.removeEventListener('touchstart',bump); btn.removeEventListener('mousedown',bump); };
+  rafId=requestAnimationFrame(loop);
+}
+
+/* ============ ENGINE: SEQUENCE ============ */
+function engSeq(e, done){
+  glayer.style.display='block';
+  const P=gameParams(e); const ICONS=['📜','🏺','🗝️','⚱️']; let finished=false;
+  glayer.innerHTML=`<div class="sq-wrap">
+    <div class="sq-prompt" id="sqPrompt">${objMain(e)}</div>
+    <div class="sq-round" id="sqRound"></div>
+    <div class="sq-grid" id="sqGrid">${ICONS.map((ic,i)=>`<div class="sq-cell" data-i="${i}">${ic}</div>`).join('')}</div></div>`;
+  const cells=[...glayer.querySelectorAll('.sq-cell')], promptEl=$('sqPrompt'), roundEl=$('sqRound');
+  setObjective(state.caveman?objMain(e):T().objSeq,''); setLives('');
+  let seq=[], round=0, accept=false, inputIdx=0;
+  function lite(i,dur){ const c=cells[i]; c.classList.add('lit'); beep(330+i*120,.16,'sine',.18); setTimeout(()=>c.classList.remove('lit'),dur||300); }
+  function playSeq(){
+    accept=false; promptEl.textContent=T().seqWatch; roundEl.textContent=T().seqRound(round);
+    let i=0; const iv=setInterval(()=>{ if(i>=seq.length){ clearInterval(iv); accept=true; inputIdx=0; promptEl.textContent=T().seqGo; return; }
+      lite(seq[i],360); i++; }, 560);
+  }
+  function nextRound(){ round++; seq.push(Math.floor(Math.random()*4)); setObjective(T().objSeq,T().objSeqSub(round)); setTimeout(playSeq,500); }
+  function tapCell(ev){ const i=+ev.currentTarget.dataset.i; if(!accept)return; ac();
+    lite(i,160); vib(8);
+    if(i===seq[inputIdx]){ inputIdx++;
+      if(inputIdx>=seq.length){ accept=false; sGood(); flash('green');
+        if(round>=P.rounds) return finish(true); setTimeout(nextRound,520); } }
+    else{ accept=false; sBad(); flash('red'); vib(80); setTimeout(()=>finish(false),300); }
+  }
+  cells.forEach(c=>c.addEventListener('click',tapCell));
+  cleanup=()=>{ cells.forEach(c=>c.removeEventListener('click',tapCell)); };
+  function finish(win){ if(finished)return; finished=true; done(win); }
+  // start with seq length = startLen
+  seq=[]; for(let k=0;k<P.startLen-1;k++) seq.push(Math.floor(Math.random()*4));
+  nextRound();
+}
+
+/* ---------------- OUTCOME ---------------- */
+let lastTimeline=null;
+function showOutcome(idx, success){
+  const e=EVENTS[idx];
+  const wasNew = success && !state.cleared[e.id];
+  if(success){
+    if(wasNew){ state.cleared[e.id]=true; state.shards+=15; }
+    else { state.shards+=5; } // replay reward
+    save();
+  }
+  show('outcome'); track((success?'win-':'lose-')+e.id);
+  const v=$('oVerdict');
+  v.className='verdict '+(success?'win':'lose');
+  v.textContent=success?(state.caveman?T().cvWin:T().win):(state.caveman?T().cvLose:T().lose);
+  const card=$('oCard'); const reward=$('oReward');
+  if(success){
+    card.style.display='';
+    const d=describeTimeline(); lastTimeline=d;
+    $('oName').textContent=d.name; $('oEmoji').textContent=d.emoji;
+    $('oBody').innerHTML = d.lines.map(l=>`<div class="tc-line"><span class="b">▸</span><span>${l}</span></div>`).join('') ||
+      `<div class="tc-line"><span>${e.tl.cons[0][lang]}</span></div>`;
+    reward.innerHTML = `<span class="rchip gold">${T().rShard(wasNew?15:5)}</span>`+
+      (wasNew?`<span class="rchip">${T().rExhibit}</span><span class="rchip">${T().rFigure(e.tl.figure[lang])}</span>`:'');
+    flash('gold'); confetti(36); sWin(); vib([0,40,40,40]);
+  } else {
+    card.style.display='none';
+    $('oBody').innerHTML='';
+    reward.innerHTML = `<span class="rchip" style="color:var(--c-dim);border-color:var(--c-border)">${state.caveman?T().cvFail:T().failLine}</span>`;
+    sLose(); vib(120);
+  }
+  $('oHist').style.display = (state.history && !state.caveman) ? '' : 'none';
+  $('oHistBody').textContent=e.real[lang];
+  // Next button: go to next unlocked; if game failed, offer retry styling
+  const nextBtn=$('oNext');
+  if(!success){ nextBtn.textContent=T().retry; }
+  else{ nextBtn.textContent=T().next; }
+}
+$('oNext').addEventListener('click',()=>{ ac();
+  const e=EVENTS[currentIdx];
+  if(!state.cleared[e.id]){ startGame(currentIdx); return; } // retry the same (failed) event
+  const ni=nextIdx(); if(ni>=0) openBrief(ni); else { renderMap(); show('map'); }
+});
+$('oMap').addEventListener('click',()=>{ renderMap(); show('map'); });
+$('oShare').addEventListener('click',async()=>{
+  const name=(lastTimeline&&lastTimeline.name)||describeTimeline().name;
+  const txt=T().shareTxt(name);
+  try{ if(navigator.share){ await navigator.share({text:txt}); track('share'); }
+    else{ await navigator.clipboard.writeText(txt); toast(T().copied); track('share-copy'); } }catch(e){}
+});
+
+/* ---------------- MUSEUM ---------------- */
+$('muBtn').addEventListener('click',()=>{ renderMuseum(); show('museum'); track('museum'); });
+$('muBack').addEventListener('click',()=>{ renderMap(); show('map'); });
+function renderMuseum(){
+  const cleared=EVENTS.filter(e=>state.cleared[e.id]);
+  $('muProgress').textContent=T().muProg(cleared.length,EVENTS.length);
+  const wrap=$('muScroll'); wrap.innerHTML='';
+  if(!cleared.length){ wrap.innerHTML=`<div class="mu-empty">${T().muEmpty}</div>`; return; }
+  cleared.forEach(e=>{
+    const ex=document.createElement('div'); ex.className='ex';
+    ex.innerHTML=`<div class="ico">${e.ico}</div><div class="meta">
+      <div class="nm">${e.tl.exhibit[lang]}</div>
+      <div class="desc">${e.name[lang]} · ${e.year[lang]}</div>
+      <div class="fig">🃏 ${e.tl.figure[lang]}</div></div>`;
+    wrap.appendChild(ex);
+  });
+}
+
+/* ---------------- boot ---------------- */
+window.addEventListener('resize',()=>{ /* canvas refit handled per-engine on start */ });
+applyMute(); applyLang(); renderMap();
+track('open');
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+<script data-goatcounter="https://miklat-games.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
+</content>
