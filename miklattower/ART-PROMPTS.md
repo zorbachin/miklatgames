@@ -20,18 +20,25 @@ then upscale the winner to 4K and downscale to the target size.
 Cozy flat 2.5D pixel-art illustration, clean chunky pixels with soft dark
 outlines and gentle cel-shading, bright and sunny, NOT photorealistic, no
 gritty grain, children's-book-meets-arcade warmth. A tall Israeli apartment
-block with a warm sand-tan facade, drawn as a cutaway dollhouse cross-section
-so every floor is visible. Authentic rooftop solar water heaters (dud shemesh)
-with angled panels, white AC units, a water tank. Each floor cluttered with
-stacked cardboard moving boxes, a bicycle, potted green plants, navy-blue
-windows with little balcony railings and half-closed shutters. A pale concrete
-staircase zig-zags diagonally down the middle. Small rounded cartoon neighbors
-in flat colors — a grandma in a purple cardigan with glasses, two kids, a man
-with a mustache, a little brown dog. A glowing green basement shelter (miklat)
-doorway with a white down-arrow at the base. Bright blue sky, one small round
-yellow sun. Warm, comedic, peaceful — zero violence, nothing broken, no rubble.
-Palette: sky blue, sand tan, navy windows, warm orange ground, shelter green,
-sunny yellow. No text, no letters, no numbers, no signage, no words anywhere.
+block drawn as a cutaway dollhouse cross-section so every floor is visible,
+built from warm Jerusalem-stone blocks (cream and sand tan) with blue metal
+trisim shutters and little balcony railings. Authentic rooftop solar water
+heaters (dud shemesh) with angled panels, white AC units, a black water tank,
+and a satellite dish. Bougainvillea in purple and pink cascades down the
+walls; terracotta plant pots, herbs, a bicycle and stacked cardboard moving
+boxes clutter the floors and balconies; street cats lounge on the sills. A
+pale stone staircase zig-zags diagonally down the middle. A warm, DIVERSE set
+of Israeli neighbors in flat colors holds hands in a line — a grandma
+(savta) in a cardigan with glasses, a bearded religious man in a kippah, a
+woman in a hijab, curly-haired kids in sandals, a man with a mustache in a
+ribbed undershirt, and a little brown dog — led by a cheerful volunteer in a
+yellow hard hat and orange hi-vis vest carrying a broom. A glowing green
+basement shelter (miklat) doorway with a white down-arrow at the base. Bright
+blue sky, one small round yellow sun, a couple of soft clouds. Warm, comedic,
+peaceful — zero violence, nothing broken, no rubble. Palette: sky blue,
+Jerusalem-stone cream/sand, blue shutters, bougainvillea purple-pink, warm
+orange ground, shelter green, sunny yellow. No text, no letters, no numbers,
+no signage, no words anywhere.
 ```
 
 ---
