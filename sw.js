@@ -1,7 +1,7 @@
 /* MIKLAT GAMES portal — offline-first service worker.
    Caches the portal shell ONLY. Game scopes are bypassed —
    each game ships its own SW and owns its own cache. */
-const CACHE = 'miklat-portal-v10';
+const CACHE = 'miklat-portal-v11';
 const ASSETS = [
   './',
   './index.html',
@@ -15,7 +15,8 @@ const ASSETS = [
   './assets/miklatdigger-cover.svg',
   './assets/dome-arc.svg',
   './mamaddash/art/hero.webp',
-  './mamaddash/art/icon.png'
+  './mamaddash/art/icon.png',
+  './whackamullah/cover.png'
 ];
 const GAME_SCOPES = ['/irondome/', '/mamaddash/', '/shukshopper/', '/changinghistory/', '/whackamullah/'];
 

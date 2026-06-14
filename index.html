@@ -102,6 +102,23 @@
   .feat-play{display:inline-block;margin-top:11px;background:linear-gradient(180deg,#3ee6ff,#23b6cf);
     color:#04141a;font-weight:900;font-size:14px;padding:10px 20px;border-radius:12px;
     box-shadow:0 6px 18px rgba(62,230,255,.4);}
+  .feat-play.gold{background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;box-shadow:0 6px 18px rgba(233,162,59,.45);}
+
+  /* split featured: portrait video on one side, text on the other */
+  .featured.split{display:flex;align-items:stretch;min-height:208px;}
+  .featured.split.gold{border-color:var(--c-gold-border);}
+  .split-media{position:relative;flex:0 0 44%;max-width:210px;overflow:hidden;background:#070d20;}
+  .split-media .feat-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+  .split-media::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(90deg,transparent 60%,rgba(16,27,56,.55) 100%);}
+  .split-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+    gap:7px;padding:16px 16px;text-align:start;}
+  .split-body .feat-ttl .name{font-size:21px;text-shadow:none;}
+  .split-body .feat-ttl .name-he{color:var(--c-gold);}
+  .split-body .feat-hook{margin-top:0;color:var(--c-dim);text-shadow:none;max-width:100%;}
+  .split-tag{font-size:10.5px;font-weight:800;letter-spacing:.1em;color:#1a1405;
+    background:linear-gradient(180deg,#ffd166,#e9a23b);padding:4px 10px;border-radius:999px;}
+  .split-body .feat-play{margin-top:4px;}
   .gcard .play{position:absolute;bottom:10px;inset-inline-end:10px;background:linear-gradient(180deg,#ffd166,#e9a23b);
     color:#1a1405;font-weight:900;font-size:14px;padding:9px 16px;border-radius:11px;
     box-shadow:0 6px 18px rgba(233,162,59,.45);}
@@ -195,16 +212,20 @@
       </div>
     </a>
 
-    <div class="cards">
-      <a class="gcard" href="whackamullah/" id="cardWhack" style="--accent:#ffd166" data-game="whackamullah" data-preview="whackamullah/promo.mp4">
-        <div class="coverwrap"><img class="cover" src="whackamullah/cover.png" alt="Whack-a-Mullah" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
-        <div class="body">
-          <div class="ttl"><span class="name">Whack-a-Mullah</span><span class="name-he">וואק-א-מולה</span></div>
-          <div class="hook" data-i18n="whackHook">Slay the Ayatollah, save the Fabatollahs. Multi-tap, 3 strikes — how far can you go?</div>
-          <div class="meta"><span class="pill best" data-i18n="prideOnly">🏳️‍🌈 Only for Pride</span><span class="pill" data-i18n="offline">📵 No reception needed</span></div>
-        </div>
-      </a>
+    <a class="featured split gold" href="whackamullah/" id="featWhack">
+      <div class="split-media">
+        <video class="feat-vid" src="whackamullah/promo.mp4" poster="whackamullah/cover.png"
+               muted loop playsinline preload="none" aria-label="Whack-a-Mullah gameplay"></video>
+      </div>
+      <div class="split-body">
+        <span class="split-tag" data-i18n="newTag">🔨 NEW</span>
+        <div class="feat-ttl"><span class="name">Whack-a-Mullah</span><span class="name-he">וואק-א-מולה</span></div>
+        <div class="feat-hook" data-i18n="whackHook">Slay the Ayatollah, save the Fabatollahs. Multi-tap, 3 strikes — how far can you go?</div>
+        <span class="feat-play gold" data-i18n="playNow">▶ PLAY NOW</span>
+      </div>
+    </a>
 
+    <div class="cards">
       <a class="gcard" href="mamaddash/" id="cardMamad" style="--accent:#7ee8c7" data-game="mamaddash">
         <div class="coverwrap"><img class="cover" src="mamaddash/art/hero.webp" alt="Cartoon runner leaping over a savta on the Tel Aviv promenade" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
@@ -280,7 +301,7 @@ const I18N={
  en:{dir:'ltr',brand:'MIKLAT GAMES',brandAlt:'משחקים למקלט',
   promise:'Free browser games that work in the shelter — no signal, no download, no ads.',
   play:'PLAY ▶',daily:'📅 Today’s Siren',offline:'📵 No reception needed',
-  featured:'★ FEATURED',playNow:'▶ PLAY NOW',
+  featured:'★ FEATURED',playNow:'▶ PLAY NOW',newTag:'🔨 NEW',
   mamadHook:'Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.',
   ironHook:'Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.',
   shukHook:"Friday rush. Swipe through the stalls, fill Ima's list, outrun the vendor before Shabbat closes the shuk.",
@@ -298,7 +319,7 @@ const I18N={
  he:{dir:'rtl',brand:'משחקים למקלט',brandAlt:'MIKLAT GAMES',
   promise:'משחקי דפדפן חינמיים שעובדים בממ״ד — בלי קליטה, בלי הורדה, בלי פרסומות.',
   play:'שחקו ▶',daily:'📅 האזעקה של היום',offline:'📵 עובד בלי קליטה',
-  featured:'★ מומלץ',playNow:'▶ שחקו עכשיו',
+  featured:'★ מומלץ',playNow:'▶ שחקו עכשיו',newTag:'🔨 חדש',
   mamadHook:'רוצו לממ״ד לפני הבום. קופצים מעל הסבתות, מתכופפים מתחת ליונים.',
   ironHook:'מיירטים רקטות עם האצבע. עשרה שלבים משדרות ועד אילת. עובד בלי קליטה.',
   shukHook:'שישי בצהריים. מחליקים בין הדוכנים, ממלאים את הרשימה של אמא, ובורחים מהמוכר לפני שהשוק נסגר.',
@@ -385,7 +406,7 @@ const TIP_URL='https://ko-fi.com/miklatgames';
 if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
   tj.hidden=false;tj.addEventListener('click',()=>track('tip'));}
 document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
-document.getElementById('cardWhack').addEventListener('click',()=>track('play-whackamullah'));
+document.getElementById('featWhack').addEventListener('click',()=>track('play-whackamullah'));
 document.getElementById('featured').addEventListener('click',()=>track('play-irondome'));
 
 /* ---- CrazyGames-style video: desktop only, lazy-loaded, so phones on no/low
@@ -419,13 +440,11 @@ if (DESKTOP) {
    only loads when online — offline visitors just see the poster, no failed
    fetch and nothing cached for the shelter. retry when tab returns / reconnects. */
 (function(){
-  const fv = document.querySelector('.feat-vid'); if (!fv) return;
-  const go = () => {
-    if (!navigator.onLine) return;
-    const p = fv.play(); if (p && p.catch) p.catch(()=>{});
-  };
+  const vids = Array.from(document.querySelectorAll('.feat-vid')); if (!vids.length) return;
+  const play = v => { const p = v.play(); if (p && p.catch) p.catch(()=>{}); };
+  const go = () => { if (navigator.onLine) vids.forEach(play); };
   go();
-  fv.addEventListener('loadeddata', () => { const p = fv.play(); if (p && p.catch) p.catch(()=>{}); });
+  vids.forEach(v => v.addEventListener('loadeddata', () => play(v)));
   document.addEventListener('visibilitychange', () => { if (!document.hidden) go(); });
   document.addEventListener('pointerdown', go, {once:true});
   window.addEventListener('online', go);
