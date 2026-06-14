@@ -1,0 +1,31 @@
+{
+  "game": "Build the Burj",
+  "style": "Vibrant 3D cartoon, app-store polish, thick outlines, punchy saturation — Miklat house look, Dubai edition. Palette: desert gold #e9c08b, brand gold #ffd166, glass cyan #3ee6ff, cream #fdf3e3, dusk purple #5e3c8f, shelter-night sky #0d1120, coral #ff5d73. Hero character (reused arcade cast): Rafi the Worker — yellow hard hat, hi-vis neon-orange vest over teal tee, work gloves, brass finjan at the belt, big grin. Title lockup 'BUILD THE BURJ' in bold chunky uppercase mono with a gold gradient. Generate with bin/imagepack burj",
+  "images": [
+    {
+      "file": "keyart-16x9.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Mobile game key art, vibrant 3D cartoon style, app-store quality. A colossal half-built glass skyscraper soaring up into a golden Dubai sunset, a yellow tower-crane lowering one glowing floor block toward the top of the stack, a few floors comically overhanging and swaying. In the foreground Rafi the Worker — yellow hard hat, hi-vis neon-orange vest, brass finjan at his belt — points up with a proud two-thumbs-up grin. Distant Dubai skyline and golden dunes on the horizon. Palette: desert gold #e9c08b, brand gold #ffd166, glass cyan #3ee6ff, dusk purple #5e3c8f, coral #ff5d73, cream #fdf3e3. Bold chunky game-logo title text 'BUILD THE BURJ' across the top, gold gradient on dark. High-energy, polished."
+    },
+    {
+      "file": "icon-1x1.png",
+      "aspect_ratio": "1:1",
+      "prompt": "App icon for a mobile game, 3D cartoon style, glossy game-icon finish, readable at small size. A single sleek blue-glass skyscraper with a gold spire, a small yellow crane hook lowering one bright gold floor onto its top, with motion sparkle. Centered on a warm brand-gold #ffd166 radial background with a faint desert-dune curve at the bottom. Thick outlines, bold and punchy, cyan glint #3ee6ff on the glass. No text."
+    },
+    {
+      "file": "poster-9x16.png",
+      "aspect_ratio": "9:16",
+      "prompt": "Vertical mobile game poster, vibrant 3D cartoon style, app-store quality. Dramatic low-angle hero shot looking straight up a towering, slightly swaying glass skyscraper mid-construction, a crane-held floor about to drop into place at the very top, the spire glinting against a sunset-to-dusk sky (gold #ffd166 fading to purple #5e3c8f and shelter-night #0d1120). Tiny Rafi the Worker silhouette cheering on a lower floor. Bold chunky title 'BUILD THE BURJ' near the top; a tagline banner at the bottom reading 'BALANCE THE BUDGET. BEAT THE WIND. TOUCH THE SKY.' Polished, high-energy."
+    },
+    {
+      "file": "itchcover-4x3.png",
+      "aspect_ratio": "4:3",
+      "prompt": "Game cover art for itch.io, vibrant 3D cartoon style. Close crop: a yellow crane hook lowering a glowing gold floor block onto a teetering stack of mismatched skyscraper floors (glass, concrete, gold), one floor overhanging precariously, Rafi the Worker's grinning hard-hatted face peeking from the side cheering. Dubai sunset behind, desert gold #e9c08b and brand gold #ffd166, glass cyan #3ee6ff, coral #ff5d73 wobble lines. Bold chunky hand-painted title 'BUILD THE BURJ' across the top third. Thick outlines, punchy saturated colors, readable as a small thumbnail."
+    },
+    {
+      "file": "banner-notext-16x9.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Wide promotional banner for a mobile game, vibrant 3D cartoon style, NO title text. Composition with clean negative space in the top-center for overlay text: on the right, a tall glass skyscraper rising with a crane lowering a floor; center, floors stacking with a little comic sway and sparkle; on the left, Rafi the Worker in hard hat and hi-vis vest giving a thumbs-up. Background: blurred golden Dubai skyline and dunes at sunset. Palette: desert gold #e9c08b, brand gold #ffd166, glass cyan #3ee6ff, dusk purple #5e3c8f, coral #ff5d73, cream #fdf3e3. Polished, high-energy, no text in image."
+    }
+  ]
+}
