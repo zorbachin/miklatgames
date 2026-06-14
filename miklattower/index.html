@@ -225,6 +225,23 @@ function strataCol(r){ // facade tan per clearing-speed zone (cover palette)
   if(r>6)  return '#b9a071';
   return '#ad9362';
 }
+/* Jerusalem-stone facade palette (cream/sand ashlar by depth zone) + trim */
+const MORTAR='#9c8a64', LEDGE='#cabd96', SHUTTER='#3b6ea5', SHUTTER_HI='#5b8fc9';
+const STONE=[['#ded0ad','#d7c8a2','#d1c19a'],['#d6c69e','#cfbd92','#c9b78c'],
+             ['#cdbd90','#c5b184','#bfac7e'],['#c3af80','#bba673','#b59f6c']];
+function bougainvillea(g,dh,x0,yTop,yBot){ // trailing pink/purple vine, like the keyart
+  const cols=['#c0398a','#e066a6','#9b3fb5','#d94fa0'];
+  for(let yy=yTop; yy<yBot; yy+=6){
+    const sway=Math.sin(yy*0.25)*9;
+    g.fillStyle='#3f7d3a'; g.fillRect(x0+sway-2,yy,4,4);
+    for(let k=0;k<3;k++){
+      if(dh(x0+k,yy)>0.42){
+        g.fillStyle=cols[(dh(yy,k+x0)*4)|0];
+        g.beginPath(); g.arc(x0+sway+(k-1)*5,yy+2,2.6,0,7); g.fill();
+      }
+    }
+  }
+}
 function carve(x,y,rad){
   dctx.save(); dctx.globalCompositeOperation='destination-out';
   dctx.beginPath(); dctx.arc(x,y,rad,0,7); dctx.fill(); dctx.restore();
@@ -270,43 +287,59 @@ function genLevel(){
   const seedBase=(G.seed||0)>>>0;
   const dh=(c,r)=>{ let x=Math.imul(((c+1)*73856093)^((r+1)*19349663)^seedBase,2654435761); return ((x^x>>>15)>>>0)/4294967296; };
   for(let r=TOP;r<LOBBY;r++){
-    dctx.fillStyle=strataCol(r); dctx.fillRect(0,r*TILE,W,TILE);
-    dctx.fillStyle='rgba(0,0,0,.05)';                                       // faint pilaster seams
-    for(let c=1;c<COLS;c++) dctx.fillRect(c*TILE,r*TILE,1,TILE);
-    dctx.fillStyle='#9c8757'; dctx.fillRect(0,(r+1)*TILE-3,W,3);            // floor slab
-    dctx.fillStyle='rgba(0,0,0,.10)'; dctx.fillRect(0,(r+1)*TILE-5,W,2);    // slab undershadow
-    dctx.fillStyle='rgba(255,255,255,.12)'; dctx.fillRect(0,r*TILE,W,2);    // slab highlight
-    for(let c=1;c<COLS;c+=2){
-      const wx=c*TILE+9, wy=r*TILE+8, lit=dh(c,r)>0.62;
-      dctx.fillStyle='#8a7456'; dctx.fillRect(wx-2,wy-2,24,26);             // recessed frame
-      dctx.fillStyle=lit?'#ffe9a8':'#2b3550'; dctx.fillRect(wx,wy,20,20);
-      if(lit){ dctx.fillStyle='#ffd166'; dctx.fillRect(wx+2,wy+9,16,9); }   // warm room glow
-      else   { dctx.fillStyle='rgba(255,255,255,.16)'; dctx.fillRect(wx,wy,20,4); } // sky reflection
-      dctx.fillStyle='#6e5c40'; dctx.fillRect(wx+9,wy,2,20); dctx.fillRect(wx,wy+9,20,2); // mullion
-      dctx.fillStyle='#b7a17a'; dctx.fillRect(wx-3,wy+20,26,3);             // sill
-      dctx.fillStyle='rgba(0,0,0,.12)'; dctx.fillRect(wx-3,wy+23,26,1);
-      if(dh(c+5,r)>0.7){                                                    // half-closed shutter (tris)
-        const sh=6+Math.floor(dh(c,r+3)*8);
-        dctx.fillStyle='#c2b18c'; dctx.fillRect(wx,wy,20,sh);
-        dctx.fillStyle='rgba(0,0,0,.18)';
-        for(let s=2;s<sh;s+=3) dctx.fillRect(wx,wy+s,20,1);
-      }
-      if(dh(c+1,r)>0.66){                                                   // balcony rail
-        dctx.fillStyle='#7c6a4c'; dctx.fillRect(wx-4,wy+23,28,2);
-        for(let b=0;b<6;b++) dctx.fillRect(wx-3+b*5,wy+23,1,5);
-      }
-      if(dh(c+2,r+2)>0.82){                                                 // facade AC box
-        dctx.fillStyle='#dfe3e6'; dctx.fillRect(wx+20,wy+4,8,10);
-        dctx.fillStyle='#b8bdc2'; dctx.fillRect(wx+20,wy+4,8,2);
+    const zone=r>14?0:r>10?1:r>6?2:3, tints=STONE[zone];
+    dctx.fillStyle=MORTAR; dctx.fillRect(0,r*TILE,W,TILE);                  // mortar bed
+    for(let cc=0;cc<3;cc++){                                                // ashlar stone courses
+      const cy=r*TILE+cc*13+1;
+      let x=-((cc%2)*15+((r*9)%14));
+      while(x<W){
+        const bw=24+Math.floor(dh(x,r*4+cc)*14);
+        dctx.fillStyle=tints[(dh(x+7,r+cc)*tints.length)|0];
+        dctx.fillRect(x+1.5,cy,bw-3,11);
+        dctx.fillStyle='rgba(255,255,255,.10)'; dctx.fillRect(x+1.5,cy,bw-3,2);
+        dctx.fillStyle='rgba(0,0,0,.08)';       dctx.fillRect(x+1.5,cy+9,bw-3,2);
+        x+=bw;
       }
     }
-    if(dh(r,7)>0.72){                                                       // laundry line
+    dctx.fillStyle=LEDGE; dctx.fillRect(0,(r+1)*TILE-4,W,4);                // stone floor ledge
+    dctx.fillStyle='rgba(255,255,255,.16)'; dctx.fillRect(0,(r+1)*TILE-4,W,1);
+    dctx.fillStyle='rgba(0,0,0,.18)';        dctx.fillRect(0,(r+1)*TILE-1,W,1);
+    for(let c=1;c<COLS;c+=2){                                              // windows + blue trisim shutters
+      const lit=dh(c,r)>0.5, wx=c*TILE+8, wy=r*TILE+9, ww=24, wh=21;
+      dctx.fillStyle=LEDGE; dctx.fillRect(wx-3,wy-4,ww+6,4);               // lintel
+      dctx.fillStyle='#5b4a32'; dctx.fillRect(wx-1,wy-1,ww+2,wh+2);        // recess
+      dctx.fillStyle=lit?'#ffe6a3':'#39506e'; dctx.fillRect(wx+5,wy,ww-10,wh);
+      if(lit){ dctx.fillStyle='#ffd35e'; dctx.fillRect(wx+7,wy+wh*0.45,ww-14,wh*0.55); }
+      else   { dctx.fillStyle='rgba(255,255,255,.15)'; dctx.fillRect(wx+5,wy,ww-10,5); }
+      dctx.fillStyle='#5b4a32'; dctx.fillRect(wx+ww/2-1,wy,2,wh);          // mullion
+      dctx.fillStyle=SHUTTER; dctx.fillRect(wx,wy,5,wh); dctx.fillRect(wx+ww-5,wy,5,wh);
+      dctx.fillStyle='rgba(0,0,0,.20)';
+      for(let s=2;s<wh;s+=3){ dctx.fillRect(wx,wy+s,5,1); dctx.fillRect(wx+ww-5,wy+s,5,1); }
+      dctx.fillStyle=SHUTTER_HI; dctx.fillRect(wx,wy,5,1); dctx.fillRect(wx+ww-5,wy,5,1);
+      dctx.fillStyle=LEDGE; dctx.fillRect(wx-3,wy+wh,ww+6,3);              // sill
+      if(dh(c+1,r)>0.5){                                                   // flower box
+        dctx.fillStyle='#7a4a2a'; dctx.fillRect(wx-2,wy+wh+2,ww+4,5);
+        for(let b=0;b<6;b++){ dctx.fillStyle=(b%2)?'#3f7d3a':(dh(c+b,r)>0.5?'#cf3f8f':'#e066a6'); dctx.fillRect(wx-1+b*4.5,wy+wh,4,4); }
+      } else if(dh(c+4,r)>0.6){                                            // blue balcony rail
+        dctx.fillStyle=SHUTTER; dctx.fillRect(wx-4,wy+wh+4,ww+8,2);
+        for(let b=0;b<8;b++) dctx.fillRect(wx-3+b*4,wy+wh+4,1,6);
+      }
+      if(dh(c+2,r+2)>0.85){                                               // facade AC box
+        dctx.fillStyle='#dfe3e6'; dctx.fillRect(wx+ww-3,wy+3,9,10);
+        dctx.fillStyle='#b8bdc2'; dctx.fillRect(wx+ww-3,wy+3,9,2);
+      }
+    }
+    if(dh(r,7)>0.78){                                                      // laundry line
       const ly=r*TILE+6; dctx.strokeStyle='rgba(40,30,20,.5)'; dctx.lineWidth=1;
       dctx.beginPath(); dctx.moveTo(TILE*1.5,ly); dctx.lineTo(TILE*5.5,ly+3); dctx.stroke();
       const cols=['#e8590c','#4dabf7','#fff','#f06595'];
       for(let i=0;i<4;i++){ dctx.fillStyle=cols[i]; dctx.fillRect(TILE*1.5+18+i*28,ly+1+i,8,11); }
     }
   }
+  // bougainvillea cascades, like the keyart (carved away when you tunnel through)
+  bougainvillea(dctx,dh,10,TOP*TILE+6,(TOP+7)*TILE);
+  bougainvillea(dctx,dh,W-14,(TOP+1)*TILE,(TOP+6)*TILE);
+  bougainvillea(dctx,dh,W*0.5,(TOP+3)*TILE,(TOP+8)*TILE);
   dctx.restore();
 
   const used=new Set();
@@ -329,7 +362,7 @@ function genLevel(){
         openCell(c,r); openCell(c+1,r); carveCapsule(c,r,c+1,r);
         G.pockets.push({c,r});
         G.residents.push({c:c,r:r,homeC:c,homeR:r,x:cellCX(c)+10,y:cellCY(r),
-          name:NAMES[i],kind:i===0?0:1+(i%2),wave:rnd(0,6)});
+          name:NAMES[i],kind:i===0?0:1+((i-1)%4),wave:rnd(0,6)});
         break;
       }
     }
@@ -744,15 +777,23 @@ function drawBackdrop(){
   ctx.fillStyle='#23242c'; ctx.fillRect(0,LOBBY*TILE,W,TILE);
   ctx.fillStyle='#2e3038';
   for(let x=0;x<W;x+=26) ctx.fillRect(x,LOBBY*TILE+TILE-6,22,4);
-  // miklat entrance (bottom-left): inviting glow + stair doorway + green sign
-  const mg=ctx.createRadialGradient(73,LOBBY*TILE+18,4,73,LOBBY*TILE+18,48);
-  mg.addColorStop(0,'rgba(110,219,116,.30)'); mg.addColorStop(1,'rgba(110,219,116,0)');
-  ctx.fillStyle=mg; ctx.fillRect(0,LOBBY*TILE-22,160,TILE+26);
-  ctx.fillStyle='#15161c'; ctx.fillRect(6,LOBBY*TILE+2,40,36);
-  ctx.fillStyle='#2e7d32'; ctx.fillRect(48,LOBBY*TILE+4,50,26);
-  ctx.fillStyle='#fff'; ctx.font='bold 12px Courier New'; ctx.textAlign='center';
-  ctx.fillText('מקלט',73,LOBBY*TILE+16);
-  ctx.fillText('↓',73,LOBBY*TILE+28);
+  // miklat entrance — arched green shelter door (the rescue point), with inviting glow
+  const my=LOBBY*TILE;
+  const mg=ctx.createRadialGradient(50,my+18,4,50,my+18,54);
+  mg.addColorStop(0,'rgba(110,219,116,.34)'); mg.addColorStop(1,'rgba(110,219,116,0)');
+  ctx.fillStyle=mg; ctx.fillRect(0,my-24,150,TILE+28);
+  ctx.fillStyle='#cabd96';                                                  // stone arch surround
+  ctx.beginPath(); ctx.moveTo(20,my+TILE); ctx.lineTo(20,my+12); ctx.arc(50,my+12,30,Math.PI,0); ctx.lineTo(80,my+TILE); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,.10)'; ctx.fillRect(20,my+TILE-3,60,3);
+  ctx.fillStyle='#2f8a35';                                                  // arched green door
+  ctx.beginPath(); ctx.moveTo(30,my+TILE-2); ctx.lineTo(30,my+14); ctx.arc(50,my+14,20,Math.PI,0); ctx.lineTo(70,my+TILE-2); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#256e2a'; ctx.fillRect(49,my+14,2,TILE-16);                // door split
+  ctx.fillStyle='#ffd166'; ctx.beginPath(); ctx.arc(44,my+30,1.8,0,7); ctx.fill(); // handle
+  ctx.fillStyle='#ffe9a8'; ctx.beginPath(); ctx.arc(50,my+3,3.5,0,7); ctx.fill();  // lamp
+  ctx.fillStyle='#fff';                                                     // white down-arrow
+  ctx.fillRect(47,my+17,6,9); ctx.beginPath(); ctx.moveTo(42,my+25); ctx.lineTo(58,my+25); ctx.lineTo(50,my+35); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='#0b3d12'; ctx.font='bold 9px Courier New'; ctx.textAlign='center';
+  ctx.fillText('מקלט',50,my-1);
   // the elevator, perpetually be'tikun (bottom-right)
   ctx.fillStyle='#7a828c'; ctx.fillRect(W-66,LOBBY*TILE+4,52,36);
   ctx.fillStyle='#5d646d'; ctx.fillRect(W-64,LOBBY*TILE+6,23,32); ctx.fillRect(W-39,LOBBY*TILE+6,23,32);
@@ -819,27 +860,23 @@ function drawResident(x,y,kind,wave){
   ctx.fillStyle='rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(0,16,11,3.5,0,0,7); ctx.fill();
   const bob=Math.sin(wave)*2, sw=Math.sin(wave*2);   // sw = gentle limb swing
   const skin='#ffd8b5';
-  let coat,coatHi;
-  if(kind===0){ coat='#b197fc'; coatHi='#c9b8ff'; }       // savta
-  else if(kind===1){ coat='#63e6be'; coatHi='#96f2d7'; }  // kid
-  else { coat='#4dabf7'; coatHi='#74c0fc'; }              // mr mizrahi
+  const C=[{coat:'#b197fc',hi:'#c9b8ff'},   // 0 savta
+           {coat:'#63e6be',hi:'#96f2d7'},   // 1 kid
+           {coat:'#4dabf7',hi:'#74c0fc'},   // 2 mr mizrahi
+           {coat:'#f1f3f5',hi:'#ffffff'},   // 3 religious man (white shirt)
+           {coat:'#b5559e',hi:'#cd76b8'}][kind]||{coat:'#9aa0a6',hi:'#c2c8cd'}; // 4 hijab
   const small=kind===1, bw=small?14:18, bh=small?14:18, bt=small?-2:-4;
-  // feet
-  ctx.fillStyle='#5a4632';
+  ctx.fillStyle='#5a4632';                                  // feet
   ctx.fillRect(-5,13+bob,4,4+sw); ctx.fillRect(1,13+bob,4,4-sw);
-  // arms
-  ctx.strokeStyle=coat; ctx.lineWidth=4; ctx.lineCap='round';
+  ctx.strokeStyle=C.coat; ctx.lineWidth=4; ctx.lineCap='round';   // arms
   ctx.beginPath(); ctx.moveTo(-bw/2+2,bt+5+bob); ctx.lineTo(-bw/2-2,bt+11+bob+sw*1.5); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(bw/2-2,bt+5+bob); ctx.lineTo(bw/2+2,bt+11+bob-sw*1.5); ctx.stroke();
-  // torso
-  ctx.fillStyle=coat; ctx.fillRect(-bw/2,bt+bob,bw,bh);
-  ctx.fillStyle=coatHi; ctx.fillRect(-bw/2,bt+bob,bw,3);
+  ctx.fillStyle=C.coat; ctx.fillRect(-bw/2,bt+bob,bw,bh);   // torso
+  ctx.fillStyle=C.hi; ctx.fillRect(-bw/2,bt+bob,bw,3);
   ctx.fillStyle='rgba(0,0,0,.12)'; ctx.fillRect(bw/2-3,bt+bob,3,bh);
-  // hands
-  ctx.fillStyle=skin; ctx.beginPath();
+  ctx.fillStyle=skin; ctx.beginPath();                     // hands
   ctx.arc(-bw/2-2,bt+11+bob+sw*1.5,2.2,0,7); ctx.arc(bw/2+2,bt+11+bob-sw*1.5,2.2,0,7); ctx.fill();
-  // head
-  const hy=(small?-8:-10)+bob, hr=small?7:8;
+  const hy=(small?-8:-10)+bob, hr=small?7:8;               // head
   ctx.fillStyle=skin; ctx.beginPath(); ctx.arc(0,hy,hr,0,7); ctx.fill();
   ctx.fillStyle='rgba(0,0,0,.08)'; ctx.beginPath(); ctx.arc(2,hy,hr,-0.6,1.4); ctx.fill();
   if(kind===0){ // savta — grey bun + glasses + cardigan buttons
@@ -852,16 +889,26 @@ function drawResident(x,y,kind,wave){
     ctx.fillStyle='#e8590c'; ctx.beginPath(); ctx.arc(0,hy-3,6,Math.PI,0); ctx.fill();
     ctx.fillRect(-6,hy-3,9,2); ctx.fillRect(1,hy-3.6,8,2.2);
     ctx.fillStyle='#222'; ctx.fillRect(-3,hy-1,2,2.4); ctx.fillRect(2,hy-1,2,2.4);
-  } else { // mr mizrahi — hair + mustache
+  } else if(kind===2){ // mr mizrahi — hair + mustache
     ctx.fillStyle='#3a2e22'; ctx.beginPath(); ctx.arc(0,hy-4,7,Math.PI,0); ctx.fill();
     ctx.fillStyle='#222'; ctx.fillRect(-4,hy-1,2,2.4); ctx.fillRect(3,hy-1,2,2.4);
     ctx.fillStyle='#495057'; ctx.fillRect(-4,hy+3,8,2);
+  } else if(kind===3){ // religious man — kippah + beard
+    ctx.fillStyle='#2a2018'; ctx.beginPath(); ctx.arc(0,hy-3,7,Math.PI,-0.1); ctx.fill();
+    ctx.fillStyle='#1a1410'; ctx.beginPath(); ctx.ellipse(0,hy-hr+1,4.5,2.6,0,Math.PI,0); ctx.fill();
+    ctx.fillStyle='#3a2e22'; ctx.beginPath(); ctx.moveTo(-hr+1,hy+1); ctx.quadraticCurveTo(0,hy+hr+6,hr-1,hy+1); ctx.quadraticCurveTo(0,hy+hr+2,-hr+1,hy+1); ctx.fill();
+    ctx.fillStyle='#222'; ctx.fillRect(-4,hy-1,2,2.4); ctx.fillRect(3,hy-1,2,2.4);
+  } else if(kind===4){ // woman in hijab
+    ctx.fillStyle='#2f9e8f'; ctx.beginPath(); ctx.arc(0,hy,hr+2,0,7); ctx.fill();
+    ctx.fillRect(-hr-1,hy,hr*2+2,hr+7);
+    ctx.fillStyle=skin; ctx.beginPath(); ctx.ellipse(0,hy+1,hr-2.5,hr-1,0,0,7); ctx.fill();
+    ctx.fillStyle='#222'; ctx.fillRect(-3.5,hy,2,2.2); ctx.fillRect(2,hy,2,2.2);
   }
   // shared smile + rosy cheeks
   ctx.strokeStyle='#b3683f'; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.arc(0,hy+2,2.2,0.25,Math.PI-0.25); ctx.stroke();
-  ctx.fillStyle='rgba(255,140,120,.35)';
-  ctx.beginPath(); ctx.arc(-4.5,hy+2,1.5,0,7); ctx.arc(4.5,hy+2,1.5,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(0,hy+2.5,2,0.25,Math.PI-0.25); ctx.stroke();
+  ctx.fillStyle='rgba(255,140,120,.32)';
+  ctx.beginPath(); ctx.arc(-4.3,hy+2.5,1.4,0,7); ctx.arc(4.3,hy+2.5,1.4,0,7); ctx.fill();
   ctx.restore();
 }
 function drawCritter(k){
@@ -1225,7 +1272,7 @@ function loop(now){
   ctx.drawImage(dirt,0,0,W,H);
   // facade edges against the sky (cover parity)
   ctx.fillStyle='#8ecdf0'; ctx.fillRect(0,TOP*TILE,6,(LOBBY-TOP)*TILE); ctx.fillRect(W-6,TOP*TILE,6,(LOBBY-TOP)*TILE);
-  ctx.fillStyle='#8a7456'; ctx.fillRect(6,TOP*TILE,2,(LOBBY-TOP)*TILE); ctx.fillRect(W-8,TOP*TILE,2,(LOBBY-TOP)*TILE);
+  ctx.fillStyle='#b3a279'; ctx.fillRect(6,TOP*TILE,2,(LOBBY-TOP)*TILE); ctx.fillRect(W-8,TOP*TILE,2,(LOBBY-TOP)*TILE);
   for(const k of G.rocks) drawRock(k);
   for(const f of G.falafels){
     ctx.fillStyle='#b07a2e'; ctx.beginPath(); ctx.arc(f.x,f.y,6,0,7); ctx.fill();
