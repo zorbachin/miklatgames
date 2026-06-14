@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0d1120">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BUILD THE BURJ 🏗️ — ابنِ البرج">
+<meta property="og:description" content="Balance the budget, beat the wind, touch the sky. Stack Dubai's tallest tower one floor at a time. No app. One thumb.">
+<meta property="og:url" content="https://miklatgames.fun/burj/">
+<meta property="og:image" content="https://miklatgames.fun/burj/press/keyart.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Dubai tower-stacker from the MIKLAT GAMES arcade. Balance budget, materials and stability to the spire. Works offline.">
+<link rel="manifest" href="manifest.webmanifest">
+<title>BUILD THE BURJ 🏗️ — ابنِ البرج</title>
+<style>
+  :root{
+    --night:#0d1120; --panel:#161d33; --gold:#ffd166; --amber:#e9a23b;
+    --red:#ff5d73; --mint:#7ee8c7; --cyan:#3ee6ff; --cream:#fdf3e3;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--night);
+    font-family:'Heebo',system-ui,Segoe UI,Roboto,Arial,sans-serif;color:var(--cream);
+    -webkit-user-select:none;user-select:none;touch-action:manipulation}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#05070e}
+  #game{position:relative;width:100%;height:100%;max-width:560px;margin:0 auto;background:var(--night);overflow:hidden;box-shadow:0 0 60px rgba(0,0,0,.6)}
+  canvas{display:block;width:100%;height:100%;touch-action:none}
+  .mono{font-family:'Courier New',ui-monospace,monospace;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+  /* top chrome */
+  #top{position:absolute;top:0;left:0;right:0;display:flex;gap:8px;align-items:center;
+    padding:max(10px,env(safe-area-inset-top)) 12px 8px;z-index:6;pointer-events:none}
+  #top a,#top button{pointer-events:auto}
+  .chip{background:rgba(13,17,32,.62);border:1px solid rgba(253,243,227,.18);border-radius:11px;
+    color:var(--cream);font-size:12px;font-weight:800;padding:7px 10px;text-decoration:none;cursor:pointer;backdrop-filter:blur(4px)}
+  .chip:active{transform:scale(.95)}
+  .spacer{flex:1}
+  /* HUD */
+  #hud{position:absolute;left:0;right:0;top:54px;z-index:5;padding:0 12px;display:none;pointer-events:none}
+  .hudrow{display:flex;gap:8px;align-items:stretch}
+  .stat{flex:1;background:rgba(13,17,32,.55);border:1px solid rgba(253,243,227,.14);border-radius:12px;padding:7px 10px;backdrop-filter:blur(4px)}
+  .stat .lab{font-size:9.5px;opacity:.72;font-weight:800;letter-spacing:.1em}
+  .stat .val{font-size:19px;font-weight:900;line-height:1.05;font-family:'Courier New',monospace}
+  .stat.h .val{color:var(--gold)} .stat.b .val{color:var(--mint)}
+  #stabwrap{margin-top:8px;height:9px;background:rgba(13,17,32,.6);border:1px solid rgba(253,243,227,.14);border-radius:9px;overflow:hidden}
+  #stabbar{height:100%;width:0%;background:linear-gradient(90deg,var(--mint),var(--gold) 62%,var(--red));transition:width .15s}
+  #stablab{font-size:9.5px;opacity:.72;font-weight:800;letter-spacing:.1em;margin-top:3px}
+  /* overlays */
+  .overlay{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:24px;gap:14px;background:radial-gradient(120% 90% at 50% 10%,rgba(13,17,32,.62),rgba(5,7,14,.92))}
+  .overlay h1{margin:0;font-size:clamp(34px,11vw,60px);line-height:.92;color:var(--gold);
+    text-shadow:0 3px 0 #7a4d12,0 0 26px rgba(255,209,102,.35)}
+  .overlay .sub{font-size:14px;opacity:.92;max-width:300px;line-height:1.45}
+  .overlay .ar2{font-size:18px;color:var(--cyan);font-weight:800}
+  .btn{appearance:none;border:0;cursor:pointer;font-weight:900;letter-spacing:.05em;text-transform:uppercase;
+    font-family:'Courier New',monospace;font-size:18px;color:#3a2606;border-radius:15px;padding:15px 30px;
+    background:linear-gradient(180deg,var(--gold),var(--amber));box-shadow:0 6px 0 #99691b,0 10px 22px rgba(0,0,0,.4)}
+  .btn:active{transform:translateY(3px);box-shadow:0 3px 0 #99691b}
+  .btn.ghost{background:transparent;color:var(--cream);border:1.5px solid rgba(253,243,227,.5);box-shadow:none;font-size:14px;padding:12px 22px}
+  .big{font-size:clamp(46px,18vw,96px);font-weight:900;color:var(--gold);font-family:'Courier New',monospace;line-height:.9}
+  .biglab{font-size:12px;letter-spacing:.18em;opacity:.7;font-weight:800}
+  #beat{display:none;background:rgba(62,230,255,.14);border:1px solid var(--cyan);color:var(--cyan);
+    font-size:12.5px;font-weight:800;border-radius:11px;padding:9px 12px;max-width:320px}
+  #toast{position:absolute;left:50%;top:36%;transform:translateX(-50%);z-index:9;background:rgba(13,17,32,.92);
+    border:1px solid var(--gold);color:var(--gold);font-weight:900;font-size:15px;padding:10px 16px;border-radius:12px;
+    opacity:0;transition:opacity .25s;pointer-events:none;font-family:'Courier New',monospace;text-align:center}
+  #toast.show{opacity:1}
+  .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .tag{font-size:11px;opacity:.6;letter-spacing:.12em;font-weight:700}
+  [dir=rtl] .stat .lab,[dir=rtl] #stablab{letter-spacing:0}
+  #tip{display:none;font-size:12px;color:var(--gold);text-decoration:none;font-weight:800;margin-top:2px}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="game">
+  <canvas id="cv"></canvas>
+
+  <div id="top">
+    <a class="chip" href="https://miklatgames.fun/" id="backBtn">← <span data-i="arcade">ARCADE</span></a>
+    <div class="spacer"></div>
+    <button class="chip" id="muteBtn" title="sound">🔊</button>
+    <button class="chip" id="langBtn" title="language">عربي</button>
+  </div>
+
+  <div id="hud">
+    <div class="hudrow">
+      <div class="stat h"><div class="lab" data-i="height">HEIGHT</div><div class="val" id="hHeight">0m</div></div>
+      <div class="stat b"><div class="lab" data-i="budget">BUDGET</div><div class="val" id="hBudget">0</div></div>
+    </div>
+    <div id="stabwrap"><div id="stabbar"></div></div>
+    <div id="stablab" data-i="stability">STABILITY</div>
+  </div>
+
+  <!-- MENU -->
+  <div class="overlay" id="menu">
+    <div class="tag mono">MIKLAT GAMES · DUBAI</div>
+    <h1 class="mono">BUILD<br>THE BURJ</h1>
+    <div class="ar2">ابنِ البرج</div>
+    <div class="sub" id="howtxt"></div>
+    <button class="btn" id="startBtn">TAP TO BUILD</button>
+    <div id="menuBest" class="tag mono"></div>
+    <div id="beat"></div>
+    <a id="tip" href="#" target="_blank" rel="noopener">☕ <span data-i="tip">Keep the cranes running</span></a>
+  </div>
+
+  <!-- GAME OVER / WIN -->
+  <div class="overlay" id="over" style="display:none">
+    <div class="biglab mono" id="overWhy">COLLAPSED</div>
+    <div class="big mono" id="overHeight">0m</div>
+    <div class="sub mono" id="overSub"></div>
+    <div class="row">
+      <button class="btn" id="againBtn">BUILD AGAIN</button>
+      <button class="btn ghost" id="shareBtn">SHARE</button>
+    </div>
+    <div id="menuBest2" class="tag mono"></div>
+  </div>
+
+  <div id="toast"></div>
+</div></div>
+
+<script>
+'use strict';
+/* ============================================================ BUILD THE BURJ
+   Single-file canvas tower-stacker. House pattern (mamaddash/shukshopper sib):
+   offline SW, EN/AR i18n + RTL, GoatCounter events, ?beat= challenge, magenta
+   chroma-key art loader w/ emoji fallback, pure-canvas share card. ========= */
+
+/* ---------- i18n ---------- */
+const DICT={
+  en:{arcade:'ARCADE',height:'HEIGHT',budget:'BUDGET',stability:'STABILITY',tip:'Keep the cranes running',
+    how:'Tap when the swinging floor lines up. A PERFECT drop saves money and keeps it steady. Run out of budget — or topple — and it’s over.',
+    tapBuild:'TAP TO BUILD',again:'BUILD AGAIN',share:'SHARE',
+    perfect:'PERFECT! +',bankrupt:'BANKRUPT',collapse:'COLLAPSED',toppled:'TOPPLED',win:'TOPPED OUT!',missed:'MISSED IT',
+    best:h=>'Best · '+h+'m',
+    floors:n=>n+(n===1?' floor':' floors'),
+    overSub:(n,p)=>n+' floors · '+p+' perfect drops',
+    winSub:'You crowned the spire. Dubai has a new skyline.',
+    beat:t=>'🎯 A friend reached '+t+'m. Can you build higher?',
+    landmark:(name,h)=>name+' — '+h+'m ✓',
+    sponsorTip:'↑ sponsor floor',
+    shareTxt:(h,n)=>'I built the Burj to '+h+'m ('+n+' floors) 🏗️\nBeat my skyline → miklatgames.fun/burj',
+    shareWin:h=>'I topped out the Burj at '+h+'m 🏗️👑\nThink you can build it cleaner? → miklatgames.fun/burj',
+    copied:'Copied — paste in the chat!'},
+  ar:{arcade:'الأرواق',height:'الارتفاع',budget:'الميزانية',stability:'الثبات',tip:'أبقِ الرافعات تعمل',
+    how:'انقر عندما يصطف الطابق المتأرجح. الإسقاط المثالي يوفّر المال ويحافظ على الثبات. إذا نفدت الميزانية أو سقط البرج — انتهت اللعبة.',
+    tapBuild:'انقر للبناء',again:'ابنِ من جديد',share:'شارك',
+    perfect:'مثالي! +',bankrupt:'إفلاس',collapse:'انهار',toppled:'سقط البرج',win:'اكتمل البناء!',missed:'أخطأت',
+    best:h=>'الأفضل · '+h+'م',
+    floors:n=>n+' طابق',
+    overSub:(n,p)=>n+' طابق · '+p+' إسقاط مثالي',
+    winSub:'توّجت القمة. دبي لها أفق جديد.',
+    beat:t=>'🎯 صديق وصل '+t+'م. هل تبني أعلى؟',
+    landmark:(name,h)=>name+' — '+h+'م ✓',
+    sponsorTip:'↑ طابق راعي',
+    shareTxt:(h,n)=>'بنيت البرج حتى '+h+'م ('+n+' طابق) 🏗️\nتحدّ أفقي → miklatgames.fun/burj',
+    shareWin:h=>'توّجت البرج عند '+h+'م 🏗️👑\nهل تبنيه أنظف؟ → miklatgames.fun/burj',
+    copied:'تم النسخ — الصقه في المحادثة!'}
+};
+let lang = (new URLSearchParams(location.search).get('lang')) || localStorage.getItem('burj_lang') || ((navigator.language||'').slice(0,2)==='ar'?'ar':'en');
+if(lang!=='ar'&&lang!=='en') lang='en';
+const T=()=>DICT[lang];
+const AR_DIG={'0':'٠','1':'١','2':'٢','3':'٣','4':'٤','5':'٥','6':'٦','7':'٧','8':'٨','9':'٩'};
+const num=n=>{ n=Math.round(n); return lang==='ar'? (''+n).replace(/[0-9]/g,d=>AR_DIG[d]) : ''+n; };
+const mUnit=()=>lang==='ar'?'م':'m';
+
+function applyLang(){
+  document.documentElement.lang=lang; document.documentElement.dir = lang==='ar'?'rtl':'ltr';
+  document.querySelectorAll('[data-i]').forEach(el=>{const k=el.getAttribute('data-i'); if(T()[k]!=null && typeof T()[k]!=='function') el.textContent=T()[k];});
+  document.getElementById('howtxt').textContent=T().how;
+  document.getElementById('startBtn').textContent=T().tapBuild;
+  document.getElementById('againBtn').textContent=T().again;
+  document.getElementById('shareBtn').textContent=T().share;
+  document.getElementById('langBtn').textContent = lang==='ar'?'EN':'عربي';
+  refreshBest();
+}
+
+/* ---------- audio (lazy WebAudio one-shots, hidden-tab safe) ---------- */
+let actx=null, muted=localStorage.getItem('burj_mute')==='1';
+function beep(freq,dur,type,vol){ if(muted)return; try{ actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  const o=actx.createOscillator(),g=actx.createGain(); o.type=type||'sine'; o.frequency.value=freq;
+  g.gain.value=(vol||.12); o.connect(g); g.connect(actx.destination); const t=actx.currentTime;
+  g.gain.setValueAtTime(g.gain.value,t); g.gain.exponentialRampToValueAtTime(.0001,t+(dur||.12));
+  o.start(t); o.stop(t+(dur||.12)+.02);}catch(e){} }
+const sfxTick =()=>beep(520,.05,'square',.05);
+const sfxDrop =()=>beep(180,.12,'sine',.13);
+const sfxPerfect=()=>{beep(740,.10,'sine',.13);setTimeout(()=>beep(1110,.14,'sine',.11),70);};
+const sfxBad  =()=>beep(110,.30,'sawtooth',.14);
+const sfxWin  =()=>{[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.18,'sine',.12),i*120));};
+
+/* ---------- art loader (magenta chroma-key + emoji fallback) ---------- */
+const ART={};
+function keyMagenta(img){
+  const c=document.createElement('canvas');c.width=img.width;c.height=img.height;
+  const x=c.getContext('2d');x.drawImage(img,0,0);
+  try{
+    const d=x.getImageData(0,0,c.width,c.height); let minX=c.width,minY=c.height,maxX=0,maxY=0;
+    for(let i=0;i<d.data.length;i+=4){
+      if(d.data[i]>165&&d.data[i+2]>165&&d.data[i+1]<120){d.data[i+3]=0;continue;}
+      if(d.data[i+3]>8){const p=i/4,px=p%c.width,py=(p/c.width)|0;
+        if(px<minX)minX=px;if(px>maxX)maxX=px;if(py<minY)minY=py;if(py>maxY)maxY=py;}
+    }
+    x.putImageData(d,0,0);
+    if(maxX>minX&&maxY>minY){const pad=2,w=Math.min(c.width,maxX-minX+1+pad*2),h=Math.min(c.height,maxY-minY+1+pad*2);
+      const c2=document.createElement('canvas');c2.width=w;c2.height=h;
+      c2.getContext('2d').drawImage(c,Math.max(0,minX-pad),Math.max(0,minY-pad),w,h,0,0,w,h);return c2;}
+  }catch(e){}
+  return c;
+}
+[['bg-day',0],['bg-dusk',0],['floor-glass',1],['floor-concrete',1],['floor-gold',1],
+ ['floor-retail',1],['floor-sponsor',1],['crane',1],['rafi',1],['spire',1]
+].forEach(([n,key])=>{ const i=new Image();
+  i.onload=()=>{ try{ART[n]=key?keyMagenta(i):i;}catch(e){ART[n]=i;} };
+  i.onerror=()=>{}; i.src='assets/'+n+'.jpg'; });
+
+/* ---------- canvas / sizing ---------- */
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+let W=0,H=0,DPR=1;
+function fit(){ const r=document.getElementById('game').getBoundingClientRect();
+  DPR=Math.min(2,window.devicePixelRatio||1); W=r.width; H=r.height;
+  cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize',fit); fit();
+
+/* ---------- game constants ---------- */
+const FLOOR_H=46;            // world px per floor
+const M_PER_FLOOR=20;        // metres per floor
+const BASE_W=()=>Math.min(260, W*0.62);
+const PERFECT_TOL=9;         // world px centre offset for a "perfect"
+const MIN_W=24;              // below this width the tower collapses
+const START_BUDGET=1000;
+const TARGET_FLOORS=41;      // ~820m -> spire -> win
+const LANDMARKS=[            // floor index -> name (height auto)
+  {f:6, en:'Dubai Frame', ar:'برواز دبي'},
+  {f:16,en:'Burj Al Arab', ar:'برج العرب'},
+  {f:28,en:'Princess Tower', ar:'برج الأميرة'},
+  {f:TARGET_FLOORS,en:'Burj Khalifa', ar:'برج خليفة'}
+];
+const MAT=['floor-retail','floor-glass','floor-concrete','floor-glass','floor-gold','floor-sponsor'];
+const MAT_EMOJI={'floor-retail':'#caa46b','floor-glass':'#3ea0e6','floor-concrete':'#9aa0a6','floor-gold':'#ffd166','floor-sponsor':'#2b3550'};
+function matFor(i){ if(i>0 && i%6===0) return 'floor-sponsor'; const seq=['floor-glass','floor-concrete','floor-glass','floor-gold','floor-glass']; return seq[i%seq.length]; }
+
+/* ---------- state ---------- */
+let G=null, running=false, last=0, acc=0;
+let best=+(localStorage.getItem('burj_best')||0);
+const beatTarget=+(new URLSearchParams(location.search).get('beat')||0)||0;
+
+function newGame(){
+  G={
+    floors:[], budget:START_BUDGET, stability:0, perfects:0, over:false, won:false,
+    cur:null, dropping:false, dropY:0, swingT:Math.random()*6, camY:0, camTarget:0,
+    sway:0, shake:0, gust:0, gustT:0, hitLandmarks:{}, fade:0
+  };
+  // base/foundation floor (placed, full width, centred)
+  const bw=BASE_W();
+  G.floors.push({cx:W/2, w:bw, mat:'floor-retail', y:0, sponsor:false});
+  spawnFloor();
+  G.camTarget=0;
+}
+function topFloor(){ return G.floors[G.floors.length-1]; }
+function curFloorMat(){ return matFor(G.floors.length); }
+function spawnFloor(){
+  const prev=topFloor();
+  const mat=curFloorMat();
+  G.cur={ cx:W/2, w:prev.w, mat:mat, sponsor:mat==='floor-sponsor', dir:1 };
+  G.swingAmp=Math.min(W*0.46, (W/2 - 20)); // keep within view
+  G.swingSpeed=1.05 + G.floors.length*0.018; // ramps with height
+}
+
+/* world->screen Y: floor index i sits at world y = i*FLOOR_H from the ground.
+   We draw with the ground near the bottom and pan the camera up as we climb. */
+function groundScreenY(){ return H - 90; }
+function floorScreenY(i){ return groundScreenY() - i*FLOOR_H + G.camY; }
+
+/* ---------- input ---------- */
+function doDrop(){
+  if(!running||!G||G.over) return;
+  if(G.dropping||!G.cur) return;
+  G.dropping=true;
+  G.dropY=floorScreenY(G.floors.length); // target screen y for the new floor top
+  sfxDrop();
+}
+function press(e){ if(e.cancelable)e.preventDefault();
+  if(!running){ return; }           // overlays handle their own buttons
+  doDrop();
+}
+cv.addEventListener('pointerdown',press,{passive:false});
+window.addEventListener('keydown',e=>{ if(e.code==='Space'||e.code==='Enter'){ if(running){e.preventDefault();doDrop();} } });
+
+/* ---------- resolve a placed floor ---------- */
+function resolveDrop(){
+  const prev=topFloor(), cur=G.cur;
+  const prevL=prev.cx-prev.w/2, prevR=prev.cx+prev.w/2;
+  const curL=cur.cx-cur.w/2, curR=cur.cx+cur.w/2;
+  const oL=Math.max(prevL,curL), oR=Math.min(prevR,curR);
+  const overlap=oR-oL;
+  if(overlap<=2){ // total miss -> collapse
+    sfxBad(); endGame('collapse'); return;
+  }
+  const offset=Math.abs(cur.cx-prev.cx);
+  let newW=overlap, newCx=(oL+oR)/2, perfect=false;
+  if(offset<=PERFECT_TOL){ perfect=true; newW=prev.w; newCx=prev.cx; }
+  // budget: base cost + wasted-material penalty on trim; perfect = rebate; sponsor = rent income
+  const trimmed=Math.max(0,prev.w-newW);
+  let cost=22 + Math.round(trimmed/BASE_W()*46);
+  G.budget-=cost;
+  if(perfect){ G.budget+=26; G.perfects++; G.stability=Math.max(0,G.stability-10); sfxPerfect();
+    toast(T().perfect+num(26)); }
+  else { G.stability+=Math.min(34, 6+offset*0.5); }
+  if(cur.sponsor){ G.budget+=70; } // sponsor floor pays rent
+  const placed={cx:newCx, w:newW, mat:cur.mat, sponsor:cur.sponsor, y:G.floors.length*FLOOR_H};
+  G.floors.push(placed);
+  G.shake=Math.min(7, 2+offset*0.05);
+  // landmark?
+  const fi=G.floors.length-1;
+  LANDMARKS.forEach(l=>{ if(l.f===fi && !G.hitLandmarks[l.f]){ G.hitLandmarks[l.f]=1;
+    toast(T().landmark(lang==='ar'?l.ar:l.en, num(fi*M_PER_FLOOR)+mUnit())); }});
+  track('floor');
+  // lose checks
+  if(G.budget<=0){ endGame('bankrupt'); return; }
+  if(newW<MIN_W){ endGame('collapse'); return; }
+  if(G.stability>=100){ endGame('toppled'); return; }
+  // win check
+  if(fi>=TARGET_FLOORS){ endGame('win'); return; }
+  // next
+  G.dropping=false; G.cur=null;
+  spawnFloor();
+  G.camTarget = Math.max(0, (G.floors.length)*FLOOR_H - (H*0.42));
+}
+
+/* ---------- update ---------- */
+function update(dt){
+  if(!G||G.over) { if(G&&G.fade<1)G.fade=Math.min(1,G.fade+dt*2); return; }
+  // camera easing
+  G.camY += (G.camTarget - G.camY)*Math.min(1,dt*6);
+  // shake decay
+  G.shake*=Math.pow(0.001,dt);
+  // wind gusts at altitude
+  const alt=G.floors.length;
+  G.gustT-=dt; if(G.gustT<=0 && alt>10){ G.gust=(Math.random()*2-1)*Math.min(0.6,alt*0.012); G.gustT=1.2+Math.random()*1.8; }
+  G.gust*=Math.pow(0.2,dt);
+  // sway from instability (visual lean)
+  const targetSway=(G.stability/100)*22;
+  G.sway = Math.sin(performance.now()/520)*targetSway;
+  if(!G.dropping && G.cur){
+    // swing the crane floor
+    G.swingT+=dt*G.swingSpeed;
+    const a=Math.sin(G.swingT)+G.gust*0.6;
+    G.cur.cx = W/2 + a*G.swingAmp;
+    // soft tick at the extremes
+  } else if(G.dropping && G.cur){
+    // animate floor downwards to the stack
+    const targetY=G.dropY;
+    const topY=floorScreenY(G.floors.length); // recompute (camera mid-move)
+    G.cur._fallY = (G.cur._fallY==null? craneFloorY() : G.cur._fallY);
+    G.cur._fallY += dt*1900;
+    if(G.cur._fallY>=topY){ G.cur._fallY=null; resolveDrop(); }
+  }
+}
+function craneFloorY(){ return 92; } // screen y where the swinging floor hangs
+
+/* ---------- render ---------- */
+function drawBackdrop(){
+  const alt=G?G.floors.length:0;
+  const dusk = alt>14;
+  const img = dusk?ART['bg-dusk']:ART['bg-day'];
+  if(img){ // cover-fit
+    const ir=img.width/img.height, cr=W/H; let dw,dh;
+    if(ir>cr){ dh=H; dw=H*ir; } else { dw=W; dh=W/ir; }
+    // slow vertical parallax with camera
+    const py=((G?G.camY:0)*0.18)%dh;
+    ctx.drawImage(img,(W-dw)/2,(H-dh)/2 - py*0,dw,dh);
+  } else {
+    const g=ctx.createLinearGradient(0,0,0,H);
+    if(dusk){g.addColorStop(0,'#0d1120');g.addColorStop(.5,'#5e3c8f');g.addColorStop(1,'#e9a23b');}
+    else{g.addColorStop(0,'#3ea0e6');g.addColorStop(1,'#e9c08b');}
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  }
+  // dark vignette top for HUD legibility
+  const v=ctx.createLinearGradient(0,0,0,150); v.addColorStop(0,'rgba(5,7,14,.6)'); v.addColorStop(1,'rgba(5,7,14,0)');
+  ctx.fillStyle=v; ctx.fillRect(0,0,W,150);
+}
+function drawFloorImg(mat,cx,cy,w,h,sponsor){
+  const img=ART[mat];
+  if(img){ ctx.drawImage(img,cx-w/2,cy,w,h); }
+  else { ctx.fillStyle=MAT_EMOJI[mat]||'#888'; ctx.strokeStyle='rgba(0,0,0,.4)';
+    ctx.fillRect(cx-w/2,cy,w,h); ctx.strokeRect(cx-w/2,cy,w,h); }
+  if(sponsor){ // demo billboard — the corporate-engine ad slot
+    const bw=Math.min(w*0.62,150), bh=h*0.5, bx=cx-bw/2, by=cy+h*0.24;
+    ctx.fillStyle='rgba(253,243,227,.95)'; ctx.strokeStyle='#ffd166'; ctx.lineWidth=2;
+    ctx.fillRect(bx,by,bw,bh); ctx.strokeRect(bx,by,bw,bh);
+    ctx.fillStyle='#9a6a12'; ctx.font='900 '+Math.max(9,bh*0.42)+'px Courier New,monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(lang==='ar'?'علامتك':'YOUR BRAND',cx,by+bh/2);
+  }
+}
+function render(){
+  ctx.clearRect(0,0,W,H);
+  drawBackdrop();
+  if(!G){ return; }
+  const shx=(Math.random()*2-1)*G.shake;
+  ctx.save();
+  ctx.translate(shx,0);
+  // tower lean from instability (pivot at ground)
+  const gy=groundScreenY();
+  const lean=(G.sway/ Math.max(1,H)) ; // radians-ish small
+  ctx.translate(W/2, gy); ctx.rotate(lean*0.012); ctx.translate(-W/2,-gy);
+
+  // placed floors (cull to viewport)
+  for(let i=0;i<G.floors.length;i++){
+    const f=G.floors[i]; const yTop=floorScreenY(i)-FLOOR_H;
+    if(yTop>H+FLOOR_H || yTop< -FLOOR_H) continue;
+    drawFloorImg(f.mat,f.cx,yTop,f.w,FLOOR_H,f.sponsor);
+  }
+  // Rafi cheers from the top placed floor
+  const tf=topFloor(); const ty=floorScreenY(G.floors.length-1)-FLOOR_H;
+  if(ART['rafi'] && ty<H && ty>-60){ const rh=58, rw=rh*(ART['rafi'].width/ART['rafi'].height);
+    ctx.drawImage(ART['rafi'], tf.cx+tf.w/2-rw*0.7, ty-rh+4, rw, rh); }
+  ctx.restore();
+
+  // crane + swinging / falling current floor (above the stack, not leaned)
+  if(G.cur && !G.over){
+    const cy = G.dropping ? (G.cur._fallY!=null?G.cur._fallY:craneFloorY()) : craneFloorY();
+    // crane jib
+    if(ART['crane']){ const cw=W*1.0, ch=cw*(ART['crane'].height/ART['crane'].width);
+      ctx.drawImage(ART['crane'], G.cur.cx-cw/2, 6, cw, ch); }
+    // cable
+    ctx.strokeStyle='rgba(40,44,60,.9)'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(G.cur.cx, 70); ctx.lineTo(G.cur.cx, cy); ctx.stroke();
+    drawFloorImg(G.cur.mat,G.cur.cx,cy,G.cur.w,FLOOR_H,G.cur.sponsor);
+    // alignment guide line down to the stack top
+    if(!G.dropping){ ctx.strokeStyle='rgba(255,209,102,.35)'; ctx.setLineDash([4,6]); ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(G.cur.cx, cy+FLOOR_H); ctx.lineTo(G.cur.cx, floorScreenY(G.floors.length)-FLOOR_H); ctx.stroke(); ctx.setLineDash([]); }
+  }
+  // HUD values
+  document.getElementById('hHeight').textContent=num((G.floors.length-1)*M_PER_FLOOR)+mUnit();
+  document.getElementById('hBudget').textContent=num(Math.max(0,G.budget));
+  document.getElementById('stabbar').style.width=Math.min(100,G.stability)+'%';
+}
+
+/* ---------- main loop (semi-fixed step) ---------- */
+function frame(ts){
+  const dt=Math.min(0.05,(ts-last)/1000||0); last=ts;
+  if(running||(G&&G.over)) update(dt);
+  render();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---------- flow ---------- */
+function start(){
+  document.getElementById('menu').style.display='none';
+  document.getElementById('over').style.display='none';
+  document.getElementById('hud').style.display='block';
+  newGame(); running=true; G.over=false; track('start');
+}
+function endGame(why){
+  G.over=true; running=false; G.won=(why==='win');
+  if(why==='win')sfxWin(); else sfxBad();
+  const h=(G.floors.length-1)*M_PER_FLOOR;
+  if(h>best){ best=h; try{localStorage.setItem('burj_best',best);}catch(e){} }
+  document.getElementById('overWhy').textContent = T()[why]||T().collapse;
+  document.getElementById('overHeight').textContent=num(h)+mUnit();
+  document.getElementById('overSub').textContent = why==='win'? T().winSub : T().overSub(num(G.floors.length-1), num(G.perfects));
+  document.getElementById('hud').style.display='none';
+  document.getElementById('over').style.display='flex';
+  refreshBest();
+  track(why==='win'?'win':'collapse');
+}
+function refreshBest(){
+  const b = best>0 ? T().best(num(best)) : '';
+  document.getElementById('menuBest').textContent=b;
+  document.getElementById('menuBest2').textContent=b;
+}
+
+/* ---------- share (pure-canvas card -> file/text) ---------- */
+function buildCard(){
+  const c=document.createElement('canvas'); c.width=1080; c.height=1350; const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,1350); g.addColorStop(0,'#0d1120'); g.addColorStop(.55,'#3a2b6b'); g.addColorStop(1,'#e9a23b');
+  x.fillStyle=g; x.fillRect(0,0,1080,1350);
+  x.textAlign='center';
+  x.fillStyle='#ffd166'; x.font='900 70px Courier New,monospace';
+  x.fillText('BUILD THE BURJ',540,130);
+  x.fillStyle='#fdf3e3'; x.font='800 34px Heebo,Arial'; x.fillText('ابنِ البرج',540,178);
+  // skyline silhouette from placed floors
+  const fl=G?G.floors:[]; const n=Math.max(1,fl.length);
+  const drawTop=300, drawBot=1120, colH=(drawBot-drawTop);
+  const per=Math.min(26, colH/n);
+  for(let i=0;i<n;i++){ const f=fl[i]; const w=(f? f.w/BASE_W():1)*380;
+    const y=drawBot-(i+1)*per; const cx=540;
+    x.fillStyle = f&&f.sponsor? '#ffd166' : (i%2? '#3ee6ff':'#7fb6e6');
+    x.globalAlpha=.92; x.fillRect(cx-w/2,y,w,per-2); x.globalAlpha=1; }
+  // spire
+  x.fillStyle='#dfe6ee'; x.beginPath(); x.moveTo(540,drawBot-n*per); x.lineTo(528,drawBot-n*per+30); x.lineTo(552,drawBot-n*per+30); x.closePath(); x.fill();
+  // big stat
+  const h=G?(G.floors.length-1)*M_PER_FLOOR:0;
+  x.fillStyle='#ffd166'; x.font='900 150px Courier New,monospace'; x.fillText(num(h)+mUnit(),540,1230);
+  x.fillStyle='#fdf3e3'; x.font='800 34px Courier New,monospace';
+  x.fillText((G&&G.won?'👑 ':'')+ T().floors(num(G?G.floors.length-1:0))+' · '+num(G?G.perfects:0)+' perfect',540,1285);
+  x.fillStyle='rgba(253,243,227,.85)'; x.font='800 30px Courier New,monospace'; x.fillText('miklatgames.fun/burj',540,1330);
+  return c;
+}
+async function share(){
+  const h=(G.floors.length-1)*M_PER_FLOOR, n=G.floors.length-1;
+  const txt = G.won? T().shareWin(num(h)) : T().shareTxt(num(h),num(n));
+  try{
+    const card=buildCard();
+    const blob=await new Promise(res=>card.toBlob(res,'image/png'));
+    if(blob && navigator.canShare){ const file=new File([blob],'burj.png',{type:'image/png'});
+      if(navigator.canShare({files:[file]})){ await navigator.share({files:[file],text:txt}); track('share'); return; } }
+    if(navigator.share){ await navigator.share({text:txt}); track('share'); return; }
+    await navigator.clipboard.writeText(txt); toast(T().copied); track('share-copy');
+  }catch(e){ try{ await navigator.clipboard.writeText(txt); toast(T().copied); }catch(_){} }
+}
+
+/* ---------- ui wiring ---------- */
+document.getElementById('startBtn').addEventListener('click',start);
+document.getElementById('againBtn').addEventListener('click',start);
+document.getElementById('shareBtn').addEventListener('click',share);
+document.getElementById('langBtn').addEventListener('click',()=>{ lang=lang==='ar'?'en':'ar';
+  try{localStorage.setItem('burj_lang',lang);}catch(e){} applyLang(); });
+document.getElementById('muteBtn').addEventListener('click',()=>{ muted=!muted;
+  try{localStorage.setItem('burj_mute',muted?'1':'0');}catch(e){}
+  document.getElementById('muteBtn').textContent=muted?'🔇':'🔊'; });
+document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';
+
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),1500); }
+function track(name){ try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'evt-burj-'+name,event:true}); }catch(e){} }
+
+/* tip jar — dormant until TIP_URL set */
+const TIP_URL='';
+if(TIP_URL){ const t=document.getElementById('tip'); t.href=TIP_URL; t.style.display='inline-block'; t.addEventListener('click',()=>track('tip')); }
+
+/* beat banner */
+if(beatTarget){ const b=document.getElementById('beat'); b.style.display='block'; b.textContent=T().beat(num(beatTarget)); }
+
+applyLang();
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+<script data-goatcounter="https://miklat-games.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
