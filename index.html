@@ -103,10 +103,12 @@
     color:#04141a;font-weight:900;font-size:14px;padding:10px 20px;border-radius:12px;
     box-shadow:0 6px 18px rgba(62,230,255,.4);}
   .feat-play.gold{background:linear-gradient(180deg,#ffd166,#e9a23b);color:#1a1405;box-shadow:0 6px 18px rgba(233,162,59,.45);}
+  .feat-play.green{background:linear-gradient(180deg,#5dffa8,#2fcf86);color:#04140c;box-shadow:0 6px 18px rgba(93,255,168,.4);}
 
   /* split featured: portrait video on one side, text on the other */
   .featured.split{display:flex;align-items:stretch;min-height:208px;}
   .featured.split.gold{border-color:var(--c-gold-border);}
+  .featured.split.green{border-color:rgba(93,255,168,.4);}
   .split-media{position:relative;flex:0 0 44%;max-width:210px;overflow:hidden;background:#070d20;}
   .split-media .feat-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
   .split-media::after{content:"";position:absolute;inset:0;pointer-events:none;
@@ -114,8 +116,10 @@
   .split-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
     gap:7px;padding:16px 16px;text-align:start;}
   .split-body .feat-ttl .name{font-size:21px;text-shadow:none;}
-  .split-body .feat-ttl .name-he{color:var(--c-gold);}
+  .split.gold .feat-ttl .name-he{color:var(--c-gold);}
+  .split.green .feat-ttl .name-he{color:var(--c-green);}
   .split-body .feat-hook{margin-top:0;color:var(--c-dim);text-shadow:none;max-width:100%;}
+  .split-body .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;}
   .split-tag{font-size:10.5px;font-weight:800;letter-spacing:.1em;color:#1a1405;
     background:linear-gradient(180deg,#ffd166,#e9a23b);padding:4px 10px;border-radius:999px;}
   .split-body .feat-play{margin-top:4px;}
@@ -225,19 +229,23 @@
       </div>
     </a>
 
-    <div class="cards">
-      <a class="gcard" href="mamaddash/" id="cardMamad" style="--accent:#7ee8c7" data-game="mamaddash">
-        <div class="coverwrap"><img class="cover" src="mamaddash/art/hero.webp" alt="Cartoon runner leaping over a savta on the Tel Aviv promenade" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
-        <div class="body">
-          <div class="ttl"><span class="name">Mamad Dash</span><span class="name-he">מקלט דאש</span></div>
-          <div class="hook" data-i18n="mamadHook">Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.</div>
-          <div class="meta">
-            <span class="pill" data-i18n="daily">📅 Today's Siren</span>
-            <span class="pill best" id="mdBest" style="display:none"></span>
-          </div>
+    <a class="featured split green" href="mamaddash/" id="featMamad">
+      <div class="split-media">
+        <video class="feat-vid" src="mamaddash/promo.mp4" poster="mamaddash/art/hero.webp"
+               muted loop playsinline preload="none" aria-label="Mamad Dash gameplay"></video>
+      </div>
+      <div class="split-body">
+        <div class="feat-ttl"><span class="name">Mamad Dash</span><span class="name-he">מקלט דאש</span></div>
+        <div class="feat-hook" data-i18n="mamadHook">Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.</div>
+        <div class="meta">
+          <span class="pill" data-i18n="daily">📅 Today's Siren</span>
+          <span class="pill best" id="mdBest" style="display:none"></span>
         </div>
-      </a>
+        <span class="feat-play green" data-i18n="playNow">▶ PLAY NOW</span>
+      </div>
+    </a>
 
+    <div class="cards">
       <div class="ghosts">
         <div class="ghost">
           <img class="gart" src="assets/fabatollah-cover.webp" alt="Fabatollah" loading="lazy" style="object-position:78% center;">
@@ -405,7 +413,7 @@ function track(name){
 const TIP_URL='https://ko-fi.com/miklatgames';
 if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
   tj.hidden=false;tj.addEventListener('click',()=>track('tip'));}
-document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
+document.getElementById('featMamad').addEventListener('click',()=>track('play-mamaddash'));
 document.getElementById('featWhack').addEventListener('click',()=>track('play-whackamullah'));
 document.getElementById('featured').addEventListener('click',()=>track('play-irondome'));
 
