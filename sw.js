@@ -1,7 +1,7 @@
 /* MIKLAT GAMES portal — offline-first service worker.
    Caches the portal shell ONLY. Game scopes are bypassed —
    each game ships its own SW and owns its own cache. */
-const CACHE = 'miklat-portal-v6';
+const CACHE = 'miklat-portal-v7';
 const ASSETS = [
   './',
   './index.html',
@@ -17,7 +17,7 @@ const ASSETS = [
   './mamaddash/art/hero.webp',
   './mamaddash/art/icon.png'
 ];
-const GAME_SCOPES = ['/irondome/', '/mamaddash/', '/shukshopper/', '/changinghistory/'];
+const GAME_SCOPES = ['/irondome/', '/mamaddash/', '/shukshopper/', '/changinghistory/', '/whackamullah/'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

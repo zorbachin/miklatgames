@@ -79,6 +79,32 @@
   .gcard .preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
     opacity:0;transition:opacity .35s var(--ease);pointer-events:none;background:#070d20;}
   .gcard .preview.show{opacity:1;}
+
+  /* ---- featured hero (CrazyGames-style) ---- */
+  .featured{position:relative;display:block;border-radius:20px;overflow:hidden;text-decoration:none;color:inherit;
+    margin-bottom:18px;border:1px solid var(--c-cyan-border-strong);box-shadow:var(--shadow-card);
+    background:var(--c-panel-2);transition:transform .12s var(--ease);}
+  .featured:active{transform:scale(.99);}
+  .feat-media{position:relative;aspect-ratio:16/9;overflow:hidden;}
+  .feat-media .feat-poster{width:100%;height:100%;object-fit:cover;display:block;}
+  .feat-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    opacity:0;transition:opacity .45s var(--ease);}
+  .feat-media video.show{opacity:1;}
+  .feat-media::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(0deg,rgba(10,18,38,.93) 0%,rgba(10,18,38,.22) 48%,transparent 72%);}
+  .feat-tag{position:absolute;top:12px;inset-inline-start:12px;z-index:2;font-size:11px;font-weight:800;
+    letter-spacing:.1em;color:#1a1405;background:linear-gradient(180deg,#ffd166,#e9a23b);
+    padding:5px 11px;border-radius:999px;box-shadow:0 4px 14px rgba(233,162,59,.5);}
+  .feat-overlay{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:16px 18px;}
+  .feat-ttl{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+  .feat-ttl .name{font-family:var(--font-display);font-size:24px;font-weight:700;letter-spacing:.04em;
+    text-transform:uppercase;text-shadow:0 2px 10px rgba(0,0,0,.85);}
+  .feat-ttl .name-he{font-size:15px;color:var(--c-cyan);font-weight:500;}
+  .feat-hook{margin-top:4px;font-size:13.5px;color:#cdd6e8;max-width:92%;line-height:1.4;
+    text-shadow:0 1px 6px rgba(0,0,0,.75);}
+  .feat-play{display:inline-block;margin-top:11px;background:linear-gradient(180deg,#3ee6ff,#23b6cf);
+    color:#04141a;font-weight:900;font-size:14px;padding:10px 20px;border-radius:12px;
+    box-shadow:0 6px 18px rgba(62,230,255,.4);}
   .gcard .play{position:absolute;bottom:10px;inset-inline-end:10px;background:linear-gradient(180deg,#ffd166,#e9a23b);
     color:#1a1405;font-weight:900;font-size:14px;padding:9px 16px;border-radius:11px;
     box-shadow:0 6px 18px rgba(233,162,59,.45);}
@@ -159,6 +185,18 @@
   </header>
 
   <main class="main">
+    <a class="featured" href="irondome/" id="featured" data-preview="irondome/press/promo-horizontal.mp4">
+      <div class="feat-media">
+        <img class="feat-poster" src="assets/irondome-cover.webp" alt="Pixel-art Iron Dome intercepting rockets over a glowing city skyline">
+        <span class="feat-tag" data-i18n="featured">★ FEATURED</span>
+      </div>
+      <div class="feat-overlay">
+        <div class="feat-ttl"><span class="name">Iron Dome</span><span class="name-he">כיפת ברזל</span></div>
+        <div class="feat-hook" data-i18n="ironHook">Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.</div>
+        <span class="feat-play" data-i18n="playNow">▶ PLAY NOW</span>
+      </div>
+    </a>
+
     <div class="cards">
       <a class="gcard" href="irondome/" id="cardIron" style="--accent:#3ee6ff" data-game="irondome" data-preview="irondome/press/promo.mp4">
         <div class="coverwrap"><img class="cover" src="assets/irondome-cover.webp" alt="Pixel-art Iron Dome intercepting rockets over a glowing city skyline" loading="eager"><span class="play" data-i18n="play">PLAY ▶</span></div>
@@ -169,7 +207,7 @@
         </div>
       </a>
 
-      <a class="gcard" href="whackamullah/" id="cardWhack" style="--accent:#ffd166" data-game="whackamullah">
+      <a class="gcard" href="whackamullah/" id="cardWhack" style="--accent:#ffd166" data-game="whackamullah" data-preview="whackamullah/promo.mp4">
         <div class="coverwrap"><img class="cover" src="whackamullah/cover.png" alt="Whack-a-Mullah" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
           <div class="ttl"><span class="name">Whack-a-Mullah</span><span class="name-he">וואק-א-מולה</span></div>
@@ -253,6 +291,7 @@ const I18N={
  en:{dir:'ltr',brand:'MIKLAT GAMES',brandAlt:'משחקים למקלט',
   promise:'Free browser games that work in the shelter — no signal, no download, no ads.',
   play:'PLAY ▶',daily:'📅 Today’s Siren',offline:'📵 No reception needed',
+  featured:'★ FEATURED',playNow:'▶ PLAY NOW',
   mamadHook:'Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.',
   ironHook:'Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.',
   shukHook:"Friday rush. Swipe through the stalls, fill Ima's list, outrun the vendor before Shabbat closes the shuk.",
@@ -270,6 +309,7 @@ const I18N={
  he:{dir:'rtl',brand:'משחקים למקלט',brandAlt:'MIKLAT GAMES',
   promise:'משחקי דפדפן חינמיים שעובדים בממ״ד — בלי קליטה, בלי הורדה, בלי פרסומות.',
   play:'שחקו ▶',daily:'📅 האזעקה של היום',offline:'📵 עובד בלי קליטה',
+  featured:'★ מומלץ',playNow:'▶ שחקו עכשיו',
   mamadHook:'רוצו לממ״ד לפני הבום. קופצים מעל הסבתות, מתכופפים מתחת ליונים.',
   ironHook:'מיירטים רקטות עם האצבע. עשרה שלבים משדרות ועד אילת. עובד בלי קליטה.',
   shukHook:'שישי בצהריים. מחליקים בין הדוכנים, ממלאים את הרשימה של אמא, ובורחים מהמוכר לפני שהשוק נסגר.',
@@ -358,10 +398,13 @@ if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
 document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
 document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
 document.getElementById('cardWhack').addEventListener('click',()=>track('play-whackamullah'));
+document.getElementById('featured').addEventListener('click',()=>track('play-featured-irondome'));
 
-/* ---- CrazyGames-style hover preview: desktop-only, loads video lazily on hover
-   so phones on no/low signal never pay the data cost (core promise) ---- */
-if (window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
+/* ---- CrazyGames-style video: desktop only, lazy-loaded, so phones on no/low
+   signal never pay the data cost (core "works in the shelter" promise) ---- */
+const DESKTOP = window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+if (DESKTOP) {
+  /* game cards: preview plays on hover */
   document.querySelectorAll('.gcard[data-preview]').forEach(card => {
     const wrap = card.querySelector('.coverwrap'); if (!wrap) return;
     let vid = null;
@@ -382,6 +425,20 @@ if (window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').m
       try { vid.pause(); } catch(e){}
     });
   });
+
+  /* featured hero: autoplays its loop over the poster */
+  const feat = document.querySelector('.featured[data-preview]');
+  if (feat) {
+    const media = feat.querySelector('.feat-media');
+    const fv = document.createElement('video');
+    fv.muted = true; fv.loop = true; fv.playsInline = true;
+    fv.preload = 'auto'; fv.src = feat.getAttribute('data-preview');
+    media.insertBefore(fv, media.querySelector('.feat-tag'));
+    fv.addEventListener('canplay', () => {
+      const p = fv.play(); if (p && p.catch) p.catch(()=>{});
+      requestAnimationFrame(()=>fv.classList.add('show'));
+    });
+  }
 }
 
 applyLang(); applyAudio();
