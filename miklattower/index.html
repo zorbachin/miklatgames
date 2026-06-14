@@ -8,7 +8,7 @@
 <meta property="og:title" content="MIKLAT TOWER">
 <meta property="og:description" content="Everyone down to the miklat!">
 <meta property="og:url" content="https://miklatgames.fun/miklattower/">
-<meta property="og:image" content="https://miklatgames.fun/assets/miklattower-cover.png">
+<meta property="og:image" content="https://miklatgames.fun/assets/miklattower-cover.jpg">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
 <meta name="twitter:card" content="summary_large_image">
@@ -190,6 +190,11 @@ loadBest();
 const dirt=document.createElement('canvas');
 dirt.width=W*dpr; dirt.height=H*dpr;
 const dctx=dirt.getContext('2d'); dctx.scale(dpr,dpr);
+
+/* title-screen keyart (falls back to the live building until it loads) */
+const titleImg=new Image(); let titleReady=false;
+titleImg.onload=()=>{ titleReady=true; };
+titleImg.src='title.webp';
 
 function strataCol(r){ // facade tan per clearing-speed zone (cover palette)
   if(r>14) return '#cdb78f';
@@ -1010,13 +1015,22 @@ function diffChips(){
   return [['easy',0],['med',1],['hard',2]].map(([k,i])=>({k,x:x0+i*(w+gap),y,w,h}));
 }
 function drawTitle(){
-  drawSky(); drawBackdrop();
-  ctx.drawImage(dirt,0,0,W,H);
-  ctx.fillStyle='rgba(8,10,20,.62)'; ctx.fillRect(0,0,W,H);
+  if(titleReady){
+    ctx.drawImage(titleImg,0,0,W,H);
+    const sc=ctx.createLinearGradient(0,0,0,H);
+    sc.addColorStop(0,'rgba(8,10,20,.30)'); sc.addColorStop(0.42,'rgba(8,10,20,.5)'); sc.addColorStop(1,'rgba(8,10,20,.76)');
+    ctx.fillStyle=sc; ctx.fillRect(0,0,W,H);
+  } else {
+    drawSky(); drawBackdrop();
+    ctx.drawImage(dirt,0,0,W,H);
+    ctx.fillStyle='rgba(8,10,20,.62)'; ctx.fillRect(0,0,W,H);
+  }
   ctx.textAlign='center';
+  ctx.save(); ctx.shadowColor='rgba(0,0,0,.6)'; ctx.shadowBlur=8; ctx.shadowOffsetY=2;
   ctx.fillStyle='#ffd166'; ctx.font='bold 44px Courier New';
   ctx.fillText('MIKLAT',W/2,H*0.20);
   ctx.fillText('TOWER',W/2,H*0.27);
+  ctx.restore();
   ctx.fillStyle='#9ef0a0'; ctx.font='bold 16px Courier New';
   ctx.fillText('כולם למקלט!',W/2,H*0.32);
   if(G.challengeSeed!=null){
