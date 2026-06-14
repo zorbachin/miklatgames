@@ -103,6 +103,29 @@ const Snd={
   toggle(){ this.on=!this.on; store.set('twr_mute',this.on?'0':'1'); }
 };
 
+/* ---------------- music (mp3 loops) ----------------
+   menu theme on the home screen + between levels; a per-level gameplay
+   track that cycles A/B/C. Lazy-loaded, crossfaded, tied to the mute toggle. */
+const Mus={
+  paths:{menu:'music/menu.mp3',lvl0:'music/level-a.mp3',lvl1:'music/level-b.mp3',lvl2:'music/level-c.mp3'},
+  tracks:{}, cur:null, vol:0.4, _try:0, _fail:false,
+  el(key){ if(this.tracks[key])return this.tracks[key]; if(this._fail)return null;
+    try{ const a=new Audio(this.paths[key]); a.loop=true; a.volume=0; a.preload='none'; this.tracks[key]=a; return a; }
+    catch(e){ this._fail=true; return null; } },
+  want(key){ this.cur=key; },
+  tick(dt){
+    if(this._fail)return;
+    if(this.cur&&Snd.on){ const a=this.el(this.cur), now=performance.now();
+      if(a&&a.paused&&now-this._try>600){ this._try=now; const p=a.play(); if(p&&p.catch)p.catch(()=>{}); } }
+    for(const k in this.tracks){ const a=this.tracks[k];
+      const tgt=(k===this.cur&&Snd.on)?this.vol:0;
+      let v=a.volume;
+      if(v!==tgt){ v=v+(tgt-v)*Math.min(1,dt*4); if(Math.abs(v-tgt)<0.012)v=tgt; a.volume=clamp(v,0,1); }
+      if(tgt===0&&a.volume<=0.012&&!a.paused) a.pause();
+    }
+  }
+};
+
 /* ---------------- input ---------------- */
 const Inp={ want:null, fire:false, keys:{},
   pad:{cx:96,cy:H-104,r:78,btnx:W-84,btny:H-104,btnr:46},
@@ -1167,6 +1190,10 @@ genLevel(); // pretty dirt behind the title
 function loop(now){
   const dt=Math.min((now-last)/1000,0.05); last=now;
   ctx.clearRect(0,0,W,H);
+
+  // background music: per-level track while climbing, menu theme everywhere else
+  Mus.want(G.state==='play' ? 'lvl'+((G.level-1)%3) : 'menu');
+  Mus.tick(dt);
 
   if(G.state==='title'){ drawTitle(); requestAnimationFrame(loop); return; }
 
