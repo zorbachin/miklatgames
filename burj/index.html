@@ -186,6 +186,14 @@ const sfxDrop =()=>beep(180,.12,'sine',.13);
 const sfxPerfect=()=>{beep(740,.10,'sine',.13);setTimeout(()=>beep(1110,.14,'sine',.11),70);};
 const sfxBad  =()=>beep(110,.30,'sawtooth',.14);
 const sfxWin  =()=>{[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.18,'sine',.12),i*120));};
+/* start-screen theme — HTMLAudio, plays on menu/result screens, paused while
+   building and when the tab is hidden (no hidden-tab audio leak). */
+let theme=null;
+try{ theme=new Audio('assets/start-theme.mp3'); theme.loop=true; theme.volume=.5; theme.preload='auto'; }catch(e){}
+function playTheme(){ if(theme&&!muted&&!running&&document.visibilityState!=='hidden'){ theme.play().catch(()=>{}); } }
+function stopTheme(){ if(theme){ try{theme.pause();}catch(e){} } }
+window.addEventListener('pointerdown',playTheme);   // unlock + start on first gesture
+document.addEventListener('visibilitychange',()=>{ document.visibilityState==='hidden'?stopTheme():playTheme(); });
 
 /* ---------- art loader (magenta chroma-key + emoji fallback) ---------- */
 const ART={};
@@ -452,7 +460,7 @@ function start(){
   document.getElementById('menu').style.display='none';
   document.getElementById('over').style.display='none';
   document.getElementById('hud').style.display='block';
-  newGame(); running=true; G.over=false; track('start');
+  newGame(); running=true; G.over=false; stopTheme(); track('start');
 }
 function endGame(why){
   G.over=true; running=false; G.won=(why==='win');
@@ -464,7 +472,7 @@ function endGame(why){
   document.getElementById('overSub').textContent = why==='win'? T().winSub : T().overSub(num(G.floors.length-1), num(G.perfects));
   document.getElementById('hud').style.display='none';
   document.getElementById('over').style.display='flex';
-  refreshBest();
+  refreshBest(); playTheme();
   track(why==='win'?'win':'collapse');
 }
 function refreshBest(){
@@ -521,7 +529,7 @@ document.getElementById('langBtn').addEventListener('click',()=>{ lang=lang==='a
   try{localStorage.setItem('burj_lang',lang);}catch(e){} applyLang(); });
 document.getElementById('muteBtn').addEventListener('click',()=>{ muted=!muted;
   try{localStorage.setItem('burj_mute',muted?'1':'0');}catch(e){}
-  document.getElementById('muteBtn').textContent=muted?'🔇':'🔊'; });
+  document.getElementById('muteBtn').textContent=muted?'🔇':'🔊'; muted?stopTheme():playTheme(); });
 document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';
 
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
