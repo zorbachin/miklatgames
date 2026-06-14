@@ -1,5 +1,5 @@
 /* BUILD THE BURJ — offline-first service worker (pattern: shukshopper v1) */
-const CACHE = 'burj-v1';
+const CACHE = 'burj-v2';
 const ASSETS = ['./','./index.html','./manifest.webmanifest'];
 
 self.addEventListener('install', e => {
