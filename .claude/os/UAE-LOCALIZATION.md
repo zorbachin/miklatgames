@@ -44,11 +44,11 @@ paid experiences as a first-class shared system, not per-game bolt-ons.
 
 | | **THE PLATE** 🚗 | **BUILD THE BURJ** 🏗️ | **DUBAI LIFE** 🌆 |
 |---|---|---|---|
-| Pitch | Win the most prestigious car plate by out-bidding whales & friends | Stack a megatower balancing budget / material / stability / height | Survive a day in Dubai — parking, SZR traffic, the Gazebo run |
-| Proven base | Auction/duel + Trivia-Crack forfeit duel | Tower Bloxx / "Stack" + light sim | Changing-History grab-bag + Balagan daily duel |
-| Control scheme | TIME-IT bid / nerve-hold | TIME-IT (drop swinging floor) | reuses existing engines (data, not new engines) |
-| Cultural hook | Plate "P7" → AED 55M charity auction | Burj Khalifa (828m, $1.5B, wind) | relatable daily-life chaos every resident knows |
-| Share unit | plate won + clout ("I took plate 7") | skyline + height | "survived Dubai in N tries" |
+| Pitch | Race rivals down the Dubai strip — beat them, take their plate | Stack a megatower balancing budget / material / stability / height | Survive a day in Dubai — parking, SZR traffic, the Gazebo run |
+| Proven base | Race-for-pinks (NFS / F&F) + ghost racing (SOCIAL.md) | Tower Bloxx / "Stack" + light sim | Changing-History grab-bag + Balagan daily duel |
+| Control scheme | SLIDE + GAS (reuses the shipped chariot engine) | TIME-IT (drop swinging floor) | reuses existing engines (data, not new engines) |
+| Cultural hook | plate-code status grammar + Dubai supercar racing | Burj Khalifa (828m, $1.5B, wind) | relatable daily-life chaos every resident knows |
+| Share unit | plate stolen in a race ("took plate 7 at 290 km/h") | skyline + height | "survived Dubai in N tries" |
 | Role | **Viral flagship — ship first** | **Revenue engine + B2B** | **Social daily + corporate-engine showcase** |
 
 ## 🏆 10M Advisor Panel Verdict (concept review, 2026-06-13)
@@ -60,7 +60,19 @@ Verbatim role: virality / retention / stability / monetization.
 | **Virality** | **8/10** — status > score; natively a WhatsApp duel | 6.5/10 — a number, not a story; sponsor logos fight the card | PLATE |
 | **Retention** | **7.5/10** — 36h-forfeit duel = mutual obligation | 6/10 — beautiful but solitaire ritual | PLATE |
 | **Stability** | **7.5/10** — hard parts (URL codec, RTL plate text) testable up front | 5/10 — frame-rate-independent physics + draw-call growth verifiable only late | PLATE (ship first) |
-| **Monetization** | 6.5/10 — gambling-adjacency caps the buyer roster | **8.5/10** — developers are huge spenders; fiction = their product; brand-safe | BURJ |
+| **Monetization** | 6.5/10 → **~8** after racing pivot (see note) | **8.5/10** — developers are huge spenders; fiction = their product; brand-safe | BURJ |
+
+**🏁 Racing pivot note (2026-06-13, supersedes The Plate's v1 auction concept):**
+Zorba moved The Plate from an auction to a **street race — beat the rival, take
+their plate** (`games/THE-PLATE.md`). Panel-lens re-read: **virality ⬆️** (the
+steal is now a clip-able overtake, not a bid number), **monetization ⬆️ 6.5→~8**
+(no bidding = **no gambling read** → banks + government/tourism buyers re-open,
+and auto brands become the natural, cleaner sponsor), **retention ≈** (same daily
++ 36h-forfeit duel spine), **stability 7.5→~6.5 but mitigated** (more to build
+than an auction, but it **reuses the already-shipped chariot SLIDE+GAS engine**
+and ghost-racing snapshots dodge cross-device desync). Net: the pivot trades a
+little build-risk for a stronger share moment and a far bigger, brand-safe buyer
+pool. v1 auction kept as a deferred "Most Noble Numbers" charity mode.
 
 **Consensus call: ship THE PLATE first, build BURJ second.**
 - The Plate wins reach, retention, and is the *safer* first build — its hardest
