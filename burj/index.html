@@ -260,10 +260,11 @@ function rotsP(cs){let res=[normP(cs)],cur=res[0];for(let k=0;k<3;k++){cur=normP
 const SHAPES={}; for(const k in BASE)SHAPES[k]=rotsP(BASE[k]); const TYPES=Object.keys(BASE);
 
 /* ---------- layout ---------- */
-let CELL=20, GX=0, GY=0, GW=0, GH=0;
+let CELL=20, GX=0, GY=0, GW=0, GH=0, RAILW=0;
 function layout(){ const topPad=130, botPad=76;
-  CELL=Math.max(12,Math.floor(Math.min((W*0.9)/COLS,(H-topPad-botPad)/ROWS)));
-  GW=CELL*COLS; GH=CELL*ROWS; GX=Math.round((W-GW)/2); GY=topPad; }
+  RAILW=Math.round(Math.min(78, W*0.18));   // left rail = the rising Burj
+  CELL=Math.max(12,Math.floor(Math.min((W-RAILW-14)/COLS,(H-topPad-botPad)/ROWS)));
+  GW=CELL*COLS; GH=CELL*ROWS; GX=RAILW+Math.round((W-RAILW-GW)/2); GY=topPad; }
 
 /* ---------- seeded rng (mulberry32) ---------- */
 function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
@@ -283,7 +284,7 @@ function blueprintMask(sec){ const hs=BLUEPRINTS[sec]; const m=new Int8Array(COL
 function newGame(){
   const ps=seedQ!=null?parseInt(seedQ,10):NaN;
   const seed=(isNaN(ps)?((Math.random()*1e9)|0):ps)>>>0;
-  G={ seed:seed, grid:new Int8Array(COLS*ROWS), sec:0, budget:START_BUDGET, over:false, won:false, flash:0, lockT:0, lockResets:0,
+  G={ seed:seed, grid:new Int8Array(COLS*ROWS), sec:0, budget:START_BUDGET, over:false, won:false, flash:0, lockT:0, lockResets:0, built:[],
     rng:mulberry(seed), bag:[], next:null, hold:null, holdUsed:false, cur:null,
     dropAcc:0, pieceCount:0, sponsorsLeased:0, sumOnplan:0, sumPlaced:0, cleanSections:0,
     shake:0, fade:0, secMaskTotal:0 };
@@ -339,6 +340,8 @@ function sectionComplete(){
   const clean=(placed===onplan && onplan>=tot); // exact: filled the plan, no spill, no holes
   if(clean){ G.cleanSections++; G.budget+=60; coach(T().tClean+num(60)); }
   else teach('spill',T().tSpill);
+  // record this floor for the rising tower (dominant material = its look)
+  { let cnt={}; for(let i=0;i<G.grid.length;i++){const v=G.grid[i];if(v)cnt[v]=(cnt[v]||0)+1;} let dv=1,dn=0; for(const k in cnt){if(cnt[k]>dn){dn=cnt[k];dv=+k;}} G.built.push(cellColor(dv)); }
   sfxClear(); toast(T().secClear(num(m))); G.flash=0.5; track('section');
   G.sec++;
   if(G.sec>=BLUEPRINTS.length){ endGame('win'); return; }
@@ -358,6 +361,14 @@ function update(dt){ if(!G||G.over){ if(G&&G.fade<1)G.fade=Math.min(1,G.fade+dt*
 
 /* ---------- render ---------- */
 function cellColor(v){ return v===1?MAT.glass:v===2?MAT.concrete:v===3?MAT.gold:MAT.sponsor; }
+/* settled cells render as real building parts — lit glass windows, cement,
+   gold cladding, AD billboards — so locking a piece visibly "builds" the tower */
+function drawSettled(c,r,v){ const x=GX+c*CELL, y=GY+r*CELL, s=CELL;
+  if(v===1){ ctx.fillStyle='#1f5c97'; ctx.fillRect(x+1,y+1,s-2,s-2); const g=(s-3)/2;
+    for(let a=0;a<2;a++)for(let b=0;b<2;b++){ const lit=((c*7+r*13+a*3+b*5)%5===0); ctx.fillStyle=lit?'#ffe9a8':'#62d2f0'; ctx.fillRect(x+1.5+a*(g+1),y+1.5+b*(g+1),g-0.5,g-0.5); } }
+  else if(v===2){ ctx.fillStyle='#9aa0a6'; ctx.fillRect(x+1,y+1,s-2,s-2); ctx.strokeStyle='rgba(55,59,67,.55)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x+1,y+s*0.5); ctx.lineTo(x+s-1,y+s*0.5); ctx.stroke(); ctx.fillStyle='rgba(55,59,67,.4)'; ctx.fillRect(x+s*0.5,y+1,1,s-2); }
+  else if(v===3){ const gd=ctx.createLinearGradient(x,y,x,y+s); gd.addColorStop(0,'#ffe08a'); gd.addColorStop(1,'#e9a23b'); ctx.fillStyle=gd; ctx.fillRect(x+1,y+1,s-2,s-2); ctx.fillStyle='rgba(255,255,255,.35)'; ctx.fillRect(x+2,y+2,s-4,Math.max(2,s*0.16)); }
+  else { ctx.fillStyle='#fdf3e3'; ctx.fillRect(x+1,y+1,s-2,s-2); ctx.strokeStyle='#ffd166'; ctx.lineWidth=2; ctx.strokeRect(x+2,y+2,s-4,s-4); ctx.fillStyle='#9a6a12'; ctx.font='900 '+Math.max(7,s*0.36)+'px Courier New'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('AD',x+s/2,y+s/2); } }
 function drawCell(c,r,col,alpha,blue){ const x=GX+c*CELL, y=GY+r*CELL;
   ctx.globalAlpha=alpha==null?1:alpha; ctx.fillStyle=col; ctx.fillRect(x+1,y+1,CELL-2,CELL-2);
   if(!blue){ ctx.fillStyle='rgba(255,255,255,.16)'; ctx.fillRect(x+1,y+1,CELL-2,Math.max(2,CELL*0.18)); }
@@ -378,8 +389,7 @@ function render(){ ctx.clearRect(0,0,W,H); drawBackdrop(); if(!G)return;
     ctx.strokeStyle='rgba(255,209,102,.5)'; ctx.lineWidth=1; ctx.strokeRect(x+1.5,y+1.5,CELL-3,CELL-3); } }
   // locked cells
   for(let i=0;i<G.grid.length;i++){ const v=G.grid[i]; if(!v)continue; const c=i%COLS,r=(i/COLS)|0;
-    const onPlan=G.mask[i]; drawCell(c,r,cellColor(v)); if(!onPlan){ ctx.globalAlpha=.5; ctx.fillStyle='rgba(255,93,115,.4)'; ctx.fillRect(GX+c*CELL+1,GY+r*CELL+1,CELL-2,CELL-2); ctx.globalAlpha=1; }
-    if(v===4){ const x=GX+c*CELL,y=GY+r*CELL; ctx.fillStyle='#9a6a12'; ctx.font='900 '+Math.max(7,CELL*0.36)+'px Courier New'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('AD',x+CELL/2,y+CELL/2); } }
+    drawSettled(c,r,v); if(!G.mask[i]){ ctx.fillStyle='rgba(255,93,115,.42)'; ctx.fillRect(GX+c*CELL+1,GY+r*CELL+1,CELL-2,CELL-2); } }
   // persistent gold "build up to here" line per column (stays after cells fill)
   { const tgl=BLUEPRINTS[G.sec]; for(let c=0;c<COLS;c++){ const ty=GY+(ROWS-tgl[c])*CELL; ctx.fillStyle='rgba(255,209,102,.92)'; ctx.fillRect(GX+c*CELL+1,ty-1,CELL-2,3); } }
   // ghost landing + current piece
@@ -388,6 +398,7 @@ function render(){ ctx.clearRect(0,0,W,H); drawBackdrop(); if(!G)return;
     for(const [c,r] of pieceCells(p)){ if(r>=0) drawCell(c,r,MAT[p.mat]); } }
   ctx.restore();
   if(G.flash>0){ ctx.fillStyle='rgba(255,209,102,'+(G.flash*0.45)+')'; ctx.fillRect(GX-3,GY-3,GW+6,GH+6); } // section-clear flash
+  drawRailTower();
   // hold / next previews in the band above the grid
   drawMini(G.hold, GX, GY-30, lang==='ar'?'احتفاظ':'HOLD');
   drawMini(G.next, GX+GW-4*9, GY-30, lang==='ar'?'التالي':'NEXT');
@@ -401,6 +412,17 @@ function drawMini(t,x,y,lab){ const s=9;
   ctx.fillText(lab,x,y-3);
   if(!t)return; const cells=SHAPES[t][0];
   for(const [c,r] of cells){ ctx.fillStyle='rgba(253,243,227,.85)'; ctx.fillRect(x+c*s, y+r*s, s-1, s-1); } }
+/* the rising Burj — grows one tapering floor per completed section, toward the spire */
+function drawRailTower(){ if(!G)return; const x0=6,x1=RAILW-6,cx=(x0+x1)/2,innerW=x1-x0;
+  const top=GY,bot=H-76-6,n=BLUEPRINTS.length,segH=(bot-top-26)/(n+1);
+  let y=bot;
+  for(let s=0;s<G.built.length;s++){ const w=innerW*(1-s*0.045),h=segH-2;
+    ctx.fillStyle=G.built[s]; ctx.globalAlpha=.96; ctx.fillRect(cx-w/2,y-h,w,h); ctx.globalAlpha=1;
+    ctx.fillStyle='rgba(13,17,32,.28)'; for(let wy=y-h+3; wy<y-2; wy+=4) ctx.fillRect(cx-w/2+2,wy,w-4,1);
+    y-=segH; }
+  if(!G.over && G.sec<n){ const w=innerW*(1-G.sec*0.045); ctx.strokeStyle='rgba(255,209,102,.6)'; ctx.lineWidth=1; ctx.setLineDash([3,3]); ctx.strokeRect(cx-w/2,y-(segH-2),w,segH-2); ctx.setLineDash([]); }
+  const sy=top+22; ctx.fillStyle=G.won?'#dfe6ee':'rgba(223,230,238,.32)'; ctx.beginPath(); ctx.moveTo(cx,sy-16); ctx.lineTo(cx-7,sy); ctx.lineTo(cx+7,sy); ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(253,243,227,.85)'; ctx.font='800 10px Courier New'; ctx.textAlign='center'; ctx.textBaseline='alphabetic'; ctx.fillText(num(G.sec*M_PER_SEC)+mUnit(),cx,bot+13); }
 
 /* ---------- loop ---------- */
 function frame(ts){ const dt=Math.min(0.05,(ts-last)/1000||0); last=ts; if(running||(G&&G.over))update(dt); render(); requestAnimationFrame(frame); }
