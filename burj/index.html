@@ -146,7 +146,8 @@ const DICT={
     how:'Each section gives you a blueprint to fill. Drop the falling materials to match the plan. Clean fills score higher — spill just lowers your match.',
     tapBuild:'TAP TO BUILD',again:'BUILD AGAIN',share:'SHARE',
     collapse:'TOPPED OUT',bankrupt:'OVER BUDGET',win:'TOPPED OUT THE SPIRE!',
-    how1:'Fill the glowing blueprint with falling blocks.',how2:'Move ◀ ▶, rotate ⟳, drop ⤓. HOLD saves a piece.',how3:'Exact fills = clean build. Reach the spire!',
+    howTitle:'HOW TO BUILD',gotIt:'GOT IT',
+    how1:'Stack each column up to the gold line — no line-clears.',how2:'Move ◀ ▶, rotate ⟳, drop ⤓. HOLD saves a piece.',how3:'Holes & spill only lower MATCH%. Reach the spire!',
     best:p=>'Best · '+p+'% clean',
     overSub:(s,h)=>s+' sections · '+h+'m',
     winSub:'You matched it all the way to 828m. A clean skyline.',
@@ -155,8 +156,8 @@ const DICT={
     secClear:m=>'SECTION CLEAR · '+m+'%',
     tMove:'◀ ▶ move · ⟳ rotate',tDrop:'⤓ drops it fast',tHold:'HOLD saves a piece',
     tSpill:'Spill lowers your match',tClean:'Clean fill! +',tSponsor:n=>'Leased — rent +'+n,
-    tSponsorFirst:'Gold block = a brand leases that floor',tSpire:'Build clean to the spire!',
-    sampleTenant:'sample tenant',
+    tSponsorFirst:'Gold AD block = a brand leases it',tSpire:'Build clean to the spire!',
+    tRule:'Fill to the gold line — holes cost MATCH%',sampleTenant:'sample tenant',
     shareTxt:(m,s,h)=>'I built the Burj '+m+'% clean ('+s+' sections, '+h+'m) 🏗️\nSame blueprints, same pieces — build it tighter → miklatgames.fun/burj',
     shareWin:m=>'I topped out the Burj '+m+'% clean to the spire 🏗️👑\nMatch it → miklatgames.fun/burj',
     copied:'Copied — paste in the chat!'},
@@ -164,7 +165,8 @@ const DICT={
     how:'كل قسم يمنحك مخططًا لتعبئته. أسقط المواد المتساقطة لمطابقة الخطة. التعبئة النظيفة تسجّل أعلى — الفائض يقلّل تطابقك فقط.',
     tapBuild:'انقر للبناء',again:'ابنِ من جديد',share:'شارك',
     collapse:'امتلأ البرج',bankrupt:'تجاوز الميزانية',win:'اكتملت القمة!',
-    how1:'املأ المخطط المضيء بالكتل المتساقطة.',how2:'حرّك ◀ ▶، دوّر ⟳، أسقط ⤓. «HOLD» يحفظ قطعة.',how3:'التعبئة الدقيقة = بناء نظيف. اصعد للقمة!',
+    howTitle:'كيف تبني',gotIt:'فهمت',
+    how1:'كدّس كل عمود حتى الخط الذهبي — لا مسح صفوف.',how2:'حرّك ◀ ▶، دوّر ⟳، أسقط ⤓. «HOLD» يحفظ قطعة.',how3:'الفراغات والفائض تقلّل التطابق فقط. اصعد للقمة!',
     best:p=>'الأفضل · '+p+'% نظافة',
     overSub:(s,h)=>s+' أقسام · '+h+'م',
     winSub:'طابقتَه حتى ٨٢٨م. أفق نظيف.',
@@ -173,8 +175,8 @@ const DICT={
     secClear:m=>'اكتمل القسم · '+m+'%',
     tMove:'◀ ▶ حرّك · ⟳ دوّر',tDrop:'⤓ يُسقطها بسرعة',tHold:'«HOLD» يحفظ قطعة',
     tSpill:'الفائض يقلّل تطابقك',tClean:'تعبئة نظيفة! +',tSponsor:n=>'مؤجّر — إيجار +'+n,
-    tSponsorFirst:'الكتلة الذهبية = علامة تستأجر الطابق',tSpire:'ابنِ بنظافة حتى القمة!',
-    sampleTenant:'مستأجر تجريبي',
+    tSponsorFirst:'كتلة AD الذهبية = علامة تستأجرها',tSpire:'ابنِ بنظافة حتى القمة!',
+    tRule:'املأ حتى الخط الذهبي — الفراغات تكلّف التطابق',sampleTenant:'مستأجر تجريبي',
     shareTxt:(m,s,h)=>'بنيت البرج بنظافة '+m+'% ('+s+' أقسام، '+h+'م) 🏗️\nنفس المخططات والقطع — ابنِه أدق → miklatgames.fun/burj',
     shareWin:m=>'أكملت قمة البرج بنظافة '+m+'% 🏗️👑\nطابقه → miklatgames.fun/burj',
     copied:'تم النسخ — الصقه في المحادثة!'}
@@ -235,8 +237,8 @@ window.addEventListener('resize',fit);
 const COLS=8, ROWS=16, M_PER_SEC=83;   // ~10 sections -> ~828m
 const START_BUDGET=900;
 const MAT={glass:'#3ee6ff',concrete:'#9aa0a6',gold:'#ffd166',sponsor:'#ffd166'};
-const MATKEYS=['glass','concrete','gold'];
-const TENANTS=['MARINA TOWERS','GULF TELECOM','AL NOOR BANK','YOUR BRAND'];
+const MV={glass:1,concrete:2,gold:3,sponsor:4};
+const TENANTS=['DEMO TENANT A','DEMO TENANT B','DEMO TENANT C','YOUR BRAND HERE']; // clearly fictional demo inventory
 // blueprints = target HEIGHT per column (8 cols). Shape complexity escalates; gravity-fillable by construction.
 const BLUEPRINTS=[
   [3,3,3,3,3,3,3,3],
@@ -279,8 +281,9 @@ function blueprintMask(sec){ const hs=BLUEPRINTS[sec]; const m=new Int8Array(COL
   for(let c=0;c<COLS;c++){ for(let k=0;k<hs[c];k++){ const r=ROWS-1-k; m[r*COLS+c]=1; tot++; } } return {mask:m,total:tot}; }
 
 function newGame(){
-  const seed=(seedQ!=null?(parseInt(seedQ,10)||1):((Math.random()*1e9)|0))>>>0;
-  G={ seed:seed, grid:new Int8Array(COLS*ROWS), sec:0, budget:START_BUDGET, over:false, won:false,
+  const ps=seedQ!=null?parseInt(seedQ,10):NaN;
+  const seed=(isNaN(ps)?((Math.random()*1e9)|0):ps)>>>0;
+  G={ seed:seed, grid:new Int8Array(COLS*ROWS), sec:0, budget:START_BUDGET, over:false, won:false, flash:0, lockT:0, lockResets:0,
     rng:mulberry(seed), bag:[], next:null, hold:null, holdUsed:false, cur:null,
     dropAcc:0, pieceCount:0, sponsorsLeased:0, sumOnplan:0, sumPlaced:0, cleanSections:0,
     shake:0, fade:0, secMaskTotal:0 };
@@ -302,21 +305,21 @@ function spawn(t){ const ty=t||G.next; if(!t)G.next=nextType();
   const cells0=SHAPES[ty][0]; const bw=Math.max(...cells0.map(c=>c[0]))+1;
   const p={t:ty,rot:0,px:((COLS-bw)/2)|0,py:0,mat:pieceMat(),tenant:null};
   if(p.mat==='sponsor')p.tenant=TENANTS[(G.sponsorsLeased)%TENANTS.length];
-  G.cur=p; G.holdUsed=false; G.dropAcc=0;
+  G.cur=p; G.holdUsed=false; G.dropAcc=0; G.lockT=0; G.lockResets=0;
   if(collide(pieceCells(p))){ endGame('collapse'); } }
 
 /* ---------- input ops ---------- */
-function tryMove(dx){ if(!G.cur)return; const p=G.cur,nc=pieceCells({...p,px:p.px+dx}); if(!collide(nc)){p.px+=dx;sfxMove();} }
+function lockReset(){ if(G.lockResets<14){ G.lockT=0; G.lockResets++; } }
+function tryMove(dx){ if(!G.cur)return; const p=G.cur,nc=pieceCells({...p,px:p.px+dx}); if(!collide(nc)){p.px+=dx;sfxMove();lockReset();} }
 function tryRotate(){ if(!G.cur)return; const p=G.cur,nr=(p.rot+1)&3;
-  for(const k of [0,-1,1,-2,2]){ if(!collide(pieceCells({...p,rot:nr,px:p.px+k}))){ p.rot=nr; p.px+=k; sfxRot(); return; } } }
+  for(const k of [0,-1,1,-2,2]){ if(!collide(pieceCells({...p,rot:nr,px:p.px+k}))){ p.rot=nr; p.px+=k; sfxRot(); lockReset(); return; } } }
 function softStep(){ if(!G.cur)return false; const p=G.cur,nc=pieceCells({...p,py:p.py+1}); if(!collide(nc)){p.py++;return true;} lockPiece(); return false; }
 function hardDrop(){ if(!G.cur)return; const p=G.cur; while(!collide(pieceCells({...p,py:p.py+1})))p.py++; lockPiece(); }
 function holdSwap(){ if(!G.cur||G.holdUsed)return; const cu=G.cur.t; if(G.hold){ const h=G.hold; G.hold=cu; spawn(h); } else { G.hold=cu; spawn(); } G.holdUsed=true; }
 
 function lockPiece(){ const p=G.cur; let cost=0;
-  for(const [c,r] of pieceCells(p)){ if(r<0){ endGame('collapse'); return; } const i=r*COLS+c; G.grid[i]=MATKEYS.indexOf(p.mat)+1>0?(MATKEYS.indexOf(p.mat)+1):4;
-    if(p.mat==='sponsor')G.grid[i]=4; cost+=3; }
-  G.budget-=cost; sfxLock(); G.shake=2.5;
+  for(const [c,r] of pieceCells(p)){ if(r<0){ G.cur=null; endGame('collapse'); return; } G.grid[r*COLS+c]=MV[p.mat]; cost+=3; }
+  G.budget-=cost; sfxLock(); G.shake=2.5; teach('rule',T().tRule);
   if(p.mat==='sponsor'){ G.budget+=70; G.sponsorsLeased++;
     if(!taughtOnce.has('spon')){teach('spon',T().tSponsorFirst);} else coach(T().tSponsor(num(70)));
     const bv=document.querySelector('.stat.b .val'); if(bv){bv.classList.add('low');setTimeout(()=>bv.classList.remove('low'),700);} }
@@ -336,7 +339,7 @@ function sectionComplete(){
   const clean=(placed===onplan && onplan>=tot); // exact: filled the plan, no spill, no holes
   if(clean){ G.cleanSections++; G.budget+=60; coach(T().tClean+num(60)); }
   else teach('spill',T().tSpill);
-  sfxClear(); toast(T().secClear(num(m))); track('section');
+  sfxClear(); toast(T().secClear(num(m))); G.flash=0.5; track('section');
   G.sec++;
   if(G.sec>=BLUEPRINTS.length){ endGame('win'); return; }
   loadSection(G.sec); spawn();
@@ -346,10 +349,12 @@ function sectionComplete(){
 function overallClean(){ return G.sumPlaced>0? Math.round(100*G.sumOnplan/G.sumPlaced) : 100; }
 
 /* ---------- update ---------- */
-function dropInterval(){ return Math.max(0.18, 0.85 - G.sec*0.06); }
+function dropInterval(){ return Math.max(0.24, 0.92 - G.sec*0.05); } // late skill is placement, not reflex
 function update(dt){ if(!G||G.over){ if(G&&G.fade<1)G.fade=Math.min(1,G.fade+dt*2); return; }
-  G.shake*=Math.pow(0.0015,dt);
-  if(G.cur){ G.dropAcc+=dt; if(G.dropAcc>=dropInterval()){ G.dropAcc=0; softStep(); } } }
+  G.shake*=Math.pow(0.0015,dt); if(G.flash>0)G.flash=Math.max(0,G.flash-dt*2);
+  if(G.cur){ const grounded=collide(pieceCells({...G.cur,py:G.cur.py+1}));
+    if(grounded){ G.lockT+=dt; if(G.lockT>=0.45) lockPiece(); }   // lock delay: nudge/tuck before it sets
+    else { G.lockT=0; G.dropAcc+=dt; if(G.dropAcc>=dropInterval()){ G.dropAcc=0; softStep(); } } } }
 
 /* ---------- render ---------- */
 function cellColor(v){ return v===1?MAT.glass:v===2?MAT.concrete:v===3?MAT.gold:MAT.sponsor; }
@@ -374,12 +379,15 @@ function render(){ ctx.clearRect(0,0,W,H); drawBackdrop(); if(!G)return;
   // locked cells
   for(let i=0;i<G.grid.length;i++){ const v=G.grid[i]; if(!v)continue; const c=i%COLS,r=(i/COLS)|0;
     const onPlan=G.mask[i]; drawCell(c,r,cellColor(v)); if(!onPlan){ ctx.globalAlpha=.5; ctx.fillStyle='rgba(255,93,115,.4)'; ctx.fillRect(GX+c*CELL+1,GY+r*CELL+1,CELL-2,CELL-2); ctx.globalAlpha=1; }
-    if(v===4){ const x=GX+c*CELL,y=GY+r*CELL; ctx.fillStyle='#9a6a12'; ctx.font='900 '+Math.max(7,CELL*0.4)+'px Courier New'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('₪',x+CELL/2,y+CELL/2); } }
+    if(v===4){ const x=GX+c*CELL,y=GY+r*CELL; ctx.fillStyle='#9a6a12'; ctx.font='900 '+Math.max(7,CELL*0.36)+'px Courier New'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('AD',x+CELL/2,y+CELL/2); } }
+  // persistent gold "build up to here" line per column (stays after cells fill)
+  { const tgl=BLUEPRINTS[G.sec]; for(let c=0;c<COLS;c++){ const ty=GY+(ROWS-tgl[c])*CELL; ctx.fillStyle='rgba(255,209,102,.92)'; ctx.fillRect(GX+c*CELL+1,ty-1,CELL-2,3); } }
   // ghost landing + current piece
   if(G.cur){ const p=G.cur; let gy=0; while(!collide(pieceCells({...p,py:p.py+gy+1})))gy++;
     for(const [c,r] of pieceCells(p)){ if(r+gy>=0){ const x=GX+c*CELL,y=GY+(r+gy)*CELL; ctx.strokeStyle='rgba(253,243,227,.45)'; ctx.lineWidth=1.5; ctx.strokeRect(x+2,y+2,CELL-4,CELL-4); } }
     for(const [c,r] of pieceCells(p)){ if(r>=0) drawCell(c,r,MAT[p.mat]); } }
   ctx.restore();
+  if(G.flash>0){ ctx.fillStyle='rgba(255,209,102,'+(G.flash*0.45)+')'; ctx.fillRect(GX-3,GY-3,GW+6,GH+6); } // section-clear flash
   // hold / next previews in the band above the grid
   drawMini(G.hold, GX, GY-30, lang==='ar'?'احتفاظ':'HOLD');
   drawMini(G.next, GX+GW-4*9, GY-30, lang==='ar'?'التالي':'NEXT');
@@ -421,18 +429,17 @@ function buildCard(){ const c=document.createElement('canvas');c.width=1080;c.he
   x.fillStyle='#ffd166';x.font='900 70px Courier New';x.fillText('BUILD THE BURJ',540,128);
   x.fillStyle='#fdf3e3';x.font='800 34px Heebo,Arial';x.fillText('ابنِ البرج',540,176);
   // mini skyline from completed sections (use blueprint profiles)
-  const drawBot=980,maxH=560,unit=12;
-  let yb=drawBot;
-  for(let s=0;s<Math.min(G?G.sec:0,BLUEPRINTS.length);s++){ const hs=BLUEPRINTS[s]; const cw=46; const totW=cw*COLS; const sx=540-totW/2;
-    const segH=Math.max(...hs); const sh=Math.min(segH*unit, 70);
-    for(let cc=0;cc<COLS;cc++){ const bh=(hs[cc]/segH)*sh; x.fillStyle=cc%2?'#3ee6ff':'#7fb6e6'; x.globalAlpha=.92; x.fillRect(sx+cc*cw+3,yb-bh,cw-6,bh); x.globalAlpha=1; }
-    yb-=sh+4; if(yb<drawBot-maxH)break; }
-  if(G&&G.won){ x.fillStyle='#dfe6ee'; x.beginPath(); x.moveTo(540,yb); x.lineTo(524,yb+34); x.lineTo(556,yb+34); x.closePath(); x.fill(); }
+  const baseW=440, n=Math.min(G?G.sec:0,BLUEPRINTS.length); let yb=980;
+  for(let s=0;s<n;s++){ const hs=BLUEPRINTS[s], segH=Math.max(...hs); const tw=baseW*(1-s*0.055), sh=Math.min(segH*9,60), sx=540-tw/2, cw=tw/COLS;
+    for(let cc=0;cc<COLS;cc++){ const bh=(hs[cc]/segH)*sh; x.fillStyle=cc%2?'#3ee6ff':'#7fb6e6'; x.globalAlpha=.94; x.fillRect(sx+cc*cw+2,yb-bh,cw-4,bh); x.globalAlpha=1; }
+    yb-=sh+3; }
+  x.fillStyle='#dfe6ee'; x.beginPath(); x.moveTo(540,yb); x.lineTo(530,yb+42); x.lineTo(550,yb+42); x.closePath(); x.fill(); // spire
   const clean=G?overallClean():0;
   x.fillStyle='#7ee8c7';x.font='900 150px Courier New';x.fillText(num(clean)+'%',540,1150);
   x.fillStyle='#fdf3e3';x.font='800 36px Courier New';x.fillText((G&&G.won?'👑 ':'')+(lang==='ar'?'بناء نظيف':'CLEAN BUILD'),540,1205);
-  x.fillStyle='rgba(253,243,227,.9)';x.font='800 30px Courier New';x.fillText(num(G?G.sec:0)+(lang==='ar'?' أقسام · ':' sections · ')+num((G?G.sec:0)*M_PER_SEC)+mUnit(),540,1258);
-  x.fillStyle='rgba(253,243,227,.8)';x.font='800 28px Courier New';x.fillText('miklatgames.fun/burj',540,1320);
+  x.fillStyle='rgba(253,243,227,.9)';x.font='800 30px Courier New';x.fillText(num(G?G.sec:0)+(lang==='ar'?' أقسام · ':' sections · ')+num((G?G.sec:0)*M_PER_SEC)+mUnit(),540,1256);
+  x.fillStyle='#ffd166';x.font='800 27px Courier New';x.fillText(lang==='ar'?'نفس المخططات — تغلّب عليّ':'SAME BLUEPRINTS — BEAT ME',540,1298);
+  x.fillStyle='rgba(253,243,227,.8)';x.font='800 26px Courier New';x.fillText('miklatgames.fun/burj',540,1334);
   return c; }
 async function share(){ const clean=overallClean(), s=G.sec, h=s*M_PER_SEC;
   let txt=G.won?T().shareWin(num(clean)):T().shareTxt(num(clean),num(s),num(h));
@@ -457,7 +464,7 @@ document.getElementById('muteBtn').addEventListener('click',()=>{muted=!muted;tr
 document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';
 document.getElementById('holdBtn').addEventListener('click',()=>{if(running)holdSwap();});
 // control buttons
-const bind=(id,fn)=>{const e=document.getElementById(id); e.addEventListener('click',ev=>{ev.preventDefault();if(running)fn();});};
+const bind=(id,fn)=>{const e=document.getElementById(id); e.addEventListener('pointerdown',ev=>{ev.preventDefault();if(running)fn();});};
 bind('bLeft',()=>tryMove(-1)); bind('bRight',()=>tryMove(1)); bind('bRot',tryRotate); bind('bDrop',hardDrop);
 window.addEventListener('keydown',e=>{ if(!running)return; const k=e.code;
   if(k==='ArrowLeft'){e.preventDefault();tryMove(-1);} else if(k==='ArrowRight'){e.preventDefault();tryMove(1);}
