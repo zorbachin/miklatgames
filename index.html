@@ -185,7 +185,7 @@
     <a class="featured" href="irondome/" id="featured">
       <div class="feat-media">
         <video class="feat-vid" src="irondome/press/promo-horizontal.mp4" poster="assets/irondome-cover.webp"
-               autoplay muted loop playsinline preload="auto" aria-label="Iron Dome gameplay"></video>
+               muted loop playsinline preload="none" aria-label="Iron Dome gameplay"></video>
         <span class="feat-tag" data-i18n="featured">★ FEATURED</span>
       </div>
       <div class="feat-overlay">
@@ -416,13 +416,19 @@ if (DESKTOP) {
 }
 
 /* featured hero plays muted on every device (iOS allows muted+playsinline).
-   nudge play in case the browser holds it, and retry when the tab returns. */
+   only loads when online — offline visitors just see the poster, no failed
+   fetch and nothing cached for the shelter. retry when tab returns / reconnects. */
 (function(){
   const fv = document.querySelector('.feat-vid'); if (!fv) return;
-  const go = () => { const p = fv.play(); if (p && p.catch) p.catch(()=>{}); };
-  if (fv.readyState >= 2) go(); else fv.addEventListener('loadeddata', go, {once:true});
+  const go = () => {
+    if (!navigator.onLine) return;
+    const p = fv.play(); if (p && p.catch) p.catch(()=>{});
+  };
+  go();
+  fv.addEventListener('loadeddata', () => { const p = fv.play(); if (p && p.catch) p.catch(()=>{}); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) go(); });
   document.addEventListener('pointerdown', go, {once:true});
+  window.addEventListener('online', go);
 })();
 
 applyLang(); applyAudio();
