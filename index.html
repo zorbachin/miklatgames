@@ -198,15 +198,6 @@
     </a>
 
     <div class="cards">
-      <a class="gcard" href="irondome/" id="cardIron" style="--accent:#3ee6ff" data-game="irondome" data-preview="irondome/press/promo.mp4">
-        <div class="coverwrap"><img class="cover" src="assets/irondome-cover.webp" alt="Pixel-art Iron Dome intercepting rockets over a glowing city skyline" loading="eager"><span class="play" data-i18n="play">PLAY ▶</span></div>
-        <div class="body">
-          <div class="ttl"><span class="name">Iron Dome</span><span class="name-he">כיפת ברזל</span></div>
-          <div class="hook" data-i18n="ironHook">Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.</div>
-          <div class="meta"><span class="pill" data-i18n="offline">📵 No reception needed</span></div>
-        </div>
-      </a>
-
       <a class="gcard" href="whackamullah/" id="cardWhack" style="--accent:#ffd166" data-game="whackamullah" data-preview="whackamullah/promo.mp4">
         <div class="coverwrap"><img class="cover" src="whackamullah/cover.png" alt="Whack-a-Mullah" loading="lazy"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
@@ -396,9 +387,8 @@ const TIP_URL='https://ko-fi.com/miklatgames';
 if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
   tj.hidden=false;tj.addEventListener('click',()=>track('tip'));}
 document.getElementById('cardMamad').addEventListener('click',()=>track('play-mamaddash'));
-document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
 document.getElementById('cardWhack').addEventListener('click',()=>track('play-whackamullah'));
-document.getElementById('featured').addEventListener('click',()=>track('play-featured-irondome'));
+document.getElementById('featured').addEventListener('click',()=>track('play-irondome'));
 
 /* ---- CrazyGames-style video: desktop only, lazy-loaded, so phones on no/low
    signal never pay the data cost (core "works in the shelter" promise) ---- */
