@@ -76,6 +76,9 @@
   .gcard:active{transform:scale(.98);}
   .gcard .coverwrap{position:relative;}
   .gcard .cover{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--c-panel-2);}
+  .gcard .preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    opacity:0;transition:opacity .35s var(--ease);pointer-events:none;background:#070d20;}
+  .gcard .preview.show{opacity:1;}
   .gcard .play{position:absolute;bottom:10px;inset-inline-end:10px;background:linear-gradient(180deg,#ffd166,#e9a23b);
     color:#1a1405;font-weight:900;font-size:14px;padding:9px 16px;border-radius:11px;
     box-shadow:0 6px 18px rgba(233,162,59,.45);}
@@ -157,7 +160,7 @@
 
   <main class="main">
     <div class="cards">
-      <a class="gcard" href="irondome/" id="cardIron" style="--accent:#3ee6ff" data-game="irondome">
+      <a class="gcard" href="irondome/" id="cardIron" style="--accent:#3ee6ff" data-game="irondome" data-preview="irondome/press/promo.mp4">
         <div class="coverwrap"><img class="cover" src="assets/irondome-cover.webp" alt="Pixel-art Iron Dome intercepting rockets over a glowing city skyline" loading="eager"><span class="play" data-i18n="play">PLAY ▶</span></div>
         <div class="body">
           <div class="ttl"><span class="name">Iron Dome</span><span class="name-he">כיפת ברזל</span></div>
@@ -356,6 +359,30 @@ document.getElementById('cardMamad').addEventListener('click',()=>track('play-ma
 document.getElementById('cardIron').addEventListener('click',()=>track('play-irondome'));
 document.getElementById('cardWhack').addEventListener('click',()=>track('play-whackamullah'));
 
+/* ---- CrazyGames-style hover preview: desktop-only, loads video lazily on hover
+   so phones on no/low signal never pay the data cost (core promise) ---- */
+if (window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
+  document.querySelectorAll('.gcard[data-preview]').forEach(card => {
+    const wrap = card.querySelector('.coverwrap'); if (!wrap) return;
+    let vid = null;
+    card.addEventListener('pointerenter', () => {
+      if (!vid) {
+        vid = document.createElement('video');
+        vid.className = 'preview';
+        vid.muted = true; vid.loop = true; vid.playsInline = true;
+        vid.preload = 'none'; vid.src = card.getAttribute('data-preview');
+        wrap.appendChild(vid);
+      }
+      const p = vid.play(); if (p && p.catch) p.catch(()=>{});
+      requestAnimationFrame(()=>vid.classList.add('show'));
+    });
+    card.addEventListener('pointerleave', () => {
+      if (!vid) return;
+      vid.classList.remove('show');
+      try { vid.pause(); } catch(e){}
+    });
+  });
+}
 
 applyLang(); applyAudio();
 if ('serviceWorker' in navigator)
