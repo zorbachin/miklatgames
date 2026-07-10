@@ -47,6 +47,13 @@ and finances the next phase. No phase is greenlit on faith.
    villain duo as written.
 7. **Comedy engine.** The Strong Voice vs. Nerdy Voice bickering narration
    that opens the script is already a kids'-cartoon framing device.
+8. **The ending is the brand thesis.** Max's *algorithm* wins the day — and
+   in the final reversal the nerd saves the soldier (Max rescues Harper)
+   and gets the girl. Brains-beat-brawn, delivered by the least likely
+   hero, is the message every episode reprises: the smallest Pal with the
+   smartest idea seals the portal. And the script closes on an
+   "adventure continues" beat — the sequel/series hook is native to the
+   property, not bolted on.
 
 ## 0.5 · The Portal Pals adaptation (character layer → play layer)
 
@@ -189,7 +196,8 @@ With a durable kids' brand established, the film play is dual-track:
 
 1. **The Portal Pals animated feature** — the kids' event; premise from
    the mythology the series has been seeding (Max learns what the Key
-   really is; both worlds at stake — the script's third act, kid-scaled).
+   really is; both worlds at stake — the script's third act, kid-scaled:
+   the algorithm saves the day and the nerd saves the soldier).
 2. **ZERO DAY, the live-action/hybrid tentpole** — the original screenplay,
    PG-13, produced once the brand guarantees opening-weekend awareness.
    The grown-up audience is the kids who aged up plus their parents who
