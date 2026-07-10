@@ -1,0 +1,113 @@
+# 🌀 PORTAL PALS — world bible v1 (visual-prototype canon)
+
+Kids' animated universe of the *Zero Day* screenplay (Grashin & Harkins).
+This file is the single source of truth for every generated image, clip,
+and game asset. If a prompt contradicts this file, the prompt is wrong.
+
+## Tone laws (non-negotiable)
+
+1. **Funny first, brave second, smart wins.** Every victory comes from an
+   idea, not a bigger gun. The finale of everything: the algorithm wins.
+2. **Misunderstood, not monstrous.** Parabots are never evil as a race —
+   they were peaceful until attacked. Enemies get *powered down*, never
+   destroyed on screen. Some Parabots become friends.
+3. **Zero gore, zero firearms.** Weapons are light-energy gadgets, webs,
+   bubbles, EMP pulses. Nothing bleeds; robots bonk, spark, and reboot.
+4. **The nerd saves the soldier.** Max is the least physical and the most
+   valuable. Harper learns it every episode; kids internalize it.
+5. **Adventure continues.** Every ending opens a new door (literally — a
+   new portal glows as we iris out).
+
+## The world in three sentences
+
+PortalTech's portals connect Earth to Galaxy X-16, home of the Parabots —
+robot beings who opened portals fleeing their own war. When rogue portals
+pop up in the wildest places, the Portal Pals deploy in the LASS to seal
+the breach, round up runaway Parabots, and befriend the scared ones.
+Max — secretly part-Parabot, "the Key," with a glowing birthmark that
+opens and closes portals — is the bridge between both worlds.
+
+## The Pals (hero team, kid-ified)
+
+| Character | Age read | Visual anchors | Signature move / verb |
+|---|---|---|---|
+| **MAX SHIFRIN** | 12 | dark brown skin, short curly black hair, round glasses, purple button-up under an oversized white lab coat, hi-top sneakers, gadget backpack; **glowing orange-and-blue swirl birthmark on right wrist** | the Key: opens/closes portals with his birthmark; hacks anything (timing/puzzle) |
+| **COL. HARPER** | adult mentor | huge square jaw, buzz cut, warm eyes, aviator sunglasses (often pushed up), left **robot arm with swappable cannon**, both legs robotic with orange trim | aim & blast (light-energy bolts); team dad energy |
+| **COLLINS** | adult, gentle giant | tallest, barrel chest, chrome lower jaw, grin, forearm **cartridge slots** (blue = ice-web, green = power) | smash & freeze; catches things |
+| **RIZZO** | late-teens read | athletic, high ponytail, right robot arm + left robot leg, jet flares at heels, confident smirk | corkscrew rocket flight, 360° spin-dodge |
+| **WU** | 15 | skinny, gravity-defying spiky black hair, open lab coat over graphic tee, spiky rubber bracelet, finger-guns | portal-hop trickster: pops in/out of mini-portals; tongue-*click* catchphrase |
+
+## The mascot (working name: ORBIE — placeholder pending clearance)
+
+A **baby Parabot**: round hovering orb the size of a basketball, matte
+pearl-white shell with **hexagonal panel lines**, one huge friendly cyan
+LED eye that emotes (♥, !, ?, Zzz), two stubby fold-out arms, hover-glow
+underneath. Chirps and boops; never speaks. Rides in Max's backpack with
+the flap open. The plush. The icon. In every scene transition.
+
+## Villains
+
+- **DR. DORSEY** — elegant, icy corporate scientist: silver-streaked black
+  bun, high-collar charcoal lab dress, tablet always in hand. Mid-shot she
+  **shifts** into her true form: a tall, sleek, angular chrome Parabot
+  with violet eye-lights (the only violet lights in the show — villain
+  color). Motive: steal Max's code to control all portals.
+- **DEB-BOT** — comic henchbot: prim assistant with a too-tight bun whose
+  limbs telescope into clunky robot arms at the worst moments. Loyal,
+  literal-minded, constantly too close behind Dorsey.
+
+## Friendly cast & home base
+
+- **CHARLENE** — 20s, capable and unflappable, hair in a wrap, apron over
+  flannel; owns **BREW ME LIKE YOU SHOULD**, the cozy strip-mall coffee
+  shop that survives everything — the Pals' home base. Back room hides the
+  portal lab entrance (in the movie it's a CVS; in the kids' show the
+  secret door is behind the pastry shelf).
+- **PRESIDENT McCARTHY** — blunt, funny, cookie-loving commander-in-chief.
+- **MAXINE** — Max's adoptive mom; cookies, hugs, zero fear.
+
+## Parabots (the creature system)
+
+Robot beings with **hexagonal armor plating**, digitigrade legs, and a
+single glowing chest-core. Eye/core color = disposition:
+**orange** = wild/scared (default), **cyan** = befriended,
+**violet** = Dorsey-controlled. Sizes: *Scuttler* (dog-size),
+*Strider* (horse-size), *Titan* (building-size, rare boss).
+Befriended Parabots live in the **Portal Paddock** behind Charlene's.
+
+## Hardware
+
+- **The LASS** — the team vehicle: chunky, friendly amphibious hover-tank,
+  white + orange livery, big canopy, four modes (Land wheels / Air jets /
+  Sea fins / Space boosters). Toy-first proportions: fat wheels, big
+  buttons, room for five Pals + Orbie's pod.
+- **Portal ring** — a floor-mounted metal ring; the portal itself is a
+  vertical disk of **swirling orange electric light** with white-hot rim
+  sparks. Rogue mini-portals are the same in candy colors.
+- **Cartridges & orbs** — palm-size glowing canisters the Pals slot into
+  gear: blue (ice-web), green (power surge), gold (leap-frog jump orbs).
+
+## Look of the show (master art direction)
+
+Vibrant 3D animated-feature style (modern theatrical CG family film):
+soft rounded shapes, chunky silhouettes readable at thumbnail size, big
+expressive eyes, subtle subsurface skin, clean PBR materials on robots.
+**Palette:** warm desert golds + teal skies on Earth; lush oversaturated
+alien greens/purples on the Parabot world; **portal orange (#FF7A1A)** is
+the brand accent everywhere; villain tech is the only violet. Lighting:
+sunny key + bounce, rim-lit action, portals as practical orange light
+sources. Camera: low kid-height angles, wide lenses for adventure scale.
+No gore, no realistic weapons, no text unless specified.
+
+## Worlds (episode/level settings)
+
+1. **Vegas Outskirts** — desert highway, strip mall, Charlene's shop.
+2. **Portal Academy HQ** — the kid-brand PortalTech: bright underground
+   NASA-style nerve center, glass pods, LED scoreboard wall.
+3. **Parabot Meadow** (Galaxy X-16) — Earth-like but larger-than-life:
+   giant vibrant flora, floating LED bubbles, low warm sun.
+4. **The Glass Tower** — Parabot capital: a tower of light-panels instead
+   of steel, shimmering force fields.
+5. **Rogue-portal locales** (renewable): school gym, container port,
+   snowy mountain village, night carnival, space junkyard… one new world
+   per episode/level, forever.
