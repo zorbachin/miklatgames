@@ -29,9 +29,14 @@ opens and closes portals — is the bridge between both worlds.
 
 ## The Pals (hero team, kid-ified)
 
+🔒 = design locked from an approved generated reference sheet — attach
+that sheet to every future prompt featuring the character; do not
+re-invent. (Locked so far: Max, 2026-07-11. The Scuttler creature design
+from the first befriending board is also approved as canon.)
+
 | Character | Age read | Visual anchors | Signature move / verb |
 |---|---|---|---|
-| **MAX SHIFRIN** | 12 | dark brown skin, short curly black hair, round glasses, purple button-up under an oversized white lab coat, hi-top sneakers, gadget backpack; **glowing orange-and-blue swirl birthmark on right wrist** | the Key: opens/closes portals with his birthmark; hacks anything (timing/puzzle) |
+| **MAX SHIFRIN** 🔒 | 12 | warm tan-brown skin, curly black hair, round dark-framed glasses, purple button-up under an oversized white lab coat with rolled sleeves, cuffed jeans, orange hi-top sneakers, black-and-orange tech backpack with a glowing orange core; **glowing orange spiral birthmark on right wrist (never pink/violet, never geometric)** | the Key: opens/closes portals with his birthmark; hacks anything (timing/puzzle) |
 | **COL. HARPER** | adult mentor | huge square jaw, buzz cut, warm eyes, aviator sunglasses (often pushed up), left **robot arm with swappable cannon**, both legs robotic with orange trim | aim & blast (light-energy bolts); team dad energy |
 | **COLLINS** | adult, gentle giant | tallest, barrel chest, chrome lower jaw, grin, forearm **cartridge slots** (blue = ice-web, green = power) | smash & freeze; catches things |
 | **RIZZO** | late-teens read | athletic, high ponytail, right robot arm + left robot leg, jet flares at heels, confident smirk | corkscrew rocket flight, 360° spin-dodge |
