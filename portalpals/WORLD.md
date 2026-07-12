@@ -43,36 +43,47 @@ the first befriending board is also approved as canon.)
 | **RIZZO** 🔒 | late-teens read | athletic, high dark ponytail, cropped flight jacket with orange shoulder armor over white tank, dog-tag chain, right robot arm + left robot lower leg, **rocket boots with orange jet nozzles** | corkscrew rocket flight (spiral orange trail), 360° spin-dodge |
 | **WU** 🔒 | 15 | skinny, gravity-defying spiky black hair, open white coat with orange portal-dial patch on the back, **dark tee with orange-teal portal swirl graphic**, chain detail on pants, spiky rubber bracelet, sneakers with glowing portal discs | portal-hop trickster: pops in/out of mini-portals; tongue-*click* catchphrase |
 
-## The mascot (working name: ORBIE — placeholder pending clearance)
+## The mascot 🔒 (working name: ORBIE — placeholder pending clearance)
 
 A **baby Parabot**: round hovering orb the size of a basketball, matte
 pearl-white shell with **hexagonal panel lines**, one huge friendly cyan
 LED eye that emotes (♥, !, ?, Zzz), two stubby fold-out arms, hover-glow
 underneath. Chirps and boops; never speaks. Rides in Max's backpack with
 the flap open. The plush. The icon. In every scene transition.
+Canon face = the SCREEN version from the locked emote sheet (heart / ! /
+? / Zzz), not a realistic eyeball iris.
 
 ## Villains
 
-- **DR. DORSEY** — elegant, icy corporate scientist: silver-streaked black
+- **DR. DORSEY** 🔒 — elegant, icy corporate scientist: silver-streaked black
   bun, high-collar charcoal lab dress, tablet always in hand. Mid-shot she
   **shifts** into her true form: a tall, sleek, angular chrome Parabot
-  with violet eye-lights (the only violet lights in the show — villain
-  color). Motive: steal Max's code to control all portals.
+  with violet eye-lights and a hexagonal violet chest core (the only violet
+  lights in the show — villain color). Human-form tell: violet earrings.
+  Signature shot: hexagon plates rippling up her arm mid-transformation.
+  Motive: steal Max's code to control all portals.
 - **DEB-BOT** — comic henchbot: prim assistant with a too-tight bun whose
   limbs telescope into clunky robot arms at the worst moments. Loyal,
   literal-minded, constantly too close behind Dorsey.
 
 ## Friendly cast & home base
 
-- **CHARLENE** — 20s, capable and unflappable, hair in a wrap, apron over
+- **CHARLENE** 🔒 — 20s, capable and unflappable, hair in a wrap, apron over
   flannel; owns **BREW ME LIKE YOU SHOULD**, the cozy strip-mall coffee
   shop that survives everything — the Pals' home base. Back room hides the
   portal lab entrance (in the movie it's a CVS; in the kids' show the
-  secret door is behind the pastry shelf).
+  secret door is behind the pastry shelf). Locked look: patterned
+  headwrap, red plaid flannel over denim overall-top, tan apron, hoop
+  earrings, tan hi-top sneakers.
+- **PERC** 🔒 (working name, pending approval) — Charlene's chubby barista
+  shop-bot, discovered in generation and adopted: egg-shaped white body,
+  orange goggle eyes, antenna bobble, olive apron with tool pockets,
+  towel over one arm, broom in hand, little wheels. Comic-relief
+  background character at the home base; second plush.
 - **PRESIDENT McCARTHY** — blunt, funny, cookie-loving commander-in-chief.
 - **MAXINE** — Max's adoptive mom; cookies, hugs, zero fear.
 
-## Parabots (the creature system)
+## Parabots 🔒 (the creature system)
 
 Robot beings with **hexagonal armor plating**, digitigrade legs, and a
 single glowing chest-core. Eye/core color = disposition:
@@ -83,10 +94,12 @@ Befriended Parabots live in the **Portal Paddock** behind Charlene's.
 
 ## Hardware
 
-- **The LASS** — the team vehicle: chunky, friendly amphibious hover-tank,
+- **The LASS** 🔒 — the team vehicle: chunky, friendly amphibious hover-tank,
   white + orange livery, big canopy, four modes (Land wheels / Air jets /
   Sea fins / Space boosters). Toy-first proportions: fat wheels, big
-  buttons, room for five Pals + Orbie's pod.
+  buttons, room for five Pals + Orbie's pod (locked layout: six-seat
+  cabin, Orbie's pod at the front console, roof light-bar, rear tail fin
+  and twin boosters).
 - **Portal ring** — a floor-mounted metal ring; the portal itself is a
   vertical disk of **swirling orange electric light** with white-hot rim
   sparks. Rogue mini-portals are the same in candy colors.
