@@ -127,7 +127,7 @@ No gore, no realistic weapons, no text unless specified.
    hidden door ajar onto the glowing tech corridor + portal pad.
 2. **Portal Academy HQ** — the kid-brand PortalTech: bright underground
    NASA-style nerve center, glass pods, LED scoreboard wall.
-3. **Parabot Meadow** (Galaxy X-16) — Earth-like but larger-than-life:
+3. **Parabot Meadow** (Galaxy X-16) 🔒 — Earth-like but larger-than-life:
    giant vibrant flora, floating LED bubbles, low warm sun.
 4. **The Glass Tower** — Parabot capital: a tower of light-panels instead
    of steel, shimmering force fields.
