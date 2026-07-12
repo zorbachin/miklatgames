@@ -1,0 +1,11 @@
+{
+  "name": "PORTAL PALS",
+  "short_name": "PORTAL PALS",
+  "description": "Befriend the scared Parabots and seal the rogue portals. Fast, funny, one thumb.",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#12060e",
+  "theme_color": "#12060e",
+  "icons": [{ "src": "assets/icon.png", "sizes": "256x256", "type": "image/png", "purpose": "any" }]
+}
