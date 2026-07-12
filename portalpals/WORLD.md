@@ -139,6 +139,6 @@ No gore, no realistic weapons, no text unless specified.
    villain color saturates everything — her domain), hexagon panel walls,
    holographic portal-network star maps, central chair ringed by robotic
    arms, alien world visible through the glass.
-5. **Rogue-portal locales** (renewable): school gym, container port,
+5. **Rogue-portal locales** 🔒 (renewable; strip-mall parking-lot plate locked as the template — comedy, not fear): school gym, container port,
    snowy mountain village, night carnival, space junkyard… one new world
    per episode/level, forever.
