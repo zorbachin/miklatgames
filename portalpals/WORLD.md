@@ -133,8 +133,12 @@ No gore, no realistic weapons, no text unless specified.
    hexagon-patterned orbs in the grass — canonized as **Parabot eggs**
    (mythology hook). Purple flora is fine here; the villain-only violet
    rule applies to tech lights, not plants.
-4. **The Glass Tower** — Parabot capital: a tower of light-panels instead
-   of steel, shimmering force fields.
+4. **The Glass Tower** 🔒 — Parabot capital: a tower of light-panels
+   instead of steel, shimmering force fields. Locked interior plate:
+   Dorsey's throne-lab drenched FULL violet (the one location where the
+   villain color saturates everything — her domain), hexagon panel walls,
+   holographic portal-network star maps, central chair ringed by robotic
+   arms, alien world visible through the glass.
 5. **Rogue-portal locales** (renewable): school gym, container port,
    snowy mountain village, night carnival, space junkyard… one new world
    per episode/level, forever.
