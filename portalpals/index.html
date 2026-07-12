@@ -48,6 +48,7 @@
   <p id="tHow"></p>
   <p id="tBeat" class="mini"></p>
   <button id="play" class="btn"></button>
+  <button id="daily" class="btn sec"></button>
   <p class="mini" id="tOffline"></p>
 </div>
 
@@ -66,9 +67,9 @@
 'use strict';
 /* ---------- i18n ---------- */
 const I18N={
- en:{sub:'Level 1 · Parking-Lot Panic',how:'A rogue portal opened at the strip mall and scared little Parabots are tumbling out! Tag 5 of them to befriend them (they just need a friend), then stand by the portal to seal it. ⬅️➡️/A·D move · ⬆️/Space jump · on phones: hold screen sides, tap JUMP.',play:'PLAY',beat:'⚡ Challenge: seal it faster than {s}s!',win:'PORTAL SEALED!',lose:'THE PORTAL GOT STRONGER…',winBody:'You befriended {n} Parabots and sealed the breach in {t}s. Best: {b}s. The adventure continues — a new portal is already glowing…',loseBody:'Time ran out! The Parabots are still scared. Try again — they believe in you.',share:'SHARE',retry:'PLAY AGAIN',shared:'Copied! Send it to a friend 📋',tip:'Enjoying it? Tip the arcade ☕',offline:'Works offline · no ads · no downloads',friends:'FRIENDS',seal:'SEAL IT! Stand by the portal',jump:'JUMP',best:'Your best: {b}s',newBest:'⭐ NEW BEST!',duelWin:'🏆 CHALLENGE BEATEN — {d}s faster!',duelLose:'So close — {d}s short of the challenge!',loseNear:'Time ran out with {n}/5 — ONE more and the portal seals. Go!',loseFar:'Time ran out with {n}/5 befriended. They believe in you — again!',avengeTxt:'The portal beat me — I only saved {n}/5 Parabots 💔 Avenge me:',grace:'✨ The Parabots calmed down — extra time!',starOff:'★★★ needs under 45s — you were {d}s off.',avengeCall:'💔 A friend needs you to avenge them!',
+ en:{sub:'Level 1 · Parking-Lot Panic',how:'A rogue portal opened at the strip mall and scared little Parabots are tumbling out! Tag 5 of them to befriend them (they just need a friend), then stand by the portal to seal it. ⬅️➡️/A·D move · ⬆️/Space jump · on phones: hold screen sides, tap JUMP.',play:'PLAY',beat:'⚡ Challenge: seal it faster than {s}s!',win:'PORTAL SEALED!',lose:'THE PORTAL GOT STRONGER…',winBody:'You befriended {n} Parabots and sealed the breach in {t}s. Best: {b}s. The adventure continues — a new portal is already glowing…',loseBody:'Time ran out! The Parabots are still scared. Try again — they believe in you.',share:'SHARE',retry:'PLAY AGAIN',shared:'Copied! Send it to a friend 📋',tip:'Enjoying it? Tip the arcade ☕',offline:'Works offline · no ads · no downloads',friends:'FRIENDS',seal:'SEAL IT! Stand by the portal',jump:'JUMP',best:'Your best: {b}s',newBest:'⭐ NEW BEST!',duelWin:'🏆 CHALLENGE BEATEN — {d}s faster!',duelLose:'So close — {d}s short of the challenge!',loseNear:'Time ran out with {n}/5 — ONE more and the portal seals. Go!',loseFar:'Time ran out with {n}/5 befriended. They believe in you — again!',avengeTxt:'The portal beat me — I only saved {n}/5 Parabots 💔 Avenge me:',grace:'✨ The Parabots calmed down — extra time!',starOff:'★★★ needs under 45s — you were {d}s off.',avengeCall:'💔 A friend needs you to avenge them!',daily:"🌀 TODAY'S PORTAL",streakLine:'🔥 Daily streak: {s} — a new portal opens at midnight!',dailyShareTxt:'Daily Portal {d}: sealed in {t}s 🔥{s} — beat me:',duelShareTxt:'You said {b}s. I did it in {t}s. Your move:',
   shareTxt:'I sealed the rogue portal and befriended {n} Parabots in {t}s in PORTAL PALS! Beat me:'},
- he:{sub:'שלב 1 · פאניקה במגרש החניה',how:'פורטל סורר נפתח ליד המרכז המסחרי ופרבוטים קטנים ומבוהלים מתגלגלים החוצה! תפסו 5 כדי להתיידד איתם (הם רק צריכים חבר), ואז עימדו ליד הפורטל כדי לאטום אותו. ⬅️➡️ תנועה · ⬆️/רווח קפיצה · בנייד: החזיקו בצדדים, הקישו לקפוץ.',play:'שחקו',beat:'⚡ אתגר: לאטום מהר מ־{s} שניות!',win:'הפורטל נאטם!',lose:'הפורטל התחזק…',winBody:'התיידדתם עם {n} פרבוטים ואטמתם את הפרצה ב־{t} שניות. שיא: {b} שניות. ההרפתקה נמשכת — פורטל חדש כבר זוהר…',loseBody:'הזמן נגמר! הפרבוטים עדיין מבוהלים. נסו שוב — הם מאמינים בכם.',share:'שתפו',retry:'עוד פעם',shared:'הועתק! שלחו לחבר 📋',tip:'נהניתם? פרגנו לארקייד ☕',offline:'עובד בלי אינטרנט · בלי פרסומות',friends:'חברים',seal:'לאטום! עימדו ליד הפורטל',jump:'קפיצה',best:'השיא שלכם: {b} שניות',newBest:'⭐ שיא חדש!',duelWin:'🏆 האתגר נוצח — מהר ב־{d} שניות!',duelLose:'כמעט — חסרו {d} שניות לאתגר!',loseNear:'הזמן נגמר עם {n}/5 — עוד אחד והפורטל נאטם. קדימה!',loseFar:'הזמן נגמר עם {n}/5. הם מאמינים בכם — עוד פעם!',avengeTxt:'הפורטל ניצח אותי — הצלתי רק {n}/5 פרבוטים 💔 נקמו אותי:',grace:'✨ הפרבוטים נרגעו — עוד זמן!',starOff:'ל־★★★ צריך מתחת ל־45 שניות — הייתם רחוקים {d} שניות.',avengeCall:'💔 חבר צריך שתנקמו אותו!',
+ he:{sub:'שלב 1 · פאניקה במגרש החניה',how:'פורטל סורר נפתח ליד המרכז המסחרי ופרבוטים קטנים ומבוהלים מתגלגלים החוצה! תפסו 5 כדי להתיידד איתם (הם רק צריכים חבר), ואז עימדו ליד הפורטל כדי לאטום אותו. ⬅️➡️ תנועה · ⬆️/רווח קפיצה · בנייד: החזיקו בצדדים, הקישו לקפוץ.',play:'שחקו',beat:'⚡ אתגר: לאטום מהר מ־{s} שניות!',win:'הפורטל נאטם!',lose:'הפורטל התחזק…',winBody:'התיידדתם עם {n} פרבוטים ואטמתם את הפרצה ב־{t} שניות. שיא: {b} שניות. ההרפתקה נמשכת — פורטל חדש כבר זוהר…',loseBody:'הזמן נגמר! הפרבוטים עדיין מבוהלים. נסו שוב — הם מאמינים בכם.',share:'שתפו',retry:'עוד פעם',shared:'הועתק! שלחו לחבר 📋',tip:'נהניתם? פרגנו לארקייד ☕',offline:'עובד בלי אינטרנט · בלי פרסומות',friends:'חברים',seal:'לאטום! עימדו ליד הפורטל',jump:'קפיצה',best:'השיא שלכם: {b} שניות',newBest:'⭐ שיא חדש!',duelWin:'🏆 האתגר נוצח — מהר ב־{d} שניות!',duelLose:'כמעט — חסרו {d} שניות לאתגר!',loseNear:'הזמן נגמר עם {n}/5 — עוד אחד והפורטל נאטם. קדימה!',loseFar:'הזמן נגמר עם {n}/5. הם מאמינים בכם — עוד פעם!',avengeTxt:'הפורטל ניצח אותי — הצלתי רק {n}/5 פרבוטים 💔 נקמו אותי:',grace:'✨ הפרבוטים נרגעו — עוד זמן!',starOff:'ל־★★★ צריך מתחת ל־45 שניות — הייתם רחוקים {d} שניות.',avengeCall:'💔 חבר צריך שתנקמו אותו!',daily:'🌀 הפורטל של היום',streakLine:'🔥 רצף יומי: {s} — פורטל חדש נפתח בחצות!',dailyShareTxt:'הפורטל היומי {d}: נאטם ב־{t} שניות 🔥{s} — נצחו אותי:',duelShareTxt:'אמרתם {b} שניות. עשיתי {t}. תורכם:',
   shareTxt:'אטמתי את הפורטל הסורר והתיידדתי עם {n} פרבוטים ב־{t} שניות ב־PORTAL PALS! נצחו אותי:'}
 };
 let LANG=new URLSearchParams(location.search).get('lang')||localStorage.getItem('pp.lang')||'en';
@@ -80,6 +81,8 @@ function applyLang(){
   document.documentElement.lang=LANG;document.documentElement.dir=LANG==='he'?'rtl':'ltr';
   langT.textContent=LANG==='he'?'EN':'עברית';
   tSub.textContent=T('sub');tHow.textContent=T('how');play.textContent=T('play');
+  const _st=+localStorage.getItem('pp.streak')||0;
+  daily.textContent=T('daily')+(_st?' · 🔥'+_st:'');
   tOffline.textContent=T('offline');share.textContent=T('share');retry.textContent=T('retry');eTip.textContent=T('tip');
   const _b=localStorage.getItem('pp.best');
   tBeat.textContent=(AVENGE?T('avengeCall')+' ':'')+(BEAT?fmt(T('beat'),{s:BEAT}):'')+(_b?' · '+fmt(T('best'),{b:_b}):'');
@@ -147,14 +150,18 @@ const sfx={
 const W=1600,H=900,GROUND=830,GOAL=5,TIME=90;
 const PORTAL={x:1010,y:430,r:235,zone:{x:820,y:520,w:390,h:330}};
 const cv=document.getElementById('cv'),cx=cv.getContext('2d');
+const DAY=new Date().toISOString().slice(0,10);
+let dailyMode=false;
+function mulberry32(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const AVENGE=new URLSearchParams(location.search).has('avenge');
 const BEAT=(()=>{const b=parseFloat(new URLSearchParams(location.search).get('beat'));return isFinite(b)&&b>0?Math.round(b):null})();
 let G=null,running=false,tPrev=0;
 
 function reset(){
+  const rng=dailyMode?mulberry32([...DAY].reduce((a,c)=>a*31+c.charCodeAt(0),7)):Math.random;
   G={t:0,timeLeft:TIME,friends:0,score:0,sealed:false,over:false,channel:0,lastSpawn:-2,hitstop:0,grace:false,calm:0,parts:[],isPB:false,orb:{x:180,y:620,em:'!',emT:2},
      max:{x:280,y:GROUND,vx:0,vy:0,w:80,h:200,face:1,onG:true,boost:0,winPose:false,sq:0,stomp:false,idleT:0},
-     scuts:[],pickups:[],pops:[],shake:0,portalFrame:0,closing:0};
+     scuts:[],pickups:[],pops:[],shake:0,portalFrame:0,closing:0,rng,streak:0};
 }
 
 /* ---------- input ---------- */
@@ -199,14 +206,14 @@ addEventListener('keydown',e=>{if((e.code==='Space'||e.code==='ArrowUp'||e.code=
 
 /* ---------- entities ---------- */
 function spawnScut(){
-  const dir=Math.random()<.5?-1:1;
-  G.scuts.push({x:PORTAL.x-60,y:PORTAL.y+80,vx:(120+Math.random()*140)*dir,vy:300+Math.random()*200,w:120,h:110,st:'fall',t:0,daze:0});
+  const dir=G.rng()<.5?-1:1;
+  G.scuts.push({x:PORTAL.x-60,y:PORTAL.y+80,vx:(120+G.rng()*140)*dir,vy:300+G.rng()*200,w:120,h:110,st:'fall',t:0,daze:0});
   G.orb.em='!';G.orb.emT=1;
   G.lastSpawn=G.t;sfx.spawn();
 }
 function spawnPickup(kind){
-  const dir=Math.random()<.5?-1:1;
-  G.pickups.push({kind,x:PORTAL.x,y:PORTAL.y+60,vx:dir*(150+Math.random()*150),vy:-350,w:70,h:70,t:0});
+  const dir=G.rng()<.5?-1:1;
+  G.pickups.push({kind,x:PORTAL.x,y:PORTAL.y+60,vx:dir*(150+G.rng()*150),vy:-350,w:70,h:70,t:0});
 }
 function pop(x,y,img,dy=-80){G.pops.push({x,y,img,t:0,dy});}
 function popT(x,y,txt,dy=-90){G.pops.push({x,y,txt,t:0,dy});}
@@ -307,6 +314,14 @@ function update(dt){
     const best=Math.min(secs,parseInt(localStorage.getItem('pp.best')||'9999'));
     localStorage.setItem('pp.best',best);
     track('evt-pp-seal');track('evt-pp-level-1');
+    if(dailyMode){
+      const last=localStorage.getItem('pp.dayLast'),y=new Date(Date.now()-864e5).toISOString().slice(0,10);
+      if(last!==DAY){
+        G.streak=(last===y?+localStorage.getItem('pp.streak')||0:0)+1;
+        localStorage.setItem('pp.streak',G.streak);localStorage.setItem('pp.dayLast',DAY);
+      }else G.streak=+localStorage.getItem('pp.streak')||1;
+      track('evt-pp-daily');
+    }
     setTimeout(()=>endScreen(true,secs,best),1800);
   }
   if(G.sealed)G.closing+=dt;
@@ -436,6 +451,7 @@ function endScreen(won,secs,best){
     let body=T('win')+' — '+fmt(T('winBody'),{n:GOAL,t:secs,b:best});
     if(BEAT)body=(secs<=BEAT?fmt(T('duelWin'),{d:Math.max(1,BEAT-secs)}):fmt(T('duelLose'),{d:secs-BEAT}))+' '+body;
     if(stars<3)body+=' '+fmt(T('starOff'),{d:secs-45});
+    if(dailyMode&&G.streak)body+=' '+fmt(T('streakLine'),{s:G.streak});
     eBody.textContent=body;
     if(G.isPB)share.style.animation='pulse .8s infinite alternate';
     share.textContent=T('share')+' '+secs+'s';
@@ -446,7 +462,13 @@ function endScreen(won,secs,best){
   }
   share.dataset.t=secs||'';share.dataset.won=won?'1':'';
 }
+document.getElementById('daily').onclick=()=>{
+  unlockAudio();dailyMode=true;
+  document.getElementById('title').classList.add('hide');document.body.classList.add('playing');
+  reset();running=true;track('evt-pp-start');track('evt-pp-daily-start');
+};
 document.getElementById('play').onclick=()=>{
+  dailyMode=false;
   unlockAudio();
   document.getElementById('title').classList.add('hide');document.body.classList.add('playing');
   reset();running=true;track('evt-pp-start');
@@ -456,13 +478,41 @@ document.getElementById('retry').onclick=()=>{
   document.getElementById('end').classList.add('hide');
   reset();running=true;track('evt-pp-start');
 };
+function sealCard(secs){
+  draw();
+  cx.save();cx.textAlign='center';cx.textBaseline='alphabetic';
+  cx.fillStyle='rgba(10,4,10,.5)';cx.fillRect(0,0,W,H);
+  cx.fillStyle='#ffb46b';cx.font='900 84px system-ui';
+  cx.fillText(T('win'),W/2,240);
+  cx.fillStyle='#fff';cx.font='900 220px system-ui';
+  cx.fillText(secs+'s',W/2,470);
+  cx.fillStyle='#ffd9b0';cx.font='800 44px system-ui';
+  cx.fillText('❤❤❤❤❤ · '+(dailyMode?'🔥 '+DAY+' · ':'')+'miklatgames.fun/portalpals',W/2,700);
+  cx.restore();cx.textBaseline='top';
+}
 document.getElementById('share').onclick=async()=>{
   const won=share.dataset.won==='1';
   const t=share.dataset.t||Math.round(G&&G.t||0);
   const url='https://miklatgames.fun/portalpals/'+(won?'?beat='+t+'&ref=share':'?avenge=1&ref=share');
-  const txt=(won?fmt(T('shareTxt'),{n:GOAL,t}):fmt(T('avengeTxt'),{n:G?G.friends:0}))+' '+url;
+  let msg;
+  if(!won)msg=fmt(T('avengeTxt'),{n:G?G.friends:0});
+  else if(dailyMode)msg=fmt(T('dailyShareTxt'),{d:DAY,t,s:G.streak||1});
+  else if(BEAT&&t<=BEAT)msg=fmt(T('duelShareTxt'),{b:BEAT,t});
+  else msg=fmt(T('shareTxt'),{n:GOAL,t});
+  const txt=msg+' '+url;
   track('evt-pp-share');
   try{
+    if(won&&G&&G.sealed&&navigator.canShare){
+      sealCard(t);
+      const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.85));
+      if(blob){
+        const f=new File([blob],'portal-'+t+'s.jpg',{type:'image/jpeg'});
+        if(navigator.canShare({files:[f]})){
+          track('evt-pp-share-img');
+          await navigator.share({files:[f],text:txt});return;
+        }
+      }
+    }
     if(navigator.share)await navigator.share({text:txt});
     else{await navigator.clipboard.writeText(txt);share.textContent=T('shared');setTimeout(applyLang,1600);}
   }catch(e){}
