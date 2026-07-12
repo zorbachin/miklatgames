@@ -31,16 +31,17 @@ opens and closes portals — is the bridge between both worlds.
 
 🔒 = design locked from an approved generated reference sheet — attach
 that sheet to every future prompt featuring the character; do not
-re-invent. (Locked so far: Max, 2026-07-11. The Scuttler creature design
-from the first befriending board is also approved as canon.)
+re-invent. (All five Pals locked 2026-07-12; Max's lock is the v2 sheet
+with the backpack in side/back views. The Scuttler creature design from
+the first befriending board is also approved as canon.)
 
 | Character | Age read | Visual anchors | Signature move / verb |
 |---|---|---|---|
 | **MAX SHIFRIN** 🔒 | 12 | warm tan-brown skin, curly black hair, round dark-framed glasses, purple button-up under an oversized white lab coat with rolled sleeves, cuffed jeans, orange hi-top sneakers, black-and-orange tech backpack with a glowing orange core; **glowing orange spiral birthmark on right wrist (never pink/violet, never geometric)** | the Key: opens/closes portals with his birthmark; hacks anything (timing/puzzle) |
-| **COL. HARPER** | adult mentor | huge square jaw, buzz cut, warm eyes, aviator sunglasses (often pushed up), left **robot arm with swappable cannon**, both legs robotic with orange trim | aim & blast (light-energy bolts); team dad energy |
-| **COLLINS** | adult, gentle giant | tallest, barrel chest, chrome lower jaw, grin, forearm **cartridge slots** (blue = ice-web, green = power) | smash & freeze; catches things |
-| **RIZZO** | late-teens read | athletic, high ponytail, right robot arm + left robot leg, jet flares at heels, confident smirk | corkscrew rocket flight, 360° spin-dodge |
-| **WU** | 15 | skinny, gravity-defying spiky black hair, open lab coat over graphic tee, spiky rubber bracelet, finger-guns | portal-hop trickster: pops in/out of mini-portals; tongue-*click* catchphrase |
+| **COL. HARPER** 🔒 | adult mentor | huge square jaw, buzz cut, warm eyes, aviators pushed up on forehead, dog tags, olive tank + cargo pants, fingerless glove on flesh hand, left **robot arm with swappable cannon barrel**, both legs robotic with orange trim | aim & blast (light-energy bolts); team dad energy |
+| **COLLINS** 🔒 | adult, gentle giant | tallest, barrel chest, chrome chin guard, olive zip vest, back armor plate, **left-forearm gauntlet with two cartridge slots** (blue snowflake = ice-web, green lightning = power), blows bubble-gum | smash & freeze; catches things |
+| **RIZZO** 🔒 | late-teens read | athletic, high dark ponytail, cropped flight jacket with orange shoulder armor over white tank, dog-tag chain, right robot arm + left robot lower leg, **rocket boots with orange jet nozzles** | corkscrew rocket flight (spiral orange trail), 360° spin-dodge |
+| **WU** 🔒 | 15 | skinny, gravity-defying spiky black hair, open white coat with orange portal-dial patch on the back, **dark tee with orange-teal portal swirl graphic**, chain detail on pants, spiky rubber bracelet, sneakers with glowing portal discs | portal-hop trickster: pops in/out of mini-portals; tongue-*click* catchphrase |
 
 ## The mascot (working name: ORBIE — placeholder pending clearance)
 
