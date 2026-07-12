@@ -137,10 +137,17 @@ function reset(){
 }
 
 /* ---------- input ---------- */
-const keys={};
-addEventListener('keydown',e=>{keys[e.code]=true;if(['ArrowLeft','ArrowRight','ArrowUp','Space'].includes(e.code))e.preventDefault();});
+const keys={};let usedKeys=false;
+addEventListener('keydown',e=>{keys[e.code]=true;usedKeys=true;if(['ArrowLeft','ArrowRight','ArrowUp','Space'].includes(e.code))e.preventDefault();});
 addEventListener('keyup',e=>keys[e.code]=false);
-let touchL=false,touchR=false;
+let touchL=false,touchR=false,touchAny=false;
+/* fixed on-screen buttons (canvas coords) */
+const BTN={L:{x:120,y:H-110,r:95},R:{x:340,y:H-110,r:95},J:{x:W-160,y:H-110,r:105}};
+function btnAt(cxp,cyp){
+  for(const k in BTN){const b=BTN[k],dx=cxp-b.x,dy=cyp-b.y;
+    if(dx*dx+dy*dy<(b.r+35)*(b.r+35))return k;}                 /* generous hit area */
+  return cxp<W/2?(cxp<230?'L':'R'):'J';                          /* whole-corner fallback */
+}
 function bindTouch(){
   cv.addEventListener('touchstart',onT,{passive:false});
   cv.addEventListener('touchmove',onT,{passive:false});
@@ -148,13 +155,22 @@ function bindTouch(){
   cv.addEventListener('touchcancel',onT,{passive:false});
 }
 function onT(e){
-  e.preventDefault();touchL=touchR=false;let jump=false;
-  for(const t of e.touches){
-    const r=cv.getBoundingClientRect(),x=(t.clientX-r.left)/r.width,y=(t.clientY-r.top)/r.height;
-    if(y>0.72&&x>0.4&&x<0.6)jump=true;
-    else if(x<0.45)touchL=true;else if(x>0.55)touchR=true;
+  e.preventDefault();
+  const r=cv.getBoundingClientRect();
+  /* jump: rising edge only */
+  if(e.type==='touchstart'){
+    for(const t of e.changedTouches){
+      const x=(t.clientX-r.left)/r.width*W,y=(t.clientY-r.top)/r.height*H;
+      if(btnAt(x,y)==='J')doJump();
+    }
   }
-  if(jump)doJump();
+  /* movement: held state from all active touches */
+  touchL=touchR=false;touchAny=e.touches.length>0;
+  for(const t of e.touches){
+    const x=(t.clientX-r.left)/r.width*W,y=(t.clientY-r.top)/r.height*H;
+    const k=btnAt(x,y);
+    if(k==='L')touchL=true;else if(k==='R')touchR=true;
+  }
 }
 function doJump(){const m=G.max;if(m.onG&&!G.over&&running){m.vy=-1050;m.onG=false;sfx.jump();}}
 addEventListener('keydown',e=>{if((e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW')&&running)doJump();});
@@ -176,7 +192,7 @@ function update(dt){
   if(!running||G.over)return;
   G.t+=dt;
   if(!G.sealed)G.timeLeft-=dt;
-  const m=G.max,spd=420*(m.boost>0?1.45:1);
+  const m=G.max,spd=380*(m.boost>0?1.45:1);
   m.boost=Math.max(0,m.boost-dt);
   const L=keys.ArrowLeft||keys.KeyA||touchL,R=keys.ArrowRight||keys.KeyD||touchR;
   m.vx=L&&!R?-spd:R&&!L?spd:0;
@@ -192,11 +208,14 @@ function update(dt){
     s.t+=dt;
     if(s.st==='fall'){s.vy+=2000*dt;s.y+=s.vy*dt;s.x+=s.vx*dt;if(s.y>=GROUND+20){s.y=GROUND+20;s.st='run';}}
     else if(s.st==='run'){
+      const scx=s.x+s.w/2,mcx=m.x+m.w/2,dx=scx-mcx;
+      if(Math.abs(dx)<300){s.vx=Math.sign(dx||1)*300;}          /* flee, slower than Max */
+      else{s.vx=Math.sign(s.vx||1)*150;}                        /* calm wander */
       s.x+=s.vx*dt;
-      if(s.x<40||s.x>W-160)s.vx*=-1;
-      if(Math.random()<dt*.3)s.vx*=-1;
-      const mb={x:m.x,y:m.y-m.h,w:m.w,h:m.h},sb={x:s.x,y:s.y-s.h,w:s.w,h:s.h};
-      if(PURE.aabb(mb,sb)){s.st='alert';s.t=0;}
+      if(s.x<40){s.x=40;s.vx=Math.abs(s.vx);}
+      if(s.x>W-160){s.x=W-160;s.vx=-Math.abs(s.vx);}
+      const dy=(s.y-s.h/2)-(m.y-m.h/2);
+      if(dx*dx+dy*dy<115*115){s.st='alert';s.t=0;}              /* generous circular catch */
     }
     else if(s.st==='alert'){if(s.t>.35){s.st='happy';s.t=0;G.friends++;G.score+=100;sfx.friend();pop(s.x+s.w/2,s.y-s.h,'pk_heart');if(navigator.vibrate)navigator.vibrate(30);}}
     else if(s.st==='happy'){s.x+=380*dt;s.y=GROUND+20-Math.abs(Math.sin(s.t*9))*40;if(s.x>W+50)s.st='gone';}
@@ -288,10 +307,19 @@ function draw(){
     cx.textAlign='center';cx.font='800 46px system-ui';cx.fillStyle='#ffe9a0';
     cx.fillText('🌀 '+T('seal'),W/2,110);cx.textAlign='left';
   }
-  /* touch jump hint */
+  /* touch buttons (shown until first key press) */
   cx.shadowBlur=0;
-  cx.globalAlpha=.35;cx.fillStyle='#fff';cx.font='700 30px system-ui';cx.textAlign='center';
-  cx.fillText('⬆ '+T('jump'),W/2,H-56);cx.globalAlpha=1;cx.textAlign='left';
+  if(!usedKeys){
+    cx.textAlign='center';cx.textBaseline='middle';cx.font='800 64px system-ui';
+    const bs=[['L','◀',touchL],['R','▶',touchR],['J','⬆',false]];
+    for(const[k,ch,on]of bs){const b=BTN[k];
+      cx.globalAlpha=on?.55:.28;cx.fillStyle='#000';
+      cx.beginPath();cx.arc(b.x,b.y,b.r,0,7);cx.fill();
+      cx.globalAlpha=on?1:.7;cx.strokeStyle='#ffd9b0';cx.lineWidth=5;
+      cx.beginPath();cx.arc(b.x,b.y,b.r,0,7);cx.stroke();
+      cx.fillStyle='#ffd9b0';cx.fillText(ch,b.x,b.y+4);}
+    cx.globalAlpha=1;cx.textAlign='left';cx.textBaseline='top';
+  }
   cx.restore();
 }
 
