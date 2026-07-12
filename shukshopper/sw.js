@@ -1,5 +1,6 @@
 /* SHUK SHOPPER — offline-first service worker (pattern: mamaddash v1) */
 const CACHE = 'shukshopper-v1';
+const PREFIX = 'shukshopper-'; /* only touch our own caches — CacheStorage is origin-wide */
 const ASSETS = [
   './',
   './index.html',
@@ -13,7 +14,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith(PREFIX) && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
