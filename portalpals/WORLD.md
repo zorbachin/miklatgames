@@ -100,10 +100,12 @@ Befriended Parabots live in the **Portal Paddock** behind Charlene's.
   buttons, room for five Pals + Orbie's pod (locked layout: six-seat
   cabin, Orbie's pod at the front console, roof light-bar, rear tail fin
   and twin boosters).
-- **Portal ring** — a floor-mounted metal ring; the portal itself is a
+- **Portal ring** 🔒 — a ring on a mounted base platform (locked design;
+  the swirl inside the portal deliberately echoes Max's birthmark spiral —
+  the brand mark repeats on wrist, portal, and Wu's tee); the portal itself is a
   vertical disk of **swirling orange electric light** with white-hot rim
   sparks. Rogue mini-portals are the same in candy colors.
-- **Cartridges & orbs** — palm-size glowing canisters the Pals slot into
+- **Cartridges & orbs** 🔒 — palm-size glowing canisters the Pals slot into
   gear: blue (ice-web), green (power surge), gold (leap-frog jump orbs).
 
 ## Look of the show (master art direction)
@@ -121,6 +123,8 @@ No gore, no realistic weapons, no text unless specified.
 ## Worlds (episode/level settings)
 
 1. **Vegas Outskirts** — desert highway, strip mall, Charlene's shop.
+   🔒 Home-base interior plate locked: golden-hour shop with the green
+   hidden door ajar onto the glowing tech corridor + portal pad.
 2. **Portal Academy HQ** — the kid-brand PortalTech: bright underground
    NASA-style nerve center, glass pods, LED scoreboard wall.
 3. **Parabot Meadow** (Galaxy X-16) — Earth-like but larger-than-life:
