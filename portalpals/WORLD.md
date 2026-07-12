@@ -128,7 +128,11 @@ No gore, no realistic weapons, no text unless specified.
 2. **Portal Academy HQ** — the kid-brand PortalTech: bright underground
    NASA-style nerve center, glass pods, LED scoreboard wall.
 3. **Parabot Meadow** (Galaxy X-16) 🔒 — Earth-like but larger-than-life:
-   giant vibrant flora, floating LED bubbles, low warm sun.
+   giant vibrant flora, floating LED bubbles, low warm sun. Locked plate
+   adds: twin moons, waterfalls under the distant Glass Tower, and
+   hexagon-patterned orbs in the grass — canonized as **Parabot eggs**
+   (mythology hook). Purple flora is fine here; the villain-only violet
+   rule applies to tech lights, not plants.
 4. **The Glass Tower** — Parabot capital: a tower of light-panels instead
    of steel, shimmering force fields.
 5. **Rogue-portal locales** (renewable): school gym, container port,
