@@ -1,5 +1,6 @@
 /* PORTAL PALS — offline-first service worker (owns its own scope) */
 const CACHE = 'portalpals-v1';
+const PREFIX = 'portalpals-'; /* only touch our own caches — CacheStorage is origin-wide */
 const ASSETS = ['./','./index.html','./manifest.webmanifest',
   './assets/bg_lot.jpg','./assets/cover.jpg','./assets/icon.png',
   './assets/max_idle.png','./assets/max_run.png','./assets/max_jump.png','./assets/max_act.png','./assets/max_hit.png','./assets/max_win.png',
@@ -11,7 +12,7 @@ self.addEventListener('install', e => {
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    .then(keys => Promise.all(keys.filter(k => k.startsWith(PREFIX) && k !== CACHE).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', e => {

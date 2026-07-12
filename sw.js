@@ -1,7 +1,8 @@
 /* MIKLAT GAMES portal — offline-first service worker.
    Caches the portal shell ONLY. Game scopes are bypassed —
    each game ships its own SW and owns its own cache. */
-const CACHE = 'miklat-portal-v12';
+const CACHE = 'miklat-portal-v13';
+const PREFIX = 'miklat-portal-'; /* only touch our own caches — CacheStorage is origin-wide */
 const ASSETS = [
   './',
   './index.html',
@@ -27,7 +28,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k.startsWith(PREFIX) && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
