@@ -1,0 +1,56 @@
+{
+  "game": "Build the Burj — gameplay art pack",
+  "style": "Vibrant 3D cartoon, app-store polish, thick outlines, punchy saturation — the Miklat house look adapted to Dubai. Environment palette: warm desert gold #e9c08b, brand gold #ffd166, glass cyan glint #3ee6ff, cream #fdf3e3, dusk purple #5e3c8f, deep shelter-night sky #0d1120, danger/wobble coral #ff5d73. UI chrome stays brand (gold CTAs, coral danger, mint #7ee8c7 success). Numbers/text are RTL-Arabic-aware but NO text in art. CHARACTER BIBLE — Rafi the Worker (the arcade's canonical builder, reused from Digger): friendly Middle-Eastern construction foreman, yellow hard hat, hi-vis neon-orange safety vest over a teal tee, work gloves, a small brass finjan (coffee pot) holstered at his belt like a sidearm, big can-do grin. SPRITES go on FLAT MAGENTA #ff00ff (the game chroma-keys it out); BACKDROPS need no transparency. Generate with bin/imagepack burj/assets",
+  "images": [
+    {
+      "file": "bg-sky-day.png",
+      "aspect_ratio": "9:16",
+      "prompt": "Tall vertical painted game background, vibrant 3D cartoon style, for a tower-stacking game set in Dubai: a clear hot daytime desert sky going from warm sandy haze at the horizon up to bright blue, a few soft clouds, a hint of a distant Dubai skyline silhouette and golden dunes along the very bottom horizon. Composition: keep the entire CENTER COLUMN open and uncluttered (the player's tower is drawn rising up the middle) — all scenery detail pushed to the far left and right edges and the lower horizon. Bottom edge is flat sandy ground #e9c08b with NO objects. Palette: desert gold #e9c08b, brand gold #ffd166, sky blue, cream #fdf3e3. No people, no cranes, no buildings in the center, no text."
+    },
+    {
+      "file": "bg-sky-dusk.png",
+      "aspect_ratio": "9:16",
+      "prompt": "Tall vertical painted game background, vibrant 3D cartoon style, for the high-altitude phase of a Dubai tower-stacking game: a glowing sunset sky, warm gold and coral low down fading up into deep dusk purple #5e3c8f and shelter-night blue #0d1120 near the top, the first stars appearing, a thin layer of clouds drifting below (you are now ABOVE the city). Composition: keep the entire CENTER COLUMN open and uncluttered for the rising tower; scenery only at the far edges. Palette: brand gold #ffd166, coral #ff5d73, dusk purple #5e3c8f, shelter-night #0d1120, cyan glint #3ee6ff. No people, no buildings in the center, no text."
+    },
+    {
+      "file": "floor-glass.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Game asset, vibrant 3D cartoon style with thick outlines: a SINGLE horizontal segment of a modern skyscraper — one floor / storey block, wider than tall, a sleek blue-glass curtain-wall facade with cyan #3ee6ff glints and a slim brand-gold #ffd166 trim along top and bottom edges, clean and premium. Drawn straight-on (elevation view), centered, filling the frame edge to edge horizontally. The ENTIRE background is one flat solid magenta color #ff00ff — no shadow, no gradient, no text."
+    },
+    {
+      "file": "floor-concrete.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Game asset, vibrant 3D cartoon style with thick outlines: a SINGLE horizontal segment of a building — one raw budget floor block, wider than tall, exposed grey concrete and rebar with a cheap corrugated look, a little rough, the 'cheap material' choice. Drawn straight-on (elevation view), centered, filling the frame horizontally. The ENTIRE background is one flat solid magenta color #ff00ff — no shadow, no gradient, no text."
+    },
+    {
+      "file": "floor-gold.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Game asset, vibrant 3D cartoon style with thick outlines: a SINGLE horizontal segment of a skyscraper — one LUXURY premium floor block, wider than tall, gleaming gold-clad facade #ffd166 with amber #e9a23b panels, ornate but tasteful, the 'top-grade material' choice, subtle sparkle. Drawn straight-on (elevation view), centered, filling the frame horizontally. The ENTIRE background is one flat solid magenta color #ff00ff — no shadow, no gradient, no text."
+    },
+    {
+      "file": "floor-retail.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Game asset, vibrant 3D cartoon style with thick outlines: a SINGLE horizontal podium/ground-floor segment of a building, wider than tall, with glass shopfront arcades, an awning, warm interior light — a retail base. A clean BLANK rectangular sign panel above the shopfront (cream #fdf3e3, empty, no writing) left clear for a sponsor logo to be added later. Drawn straight-on (elevation view), centered, filling the frame horizontally. The ENTIRE background is one flat solid magenta color #ff00ff — no shadow, no gradient, no text."
+    },
+    {
+      "file": "floor-sponsor.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Game asset, vibrant 3D cartoon style with thick outlines: a SINGLE horizontal skyscraper floor segment, wider than tall, glass office facade, dominated by one large clean BLANK billboard/logo panel in the center (flat cream #fdf3e3, completely empty, no writing or symbols) framed in brand gold #ffd166 — a rentable 'sponsor floor' template for a brand logo to be dropped in later. Drawn straight-on (elevation view), centered, filling the frame horizontally. The ENTIRE background is one flat solid magenta color #ff00ff — no shadow, no gradient, no text."
+    },
+    {
+      "file": "crane.png",
+      "aspect_ratio": "16:9",
+      "prompt": "Game asset, vibrant 3D cartoon style with thick outlines: a yellow construction tower-crane hook and trolley at the top, a steel cable hanging down with an empty spreader hook at the end (no load), drawn straight-on, the horizontal jib spanning the frame near the top. Bright safety yellow #ffd166 and grey steel. The ENTIRE background is one flat solid magenta color #ff00ff — no shadow, no gradient, no text."
+    },
+    {
+      "file": "foreman-rafi.png",
+      "aspect_ratio": "1:1",
+      "prompt": "Game character sprite, full body, vibrant 3D cartoon style with thick outlines: Rafi the Worker — a friendly Middle-Eastern construction foreman in a yellow hard hat and hi-vis neon-orange safety vest over a teal tee, work gloves, a small brass finjan coffee pot holstered at his belt, giving an enthusiastic two-thumbs-up with a big proud grin, looking up at his tower. Centered, feet near the bottom edge. The ENTIRE background is one flat solid magenta color #ff00ff, edge to edge — no ground shadow, no gradient, no text."
+    },
+    {
+      "file": "spire.png",
+      "aspect_ratio": "3:4",
+      "prompt": "Game asset, vibrant 3D cartoon style with thick outlines: a gleaming tapering skyscraper spire / crown topper, a slender stepped silver-and-gold needle pinnacle catching a bright highlight at the tip (the finishing piece of a super-tall tower, Burj-Khalifa-like silhouette). Centered, pointing up, filling the vertical frame. Palette: silver, brand gold #ffd166, cyan glint #3ee6ff. The ENTIRE background is one flat solid magenta color #ff00ff — no shadow, no gradient, no text."
+    }
+  ]
+}
