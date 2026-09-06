@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#121419">
+<meta property="og:title" content="Podpast — history, told by the people who lived it">
+<meta property="og:description" content="Pick a figure, hear their 3-minute story in their own words, pass three checks, then ask them anything. Era 1: Colonial & Founding.">
+<meta property="og:url" content="https://miklatgames.fun/podpast/">
+<title>Podpast</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Nunito:ital,wght@0,400;0,700;0,900;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#121419; --panel:#1B1F28; --panel-2:#242A36; --line:#323948;
+  --ink:#F3EEE3; --dim:#A8A294; --mute:#6F6A60;
+  --wax:#D2482F; --wax-soft:rgba(210,72,47,.16);
+  --brass:#E1AE48; --brass-soft:rgba(225,174,72,.16);
+  --sea:#3E9C93; --sea-soft:rgba(62,156,147,.16);
+  --ok:#5CBF82; --bad:#E0625A;
+  --display:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);display:flex;justify-content:center;overscroll-behavior:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,a:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.app{width:100%;max-width:520px;min-height:100vh;min-height:100dvh;position:relative;background:var(--bg);display:flex;flex-direction:column}
+.screen{display:none;flex-direction:column;flex:1;min-height:0}
+.screen.show{display:flex}
+.top{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 8px;position:sticky;top:0;background:var(--bg);z-index:5}
+.tbtn{height:38px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--dim);font:700 13px var(--body);white-space:nowrap}
+.tbtn:active{transform:scale(.96)}
+.tbtn.on{border-color:var(--brass);color:var(--brass);background:var(--brass-soft)}
+.grow{flex:1}
+.xp{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:999px;background:var(--brass-soft);border:1px solid rgba(225,174,72,.4);color:var(--brass);font:800 13px var(--mono)}
+.streak{display:inline-flex;align-items:center;gap:5px;height:38px;padding:0 11px;border-radius:999px;background:var(--wax-soft);border:1px solid rgba(210,72,47,.4);color:#F0917B;font:800 13px var(--mono)}
+.body{padding:8px 16px calc(env(safe-area-inset-bottom,0px) + 28px);flex:1}
+.wordmark{font:800 34px/1 var(--display);letter-spacing:-.02em}
+.wordmark em{font-style:normal;color:var(--wax)}
+.sub{color:var(--dim);font-size:14px;margin-top:6px}
+.eyebrow{font:600 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--brass)}
+.onair{display:inline-flex;align-items:center;gap:7px;font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.onair i{width:8px;height:8px;border-radius:50%;background:var(--wax);box-shadow:0 0 10px var(--wax)}
+.onair.live i{animation:blink 1.1s infinite}
+@keyframes blink{50%{opacity:.25}}
+/* map */
+.era{margin:14px 0;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.era-h{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.era-h .n{font:800 17px/1.15 var(--display)}
+.era-h .y{font:600 12px var(--mono);color:var(--mute)}
+.era-h .st{margin-left:auto;font:700 11px var(--mono);color:var(--dim);letter-spacing:.06em}
+.era.locked{opacity:.55}
+.era.locked .fig-list{display:none}
+.era-h .peek{font-size:12px;color:var(--mute);padding:0 14px 12px;display:none}
+.era.locked .peek{display:block}
+.fig-list{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 12px 12px}
+.node{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px 10px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line);text-align:center;position:relative}
+.node:active{transform:scale(.97)}
+.node.met{border-color:var(--sea)}
+.node .chk{position:absolute;top:8px;right:8px;font-size:13px;color:var(--ok)}
+.node .nm{font:800 14px/1.15 var(--display)}
+.node .tier{font:600 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.tier.icon{color:var(--brass)}.tier.between{color:var(--sea)}.tier.gem{color:#F0917B}
+.med{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;background:radial-gradient(circle at 35% 30%,#3a4152,#1b1f28);border:3px solid var(--ring,#555)}
+.med.big{width:120px;height:120px;font-size:54px;border-width:5px}
+/* figure card */
+.card{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:18px 16px;margin-top:10px}
+.card .nm{font:800 28px/1.05 var(--display);margin-top:12px;text-wrap:balance}
+.card .dt{font:600 13px var(--mono);color:var(--dim);margin-top:4px}
+.card .hook{font-size:17px;margin-top:12px;font-style:italic;color:var(--ink)}
+.center{text-align:center}
+.btn{display:block;width:100%;padding:15px;border-radius:14px;font:800 17px var(--display);background:var(--wax);color:#fff;margin-top:14px;letter-spacing:.01em}
+.btn:active{transform:scale(.98)}
+.btn.sec{background:var(--panel-2);color:var(--ink);border:1px solid var(--line)}
+.btn.brass{background:var(--brass);color:#1a1405}
+.btn:disabled{opacity:.4}
+.row{display:flex;gap:10px}.row .btn{flex:1}
+.note{font-size:12.5px;color:var(--mute);margin-top:10px;line-height:1.45}
+/* episode */
+.scene{position:relative;border-radius:18px;overflow:hidden;height:min(46vh,340px);border:1px solid var(--line);background:#000}
+.scene .bg{position:absolute;inset:0;background:var(--sbg,linear-gradient(160deg,#2a2f3d,#121419));transform:scale(1.05);transition:opacity .5s}
+@media (prefers-reduced-motion:no-preference){.scene .bg.kb{animation:kb 14s linear forwards}}
+@keyframes kb{from{transform:scale(1.02) translate(0,0)}to{transform:scale(1.12) translate(-1.5%,-1.5%)}}
+.scene .em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:clamp(80px,26vw,130px);filter:drop-shadow(0 12px 22px rgba(0,0,0,.6))}
+.scene .cap{position:absolute;left:14px;top:12px;font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.75);background:rgba(0,0,0,.45);padding:5px 8px;border-radius:6px}
+.scene .who{position:absolute;right:12px;bottom:12px;display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.5);padding:6px 10px 6px 6px;border-radius:999px;font:800 12px var(--display)}
+.scene .who .med{width:28px;height:28px;font-size:13px;border-width:2px}
+.wave{display:flex;align-items:flex-end;gap:3px;height:22px;position:absolute;left:14px;bottom:16px}
+.wave i{width:4px;background:var(--wax);border-radius:2px;height:6px}
+.live .wave i{animation:wv .8s ease-in-out infinite}
+.wave i:nth-child(2){animation-delay:.1s}.wave i:nth-child(3){animation-delay:.2s}.wave i:nth-child(4){animation-delay:.3s}.wave i:nth-child(5){animation-delay:.15s}.wave i:nth-child(6){animation-delay:.05s}
+@keyframes wv{0%,100%{height:6px}50%{height:22px}}
+@media (prefers-reduced-motion:reduce){.live .wave i{animation:none;height:12px}}
+.caption{min-height:118px;margin-top:14px;font-size:19px;line-height:1.45;text-wrap:pretty}
+.caption.kid{font-size:21px}
+.pbar{height:6px;background:var(--panel-2);border-radius:3px;overflow:hidden;margin-top:14px}
+.pbar i{display:block;height:100%;background:var(--wax);width:0;transition:width .4s}
+.ctl{display:flex;gap:10px;margin-top:14px;align-items:center}
+.ctl .btn{margin-top:0}
+.ctl .tbtn{height:52px;padding:0 16px;font-size:18px}
+/* checks */
+.q{font:800 21px/1.25 var(--display);margin:14px 0 12px;text-wrap:balance}
+.opt{display:block;width:100%;text-align:left;padding:13px 14px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line);margin:8px 0;font-size:16px}
+.opt.right{border-color:var(--ok);background:rgba(92,191,130,.14)}
+.opt.wrong{border-color:var(--bad);background:rgba(224,98,90,.14)}
+.opt.pick{border-color:var(--brass);background:var(--brass-soft)}
+.opt.done{opacity:.5}
+.opt .k{font:600 11px var(--mono);color:var(--brass);margin-right:8px}
+.fb{margin-top:10px;font-size:15px;color:var(--dim);min-height:24px}
+.fb.ok{color:var(--ok)}.fb.no{color:var(--bad)}
+.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+textarea{width:100%;min-height:86px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:12px;font:16px var(--body);resize:vertical}
+.bubble{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:12px;font-size:16px}
+.bubble b{display:block;font:800 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--brass);margin-bottom:6px}
+.bubble.you{background:var(--sea-soft);border-color:rgba(62,156,147,.4)}.bubble.you b{color:var(--sea)}
+.steps{display:flex;gap:6px;margin-top:4px}
+.steps i{flex:1;height:5px;border-radius:3px;background:var(--panel-2)}
+.steps i.on{background:var(--brass)}
+/* done */
+.big{font:800 40px/1 var(--display);color:var(--brass);margin-top:8px}
+.stat{display:flex;gap:10px;margin-top:14px}
+.stat div{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.stat b{display:block;font:800 22px var(--mono);color:var(--brass)}
+.stat span{font-size:12px;color:var(--dim)}
+#card{width:100%;border-radius:14px;margin-top:14px;border:1px solid var(--line);display:block}
+/* museum */
+.mus{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.mus .node{padding:12px 6px}
+.mus .node.ghost{opacity:.3}
+/* settings */
+.set{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:14px 16px}
+.set h3{font:800 15px var(--display);margin-bottom:8px}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;padding:10px 6px;border-radius:10px;background:var(--panel-2);border:1px solid var(--line);font-size:13px;font-weight:700;color:var(--dim)}
+.seg button.on{border-color:var(--brass);color:var(--brass);background:var(--brass-soft)}
+.set p{font-size:13px;color:var(--dim);margin-top:8px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(90px);background:var(--brass);color:#1a1405;font-weight:900;padding:11px 18px;border-radius:999px;transition:transform .3s var(--ease);z-index:99;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.badge{display:inline-block;font:600 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:4px 8px;border-radius:6px;background:var(--panel-2);border:1px solid var(--line);color:var(--dim)}
+.badge.legend{color:#F0917B;border-color:rgba(240,145,123,.4)}
+</style>
+</head><body>
+<div class="app">
+
+<section class="screen show" id="s-map">
+  <div class="top">
+    <span class="onair"><i></i>Podpast</span>
+    <span class="grow"></span>
+    <span class="streak" id="streak">🔥 0</span>
+    <span class="xp" id="xp">0 XP</span>
+    <button class="tbtn" id="b-museum" aria-label="Museum">🏛️</button>
+    <button class="tbtn" id="b-settings" aria-label="Settings">⚙️</button>
+  </div>
+  <div class="body">
+    <div class="wordmark">Pod<em>past</em></div>
+    <p class="sub">History, told by the people who lived it. Pick a figure, hear their story, then ask them anything.</p>
+    <p class="note" id="rank"></p>
+    <div id="eras"></div>
+    <p class="note">Test build · Era 1 is playable, the rest unlock as content ships · Narration uses your device's built-in voice for now (real voices and portraits come in Phase 1).</p>
+  </div>
+</section>
+
+<section class="screen" id="s-figure">
+  <div class="top"><button class="tbtn" data-go="s-map">← Map</button><span class="grow"></span><span class="xp" id="xp2">0 XP</span></div>
+  <div class="body">
+    <div class="card center" id="figcard"></div>
+    <button class="btn" id="b-meet">▶ Meet them · 3-minute episode</button>
+    <button class="btn sec" id="b-ask-direct">💬 Skip to “Ask them”</button>
+  </div>
+</section>
+
+<section class="screen" id="s-episode">
+  <div class="top"><button class="tbtn" id="b-ep-back">← Back</button><span class="grow"></span><span class="onair" id="onair"><i></i>Episode</span></div>
+  <div class="body">
+    <div class="scene" id="scene">
+      <div class="bg kb" id="sbg"></div>
+      <div class="em" id="sem">🎙️</div>
+      <div class="cap" id="scap">Episode</div>
+      <div class="wave" id="wave"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="who" id="swho"></div>
+    </div>
+    <div class="caption" id="cap">Press play.</div>
+    <div class="pbar"><i id="pfill"></i></div>
+    <div class="ctl">
+      <button class="tbtn" id="b-prev" aria-label="Previous">⏮</button>
+      <button class="btn" id="b-play">▶ Play</button>
+      <button class="tbtn" id="b-next" aria-label="Next">⏭</button>
+    </div>
+    <button class="btn brass" id="b-to-checks" hidden>✅ Take the 3 checks</button>
+    <p class="note" id="voicenote"></p>
+  </div>
+</section>
+
+<section class="screen" id="s-checks">
+  <div class="top"><button class="tbtn" id="b-ck-back">← Episode</button><span class="grow"></span><span class="eyebrow" id="ckhead">Check 1 of 3</span></div>
+  <div class="body">
+    <div class="steps"><i id="st1"></i><i id="st2"></i><i id="st3"></i></div>
+    <div id="ckbody"></div>
+  </div>
+</section>
+
+<section class="screen" id="s-ask">
+  <div class="top"><button class="tbtn" id="b-ask-back">← Back</button><span class="grow"></span><span class="eyebrow">Ask them</span></div>
+  <div class="body">
+    <div class="card" id="askcard"></div>
+    <div id="chat"></div>
+    <textarea id="askbox" placeholder="Ask a question… e.g. “What was the hardest part?”" aria-label="Your question"></textarea>
+    <div class="row"><button class="btn" id="b-send">Ask</button><button class="btn sec" id="b-ask-done">Done</button></div>
+    <p class="note">Offline demo: every answer comes only from this figure’s canon pack, and the figure can’t know anything after their own lifetime. Live AI conversation with the same guardrails is Phase 2.</p>
+  </div>
+</section>
+
+<section class="screen" id="s-done">
+  <div class="top"><span class="grow"></span></div>
+  <div class="body center">
+    <p class="eyebrow">Episode complete</p>
+    <div class="big" id="dn-name"></div>
+    <p class="sub" id="dn-sub"></p>
+    <div class="stat"><div><b id="dn-xp">+0</b><span>XP earned</span></div><div><b id="dn-streak">1</b><span>day streak</span></div><div><b id="dn-met">1</b><span>figures met</span></div></div>
+    <canvas id="card" width="1080" height="1350" aria-label="Share card"></canvas>
+    <div class="row"><button class="btn" id="b-share">📣 Share</button><button class="btn sec" data-go="s-map">Next figure →</button></div>
+  </div>
+</section>
+
+<section class="screen" id="s-museum">
+  <div class="top"><button class="tbtn" data-go="s-map">← Map</button><span class="grow"></span><span class="eyebrow">Museum</span></div>
+  <div class="body">
+    <h2 style="font:800 26px/1.1 var(--display)">People you’ve met</h2>
+    <p class="sub">Every figure you finish takes a seat here.</p>
+    <div class="mus" id="mus"></div>
+  </div>
+</section>
+
+<section class="screen" id="s-settings">
+  <div class="top"><button class="tbtn" data-go="s-map">← Map</button><span class="grow"></span><span class="eyebrow">Settings</span></div>
+  <div class="body">
+    <div class="set"><h3>Who’s listening?</h3>
+      <div class="seg" id="bandseg"><button data-band="explorer">Explorer<br><small>ages 6–9</small></button><button data-band="scholar">Scholar<br><small>ages 10–13</small></button><button data-band="adult">Adult</button></div>
+      <p>One content set, one dial. Explorer gets shorter, simpler beats. Scholar adds context. Adult adds the hard parts (controversies, sourced). Classroom mode, where a teacher sets this per class, is Phase 2.</p>
+    </div>
+    <div class="set"><h3>Narration</h3>
+      <div class="seg" id="voiceseg"><button data-voice="1">Voice + captions</button><button data-voice="0">Captions only</button></div>
+      <p id="voiceinfo"></p>
+    </div>
+    <div class="set"><h3>Progress</h3><button class="btn sec" id="b-reset" style="margin-top:4px">Reset everything</button></div>
+    <p class="note">Podpast test build · English only in this build (Hebrew + RTL uses the Miklat i18n frame in Phase 1) · No accounts, nothing leaves your device.</p>
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+</div>
+<script>
+'use strict';
+/* ===== PODPAST CONTENT — figures are data rows; the engine never changes per figure ===== */
+const BG={
+  boston:'linear-gradient(160deg,#3a2f2a,#14161c)', ink:'linear-gradient(160deg,#2b2f3d,#0e1016)',
+  storm:'linear-gradient(160deg,#2f3a55,#10141f)', gold:'linear-gradient(160deg,#5a4520,#1a1510)',
+  paris:'linear-gradient(160deg,#4a3552,#181322)', snow:'linear-gradient(160deg,#4a5566,#141a22)',
+  river:'linear-gradient(160deg,#243d4d,#0f171c)', field:'linear-gradient(160deg,#354a2e,#111710)',
+  fire:'linear-gradient(160deg,#5c2f1f,#1a100c)', sea:'linear-gradient(160deg,#1f3f4d,#0c1418)',
+  dusk:'linear-gradient(160deg,#4d2f3f,#170f14)', dawn:'linear-gradient(160deg,#5a4a2e,#1a1610)'
+};
+const ERAS=[
+  {n:1,name:'Colonial & Founding',years:'1600–1789',open:true,figs:['franklin','washington','abigail','phillis','salomon','tisquantum']},
+  {n:2,name:'Early Republic & Expansion',years:'1790–1850',peek:'Jefferson · Sacagawea · Tecumseh · Dolley Madison · Rebecca Gratz · York'},
+  {n:3,name:'Civil War & Reconstruction',years:'1850–1877',peek:'Lincoln · Tubman · Douglass · Clara Barton · Robert Smalls · Elizabeth Keckley'},
+  {n:4,name:'Gilded Age & Immigration',years:'1877–1914',peek:'Edison · Twain · Emma Lazarus · Tesla · Ida B. Wells · Lewis Latimer'},
+  {n:5,name:'World Wars & Depression',years:'1914–1945',peek:'FDR · Earhart · Eleanor Roosevelt · Jesse Owens · Hedy Lamarr · Dorothea Lange'},
+  {n:6,name:'Civil Rights & Space',years:'1945–1975',peek:'MLK Jr. · Armstrong · Rosa Parks · Cesar Chavez · Katherine Johnson · Claudette Colvin'},
+  {n:7,name:'Modern',years:'1975–2001',peek:'Jobs · Reagan · Sally Ride · Fred Rogers · Grace Hopper · Norman Borlaug'},
+  {n:8,name:'Folk & Legend',years:'tall tales, flagged',peek:'Johnny Appleseed · Annie Oakley · John Henry · Casey Jones · Paul Bunyan · Pecos Bill'}
+];
+/* beat: {t:text, k:kid-simplified (optional), min:'all'|'scholar'|'adult', e:emoji, bg:key, c:caption} */
+const FIGURES={
+franklin:{id:'franklin',name:'Benjamin Franklin',dates:'1706–1790',born:1706,died:1790,tier:'icon',kind:'historical',emoji:'🪁',ring:'#E1AE48',
+ hook:'Printer, inventor, diplomat. The only person who signed all four founding documents.',
+ standard:'US History, Grade 5: The American Revolution',
+ beats:[
+  {t:'Boston, 1706. I am the fifteenth of seventeen children, and my father makes candles. There is no money for school past the age of ten. So I read everything I can find, and I write.',k:'I was born in Boston in 1706, one of seventeen kids! My dad made candles. I only went to school until I was ten, so I taught myself by reading everything.',min:'all',e:'🕯️',bg:'boston',c:'Boston, 1706'},
+  {t:'At twelve I am apprenticed to my brother James, a printer. Ink under my nails, lead type in my hands. When he refuses to print my writing, I invent a widow named Silence Dogood and slip her letters under the shop door. The whole town loves her. He does not love learning who she was.',k:'At twelve I work in my big brother’s print shop. He won’t print my writing, so I make up a pretend old lady named Silence Dogood and send letters in her name. Everyone loves them!',min:'all',e:'🖨️',bg:'ink',c:'The print shop'},
+  {t:'At seventeen I run away to Philadelphia with three loaves of bread and almost nothing else. Within a few years I own my own press.',k:'At seventeen I run away to Philadelphia with three loaves of bread. A few years later I own my own print shop.',min:'all',e:'🍞',bg:'dawn',c:'Philadelphia, 1723'},
+  {t:'Poor Richard’s Almanack. Every year for a quarter of a century: weather, tides, and little sayings. “Well done is better than well said.” People still repeat them.',k:'I write a yearly book called Poor Richard’s Almanack, full of weather, tides and wise little sayings like “Well done is better than well said.”',min:'all',e:'📅',bg:'gold',c:'Poor Richard, 1732–1758'},
+  {t:'I keep starting things. A lending library so ordinary people can read. A fire company. A hospital. A society for people who love ideas. Philadelphia becomes the best-organized city in the colonies because nobody told me to stop.',min:'scholar',e:'🏛️',bg:'ink',c:'Library Company, 1731'},
+  {t:'June 1752. A thunderstorm, a kite, a silk string, a key. I feel the spark jump. Lightning is electricity. I invent the lightning rod so houses stop burning down. I never patent it. Ideas should be free.',k:'One stormy day I fly a kite with a key on the string. A spark jumps! Lightning is electricity. So I invent a metal rod to keep houses safe from it.',min:'all',e:'🪁',bg:'storm',c:'The kite, 1752'},
+  {t:'Bifocals, because I am tired of switching glasses. A better stove. A map of the Gulf Stream. Swim fins, at the age of eleven.',k:'I also invent glasses that see near and far, a better stove, and even swim fins when I was eleven!',min:'all',e:'👓',bg:'ink',c:'Inventions'},
+  {t:'By 1776 I am seventy. I sign the Declaration of Independence. Then Congress sends me to France, because the Revolution cannot win without French ships and French gold.',k:'When I am seventy, I sign the Declaration of Independence. Then I sail to France to ask them to help us win the war.',min:'all',e:'✒️',bg:'gold',c:'Independence, 1776'},
+  {t:'In Paris I wear a plain fur cap instead of a wig. The French adore it. They put my face on snuffboxes. In 1778 France signs the alliance. That alliance wins the war.',min:'scholar',e:'🎩',bg:'paris',c:'Paris, 1778'},
+  {t:'1783: I sign the peace treaty with Britain. 1787: at eighty-one, I am the oldest man in the room writing the Constitution. I am the only person to sign all four: the Declaration, the French alliance, the peace treaty, and the Constitution.',k:'I help write the peace with Britain, and at eighty-one I help write the Constitution. I am the only person who signed all four of America’s founding papers.',min:'all',e:'📜',bg:'gold',c:'Four signatures'},
+  {t:'You should know the whole record. For much of my life I owned enslaved people and ran advertisements for slave sales in my newspaper. Near the end I changed. My last public act was a petition to Congress to abolish slavery, as president of the Pennsylvania Abolition Society.',min:'adult',e:'⚖️',bg:'dusk',c:'1790: the last petition'},
+  {t:'I die in April 1790. Twenty thousand people come to the funeral. My advice, if you want it: write things down, start things, and keep asking why.',k:'I live to be eighty-four. My advice: write things down, start things, and always keep asking why.',min:'all',e:'🕊️',bg:'dawn',c:'Philadelphia, 1790'}
+ ],
+ canon:[
+  {q:['kite','lightning','electric','storm','key'],a:'June 1752. A kite, a silk string, a key, and a thunderstorm. I felt the spark jump to my knuckle. Lightning is electricity, and once you know that, you can lead it safely into the ground with a rod. I never took a patent on it.'},
+  {q:['invent','invention','bifocal','stove','glasses','fins'],a:'Bifocals, the Franklin stove, the lightning rod, swim fins, a map of the Gulf Stream, a musical instrument called the glass armonica. I invent things because problems annoy me.'},
+  {q:['print','printer','newspaper','almanac','poor richard','dogood','silence'],a:'I was a printer before anything else. My brother James taught me the trade, and I paid him back by inventing Silence Dogood. Poor Richard’s Almanack ran twenty-five years. Ink is how I made my living and my name.'},
+  {q:['france','french','paris','alliance','ambassador','diplomat'],a:'Congress sent me to France in 1776. I wore a plain fur cap, told stories, and waited. In 1778 France signed the alliance that brought us ships, soldiers and money. Without it, no Yorktown.'},
+  {q:['declaration','independence','sign','constitution','treaty','jefferson'],a:'I signed the Declaration in 1776, the French alliance in 1778, the peace treaty in 1783, and the Constitution in 1787. Four documents. Nobody else signed all four, which I mention only occasionally.'},
+  {q:['slave','slavery','abolition','enslaved'],a:'The honest answer: I owned enslaved people for much of my life, and my newspaper printed slave advertisements. Late in life I became president of the Pennsylvania Abolition Society, and my last public act was a petition to Congress against slavery. I changed. I wish I had changed sooner.'},
+  {q:['school','child','childhood','boston','family','brother','father','young'],a:'I left school at ten. My father made candles and soap in Boston, and there were seventeen of us children. I read at night and taught myself to write by copying essays and rewriting them from memory.'},
+  {q:['library','fire','hospital','philadelphia','society','start'],a:'In Philadelphia I started a lending library, a fire company, a hospital, an academy that became a university, and the American Philosophical Society. If you want a thing to exist, gather a few friends and start it.'},
+  {q:['advice','wisdom','saying','quote','tip'],a:'Well done is better than well said. Early to bed and early to rise. And one you will not find in the almanac: write things down, start things, and keep asking why.'},
+  {q:['washington','george'],a:'General Washington and I were not close friends, but I trusted him completely. When the war looked lost, he did not quit. That is the whole story of the man.'},
+  {q:['die','death','old','funeral'],a:'I died in April 1790, aged eighty-four. Twenty thousand people came to the funeral, which I would have enjoyed more from the front row.'}
+ ],
+ notKnow:['the Civil War','the telephone','airplanes','the internet'],
+ checks:{
+  mc:{q:'What did Franklin’s kite experiment show?',opts:['That lightning is electricity','That kites can fly in the rain','That keys attract storms','That silk is waterproof'],a:0,why:'The spark that jumped to the key proved lightning is electrical, which led straight to the lightning rod.'},
+  order:[['Runs away to Philadelphia','1723'],['The kite experiment','1752'],['Signs the Declaration of Independence','1776'],['Helps write the Constitution','1787']],
+  ask:'You’re standing next to Franklin in the print shop. What would you ask him?'
+ }},
+
+washington:{id:'washington',name:'George Washington',dates:'1732–1799',born:1732,died:1799,tier:'icon',kind:'historical',emoji:'🎖️',ring:'#E1AE48',
+ hook:'Won a war, then handed the power back.',
+ standard:'US History, Grade 5: The American Revolution',
+ beats:[
+  {t:'Virginia, 1732. My father dies when I am eleven. No college for me. At sixteen I am out in the wilderness with a compass and a chain, surveying land.',k:'I was born in Virginia in 1732. My dad died when I was eleven. At sixteen I got a job measuring land out in the wild woods.',min:'all',e:'🧭',bg:'field',c:'Virginia, 1732'},
+  {t:'At twenty-two I lead Virginia militia into the Ohio country. A skirmish, then a surrender at a place I named Fort Necessity. My first war starts badly. I learn.',min:'scholar',e:'⛺',bg:'field',c:'Fort Necessity, 1754'},
+  {t:'June 1775. Congress needs a general. I am the tall Virginian in uniform in a room full of men in suits. They choose me. I tell them I am not equal to it. Then I go and do it anyway.',k:'In 1775 the new Congress needs a general to lead the army. They pick me. I tell them I’m not sure I can do it. Then I go do it anyway.',min:'all',e:'🎖️',bg:'ink',c:'Commander, 1775'},
+  {t:'Christmas night, 1776. Ice on the Delaware River. My army is shrinking; enlistments end in a week. We cross in the dark and take Trenton at dawn. It is a small battle. It saves the Revolution.',k:'On Christmas night, 1776, my soldiers row across an icy river in the dark. At sunrise we win at Trenton. It’s a small battle, but it gives everyone hope again.',min:'all',e:'🚣',bg:'river',c:'The Delaware, 1776'},
+  {t:'Valley Forge. Winter, 1777. No shoes, no coats, bloody footprints in the snow. We do not quit. A Prussian officer named von Steuben drills us until we are a real army.',k:'That winter at Valley Forge we have no shoes and no coats. We don’t quit. A soldier from Prussia trains us until we are a real army.',min:'all',e:'❄️',bg:'snow',c:'Valley Forge'},
+  {t:'October 1781. Yorktown. With French ships behind him and my army in front, the British general surrenders. The war is effectively over.',k:'In 1781 at Yorktown, with French ships helping us, the British army surrenders. We won.',min:'all',e:'🏳️',bg:'dawn',c:'Yorktown, 1781'},
+  {t:'Then the strange part. December 1783. I walk into Congress and hand back my commission. I could have kept the army. Kings do. I go home to my farm. When King George hears of it, he says that if I do that, I will be the greatest man in the world.',k:'Then I do something surprising. I give the army back to Congress and go home to my farm. Kings never give up power. I do.',min:'all',e:'👑',bg:'gold',c:'Annapolis, 1783'},
+  {t:'1787. They call me back to sit at the head of the room while the Constitution is written. I barely speak. My being there is the speech.',min:'scholar',e:'📜',bg:'gold',c:'Philadelphia, 1787'},
+  {t:'1789. Every elector votes for me. There is no rulebook for a president. Everything I do becomes the rule. I leave after two terms so that leaving becomes the rule too.',k:'In 1789 I become the very first president. There are no rules yet, so everything I do becomes a rule. I leave after eight years so that leaving becomes a rule too.',min:'all',e:'🏛️',bg:'ink',c:'First President, 1789'},
+  {t:'My Farewell Address: beware of political parties that fight only for themselves. Stay out of permanent foreign alliances. Observe good faith and justice toward all nations.',min:'scholar',e:'📰',bg:'ink',c:'Farewell, 1796'},
+  {t:'The hard part of my story. More than three hundred enslaved people lived at Mount Vernon. I benefited from their labor my whole life. In my will I freed the ones I owned outright. It was late, it was not enough, and you should know it.',min:'adult',e:'⚖️',bg:'dusk',c:'Mount Vernon'},
+  {t:'December 1799. A cold ride, a sore throat, and I am gone at sixty-seven. They say I was first in war, first in peace. I would rather you remember that I gave the power back.',k:'I die in 1799 at my farm. People say I was first in war and first in peace. I’d rather you remember that I gave the power back.',min:'all',e:'🕊️',bg:'dusk',c:'1799'}
+ ],
+ canon:[
+  {q:['delaware','trenton','christmas','cross','river'],a:'Christmas night, 1776. The river was full of ice and my army was about to melt away when enlistments expired. We crossed in the dark and took Trenton at dawn. Small battle. It kept the cause alive.'},
+  {q:['valley forge','winter','cold','shoes','steuben'],a:'Valley Forge was misery: no shoes, thin coats, sickness. What saved us was Baron von Steuben drilling the men every day until they moved like an army. We came out of that winter stronger than we went in.'},
+  {q:['yorktown','surrender','win','won','british','cornwallis'],a:'Yorktown, October 1781. The French fleet closed the sea, my army and the French closed the land, and General Cornwallis surrendered. That was the end of it, though the treaty took two more years.'},
+  {q:['resign','power','king','commission','give up','annapolis'],a:'In December 1783 I went to Congress at Annapolis and handed back my commission. Men with armies usually keep them. I went home to farm. The country needed to see that the army answered to the people, not the other way round.'},
+  {q:['president','elect','term','office','rule'],a:'I was elected unanimously in 1789. Nobody had been president before, so every choice became a precedent. I left after two terms so that leaving would become one too.'},
+  {q:['constitution','convention','philadelphia','1787'],a:'I presided over the Convention in 1787 and said almost nothing. My sitting in that chair told the country the thing was serious.'},
+  {q:['slave','slavery','enslaved','mount vernon'],a:'More than three hundred enslaved people lived and worked at Mount Vernon, and I profited from their labor all my life. My will freed those I owned outright after my wife’s death. It was late and it was not enough. I will not pretend otherwise.'},
+  {q:['farewell','advice','parties','alliance','warn'],a:'In my Farewell Address I warned against political parties that serve only themselves, against permanent alliances abroad, and for good faith and justice toward all nations. People quote it more than they follow it.'},
+  {q:['child','young','father','surveyor','virginia','school','teeth'],a:'My father died when I was eleven and there was no money for college. I taught myself surveying and was out in the wilderness at sixteen. As for the teeth: yes, false ones, and no, not wooden.'},
+  {q:['franklin','ben'],a:'Dr. Franklin was the cleverest man in any room and knew it. He got us the French alliance. I could not have won without it.'},
+  {q:['die','death','1799'],a:'December 1799. I rode out in sleet, took a throat infection, and was gone within two days. Sixty-seven years old.'}
+ ],
+ notKnow:['the War of 1812','the Civil War','Abraham Lincoln','the telephone'],
+ checks:{
+  mc:{q:'Why did Washington’s resignation in 1783 matter so much?',opts:['He gave up power voluntarily instead of keeping the army','He had lost the war','He wanted to become king','Congress had fired him'],a:0,why:'A victorious general handing back his commission was almost unheard of. It set the rule that the army answers to the people.'},
+  order:[['Crossing the Delaware','1776'],['Winter at Valley Forge','1777'],['Victory at Yorktown','1781'],['Becomes first President','1789']],
+  ask:'You’re at Mount Vernon after the war. What would you ask Washington?'
+ }},
+
+abigail:{id:'abigail',name:'Abigail Adams',dates:'1744–1818',born:1744,died:1818,tier:'between',kind:'historical',emoji:'✍️',ring:'#3E9C93',
+ hook:'“Remember the Ladies.” She said it in 1776, and she meant it.',
+ standard:'US History, Grade 5: The American Revolution',
+ beats:[
+  {t:'Weymouth, Massachusetts, 1744. I am a minister’s daughter. Girls do not go to school. So I read my father’s whole library. Shakespeare. History. Sermons. Everything.',k:'I was born in Massachusetts in 1744. Girls didn’t go to school then, so I read every single book in my father’s library.',min:'all',e:'📚',bg:'boston',c:'Weymouth, 1744'},
+  {t:'I marry a stubborn young lawyer named John Adams. He is away for years at a time, so we do our marriage by letter. More than a thousand of them. That is how you know me: by my letters.',k:'I marry a lawyer named John Adams. He is away a lot, so we write letters. More than a thousand! That’s how people know me today.',min:'all',e:'💌',bg:'ink',c:'1764'},
+  {t:'June 17, 1775. I climb Penn’s Hill with my son John Quincy, age seven, and we watch the smoke rise from the Battle of Bunker Hill. The war is in our backyard.',k:'One day I climb a hill with my little boy and we see smoke from a big battle. The war is right next door to our farm.',min:'all',e:'🔥',bg:'fire',c:'Bunker Hill, 1775'},
+  {t:'John is in Philadelphia writing a country. I am in Braintree running the farm, the money, the children, and a smallpox outbreak. He calls me “Portia.” I call it Tuesday.',k:'While John is away helping start the country, I run the farm, handle the money, and raise the kids. All by myself.',min:'all',e:'🌾',bg:'field',c:'Braintree'},
+  {t:'March 31, 1776. I write to John: “Remember the Ladies, and be more generous and favourable to them than your ancestors. Do not put such unlimited power into the hands of the husbands.” He laughs. I am not joking.',k:'In 1776 I write John a famous letter: “Remember the Ladies!” I want the new laws to be fair to women too.',min:'all',e:'✍️',bg:'gold',c:'Remember the Ladies'},
+  {t:'I also write that I wish there was not a single enslaved person in the province. It seems to me a strange thing to fight for freedom while taking it from others.',min:'scholar',e:'⚖️',bg:'dusk',c:'1774'},
+  {t:'I cross the Atlantic to join John in Paris and London. I meet a king who once called us rebels. I am polite. Mostly.',min:'scholar',e:'🚢',bg:'sea',c:'London, 1785'},
+  {t:'1797. John is president. I am the second First Lady, and the first to live in the new President’s House in Washington. It is unfinished. It is damp. I hang the laundry in the great East Room.',k:'When John becomes president, we move into the brand-new White House. It isn’t finished yet! I hang our laundry in the biggest room.',min:'all',e:'🏠',bg:'ink',c:'The President’s House, 1800'},
+  {t:'People say I have too much influence. They call me “Mrs. President.” I take it as a compliment.',min:'scholar',e:'👑',bg:'gold',c:'Mrs. President'},
+  {t:'I die in October 1818. Seven years later my son John Quincy becomes president. I never see it. But I raised him on those letters, so I think I had a hand in it.',k:'I die in 1818. A few years later my son John Quincy becomes president too. I never got to see it, but I helped make it happen.',min:'all',e:'🕊️',bg:'dawn',c:'1818'}
+ ],
+ canon:[
+  {q:['remember the ladies','ladies','women','rights','letter 1776','vote'],a:'March 1776. I told John: Remember the Ladies, and be more generous and favourable to them than your ancestors. If particular care is not paid to us, we are determined to foment a rebellion. He thought I was joking. I was not.'},
+  {q:['letter','letters','write','writing','portia'],a:'John and I wrote each other more than a thousand letters. He was away for years. The letters were our marriage, our politics, and now, apparently, your history lesson.'},
+  {q:['john','husband','adams','marry','married'],a:'John Adams: brilliant, stubborn, vain, honest. I married him in 1764 and never once found him boring. He called me Portia, after the clever woman in Shakespeare.'},
+  {q:['bunker hill','battle','war','smoke','penn'],a:'On June 17, 1775, I stood on Penn’s Hill with little John Quincy and watched the smoke from Bunker Hill. Our friend Dr. Warren died that day. The war was not somewhere else. It was here.'},
+  {q:['farm','money','smallpox','children','alone','braintree'],a:'While John wrote a country, I ran the farm at Braintree, kept the accounts, raised four children and got them through a smallpox inoculation. He got the fame. I got the harvest in.'},
+  {q:['slave','slavery','enslaved'],a:'I wrote in 1774 that I wished there was not a single enslaved person in our province. It always seemed to me a strange thing to fight for liberty while denying it to others.'},
+  {q:['white house','president','first lady','laundry','washington city'],a:'We were the first to live in the President’s House in the new capital, in 1800. It was unfinished, cold and damp, and I hung the washing to dry in the great East Room. Grand it was not.'},
+  {q:['school','education','read','library','girl','learn'],a:'I never went to school; girls did not. I read my father’s library instead, and I spent my life arguing that daughters deserve the same education as sons.'},
+  {q:['john quincy','son'],a:'My son John Quincy was seven when we watched the smoke of Bunker Hill together. I raised him on letters about duty. He became president in 1825, seven years after I died. I take some credit.'},
+  {q:['england','london','paris','king','europe'],a:'I joined John in Paris and then London in the 1780s and was presented to King George the Third, who had called us rebels. I was polite. Mostly.'},
+  {q:['die','death','1818'],a:'I died of typhoid in October 1818, at home in Quincy, aged seventy-three. John outlived me by eight years and never quite recovered from it.'}
+ ],
+ notKnow:['women getting the vote in 1920','her son John Quincy becoming president in 1825','the Civil War'],
+ checks:{
+  mc:{q:'What did Abigail ask John to do in her famous 1776 letter?',opts:['Remember the Ladies when writing the new laws','Build a bigger farm','Come home from Philadelphia','Run for president'],a:0,why:'She asked the men writing the new government to give women fairer treatment under the law, in March 1776.'},
+  order:[['Marries John Adams','1764'],['Watches the smoke of Bunker Hill','1775'],['Writes “Remember the Ladies”','1776'],['Moves into the President’s House','1800']],
+  ask:'You’re sitting at Abigail’s writing desk in Braintree. What would you ask her?'
+ }},
+
+phillis:{id:'phillis',name:'Phillis Wheatley',dates:'c. 1753–1784',born:1753,died:1784,tier:'between',kind:'historical',emoji:'📜',ring:'#3E9C93',
+ hook:'Kidnapped at seven. A published poet at twenty. The first Black American to publish a book of poems.',
+ standard:'US History, Grade 5: Colonial America & the Revolution',
+ beats:[
+  {t:'I do not know my birthday. I was about seven when I was taken from West Africa. The ship was named the Phillis. That is where my name comes from. I want you to sit with that for a second.',k:'I don’t know my birthday. When I was about seven, I was taken from my home in Africa on a ship called the Phillis. That ship gave me my name.',min:'all',e:'🌊',bg:'sea',c:'1761'},
+  {t:'Boston, 1761. A merchant named John Wheatley buys me for his wife. Their daughter Mary teaches me to read. Within sixteen months I am reading the hardest parts of the Bible. Then Latin. Then I start writing poems.',k:'In Boston, the family I live with teaches me to read. I learn fast. Soon I’m reading Latin and writing my own poems.',min:'all',e:'📖',bg:'boston',c:'Learning to read'},
+  {t:'1770. A famous preacher dies, and I write a poem about it. It is printed in Boston, Newport, Philadelphia, London. I am about seventeen, I am enslaved, and I am famous.',k:'When I’m about seventeen, one of my poems gets printed in four cities, even London. I become famous.',min:'all',e:'✒️',bg:'ink',c:'1770'},
+  {t:'1772. Eighteen of the most important men in Boston, including the governor and John Hancock, question me to decide whether a Black girl could really have written these poems. I answer them. They sign a paper saying I did. I needed their signatures to publish. Think about that.',min:'scholar',e:'🧾',bg:'dusk',c:'The examination, 1772'},
+  {t:'1773. My book is published in London: Poems on Various Subjects, Religious and Moral. The first book of poetry by an African American. I sail to London, and people line up to meet me.',k:'In 1773 my book of poems is published. It’s the first poetry book ever by an African American writer. People in London line up to meet me.',min:'all',e:'📚',bg:'gold',c:'London, 1773'},
+  {t:'That same year, the Wheatleys free me. Free, with a book in my hands.',k:'That same year, I am set free. Free, with my own book in my hands.',min:'all',e:'🔓',bg:'dawn',c:'Freedom'},
+  {t:'October 1775. I write a poem to General George Washington and send it to his camp. He writes back. He invites me to visit. In the middle of a war.',k:'In 1775 I write a poem for General George Washington and mail it to him. He writes back and invites me to visit!',min:'all',e:'💌',bg:'field',c:'1775'},
+  {t:'I write to a Native American minister: “In every human breast, God has implanted a principle, which we call love of freedom; it is impatient of oppression.” I am talking about slavery. Everyone knows I am.',min:'scholar',e:'✊',bg:'ink',c:'1774'},
+  {t:'After the war, things fall apart. My husband is in debtors’ prison. My babies die. I work as a scrubwoman. I die in December 1784, about thirty-one years old. My second book is never found.',k:'After the war, life gets very hard. I die in 1784, when I am only about thirty-one. My second book of poems is lost.',min:'all',e:'🕯️',bg:'dusk',c:'1784'},
+  {t:'But the first one is still in print. Two hundred and fifty years. Read it. I am still talking.',k:'But my first book is still printed today, 250 years later. Read it. I’m still talking to you.',min:'all',e:'🕊️',bg:'dawn',c:'Still in print'}
+ ],
+ canon:[
+  {q:['name','phillis','ship','africa','kidnap','taken','born','birthday'],a:'I was taken from West Africa at about seven years old, in 1761, on a slave ship called the Phillis. They named me after the ship. I do not know my real birthday or the name my mother gave me.'},
+  {q:['read','learn','latin','teach','mary','wheatley','boston'],a:'Mary Wheatley taught me to read in Boston. Within sixteen months I was reading the hardest passages of the Bible, then Latin, then Ovid. Nobody expected it. I did not ask permission.'},
+  {q:['book','poem','poems','publish','published','london','1773'],a:'My book, Poems on Various Subjects, Religious and Moral, came out in London in 1773. No Boston printer would take it. It was the first book of poetry by an African American, and it is still in print.'},
+  {q:['examination','prove','hancock','governor','doubt','believe'],a:'In 1772 eighteen of Boston’s leading men, the governor and John Hancock among them, questioned me to decide whether I could really have written my poems. They signed a statement saying I had. I needed their signatures to be believed.'},
+  {q:['washington','george','general','camp'],a:'In October 1775 I sent General Washington a poem. He wrote back, called my verse elegant, and invited me to visit his camp at Cambridge. I went. In wartime.'},
+  {q:['free','freedom','freed','slave','slavery','oppression'],a:'The Wheatleys freed me in 1773, after the book. I wrote the next year that in every human breast God has implanted a principle which we call love of freedom; it is impatient of oppression. I meant slavery. Everyone knew.'},
+  {q:['husband','marry','married','peters','children','baby'],a:'I married John Peters, a free Black man, in 1778. He was in and out of debtors’ prison. Our children died young. Those were hard years.'},
+  {q:['die','death','1784','poor','end'],a:'I died in December 1784, about thirty-one, working as a scrubwoman in a Boston boarding house. My second manuscript was never found. My first book outlived everyone who doubted it.'},
+  {q:['famous','preacher','whitefield','1770','elegy'],a:'In 1770 I wrote an elegy for the preacher George Whitefield. It was printed in Boston, Newport, Philadelphia and London. I was about seventeen. That poem made me known.'},
+  {q:['advice','write','writing','how'],a:'Read more than anyone expects you to. Then write as if you have already been believed.'}
+ ],
+ notKnow:['the end of slavery in 1865','the Civil War','the Harlem Renaissance'],
+ checks:{
+  mc:{q:'What was special about Phillis Wheatley’s 1773 book?',opts:['It was the first book of poetry by an African American','It was the first book printed in Boston','It was written entirely in Latin','It was about sailing ships'],a:0,why:'Published in London in 1773, it was the first book of poetry by an African American, and it is still in print.'},
+  order:[['Arrives in Boston on the ship Phillis','1761'],['Her poem for Whitefield makes her famous','1770'],['Her book is published in London','1773'],['Writes to General Washington','1775']],
+  ask:'You’re in the Wheatley house in Boston, 1773. What would you ask Phillis?'
+ }},
+
+salomon:{id:'salomon',name:'Haym Salomon',dates:'1740–1785',born:1740,died:1785,tier:'gem',kind:'historical',emoji:'🗝️',ring:'#F0917B',
+ hook:'The Jewish broker who found the money when the Revolution ran out of it.',
+ standard:'US History, Grade 5: The American Revolution',
+ beats:[
+  {t:'Leszno, Poland, 1740. I am born Jewish in a kingdom that keeps changing hands. I learn languages the way other boys learn games: Polish, German, French, Hebrew, later English. Six, maybe eight.',k:'I was born in Poland in 1740. I learned lots of languages growing up: Polish, German, French, Hebrew, and later English.',min:'all',e:'🗺️',bg:'ink',c:'Poland, 1740'},
+  {t:'1772. I land in New York with almost nothing and become a broker. Buying, selling, lending, trading. I am good at it. And I join the Sons of Liberty, because I know what it is to live without rights.',k:'In 1772 I sail to New York with almost nothing. I become a trader, and I join the people fighting for freedom, because I know what it’s like to have none.',min:'all',e:'🗽',bg:'sea',c:'New York, 1772'},
+  {t:'1776. The British take New York and arrest me as a spy. They need interpreters for their German soldiers, the Hessians, so they use me. I use the job to talk the Hessians into deserting.',k:'When the British capture New York, they arrest me. They make me translate for their German soldiers. I quietly tell those soldiers to switch sides!',min:'all',e:'⛓️',bg:'dusk',c:'Arrested, 1776'},
+  {t:'1778. Arrested again. Sentenced to death. I escape and reach Philadelphia with my family, and start over from zero. Again.',min:'scholar',e:'🏃',bg:'fire',c:'Escape, 1778'},
+  {t:'Here is the problem nobody tells you about revolutions: they run out of money. Soldiers do not get paid. Congress has no gold. Robert Morris is in charge of finding it. He finds me.',k:'Here’s a secret about revolutions: they run out of money. The soldiers can’t get paid. So the man in charge of money, Robert Morris, comes to me for help.',min:'all',e:'💸',bg:'ink',c:'The money problem'},
+  {t:'I become the broker for the Office of Finance. I sell the government’s paper to people who trust my name when they do not trust Congress. In the summer of 1781, when Washington needs money to march on Yorktown, Morris writes in his diary: “I sent for Haym Salomon.” The money is found.',k:'When Washington needs cash to march his army to the big battle at Yorktown, they send for me. I find the money.',min:'all',e:'🗝️',bg:'gold',c:'Yorktown, 1781'},
+  {t:'I lend to members of Congress out of my own pocket, often with no interest. James Madison writes that when he is broke, he goes to “our little friend in Front Street.” That is me.',min:'scholar',e:'🤝',bg:'ink',c:'Front Street'},
+  {t:'I also help build the first synagogue in Philadelphia, Mikveh Israel. And I fight a Pennsylvania law that would keep Jews out of office. Freedom for the country should mean freedom for us too.',k:'I also help build the first synagogue in Philadelphia, and I speak up so that Jewish people can have the same rights as everyone else.',min:'all',e:'✡️',bg:'dawn',c:'Mikveh Israel'},
+  {t:'January 1785. I die at forty-four. The government still owes me money. My family is left with debts. It is never repaid.',k:'I die in 1785 when I am only forty-four. The government still owes me money. My family never gets it back.',min:'all',e:'🕯️',bg:'dusk',c:'1785'},
+  {t:'Two hundred years later they put me on a stamp, and in Chicago there is a statue: Washington in the middle, Morris on one side, me on the other. I would have preferred the money. But I will take the statue.',k:'Many years later they put my face on a stamp and built me a statue next to George Washington. Not bad for a kid from Poland.',min:'all',e:'🗿',bg:'gold',c:'Chicago'}
+ ],
+ canon:[
+  {q:['money','finance','broker','fund','loan','pay','gold','yorktown'],a:'Revolutions run out of money; that is the part the paintings leave out. I sold the government’s notes to people who trusted my name more than they trusted Congress. In August 1781, when Washington needed funds to march on Yorktown, Robert Morris sent for me. The money was found.'},
+  {q:['morris','robert'],a:'Robert Morris ran the Office of Finance. His diary says “I sent for Haym Salomon” more times than he probably wanted to admit. We made a good pair: he had the office, I had the trust of the market.'},
+  {q:['madison','front street','congress','lend','interest'],a:'I lent to members of Congress from my own pocket, often with no interest. James Madison wrote that when he was short of money he went to “our little friend in Front Street.” I was five foot nothing. He meant it kindly.'},
+  {q:['spy','arrest','british','prison','hessian','escape','death sentence'],a:'The British arrested me as a spy in 1776. They used me as an interpreter for their Hessian soldiers, and I used the job to persuade Hessians to desert. Arrested again in 1778, sentenced to death, I escaped to Philadelphia with nothing.'},
+  {q:['jewish','jew','synagogue','mikveh','religion','rights'],a:'I was born Jewish in Poland and stayed Jewish in America. I helped build Mikveh Israel, the first synagogue in Philadelphia, and I fought a Pennsylvania rule that would have barred Jews from office. Freedom for the country had to mean freedom for us too.'},
+  {q:['poland','born','language','leszno','child','young'],a:'Leszno, Poland, 1740. The kingdom kept changing hands, so I kept learning languages: Polish, German, French, Hebrew, later English. Six or eight tongues. Useful for a broker. Useful for a spy.'},
+  {q:['statue','stamp','remember','famous','chicago','honor'],a:'In 1941 Chicago put up a statue: Washington in the middle, Morris on one side, me on the other. In 1975 the post office put me on a stamp. I would have preferred repayment. I will take the statue.'},
+  {q:['die','death','1785','debt','family','repaid'],a:'I died in January 1785 at forty-four, with the government still owing me a great deal of money. My family was left with debts. Congress never paid. That is the plain truth of it.'},
+  {q:['washington','george'],a:'I never marched with General Washington. I did something less glorious: I made sure that when he needed to move the army, there was money to move it.'},
+  {q:['advice','wisdom','lesson'],a:'Trust is the only currency that never loses value. Spend it carefully and lend it generously.'}
+ ],
+ notKnow:['the Constitution of 1787','Washington becoming president','the State of Israel'],
+ checks:{
+  mc:{q:'What was Haym Salomon’s job for the Revolution?',opts:['Raising money as a broker for the Office of Finance','Leading troops in battle','Building warships','Printing newspapers'],a:0,why:'He sold government notes and lent his own money so the army could be paid and moved, including before Yorktown in 1781.'},
+  order:[['Arrives in New York','1772'],['Arrested by the British as a spy','1776'],['Escapes to Philadelphia','1778'],['Raises money for the Yorktown campaign','1781']],
+  ask:'You’re in Salomon’s office on Front Street, Philadelphia. What would you ask him?'
+ }},
+
+tisquantum:{id:'tisquantum',name:'Tisquantum (Squanto)',dates:'c. 1585–1622',born:1585,died:1622,tier:'gem',kind:'historical',emoji:'🌽',ring:'#F0917B',
+ hook:'Kidnapped, sold in Spain, back home to find everyone gone. Then he taught the Pilgrims how to survive.',
+ standard:'US History, Grade 5: Colonial America',
+ beats:[
+  {t:'My name is Tisquantum. You may know me as Squanto. I am Patuxet, of the Wampanoag people, and my village stood exactly where Plymouth stands now. Remember that. It matters.',k:'My name is Tisquantum. You might know me as Squanto. My people are the Wampanoag, and my village stood right where Plymouth is today.',min:'all',e:'🌲',bg:'field',c:'Patuxet'},
+  {t:'1614. An English captain named Thomas Hunt invites some of us aboard his ship to trade. Then he sails away with us chained below deck, to Spain, to sell us.',k:'One day an English captain tricks me and about twenty others onto his ship. He sails us across the ocean to sell us.',min:'all',e:'⛵',bg:'sea',c:'Kidnapped, 1614'},
+  {t:'Málaga, Spain. Some of us are sold. Some of us are taken in by Spanish friars. I get out. I get to England. I live in the house of a merchant in London, and I learn English. All of it.',k:'In Spain, some kind monks help me get away. I make it to England and live in London, where I learn to speak English.',min:'all',e:'🏰',bg:'dusk',c:'London'},
+  {t:'I work my way to Newfoundland, then convince an English captain to carry me home. It takes five years.',min:'scholar',e:'🌊',bg:'sea',c:'The long way home'},
+  {t:'1619. I walk into Patuxet. It is empty. A sickness I have never seen has killed almost everyone while I was gone. My whole world, silent.',k:'After five years, I finally get home. But a terrible sickness has taken my whole village. Everyone is gone.',min:'all',e:'🍂',bg:'dusk',c:'1619'},
+  {t:'I live with Massasoit’s people. Then, in the spring of 1621, strangers land on my empty village. English. Starving. Half of them died over the winter.',k:'I go live with the great leader Massasoit. Then, in 1621, English strangers land right on my empty village. They are starving.',min:'all',e:'🏚️',bg:'snow',c:'Plymouth, 1621'},
+  {t:'I walk into their camp and speak English. You can imagine their faces. I show them how to plant corn with fish buried under the seed, where the eels hide in the mud, which berries are safe. I translate the peace between Massasoit and their governor.',k:'I walk into the English camp and say hello in English! I teach them how to grow corn and where to find food, and I help them make peace with my people.',min:'all',e:'🌽',bg:'field',c:'The teacher'},
+  {t:'That autumn they hold a harvest feast. Ninety Wampanoag men come with five deer. You call it the first Thanksgiving. I was there. I was the reason it could happen.',k:'That fall they hold a big harvest feast. Ninety of my people come and bring five deer. You call it the first Thanksgiving. I was there!',min:'all',e:'🦃',bg:'gold',c:'Harvest, 1621'},
+  {t:'I will tell you the truth: I played politics. Standing between two peoples, I used what I knew for my own standing. Massasoit came to distrust me. Both sides needed me and neither fully trusted me. That is what living between worlds costs.',min:'scholar',e:'⚖️',bg:'ink',c:'Between worlds'},
+  {t:'November 1622. Guiding the English on a trading trip, I fall ill with a fever and die. Governor Bradford writes that I was a special instrument sent by God for their good. I would say: I was a man who lost everything and still chose to help. Decide for yourself what that means.',k:'In 1622 I get sick and die while helping the English on a trip. I was a man who lost everything and still chose to help. What do you think of that?',min:'all',e:'🕊️',bg:'dawn',c:'1622'}
+ ],
+ canon:[
+  {q:['kidnap','hunt','taken','spain','malaga','ship','captain'],a:'In 1614 Captain Thomas Hunt lured about twenty of us aboard to trade, then chained us below deck and sailed for Málaga, Spain, to sell us. Some Spanish friars took several of us in. I got out, and eventually to England.'},
+  {q:['english','language','london','learn','speak','england'],a:'I learned English in London, in the house of a merchant named John Slany. Every word of it. When I walked into the Plymouth camp years later and greeted them, they nearly fell over.'},
+  {q:['home','patuxet','village','sick','sickness','plague','empty','1619'],a:'It took five years to get home. In 1619 I walked into Patuxet and found it empty. A sickness had killed nearly everyone while I was gone. My village stood where Plymouth stands. Nobody was left to tell me their names.'},
+  {q:['corn','fish','plant','teach','food','eel','farm','survive'],a:'I showed them to plant corn with a fish buried under the seed, where to find eels in the mud, which plants to eat and which to leave alone. Simple things, if you grew up here. They had not.'},
+  {q:['pilgrim','plymouth','bradford','english','colonist','settler'],a:'The English landed on my empty village in the winter of 1620 and half of them died before spring. I walked into their camp in March 1621. Governor Bradford later called me a special instrument sent of God for their good. I was also a man with nowhere else to go.'},
+  {q:['massasoit','peace','treaty','translate','interpreter'],a:'I interpreted between Massasoit and the English governor and helped make the peace of 1621. Standing in the middle gave me influence. Massasoit came to distrust how I used it. Both sides needed me; neither fully trusted me.'},
+  {q:['thanksgiving','feast','harvest','deer','turkey'],a:'In the autumn of 1621 the English held a harvest feast. About ninety Wampanoag men came with five deer. You call it the first Thanksgiving. I was there. Without the corn I taught them, there would have been nothing to feast on.'},
+  {q:['wampanoag','people','tribe','nation','patuxet'],a:'I am Patuxet, one of the peoples of the Wampanoag. Our villages ran along the coast of what you call Massachusetts long before any ship arrived.'},
+  {q:['die','death','1622','fever'],a:'In November 1622 I was guiding the English on a trading trip around Cape Cod when a fever took me. I asked Bradford to pray that I might go to the Englishmen’s God in heaven. Make of that what you will.'},
+  {q:['trust','betray','politics','loyal','side'],a:'I played politics. I will not pretend otherwise. Between two peoples, I used what I knew to keep myself standing. Living between worlds costs something, and I paid it.'},
+  {q:['advice','lesson','why','help'],a:'I lost everything and still chose to help. You can decide whether that was wisdom, survival, or something else. I have had four hundred years to think about it and I still do not know.'}
+ ],
+ notKnow:['King Philip’s War','the United States','the modern Thanksgiving holiday'],
+ checks:{
+  mc:{q:'Why could Tisquantum speak English when he met the Plymouth colonists?',opts:['He had been kidnapped and lived in England for years','Massasoit taught him','The Pilgrims taught him that winter','He was born in England'],a:0,why:'After being kidnapped in 1614 and sold in Spain, he made it to London and learned English before finding a way home.'},
+  order:[['Kidnapped by Captain Hunt','1614'],['Returns to find Patuxet empty','1619'],['Walks into the Plymouth camp','spring 1621'],['The harvest feast','autumn 1621']],
+  ask:'You’re standing in the cornfield at Plymouth with Tisquantum. What would you ask him?'
+ }}
+};
+/* ===== PODPAST ENGINE ===== */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const RANKS=[[0,'Listener'],[40,'Time Traveler'],[110,'Historian'],[220,'Keeper of the Canon']];
+const KEY='podpast.v1';
+let S={band:'scholar',voice:1,xp:0,met:{},streak:{last:'',n:0},seen:false};
+try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function today(){return new Date().toISOString().slice(0,10);}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),1800);}
+function rank(){let r=RANKS[0][1];for(const [x,n] of RANKS)if(S.xp>=x)r=n;return r;}
+function nextRank(){for(const [x,n] of RANKS)if(S.xp<x)return `${x-S.xp} XP to ${n}`;return 'Top rank';}
+function addXP(n){S.xp+=n;save();hud();toast(`+${n} XP`);}
+function hud(){$$('#xp,#xp2').forEach(e=>e.textContent=S.xp+' XP');$('#streak').textContent='🔥 '+S.streak.n;$('#rank').textContent=`Rank: ${rank()} · ${nextRank()}`;}
+function show(id){$$('.screen').forEach(s=>s.classList.toggle('show',s.id===id));window.scrollTo(0,0);if(id!=='s-episode')stopVoice();}
+$$('[data-go]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.go)));
+function medal(f,cls){return `<div class="med ${cls||''}" style="--ring:${f.ring}">${f.emoji}</div>`;}
+function tierName(t){return t==='icon'?'Icon':t==='between'?'In-between':'Hidden gem';}
+
+/* ---- map ---- */
+function renderMap(){
+  const host=$('#eras');host.innerHTML='';
+  ERAS.forEach(e=>{
+    const d=document.createElement('div');d.className='era'+(e.open?'':' locked');
+    const metN=e.open?e.figs.filter(id=>S.met[id]).length:0;
+    d.innerHTML=`<div class="era-h"><span class="badge" style="font-size:11px">Era ${e.n}</span><div><div class="n">${e.name}</div><div class="y">${e.years}</div></div><span class="st">${e.open?metN+'/'+e.figs.length+' met':'LOCKED'}</span></div>`+
+      (e.open?`<div class="fig-list">${e.figs.map(id=>{const f=FIGURES[id];return `<button class="node ${S.met[id]?'met':''}" data-fig="${id}">${S.met[id]?'<span class="chk">✓</span>':''}${medal(f)}<span class="nm">${f.name}</span><span class="tier ${f.tier}">${tierName(f.tier)}</span></button>`;}).join('')}</div>`
+            :`<div class="peek">${e.peek}</div>`);
+    host.appendChild(d);
+  });
+  $$('[data-fig]').forEach(b=>b.addEventListener('click',()=>openFigure(b.dataset.fig)));
+  hud();
+}
+
+/* ---- figure ---- */
+let F=null;
+function openFigure(id){
+  F=FIGURES[id];
+  $('#figcard').innerHTML=`<div style="display:flex;justify-content:center">${medal(F,'big')}</div><span class="badge ${F.kind==='historical'?'':'legend'}" style="margin-top:12px">${F.kind==='historical'?tierName(F.tier):'Folk figure'}</span><div class="nm">${F.name}</div><div class="dt">${F.dates}</div><p class="hook">“${F.hook}”</p><p class="note">Aligned to: ${F.standard}</p>`;
+  $('#b-ask-direct').hidden=!S.met[id];
+  show('s-figure');
+}
+$('#b-meet').addEventListener('click',()=>startEpisode());
+$('#b-ask-direct').addEventListener('click',()=>openAsk(false));
+
+/* ---- episode player ---- */
+let beats=[],bi=0,playing=false,finished=false,timer=null,utt=null;
+const synthOK=('speechSynthesis' in window)&&('SpeechSynthesisUtterance' in window);
+function pickVoice(){
+  if(!synthOK)return null;
+  const vs=speechSynthesis.getVoices();
+  const pref=['Google UK English Male','Daniel','Google US English','Samantha','Alex','Microsoft David','Microsoft Mark'];
+  for(const p of pref){const v=vs.find(v=>v.name.includes(p));if(v)return v;}
+  return vs.find(v=>/^en/i.test(v.lang))||vs[0]||null;
+}
+if(synthOK){speechSynthesis.onvoiceschanged=()=>{};}
+function bandBeats(f){
+  const lvl={all:0,scholar:1,adult:2}, mine={explorer:0,scholar:1,adult:2}[S.band];
+  return f.beats.filter(b=>lvl[b.min]<=mine).map(b=>({...b,text:(S.band==='explorer'&&b.k)?b.k:b.t}));
+}
+function startEpisode(){
+  beats=bandBeats(F);bi=0;finished=false;
+  $('#swho').innerHTML=medal(F)+'<span>'+F.name+'</span>';
+  $('#b-to-checks').hidden=true;
+  $('#cap').className='caption'+(S.band==='explorer'?' kid':'');
+  $('#voicenote').textContent=S.voice?(synthOK?'Voice: your device’s built-in narrator (placeholder for the figure’s real voice).':'Voice unavailable on this device; captions advance automatically.'):'Captions only. Each beat advances automatically.';
+  showBeat(0);setPlaying(false);$('#cap').textContent='Press play to hear '+F.name.split(' ')[0]+' tell it.';
+  show('s-episode');
+}
+function showBeat(i){
+  bi=Math.max(0,Math.min(beats.length-1,i));const b=beats[bi];
+  const bg=$('#sbg');bg.style.setProperty('--sbg',BG[b.bg]||BG.ink);bg.classList.remove('kb');void bg.offsetWidth;bg.classList.add('kb');
+  $('#sem').textContent=b.e;$('#scap').textContent=b.c;$('#cap').textContent=b.text;
+  $('#pfill').style.width=((bi+1)/beats.length*100)+'%';
+}
+function setPlaying(p){playing=p;$('#b-play').textContent=p?'⏸ Pause':(finished?'↻ Replay':'▶ Play');$('#scene').classList.toggle('live',p);$('#onair').classList.toggle('live',p);}
+function stopVoice(){clearTimeout(timer);timer=null;if(synthOK){try{speechSynthesis.cancel();}catch(e){}}utt=null;}
+function playBeat(){
+  stopVoice();showBeat(bi);const b=beats[bi];
+  const done=()=>{if(!playing)return;if(bi<beats.length-1){bi++;playBeat();}else{finish();}};
+  const words=b.text.split(/\s+/).length, ms=Math.max(2500,words/2.6*1000);
+  if(S.voice&&synthOK){
+    utt=new SpeechSynthesisUtterance(b.text);const v=pickVoice();if(v)utt.voice=v;utt.rate=S.band==='explorer'?0.9:0.97;utt.pitch=1;
+    let ended=false;const end=()=>{if(ended)return;ended=true;clearTimeout(timer);setTimeout(done,350);};
+    utt.onend=end;utt.onerror=end;
+    timer=setTimeout(end,ms*1.8); // safety: some browsers never fire onend
+    try{speechSynthesis.speak(utt);}catch(e){end();}
+  }else{timer=setTimeout(done,ms);}
+}
+function finish(){setPlaying(false);finished=true;$('#b-to-checks').hidden=false;$('#cap').textContent='That’s the episode. Ready for three quick checks?';}
+$('#b-play').addEventListener('click',()=>{
+  if(playing){setPlaying(false);stopVoice();return;}
+  if(finished){finished=false;bi=0;}
+  if(synthOK){try{speechSynthesis.getVoices();}catch(e){}}
+  setPlaying(true);playBeat();
+});
+$('#b-next').addEventListener('click',()=>{if(bi>=beats.length-1){if(playing){finish();}return;}bi++;if(playing)playBeat();else showBeat(bi);});
+$('#b-prev').addEventListener('click',()=>{bi=Math.max(0,bi-1);if(playing)playBeat();else showBeat(bi);});
+$('#b-ep-back').addEventListener('click',()=>{stopVoice();setPlaying(false);show('s-figure');});
+$('#b-to-checks').addEventListener('click',()=>startChecks());
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing){setPlaying(false);stopVoice();}});
+
+/* ---- checks ---- */
+let ck=0,ckXP=0,orderPick=[];
+function startChecks(){ck=0;ckXP=0;renderCheck();show('s-checks');}
+function stepUI(){$('#ckhead').textContent=`Check ${ck+1} of 3`;[1,2,3].forEach(n=>$('#st'+n).classList.toggle('on',n<=ck+1));}
+function renderCheck(){
+  stepUI();const host=$('#ckbody');host.innerHTML='';
+  if(ck===0){
+    const m=F.checks.mc;
+    host.innerHTML=`<p class="eyebrow">Tap the answer</p><div class="q">${m.q}</div>`+m.opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')+`<div class="fb" id="fb"></div><button class="btn brass" id="ck-next" hidden>Next check →</button>`;
+    let tries=0;
+    $$('.opt').forEach(b=>b.addEventListener('click',()=>{
+      if(b.classList.contains('done'))return;tries++;
+      if(+b.dataset.i===m.a){$$('.opt').forEach(x=>x.classList.add('done'));b.classList.remove('done');b.classList.add('right');const pts=tries===1?15:8;ckXP+=pts;$('#fb').className='fb ok';$('#fb').textContent=`Right. ${m.why} (+${pts} XP)`;$('#ck-next').hidden=false;}
+      else{b.classList.add('wrong','done','shake');$('#fb').className='fb no';$('#fb').textContent='Not that one. Think back to the episode.';}
+    }));
+    $('#ck-next').addEventListener('click',()=>{ck=1;renderCheck();});
+  }else if(ck===1){
+    const items=F.checks.order.map((o,i)=>({label:o[0],year:o[1],i}));
+    const shuffled=items.slice().sort(()=>Math.random()-.5);
+    // guarantee not already in order
+    if(shuffled.every((x,k)=>x.i===k))shuffled.reverse();
+    orderPick=[];
+    host.innerHTML=`<p class="eyebrow">Put them in order</p><div class="q">Tap the events in the order they happened.</div><div id="ord">${shuffled.map(x=>`<button class="opt" data-i="${x.i}"><span class="k">?</span>${x.label}</button>`).join('')}</div><div class="fb" id="fb"></div><button class="btn brass" id="ck-next" hidden>Next check →</button>`;
+    let mistakes=0;
+    $$('#ord .opt').forEach(b=>b.addEventListener('click',()=>{
+      if(b.classList.contains('done'))return;
+      const want=orderPick.length;
+      if(+b.dataset.i===want){b.classList.add('pick','done');b.querySelector('.k').textContent=(want+1)+'. '+items[want].year;orderPick.push(want);
+        if(orderPick.length===items.length){const pts=mistakes===0?15:mistakes<3?10:6;ckXP+=pts;$('#fb').className='fb ok';$('#fb').textContent=`That’s the order. (+${pts} XP)`;$('#ck-next').hidden=false;}
+        else{$('#fb').className='fb';$('#fb').textContent='Good. What came next?';}}
+      else{mistakes++;b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),400);$('#fb').className='fb no';$('#fb').textContent='Not yet. Something happened before that.';}
+    }));
+    $('#ck-next').addEventListener('click',()=>{ck=2;renderCheck();});
+  }else{
+    host.innerHTML=`<p class="eyebrow">Your question</p><div class="q">${F.checks.ask}</div><textarea id="qbox" placeholder="Type a real question. There’s no wrong one, but a lazy one gets a lazy answer."></textarea><div class="fb" id="fb"></div><button class="btn" id="ck-ask">Ask ${F.name.split(' ')[0]}</button><div id="ans"></div><button class="btn brass" id="ck-fin" hidden>Finish episode ✓</button>`;
+    $('#ck-ask').addEventListener('click',()=>{
+      const q=$('#qbox').value.trim();
+      if(q.split(/\s+/).filter(Boolean).length<3){$('#fb').className='fb no';$('#fb').textContent='Give them a real question, at least a few words.';return;}
+      const a=answer(F,q);$('#ans').innerHTML=`<div class="bubble you"><b>You</b>${esc(q)}</div><div class="bubble"><b>${F.name}</b>${a.text}</div>`;
+      if(!$('#ck-fin').dataset.paid){const pts=a.hit?10:6;ckXP+=pts;$('#fb').className='fb ok';$('#fb').textContent=a.hit?`Good question, it hit the canon. (+${pts} XP)`:`Asked. (+${pts} XP)`;$('#ck-fin').dataset.paid='1';}
+      $('#ck-fin').hidden=false;$('#ck-ask').textContent='Ask another';$('#qbox').value='';
+    });
+    $('#ck-fin').addEventListener('click',()=>completeEpisode());
+  }
+}
+$('#b-ck-back').addEventListener('click',()=>show('s-episode'));
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+/* ---- canon-bound answers (offline retrieval; the guardrail shape live chat will reuse) ---- */
+function answer(f,q){
+  const t=q.toLowerCase();
+  const yr=(t.match(/\b(1[5-9]\d\d|20\d\d)\b/)||[])[1];
+  if(yr&&+yr>f.died)return {hit:false,text:`I died in ${f.died}. Whatever happened in ${yr} is beyond what I can tell you. Ask me about my own years and I’ll answer plainly.`};
+  const later=f.notKnow.find(n=>t.includes(n.toLowerCase().split(' ')[0])&&n.length>3&&t.includes(n.toLowerCase()));
+  if(later)return {hit:false,text:`${later[0].toUpperCase()+later.slice(1)} came after my time. I can only speak to what I lived.`};
+  let best=null,bs=0;
+  for(const c of f.canon){let s=0;for(const k of c.q)if(t.includes(k))s+=k.length>4?2:1;if(s>bs){bs=s;best=c;}}
+  if(best)return {hit:true,text:best.a};
+  if(/^(hi|hello|hey|shalom)\b/.test(t))return {hit:false,text:`Hello. I am ${f.name}, ${f.dates}. Ask me about my life; I answer only from what I actually did and said.`};
+  if(/how old|age|born|when were you/.test(t))return {hit:true,text:`I was born in ${f.born} and died in ${f.died}. ${f.hook}`};
+  const topics=f.canon.slice(0,3).map(c=>c.q[0]).join(', ');
+  return {hit:false,text:`I can’t answer that from my own life, and I won’t invent it. Try asking me about ${topics}.`};
+}
+
+/* ---- ask them (free chat, same retrieval) ---- */
+function openAsk(fromDone){
+  $('#askcard').innerHTML=`<div style="display:flex;gap:12px;align-items:center">${medal(F)}<div><div style="font:800 18px var(--display)">${F.name}</div><div class="dt" style="font:600 12px var(--mono);color:var(--dim)">${F.dates}</div></div></div>`;
+  $('#chat').innerHTML=`<div class="bubble"><b>${F.name}</b>Ask me anything about my life. I answer only from my own record, and I don’t know what happened after ${F.died}.</div>`;
+  $('#b-ask-done').textContent=fromDone?'Back to card':'Done';
+  show('s-ask');
+}
+$('#b-send').addEventListener('click',()=>{
+  const q=$('#askbox').value.trim();if(!q)return;
+  const a=answer(F,q);$('#chat').insertAdjacentHTML('beforeend',`<div class="bubble you"><b>You</b>${esc(q)}</div><div class="bubble"><b>${F.name}</b>${a.text}</div>`);
+  $('#askbox').value='';window.scrollTo(0,document.body.scrollHeight);
+});
+$('#b-ask-back').addEventListener('click',()=>show('s-figure'));
+$('#b-ask-done').addEventListener('click',()=>show('s-figure'));
+
+/* ---- completion, streak, share card ---- */
+function completeEpisode(){
+  const first=!S.met[F.id];
+  const base=first?20:8;const total=base+ckXP;
+  S.met[F.id]={date:today()};
+  const d=today();
+  if(S.streak.last!==d){const y=new Date(Date.now()-864e5).toISOString().slice(0,10);S.streak.n=(S.streak.last===y)?S.streak.n+1:1;S.streak.last=d;}
+  S.xp+=total;save();hud();
+  $('#dn-name').textContent=F.name;$('#dn-sub').textContent=first?'joins your Museum.':'again. Consistency counts.';
+  $('#dn-xp').textContent='+'+total;$('#dn-streak').textContent=S.streak.n;$('#dn-met').textContent=Object.keys(S.met).length;
+  drawCard();show('s-done');
+}
+function drawCard(){
+  const c=$('#card'),x=c.getContext('2d');const W=1080,H=1350;
+  x.fillStyle='#121419';x.fillRect(0,0,W,H);
+  const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#2b2f3d');g.addColorStop(1,'#121419');x.fillStyle=g;x.fillRect(0,0,W,H);
+  x.fillStyle='#D2482F';x.beginPath();x.arc(90,96,14,0,7);x.fill();
+  x.fillStyle='#F3EEE3';x.font='600 34px "IBM Plex Mono",monospace';x.fillText('PODPAST',122,109);
+  x.textAlign='center';
+  x.beginPath();x.arc(W/2,470,190,0,7);x.fillStyle='#1B1F28';x.fill();x.lineWidth=14;x.strokeStyle=F.ring;x.stroke();
+  x.font='200px serif';x.fillStyle='#fff';x.fillText(F.emoji,W/2,545);
+  x.fillStyle='#A8A294';x.font='700 30px "IBM Plex Mono",monospace';x.fillText('I JUST MET',W/2,740);
+  x.fillStyle='#F3EEE3';x.font='800 80px "Bricolage Grotesque","Trebuchet MS",sans-serif';
+  const nm=F.name.replace(/\s*\(.*\)/,'');x.fillText(nm,W/2,830);
+  x.fillStyle='#E1AE48';x.font='600 34px "IBM Plex Mono",monospace';x.fillText(F.dates,W/2,885);
+  x.fillStyle='#F3EEE3';x.font='italic 400 38px "Nunito",sans-serif';wrap(x,'“'+F.hook+'”',W/2,980,900,50);
+  x.fillStyle='#A8A294';x.font='700 30px "IBM Plex Mono",monospace';x.fillText(`${S.xp} XP · 🔥 ${S.streak.n} day streak · ${Object.keys(S.met).length} figures met`,W/2,1200);
+  x.fillStyle='#D2482F';x.font='800 36px "Bricolage Grotesque",sans-serif';x.fillText('History, told by the people who lived it · podpast.dev',W/2,1275);
+}
+function wrap(x,text,cx,y,maxW,lh){const words=text.split(' ');let line='';for(const w of words){const t=line+w+' ';if(x.measureText(t).width>maxW&&line){x.fillText(line.trim(),cx,y);line=w+' ';y+=lh;}else line=t;}x.fillText(line.trim(),cx,y);}
+$('#b-share').addEventListener('click',async()=>{
+  const text=`I just met ${F.name} on Podpast. “${F.hook}” History, told by the people who lived it → podpast.dev`;
+  try{if(navigator.share){await navigator.share({title:'Podpast',text});return;}}catch(e){}
+  try{await navigator.clipboard.writeText(text);toast('Copied to clipboard');}catch(e){toast('Share text ready above');}
+});
+
+/* ---- museum ---- */
+$('#b-museum').addEventListener('click',()=>{
+  const host=$('#mus');host.innerHTML=Object.values(FIGURES).map(f=>`<div class="node ${S.met[f.id]?'met':'ghost'}">${medal(f)}<span class="nm">${f.name.split(' (')[0]}</span><span class="tier">${S.met[f.id]?'met '+S.met[f.id].date.slice(5):'not yet'}</span></div>`).join('');
+  show('s-museum');
+});
+
+/* ---- settings ---- */
+function renderSettings(){
+  $$('#bandseg button').forEach(b=>b.classList.toggle('on',b.dataset.band===S.band));
+  $$('#voiceseg button').forEach(b=>b.classList.toggle('on',+b.dataset.voice===S.voice));
+  $('#voiceinfo').textContent=synthOK?'Uses the narrator voice built into your phone or browser. Real per-figure voices (ElevenLabs) and Higgsfield portraits arrive in Phase 1.':'This browser has no built-in narrator; captions advance on a timer.';
+}
+$('#b-settings').addEventListener('click',()=>{renderSettings();show('s-settings');});
+$$('#bandseg button').forEach(b=>b.addEventListener('click',()=>{S.band=b.dataset.band;save();renderSettings();toast('Mode: '+b.dataset.band);}));
+$$('#voiceseg button').forEach(b=>b.addEventListener('click',()=>{S.voice=+b.dataset.voice;save();renderSettings();}));
+$('#b-reset').addEventListener('click',()=>{if(!confirm('Reset XP, streak and museum?'))return;S={band:S.band,voice:S.voice,xp:0,met:{},streak:{last:'',n:0},seen:true};save();renderMap();toast('Reset');});
+
+/* ---- boot ---- */
+renderMap();
+if(!S.seen){S.seen=true;save();}
+</script></body></html>
