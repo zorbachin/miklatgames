@@ -216,6 +216,18 @@
       </div>
     </a>
 
+    <a class="featured split gold" href="aliyah/" id="featAliyah">
+      <div class="split-media">
+        <img class="feat-vid" src="assets/aliyah-cover.svg" alt="ALIYAH: THE ADVENTURE cover" loading="lazy">
+      </div>
+      <div class="split-body">
+        <span class="split-tag" data-i18n="newTag">🔨 NEW</span>
+        <div class="feat-ttl"><span class="name">Aliyah: The Adventure</span><span class="name-he">עלייה: ההרפתקה</span></div>
+        <div class="feat-hook" data-i18n="aliyahHook">Become the hero of your own Aliyah. Find the documents, survive the shaliach, out-rally Savta at matkot, reach the Kotel before sunset. 10 missions, city by city.</div>
+        <span class="feat-play gold" data-i18n="playNow">▶ PLAY NOW</span>
+      </div>
+    </a>
+
     <a class="featured split gold" href="whackamullah/" id="featWhack">
       <div class="split-media">
         <video class="feat-vid" src="whackamullah/promo.mp4" poster="whackamullah/cover.png"
@@ -312,6 +324,7 @@ const I18N={
   featured:'★ FEATURED',playNow:'▶ PLAY NOW',newTag:'🔨 NEW',
   mamadHook:'Outrun the siren. Jump the savtas, duck the doves, reach the mamad before the boom.',
   ironHook:'Tap the rockets out of the sky. 10 cities, Sderot to Eilat. Works offline in the mamad.',
+  aliyahHook:'Become the hero of your own Aliyah. Find the documents, survive the shaliach, out-rally Savta at matkot, reach the Kotel before sunset. 10 missions, city by city.',
   shukHook:"Friday rush. Swipe through the stalls, fill Ima's list, outrun the vendor before Shabbat closes the shuk.",
   diggerHook:"Dig a mamad under your building — every meter down is 3,000 years of history. Brush finds clean before the Inspector whistles. Runs on coffee.",
   newGame:'🆕 New door',
@@ -330,6 +343,7 @@ const I18N={
   featured:'★ מומלץ',playNow:'▶ שחקו עכשיו',newTag:'🔨 חדש',
   mamadHook:'רוצו לממ״ד לפני הבום. קופצים מעל הסבתות, מתכופפים מתחת ליונים.',
   ironHook:'מיירטים רקטות עם האצבע. עשרה שלבים משדרות ועד אילת. עובד בלי קליטה.',
+  aliyahHook:'הפכו לגיבורי העלייה שלכם. מצאו את המסמכים, שרדו את השליח, נצחו את סבתא במטקות, הגיעו לכותל לפני השקיעה. 10 משימות, עיר אחרי עיר.',
   shukHook:'שישי בצהריים. מחליקים בין הדוכנים, ממלאים את הרשימה של אמא, ובורחים מהמוכר לפני שהשוק נסגר.',
   diggerHook:'חופרים ממ"ד מתחת לבניין — כל מטר למטה הוא 3,000 שנות היסטוריה. שפשפו את הממצאים לפני שהפקחית שורקת. עובד על קפה.',
   newGame:'🆕 דלת חדשה',
@@ -416,6 +430,7 @@ if(TIP_URL){const tj=document.getElementById('tipJar');tj.href=TIP_URL;
 document.getElementById('featMamad').addEventListener('click',()=>track('play-mamaddash'));
 document.getElementById('featWhack').addEventListener('click',()=>track('play-whackamullah'));
 document.getElementById('featured').addEventListener('click',()=>track('play-irondome'));
+document.getElementById('featAliyah').addEventListener('click',()=>track('play-aliyah'));
 
 /* ---- CrazyGames-style video: desktop only, lazy-loaded, so phones on no/low
    signal never pay the data cost (core "works in the shelter" promise) ---- */

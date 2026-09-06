@@ -1,0 +1,13 @@
+{
+  "name": "ALIYAH: THE ADVENTURE",
+  "short_name": "ALIYAH",
+  "description": "Become the hero of your own Aliyah. Ten missions, one suitcase, city by city.",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1120",
+  "theme_color": "#0d1120",
+  "icons": [
+    { "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230d1120'/><text x='50' y='68' font-size='60' text-anchor='middle'>🧳</text></svg>", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
