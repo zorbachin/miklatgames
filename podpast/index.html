@@ -73,6 +73,39 @@ button:focus-visible,a:focus-visible,textarea:focus-visible,select:focus-visible
 .tier.icon{color:var(--brass)}.tier.between{color:var(--sea)}.tier.gem{color:#F0917B}
 .med{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;background:radial-gradient(circle at 35% 30%,#3a4152,#1b1f28);border:3px solid var(--ring,#555)}
 .med.big{width:120px;height:120px;font-size:54px;border-width:5px}
+/* intro slides */
+.slide{position:relative;flex:1;min-height:100vh;min-height:100dvh;overflow:hidden;background:#0b0d12}
+.slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:heroin 1.4s var(--ease) both}
+.slide-fade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,20,25,.2) 0%,rgba(18,20,25,0) 30%,rgba(18,20,25,.86) 62%,var(--bg) 100%)}
+.slide-txt{position:absolute;left:18px;right:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);z-index:2}
+.sl-p{font-size:17px;line-height:1.5;margin-top:12px;color:var(--ink);text-shadow:0 1px 12px rgba(0,0,0,.7);text-wrap:pretty}
+.dots{display:flex;gap:6px;margin:16px 0 4px}
+.dots i{width:22px;height:5px;border-radius:3px;background:rgba(243,238,227,.25)}
+.dots i.on{background:var(--brass)}
+#introband{margin-top:14px}
+#introband button{background:rgba(18,20,25,.6);backdrop-filter:blur(6px)}
+/* mission */
+.mission{margin-top:12px;border:1px solid rgba(225,174,72,.45);border-radius:16px;background:linear-gradient(180deg,rgba(225,174,72,.12),var(--panel));padding:14px;position:relative;overflow:hidden}
+.mission .mh{display:flex;align-items:center;gap:12px}
+.mission .med{width:56px;height:56px;flex:none}
+.mission .mt{font:800 18px/1.15 var(--display)}
+.mission .ms{font:600 11px var(--mono);color:var(--dim);letter-spacing:.06em;margin-top:4px;text-transform:uppercase}
+.mission .btn{margin-top:12px}
+.mission .prog{display:flex;gap:14px;margin-top:12px;font:700 12px var(--mono);color:var(--dim)}
+.mission .prog b{color:var(--brass)}
+.stamps{display:grid;grid-template-columns:repeat(9,1fr);gap:5px;margin-top:10px;max-width:320px}
+.stamps i{aspect-ratio:1;border-radius:50%;border:1.5px dashed rgba(225,174,72,.35);display:flex;align-items:center;justify-content:center;font-size:12px;font-style:normal}
+.stamps i.on{border:2px solid var(--wax);background:var(--wax-soft);transform:rotate(-8deg)}
+.stamps.big{margin:14px auto 0}
+.mission.done{border-color:var(--ok)}
+.goal{font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--brass);margin-right:8px;white-space:nowrap}
+/* clue chip */
+.clue{position:absolute;left:12px;right:12px;bottom:52px;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:rgba(225,174,72,.95);color:#1a1405;font:800 14px var(--display);text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.45);animation:cluein .35s var(--ease) both,cluepulse 1.4s ease-in-out .4s infinite}
+.clue small{display:block;font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+.clue.got{background:var(--ok);color:#0b1a10;animation:none}
+@keyframes cluein{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+@keyframes cluepulse{50%{transform:scale(1.025)}}
+@media (prefers-reduced-motion:reduce){.clue{animation:none}}
 /* figure hero */
 .hero{position:relative;height:min(66vh,600px);min-height:420px;overflow:hidden;background:#0b0d12}
 .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 18%;transform:scale(1.02);animation:heroin 1.2s var(--ease) both}
@@ -210,6 +243,9 @@ textarea{width:100%;min-height:86px;background:var(--panel-2);border:1px solid v
 #board .tok .ring{fill:#1B1F28;stroke-width:2.2;transition:stroke-width .15s}
 #board .tok.sel .ring{stroke-width:3.5;filter:drop-shadow(0 0 4px rgba(225,174,72,.8))}
 #board .tok.met .ring{stroke:#5CBF82}
+#board .tok.next .ring{stroke:#E1AE48;stroke-width:3.5;filter:drop-shadow(0 0 6px rgba(225,174,72,.95));animation:tokpulse 1.6s ease-in-out infinite}
+@keyframes tokpulse{50%{stroke-width:2.2;filter:drop-shadow(0 0 2px rgba(225,174,72,.5))}}
+@media (prefers-reduced-motion:reduce){#board .tok.next .ring{animation:none}}
 #board .tok .nm{font-size:8px;font-weight:700;fill:#F3EEE3;text-anchor:middle;paint-order:stroke;stroke:#0f2e36;stroke-width:2.6;stroke-linejoin:round}
 #board .tok .chk{font-size:9px;fill:#5CBF82;text-anchor:middle;paint-order:stroke;stroke:#0f2e36;stroke-width:2}
 #board .trk{cursor:pointer}
@@ -239,6 +275,21 @@ h2.ledger{font:800 20px/1.1 var(--display);margin-top:22px}
 <body>
 <div class="app">
 
+<section class="screen" id="s-intro">
+  <div class="slide" id="slide">
+    <img id="slideimg" alt="">
+    <div class="slide-fade"></div>
+    <div class="slide-txt">
+      <p class="eyebrow" id="sl-eye"></p>
+      <h1 class="hero-nm" id="sl-h"></h1>
+      <p class="sl-p" id="sl-p"></p>
+      <div class="seg" id="introband" hidden><button data-band="explorer">Explorer<br><small>ages 6–9</small></button><button data-band="scholar" class="on">Scholar<br><small>ages 10–13</small></button><button data-band="adult">Adult</button></div>
+      <div class="dots" id="dots"><i class="on"></i><i></i><i></i></div>
+      <button class="btn" id="sl-next">Next →</button>
+    </div>
+  </div>
+</section>
+
 <section class="screen show" id="s-map">
   <div class="top">
     <span class="onair"><i></i>Podpast</span>
@@ -251,7 +302,7 @@ h2.ledger{font:800 20px/1.1 var(--display);margin-top:22px}
   <div class="body">
     <div class="wordmark">Pod<em>past</em></div>
     <p class="sub">History, told by the people who lived it. Pick a figure, hear their story, then ask them anything.</p>
-    <p class="note" id="rank"></p>
+    <div class="mission" id="mission"></div>
     <div class="board">
       <div class="board-h"><span class="eyebrow">World board</span><span class="t" id="board-t">Atlantic · Era 1</span>
         <div class="seg"><button class="on" data-view="atl">Atlantic</button><button data-view="world">World</button></div></div>
@@ -286,7 +337,7 @@ h2.ledger{font:800 20px/1.1 var(--display);margin-top:22px}
 </section>
 
 <section class="screen" id="s-episode">
-  <div class="top"><button class="tbtn" id="b-ep-back">← Back</button><span class="grow"></span><span class="onair" id="onair"><i></i>Episode</span></div>
+  <div class="top"><button class="tbtn" id="b-ep-back">← Back</button><span class="grow"></span><span class="goal" id="epgoal"></span><span class="onair" id="onair"><i></i>Episode</span></div>
   <div class="body">
     <div class="scene" id="scene">
       <div class="bg kb" id="sbg"></div>
@@ -294,6 +345,7 @@ h2.ledger{font:800 20px/1.1 var(--display);margin-top:22px}
       <div class="em" id="sem">🎙️</div>
       <div class="cap" id="scap">Episode</div>
       <div class="wave" id="wave"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <button class="clue" id="clue" hidden></button>
       <div class="who" id="swho"></div>
     </div>
     <div class="caption" id="cap">Press play.</div>
@@ -333,6 +385,7 @@ h2.ledger{font:800 20px/1.1 var(--display);margin-top:22px}
     <p class="eyebrow">Episode complete</p>
     <div class="big" id="dn-name"></div>
     <p class="sub" id="dn-sub"></p>
+    <div class="stamps big" id="dn-stamps"></div>
     <div class="stat"><div><b id="dn-xp">+0</b><span>XP earned</span></div><div><b id="dn-streak">1</b><span>day streak</span></div><div><b id="dn-met">1</b><span>figures met</span></div></div>
     <canvas id="card" width="1080" height="1350" aria-label="Share card"></canvas>
     <div class="row"><button class="btn" id="b-share">📣 Share</button><button class="btn sec" data-go="s-map">Next figure →</button></div>
@@ -391,7 +444,7 @@ const BG={
   dusk:'linear-gradient(160deg,#4d2f3f,#170f14)', dawn:'linear-gradient(160deg,#5a4a2e,#1a1610)'
 };
 const ERAS=[
-  {n:1,name:'Colonial & Founding',years:'1600–1789',open:true,figs:['franklin','washington','abigail','phillis','salomon','tisquantum']},
+  {n:1,name:'Colonial & Founding',years:'1600–1789',open:true,figs:['franklin','washington','abigail','phillis','salomon','tisquantum'],route:['tisquantum','franklin','phillis','abigail','salomon','washington']},
   {n:2,name:'Early Republic & Expansion',years:'1790–1850',figs:['jefferson','sacagawea','tecumseh','dolley','gratz','york']},
   {n:3,name:'Civil War & Reconstruction',years:'1850–1877',figs:['lincoln','tubman','douglass','barton','smalls','keckley']},
   {n:4,name:'Gilded Age & Immigration',years:'1877–1914',figs:['edison','twain','lazarus','tesla','wells','latimer']},
@@ -412,6 +465,9 @@ const ROSTER={
  appleseed:{name:'Johnny Appleseed',tier:'icon',kind:'folk'},oakley:{name:'Annie Oakley',tier:'icon',kind:'folk'},johnhenry:{name:'John Henry',short:'John Henry',tier:'between',kind:'folk'},caseyjones:{name:'Casey Jones',short:'Casey Jones',tier:'between',kind:'folk'},bunyan:{name:'Paul Bunyan',tier:'gem',kind:'folk'},pecosbill:{name:'Pecos Bill',short:'Pecos Bill',tier:'gem',kind:'folk'},
  herzl:{name:'Theodor Herzl',tier:'icon'},benyehuda:{name:'Eliezer Ben-Yehuda',tier:'icon'},rachel:{name:'Rachel Bluwstein',short:'Rachel',tier:'between'},szenes:{name:'Hannah Szenes',tier:'between'},aaronsohn:{name:'Sarah Aaronsohn',tier:'gem'},trumpeldor:{name:'Yosef Trumpeldor',tier:'gem'}
 };
+/* clues: beat index for each of the three journey clues; every clue beat is min:'all' so every band can catch it */
+const CLUES={franklin:{where:0,known:5,hard:7},washington:{where:0,known:6,hard:3},abigail:{where:0,known:4,hard:3},phillis:{where:0,known:4,hard:1},salomon:{where:0,known:5,hard:2},tisquantum:{where:0,known:6,hard:1}};
+const CLUE_META={where:{l:'Where & when',e:'🧭'},known:{l:'Known for',e:'🔏'},hard:{l:'The hard part',e:'📜'}};
 /* beat: {t:text, k:kid-simplified (optional), min:'all'|'scholar'|'adult', e:emoji, bg:key, c:caption} */
 const FIGURES={
 franklin:{id:'franklin',name:'Benjamin Franklin',dates:'1706–1790',born:1706,died:1790,tier:'icon',kind:'historical',emoji:'🪁',ring:'#E1AE48',
@@ -672,7 +728,7 @@ const LAND="M334.5,482.3L333.7,483.8L332.9,485.0L327.1,484.6L320.9,484.8L317.4,4
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 const RANKS=[[0,'Listener'],[40,'Time Traveler'],[110,'Historian'],[220,'Keeper of the Canon']];
 const KEY='podpast.v1';
-let S={band:'scholar',voice:1,xp:0,met:{},streak:{last:'',n:0},seen:false};
+let S={band:'scholar',voice:1,xp:0,met:{},clues:{},streak:{last:'',n:0},seen:false,intro:false};
 try{const raw=localStorage.getItem(KEY);if(raw)S=Object.assign(S,JSON.parse(raw));}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function today(){return new Date().toISOString().slice(0,10);}
@@ -680,7 +736,7 @@ function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');cl
 function rank(){let r=RANKS[0][1];for(const [x,n] of RANKS)if(S.xp>=x)r=n;return r;}
 function nextRank(){for(const [x,n] of RANKS)if(S.xp<x)return `${x-S.xp} XP to ${n}`;return 'Top rank';}
 function addXP(n){S.xp+=n;save();hud();toast(`+${n} XP`);}
-function hud(){$$('#xp,#xp2').forEach(e=>e.textContent=S.xp+' XP');$('#streak').textContent='🔥 '+S.streak.n;$('#rank').textContent=`Rank: ${rank()} · ${nextRank()}`;}
+function hud(){$$('#xp,#xp2').forEach(e=>e.textContent=S.xp+' XP');$('#streak').textContent='🔥 '+S.streak.n;}
 function show(id){$$('.screen').forEach(s=>s.classList.toggle('show',s.id===id));window.scrollTo(0,0);if(id!=='s-episode')stopVoice();if(id==='s-map'&&show.dirty){show.dirty=false;renderMap();renderBoard();}}
 $$('[data-go]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.go)));
 const TIER_RING={icon:'#E1AE48',between:'#3E9C93',gem:'#F0917B'};
@@ -690,7 +746,21 @@ const PIMG={};if(typeof PORTRAITS!=='undefined')for(const k in PORTRAITS){const 
 function tierName(t){return t==='icon'?'Icon':t==='between'?'In-between':'Hidden gem';}
 
 /* ---- map ---- */
+const ROUTE=ERAS[0].route;
+function clueCount(id){return (S.clues[id]||[]).filter(Boolean).length;}
+function totalClues(){return ROUTE.reduce((n,id)=>n+clueCount(id),0);}
+function nextStop(){return ROUTE.find(id=>!S.met[id]||clueCount(id)<3)||null;}
+function stampGrid(cls){return `<div class="stamps ${cls||''}">${ROUTE.map(id=>[0,1,2].map(k=>`<i class="${(S.clues[id]||[])[k]?'on':''}">${(S.clues[id]||[])[k]?CLUE_META[Object.keys(CLUE_META)[k]].e:''}</i>`).join('')).join('')}</div>`;}
+function renderMission(){
+  const host=$('#mission');const nxt=nextStop();const met=ROUTE.filter(id=>S.met[id]).length;const cl=totalClues();
+  if(!nxt){host.className='mission done';host.innerHTML=`<div class="mh"><div class="med" style="--ring:var(--ok);font-size:26px">🏁</div><div><div class="mt">Era 1 complete</div><div class="ms">18 of 18 clues · the Era 2 door opens when its episodes ship</div></div></div>${stampGrid()}`;return;}
+  const f=FIGURES[nxt];const stop=ROUTE.indexOf(nxt)+1;const home=PLACE_NAME[TOKENS.find(t=>t.fig===nxt).at];
+  host.className='mission';
+  host.innerHTML=`<p class="eyebrow">Your mission · Era 1</p><div class="mh" style="margin-top:8px">${medal(f)}<div><div class="mt">Stop ${stop} of 6: ${f.name}</div><div class="ms">${home} · ${f.dates}${clueCount(nxt)?' · '+clueCount(nxt)+'/3 clues':''}</div></div></div><div class="prog"><span>Stops <b>${met}/6</b></span><span>Clues <b>${cl}/18</b></span><span>Rank <b>${rank()}</b></span></div>${stampGrid()}<button class="btn" id="m-go">${S.met[nxt]?'Catch the missing clues →':(stop===1?'Start the journey →':'Continue →')}</button>`;
+  $('#m-go').addEventListener('click',()=>openFigure(nxt));
+}
 function renderMap(){
+  renderMission();
   const host=$('#eras');host.innerHTML='';
   ERAS.forEach(e=>{
     const d=document.createElement('div');d.className='era'+(e.open?'':' locked');
@@ -769,7 +839,8 @@ function startEpisode(){
   $('#b-to-checks').hidden=true;
   $('#cap').className='caption'+(S.band==='explorer'?' kid':'');
   voiceNote();
-  showBeat(0);setPlaying(false);$('#cap').textContent='Press play to hear '+F.name.split(' ')[0]+' tell it.';
+  $('#epgoal').textContent=`Stop ${ROUTE.indexOf(F.id)+1}/6 · ${clueCount(F.id)}/3 clues`;
+  showBeat(0);setPlaying(false);$('#cap').textContent='Press play to hear '+F.name.split(' ')[0]+' tell it. Catch the three clues as they appear.';
   show('s-episode');
 }
 function showBeat(i){
@@ -779,7 +850,15 @@ function showBeat(i){
   if(sc){im.src=sc;im.hidden=false;im.classList.remove('kb');void im.offsetWidth;im.classList.add('kb');$('#sem').hidden=true;}else{im.hidden=true;im.removeAttribute('src');$('#sem').hidden=false;}
   $('#sem').textContent=b.e;$('#scap').textContent=b.c;$('#cap').textContent=b.text;
   $('#pfill').style.width=((bi+1)/beats.length*100)+'%';
+  const ck=clueKeyFor(F.id,b.i);const chip=$('#clue');
+  if(ck){const got=!!(S.clues[F.id]||[])[CLUE_IDX[ck]];chip.hidden=false;chip.className='clue'+(got?' got':'');chip.dataset.key=ck;chip.innerHTML=`<span style="font-size:22px">${CLUE_META[ck].e}</span><span><small>${got?'Clue caught':'Clue · tap to catch'}</small>${CLUE_META[ck].l}</span>`;}
+  else chip.hidden=true;
 }
+const CLUE_IDX={where:0,known:1,hard:2};
+function clueKeyFor(fid,beatIndex){const c=CLUES[fid];if(!c)return null;for(const k in c)if(c[k]===beatIndex)return k;return null;}
+$('#clue').addEventListener('click',()=>{const chip=$('#clue');const k=chip.dataset.key;if(!k||chip.classList.contains('got'))return;
+  S.clues[F.id]=S.clues[F.id]||[false,false,false];S.clues[F.id][CLUE_IDX[k]]=true;save();show.dirty=true;
+  chip.classList.add('got');chip.querySelector('small').textContent='Clue caught';$('#epgoal').textContent=`Stop ${ROUTE.indexOf(F.id)+1}/6 · ${clueCount(F.id)}/3 clues`;addXP(5);track('clue');});
 function setPlaying(p){playing=p;$('#b-play').textContent=p?'⏸ Pause':(finished?'↻ Replay':'▶ Play');$('#scene').classList.toggle('live',p);$('#onair').classList.toggle('live',p);}
 function stopVoice(){clearTimeout(timer);timer=null;if(synthOK){try{speechSynthesis.cancel();}catch(e){}}utt=null;if(aud){try{aud.onended=aud.onerror=null;aud.pause();aud.src='';}catch(e){}aud=null;}}
 function playBeat(){
@@ -806,7 +885,11 @@ function playBeat(){
     try{speechSynthesis.speak(utt);}catch(e){end();}
   }else{timer=setTimeout(done,ms);}
 }
-function finish(){setPlaying(false);finished=true;$('#b-to-checks').hidden=false;$('#cap').textContent='That’s the episode. Ready for three quick checks?';}
+function finish(){setPlaying(false);finished=true;$('#b-to-checks').hidden=false;$('#clue').hidden=true;
+  const missing=Object.keys(CLUES[F.id]||{}).filter(k=>!(S.clues[F.id]||[])[CLUE_IDX[k]]);
+  if(missing.length){$('#cap').innerHTML=`That’s the episode. You missed ${missing.length} clue${missing.length>1?'s':''}: `+missing.map(k=>`<button class="tbtn on" data-jump="${CLUES[F.id][k]}" style="margin:4px 4px 0 0">${CLUE_META[k].e} ${CLUE_META[k].l}</button>`).join('')+` <span class="note" style="display:block">Tap one to jump back and catch it, or take the checks now.</span>`;
+    $$('[data-jump]').forEach(b=>b.addEventListener('click',()=>{finished=false;const idx=beats.findIndex(x=>x.i===+b.dataset.jump);showBeat(idx<0?0:idx);setPlaying(true);playBeat();}));}
+  else $('#cap').textContent='All three clues caught. Ready for three quick checks?';}
 $('#b-play').addEventListener('click',()=>{
   if(playing){setPlaying(false);stopVoice();return;}
   if(finished){finished=false;bi=0;}
@@ -910,6 +993,7 @@ function completeEpisode(){
   S.xp+=total;save();hud();show.dirty=true;
   $('#dn-name').textContent=F.name;$('#dn-sub').textContent=first?'joins your Museum.':'again. Consistency counts.';
   $('#dn-xp').textContent='+'+total;$('#dn-streak').textContent=S.streak.n;$('#dn-met').textContent=Object.keys(S.met).length;
+  $('#dn-stamps').innerHTML=stampGrid('big');
   drawCard();show('s-done');
 }
 function drawCard(){
@@ -953,7 +1037,7 @@ function renderSettings(){
 $('#b-settings').addEventListener('click',()=>{renderSettings();show('s-settings');});
 $$('#bandseg button').forEach(b=>b.addEventListener('click',()=>{S.band=b.dataset.band;save();renderSettings();toast('Mode: '+b.dataset.band);}));
 $$('#voiceseg button').forEach(b=>b.addEventListener('click',()=>{S.voice=+b.dataset.voice;save();renderSettings();}));
-$('#b-reset').addEventListener('click',()=>{if(!confirm('Reset XP, streak and museum?'))return;S={band:S.band,voice:S.voice,xp:0,met:{},streak:{last:'',n:0},seen:true};save();renderMap();renderBoard();toast('Reset');});
+$('#b-reset').addEventListener('click',()=>{if(!confirm('Reset XP, streak and museum?'))return;S={band:S.band,voice:S.voice,xp:0,met:{},clues:{},streak:{last:'',n:0},seen:true,intro:true};save();renderMap();renderBoard();toast('Reset');});
 
 /* ---- world board ---- */
 const NS='http://www.w3.org/2000/svg';
@@ -993,6 +1077,7 @@ function renderBoard(){
     else tok.appendChild(el('text',{x:t.x,y:t.y+5,'text-anchor':'middle','font-size':'14'},f.emoji));
     tok.appendChild(el('text',{class:'nm',x:t.x,y:t.y+25},f.name.replace(/\s*\(.*\)/,'').split(' ').slice(-1)[0]));
     if(S.met[t.fig])tok.appendChild(el('text',{class:'chk',x:t.x+11,y:t.y-9},'✓'));
+    if(t.fig===nextStop())tok.classList.add('next');
     tok.addEventListener('click',()=>selectTok(t.fig));tok.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectTok(t.fig);}});
     E1.appendChild(tok);}
   svg.appendChild(E1);
@@ -1016,7 +1101,7 @@ function selectTok(id){selTok=(selTok===id)?null:id;$$('#board .tok').forEach(t=
 function renderStrip(){
   const s=$('#strip');
   if(view==='world'){s.innerHTML=`<div><div class="n">One board, every track</div><div class="hint">American track is open (Era 1 of 8). Israel is next. Tap the dashed frame to zoom back in.</div></div>`;return;}
-  if(!selTok){s.innerHTML=`<div><div class="n">Tap a portrait to select</div><div class="hint">Dotted lines are their real journeys. Tokens fan out from their home city.</div></div>`;return;}
+  if(!selTok){const n=nextStop();s.innerHTML=`<div><div class="n">${n?'Your next stop glows':'Every stop done'}</div><div class="hint">${n?'Tap '+FIGURES[n].name.split(' ').slice(-1)[0]+' to continue the journey, or any portrait to explore. Dotted lines are their real journeys.':'Replay any portrait. Dotted lines are their real journeys.'}</div></div>`;return;}
   const f=FIGURES[selTok];const home=PLACE_NAME[TOKENS.find(t=>t.fig===selTok).at];
   s.innerHTML=`${medal(f)}<div><div class="n">${f.name}</div><div class="s">${tierName(f.tier).toUpperCase()} · ${home.toUpperCase()} · ${f.dates}${S.met[selTok]?' · MET ✓':''}</div></div><button class="btn" id="strip-go">${S.met[selTok]?'Again →':'Meet →'}</button>`;
   $('#strip-go').addEventListener('click',()=>openFigure(selTok));
@@ -1036,8 +1121,20 @@ function applyView(animate){
 function setView(v){if(view===v)return;view=v;if(v==='world'){selTok=null;$$('#board .tok.sel,#board .route.on').forEach(x=>x.classList.remove('sel','on'));}applyView(true);renderStrip();}
 $$('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 
+/* ---- intro ---- */
+const SLIDES=[
+ {eye:'Podpast',h:'History, told by the people who lived it.',p:'You’re about to meet six people who built a country, in their own voices. Then you’ll ask them anything.',img:()=>typeof MAP_PLATE!=='undefined'?MAP_PLATE:''},
+ {eye:'Your mission',h:'Six stops. Eighteen clues.',p:'Travel the Atlantic of 1776 as a printer’s apprentice carrying letters. At each stop, listen, catch three clues, and pass their test. Eighteen clues open the next era.',img:()=>(typeof SCENES!=='undefined'&&SCENES.washington&&SCENES.washington[3])||''},
+ {eye:'One more thing',h:'Who’s listening?',p:'Explorer keeps it short and simple. Scholar adds the context. Adult adds the hard parts. Change it any time in settings.',img:()=>(typeof SCENES!=='undefined'&&SCENES.franklin&&SCENES.franklin[1])||'',band:true}
+];
+let si=0;
+function renderSlide(){const s=SLIDES[si];$('#sl-eye').textContent=s.eye;$('#sl-h').textContent=s.h;$('#sl-p').textContent=s.p;const im=$('#slideimg');const src=s.img();if(src){im.src=src;im.hidden=false;}else im.hidden=true;
+  $('#introband').hidden=!s.band;$$('#dots i').forEach((d,i)=>d.classList.toggle('on',i<=si));$('#sl-next').textContent=s.band?'Start the journey →':'Next →';}
+$('#sl-next').addEventListener('click',()=>{if(si<SLIDES.length-1){si++;renderSlide();return;}S.intro=true;save();track('intro_done');renderMap();renderBoard();show('s-map');});
+$$('#introband button').forEach(b=>b.addEventListener('click',()=>{S.band=b.dataset.band;save();$$('#introband button').forEach(x=>x.classList.toggle('on',x===b));}));
 /* ---- boot ---- */
 renderMap();renderBoard();
 if(!S.seen){S.seen=true;save();}
+if(!S.intro){renderSlide();show('s-intro');}
 </script>
 </body></html>
