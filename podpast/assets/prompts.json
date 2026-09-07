@@ -1,0 +1,319 @@
+{
+ "_readme": "Podpast prompt pack. Portraits + b-roll + voices + board art. Same shape as the other games' prompts.json so bin/imagepack can run it. Style block is prepended to every image prompt so the series reads as one hand.",
+ "style": {
+  "portrait": "Premium illustrated history-card portrait, oil-paint texture, series style. Three-quarter view looking just past camera, warm Rembrandt key light from the left, muted palette, dark teal-charcoal vignette background, no text, no frame, head and shoulders only. Historically grounded clothing and likeness where a real likeness exists; where none exists, plausible and respectful, never caricature.",
+  "broll": "Cinematic 16:9 b-roll, 5 seconds, slow push-in or slow pan, painterly-realistic look consistent with the portrait series, warm key light, muted palette, film grain, no on-screen text, no modern objects, no faces in close-up unless named.",
+  "board": "Game-board illustration in the Podpast style: aged parchment-and-ink world map with teal oceans, brass-and-wax accents, hand-drawn compass roses and sea routes, muted warm palette, no text.",
+  "voice_engine": "ElevenLabs via Higgsfield text2speech_v2 (variant: elevenlabs) for the guided episodes; ElevenLabs Voice Design for bespoke per-figure voices in Phase 1.",
+  "sizes": {
+   "portrait": "1:1 (1024) — also export 512 for cards",
+   "broll": "16:9 (1280x720), 5s",
+   "board": "16:9 hero + 2:1 map plate"
+  }
+ },
+ "voices": {
+  "_note": "Descriptions are for ElevenLabs Voice Design. preset_id is the Higgsfield preset used in the test build until bespoke voices exist. Age at voice = the age the figure narrates from (usually late life, looking back).",
+  "franklin": {
+   "age_at_voice": 78,
+   "design": "Elderly American man, warm, dry, amused, unhurried; slight Boston-Philadelphia colonial cadence; a storyteller who enjoys his own jokes; medium-low pitch, gravel at the edges, never frail.",
+   "preset_id": "30fc8796-ceb6-4a66-b3a7-4a145ef7f346",
+   "preset_name": "Arthur"
+  },
+  "washington": {
+   "age_at_voice": 66,
+   "design": "Tall, reserved Virginia gentleman; low, measured, formal; few words, long pauses; quiet authority rather than force; slight Tidewater softness on the vowels.",
+   "preset_id": "d603a8cd-3fe1-55e0-9245-617a2589131e",
+   "preset_name": "Barrett"
+  },
+  "abigail": {
+   "age_at_voice": 60,
+   "design": "Sharp, warm New England woman; quick, articulate, wry; reads like a letter writer thinking aloud; mid pitch, precise consonants, affection underneath the argument.",
+   "preset_id": "3c2b83c0-2e0a-5ae8-998a-a5fe71b7eccd",
+   "preset_name": "Helena"
+  },
+  "phillis": {
+   "age_at_voice": 28,
+   "design": "Young Black woman, poised and lyrical, classically educated diction; speaks in measured lines with an inner steel; light-mid pitch, clear, unhurried; warmth, not fragility.",
+   "preset_id": "caeba733-3c17-43db-863e-69c7025512cd",
+   "preset_name": "Naomi"
+  },
+  "salomon": {
+   "age_at_voice": 44,
+   "design": "Middle-aged man, Polish-Jewish accent softened by a decade in New York and Philadelphia; brisk, practical, humorous; a broker's confidence with a survivor's weariness; mid-low pitch.",
+   "preset_id": "fec5acae-d801-5761-8d2c-4c2c75db3e2a",
+   "preset_name": "Alden"
+  },
+  "tisquantum": {
+   "age_at_voice": 37,
+   "design": "Wampanoag man who learned English in London: fluent, deliberate, faintly formal 17th-century English; calm, watchful, with grief held under control; low-mid pitch, slow.",
+   "preset_id": "858499d9-fef5-40e1-bc29-b4dc661dc283",
+   "preset_name": "Callum"
+  }
+ },
+ "portraits": {
+  "_era1_built": {
+   "franklin": "Benjamin Franklin at about 70 in 1776, balding crown with long straight grey hair to the shoulders, small round spectacles, fur-collared brown coat over a plain waistcoat, shrewd amused expression.",
+   "washington": "George Washington at about 50 in 1781, powdered white hair tied back, strong jaw, dark blue Continental Army coat with buff facings and gold epaulettes, calm resolute expression.",
+   "abigail": "Abigail Adams at about 40 in 1785, dark hair pinned up under a simple white lace cap, intelligent direct gaze with a hint of a smile, 1780s dark silk gown with a white lace fichu.",
+   "phillis": "Phillis Wheatley, a young Black woman of about 20 in 1773, white linen cap tied under the chin, simple 1770s dress with a white kerchief, thoughtful poised expression as if composing a line of verse.",
+   "salomon": "Haym Salomon (no verified likeness; interpretive), Polish-born Jewish merchant of about 42 in 1782 Philadelphia, dark curly hair with a hint of grey, short well-kept beard, warm determined eyes, dark 1780s broadcloth coat, white stock.",
+   "tisquantum": "Tisquantum (no portrait exists; interpretive, reviewed with Wampanoag cultural guidance before ship), Patuxet Wampanoag man of about 35 in 1621, dignified and watchful, long dark hair, weathered face, deerskin mantle over one shoulder, wampum and shell necklace."
+  },
+  "era2": {
+   "jefferson": "Thomas Jefferson at about 57 in 1800, tall, reddish-grey hair, long face, plain dark coat, thoughtful reserved expression, a quill nearby.",
+   "sacagawea": "Sacagawea (no portrait exists; interpretive, Lemhi Shoshone), a young woman of about 17 in 1805, hair in two braids, hide dress with beadwork, carrying her infant son in a cradleboard on her back, steady gaze.",
+   "tecumseh": "Tecumseh (no verified likeness), Shawnee leader of about 42 in 1810, strong composed face, hair tied back, silver gorget and arm bands, hide and cloth shirt, unwavering gaze.",
+   "dolley": "Dolley Madison at about 44 in 1812, dark curls under a bright silk turban with a feather, warm sociable smile, Empire-waist gown, pearl necklace.",
+   "gratz": "Rebecca Gratz at about 30 in 1811 Philadelphia, dark hair in loose curls, dark eyes, white high-waisted gown with a soft shawl, kind serious expression (after the Sully portrait).",
+   "york": "York (no portrait exists; interpretive), the enslaved Black man on the Lewis and Clark expedition, about 34 in 1805, powerful build, buckskin and wool, weathered by the trail, looking out over a river."
+  },
+  "era3": {
+   "lincoln": "Abraham Lincoln at about 54 in 1863, gaunt lined face, dark beard without moustache, unruly dark hair, black frock coat and bow tie, tired kind eyes.",
+   "tubman": "Harriet Tubman at about 45 in 1868, dark headwrap, plain dark dress with white collar, hands folded, small strong frame, unflinching gaze.",
+   "douglass": "Frederick Douglass at about 45 in 1863, leonine grey-streaked hair swept back, full beard, dark suit and vest, commanding intense gaze.",
+   "barton": "Clara Barton at about 44 in 1865, dark hair parted center and pulled back, dark plain dress with a small brooch, grave compassionate expression.",
+   "smalls": "Robert Smalls at about 24 in 1863, young Black man in a dark coat, short hair, confident half-smile, a ship's wheel faint behind him.",
+   "keckley": "Elizabeth Keckley at about 45 in 1863, elegant Black woman, hair neatly parted, fine dark silk dress she made herself, measuring tape or thimble in hand, composed dignified expression."
+  },
+  "era4": {
+   "edison": "Thomas Edison at about 45 in 1892, grey hair unkempt, clean-shaven jowly face, bow tie, lab coat, a filament bulb glowing beside him.",
+   "twain": "Mark Twain at about 70 in 1905, wild white hair and moustache, white suit, cigar, twinkling sardonic eyes.",
+   "lazarus": "Emma Lazarus at about 34 in 1883, dark hair pulled back, dark Victorian dress with a high lace collar, serious luminous eyes, a page of verse.",
+   "tesla": "Nikola Tesla at about 37 in 1893, slicked dark hair parted center, thin moustache, immaculate dark suit, intense far-seeing gaze, faint electric arcs behind.",
+   "wells": "Ida B. Wells at about 30 in 1893, hair up in a soft Victorian style, dark dress with a high collar and brooch, fierce calm gaze, a folded newspaper.",
+   "latimer": "Lewis Latimer at about 40 in 1888, Black inventor, neat moustache, dark suit, drafting compass in hand, a carbon-filament lamp beside him."
+  },
+  "era5": {
+   "fdr": "Franklin D. Roosevelt at about 55 in 1937, pince-nez, wide confident grin, cigarette holder, grey suit, head tilted up.",
+   "earhart": "Amelia Earhart at about 35 in 1932, short tousled sandy hair, leather flight jacket, goggles pushed up, freckles, easy fearless smile.",
+   "eleanor": "Eleanor Roosevelt at about 55 in 1940, wavy grey hair, warm toothy smile, dark dress with a fur collar, kind direct gaze.",
+   "owens": "Jesse Owens at about 22 in 1936, Black athlete in a white singlet, short hair, calm focused expression, track lanes behind.",
+   "lamarr": "Hedy Lamarr at about 27 in 1941, glamorous dark waves, luminous face, and a frequency-hopping diagram sketched on paper beside her.",
+   "lange": "Dorothea Lange at about 40 in 1936, short dark hair under a beret, large Graflex camera in her hands, weather-lined face, dust-bowl light."
+  },
+  "era6": {
+   "mlk": "Martin Luther King Jr. at about 34 in 1963, dark suit, thin moustache, resolute uplifted expression as if mid-speech, crowd faint behind.",
+   "armstrong": "Neil Armstrong at about 38 in 1969, white spacesuit with helmet held under one arm, short sandy hair, quiet modest smile.",
+   "parks": "Rosa Parks at about 42 in 1955, glasses, hair pulled back, dark coat and hat, calm unbreakable dignity, a bus window behind.",
+   "chavez": "Cesar Chavez at about 41 in 1968, dark hair, plaid work shirt, tired determined face, a vineyard in the haze behind.",
+   "johnson": "Katherine Johnson at about 44 in 1962, Black woman in cat-eye glasses and a cardigan, pencil in hand, orbital equations on a chalkboard behind.",
+   "colvin": "Claudette Colvin at about 15 in 1955, Black teenager in glasses and a school dress, schoolbooks held tight, brave nervous expression."
+  },
+  "era7": {
+   "jobs": "Steve Jobs at about 29 in 1984, dark hair, bow tie and dark suit of the Macintosh launch, intense excited gaze.",
+   "reagan": "Ronald Reagan at about 76 in 1987, swept dark hair, warm crinkled smile, dark suit, a podium edge.",
+   "ride": "Sally Ride at about 32 in 1983, curly dark hair, blue NASA flight suit, mission patch, broad relaxed grin.",
+   "rogers": "Fred Rogers at about 55 in 1983, grey hair, red cardigan zipped, sneakers, gentle unhurried smile.",
+   "hopper": "Grace Hopper at about 78 in 1984, white hair, Navy rear admiral's uniform, sharp eyes, a nanosecond length of wire in her hand.",
+   "borlaug": "Norman Borlaug at about 56 in 1970, weathered tanned face, wheat field, rolled sleeves, straw hat, plain-spoken warmth."
+  },
+  "era8_folk": {
+   "_note": "Folk figures are flagged on screen as tall tales; art can be bigger-than-life.",
+   "appleseed": "Johnny Appleseed as legend: barefoot man with a tin pot for a hat, sack of seeds, coffee-sack shirt, apple blossoms.",
+   "oakley": "Annie Oakley at about 30 in 1890, fringed western costume, medals, rifle over her shoulder, sly confident smile.",
+   "johnhenry": "John Henry as legend: towering Black steel-driver, hammer over his shoulder, tunnel mouth and steam drill behind, dawn light.",
+   "caseyjones": "Casey Jones as legend: locomotive engineer leaning from the cab of a steam engine, striped cap, gloved hand on the throttle.",
+   "bunyan": "Paul Bunyan as legend: giant lumberjack in red plaid with an axe, Babe the blue ox beside him, pines to his knees.",
+   "pecosbill": "Pecos Bill as legend: cowboy riding a tornado with a lasso, hat flying, desert mesas below."
+  },
+  "israel_era1": {
+   "_note": "Israeli / Jewish track Era 1 (Zionism and the Yishuv), same series style.",
+   "herzl": "Theodor Herzl at about 37 in 1897, full dark beard, intense dark eyes, formal black coat, leaning on a balcony rail (after the Basel photograph).",
+   "benyehuda": "Eliezer Ben-Yehuda at about 50 in 1908, long grey beard, small round glasses, dark coat, a dictionary manuscript and lamp beside him.",
+   "rachel": "Rachel Bluwstein at about 30 in 1920, soft dark hair, white blouse, gazing at the Sea of Galilee, notebook in her lap.",
+   "szenes": "Hannah Szenes at about 22 in 1943, short dark hair, British army uniform, parachute wings, calm brave expression.",
+   "aaronsohn": "Sarah Aaronsohn at about 27 in 1917, dark hair up, white blouse, a determined watchful expression, Zichron Yaakov hills behind.",
+   "trumpeldor": "Yosef Trumpeldor at about 39 in 1920, shaved head, moustache, military tunic, one sleeve pinned, steady gaze, Tel Hai stone behind."
+  }
+ },
+ "broll": {
+  "_note": "One clip per episode beat, keyed to the beat caption in podpast/index.html. 5 seconds, 16:9, slow move. Prepend style.broll.",
+  "franklin": [
+   "Boston harbor at dusk, 1706, candle-maker's workshop window glowing, tallow candles hanging in rows.",
+   "Colonial print shop interior, hand press, lead type in a case, ink-stained apprentice hands setting a line.",
+   "A young man walking into Philadelphia's Market Street at dawn with a loaf of bread under each arm, 1723.",
+   "Pages of Poor Richard's Almanack turning on a wooden table, woodcut sun and moon, quill and inkpot.",
+   "Shelves of a small 1731 lending library, tradesmen reading by window light.",
+   "Thunderstorm over a field, a kite on a silk line, a brass key at the string, lightning far off.",
+   "Close on bifocal spectacles on a workbench beside a Franklin stove and a hand-drawn Gulf Stream chart.",
+   "Independence Hall, July 1776, quills signing a large parchment, candlelight.",
+   "Versailles salon, 1778, courtiers admiring an old man in a plain fur cap.",
+   "Four documents laid side by side on a green baize table: Declaration, alliance, treaty, Constitution.",
+   "A petition sheet on a desk, Pennsylvania Abolition Society seal, an old hand signing, 1790.",
+   "A Philadelphia funeral procession filling a street, twenty thousand mourners, April 1790, overcast."
+  ],
+  "washington": [
+   "A sixteen-year-old surveyor with a compass and chain in the Virginia wilderness, 1748, morning mist.",
+   "A crude log palisade in a wet meadow, Fort Necessity, 1754, rain on muskets.",
+   "Philadelphia, June 1775: a tall man in a blue uniform standing in a room of men in civilian coats.",
+   "Boats pushing through ice on the Delaware River at night, snow, lanterns hooded, Christmas 1776.",
+   "Valley Forge huts in snow, bloody footprints, a Prussian officer drilling ragged soldiers, winter 1777.",
+   "Yorktown, October 1781: British colors lowered, French ships on the bay, drums.",
+   "Annapolis State House, December 1783: a general laying his commission on a table before Congress.",
+   "Constitutional Convention, 1787: a tall silent figure in the presiding chair, sunlight through tall windows.",
+   "New York, April 1789: a hand on a Bible on a balcony above a cheering crowd.",
+   "A printed Farewell Address in a newspaper on a tavern table, 1796.",
+   "Mount Vernon at dusk, the long piazza, the quarters of the enslaved beyond the trees.",
+   "A cold December ride in sleet along a Virginia road, 1799, then the house lit at night."
+  ],
+  "abigail": [
+   "A Weymouth parsonage library, 1750s, a girl reading by a window, shelves to the ceiling.",
+   "A stack of hand-written letters tied with ribbon, wax seals, a traveling writing box, 1764.",
+   "Penn's Hill, June 17 1775: a woman and a small boy watching smoke rise over distant Charlestown.",
+   "A Braintree farmyard at harvest, a woman with account book and children, war-time scarcity.",
+   "A letter on a desk dated March 31 1776, quill mid-word: 'Remember the Ladies'.",
+   "A 1774 letter page, the phrase about slavery visible, candle guttering.",
+   "A sailing ship crossing the Atlantic, 1784, a woman at the rail in a bonnet.",
+   "The unfinished President's House, 1800, damp plaster, laundry hanging in the great East Room.",
+   "A political cartoon on a table calling her 'Mrs. President', 1798, coffee cups.",
+   "Quincy, autumn 1818, a bedroom window, falling leaves, a letter left unfinished."
+  ],
+  "phillis": [
+   "A slave ship's hold seen from above, chained figures, then the Boston waterfront, 1761.",
+   "A Boston parlor, a young Black girl tracing letters in a Bible with a candle, 1762.",
+   "A printed broadside elegy for George Whitefield pinned in a Boston shop window, 1770.",
+   "A wood-paneled room, eighteen men in wigs seated in judgment, a young woman standing alone, 1772.",
+   "A London printer's shop, 1773, the first bound copies of a small book of poems.",
+   "A manumission paper signed on a desk, Boston, 1773, sunlight.",
+   "A letter and poem carried by rider into a military camp at Cambridge, winter 1775.",
+   "A letter page in a clear hand: 'love of freedom... impatient of oppression', 1774.",
+   "A cold Boston boarding house, 1784, a scrubbing brush, a manuscript on a shelf.",
+   "A modern bookshop shelf, then a 1773 first edition under glass: still in print."
+  ],
+  "salomon": [
+   "Leszno, Poland, 1740s: a Jewish quarter street, a boy listening to merchants speaking several languages.",
+   "New York harbor, 1772, a small man with a satchel stepping off a ship into a crowded street.",
+   "British occupation of New York, 1776: a prisoner walking beside Hessian soldiers, whispering.",
+   "A night escape from a provost prison, 1778, then a family arriving at Philadelphia's docks.",
+   "An empty army pay chest, soldiers waiting, Robert Morris at a desk of ledgers.",
+   "Front Street Philadelphia, 1781, a broker's office, bills of exchange changing hands, a diary line: 'I sent for Haym Salomon'.",
+   "A young James Madison counting borrowed coins at a boarding-house table.",
+   "Mikveh Israel synagogue under construction, 1782, Cherry Street, Philadelphia.",
+   "A winter funeral, January 1785, a small crowd, an unpaid ledger closed.",
+   "Heald Square, Chicago: the bronze of Washington flanked by Morris and Salomon, then a 1975 stamp."
+  ],
+  "tisquantum": [
+   "A Patuxet village on the Massachusetts coast, 1610, wetus, cornfields, canoes on the water.",
+   "An English ship at anchor, 1614, men lured aboard to trade, then chains below deck.",
+   "Málaga harbor, Spain, friars in brown habits leading captives away from a slave auction.",
+   "London, 1617, a Wampanoag man at a merchant's table learning English from a ledger.",
+   "Newfoundland fishing station, then a ship's bow cutting toward New England, 1619.",
+   "An abandoned village: fallen wetus, overgrown fields, silence, 1619.",
+   "Plymouth, March 1621, a lone man walking into a colonists' camp of half-built houses.",
+   "Hands planting corn kernels over a buried fish in a mound, spring 1621.",
+   "An autumn harvest gathering, ninety Wampanoag men arriving with five deer, 1621.",
+   "Cape Cod bay, November 1622, a small English shallop, a fever, grey light."
+  ]
+ },
+ "board": {
+  "hero": "Hero plate: a hand-illustrated antique world map spread across a wooden table like a board game, brass compass, wax seals as era tokens, a small portrait card of Benjamin Franklin face-up on North America, warm lamp light, no text.",
+  "map_plate": "2:1 world map plate: parchment continents with fine ink hachure, deep teal oceans with subtle wave lines, faint rhumb lines and two compass roses, no labels, no text, tileable feel.",
+  "era_tokens": "Eight wax-seal era tokens on parchment, each a different color and emblem: candle, compass, broken chain, lightbulb, propeller, rocket, cassette, and a folk-tale axe; 1:1 sheet, no text.",
+  "pin": "A small brass map pin with a wax head in the Podpast red, isolated on transparent background, 1:1.",
+  "route_stamps": "Passport-style stamps for journeys: Boston, Philadelphia, London, Paris, Málaga, Leszno, Plymouth, on parchment, 1:1 sheet, no other text."
+ },
+ "journey": {
+  "_note": "Journey mode screens. Prefix every prompt with style.portrait or style.broll as noted. The traveler sheet (A2) is the priority image: it is the kid's avatar for the whole era, so generate it first and reuse it as a reference for every other frame that shows the apprentice.",
+  "frame": {
+   "title_plate": {
+    "ratio": "16:9",
+    "style": "broll",
+    "prompt": "The painted Atlantic board seen from above at a slight angle, a single brass-and-wax road drawn across it from a New England shore to a Delaware riverbank, six wax-seal stops along the road, one lit lantern at the first stop, the rest dark. Lamp light from the left, no text."
+   },
+   "traveler_sheet": {
+    "ratio": "1:1 sheet, two variants",
+    "style": "portrait",
+    "prompt": "Character sheet of a thirteen-year-old printer's apprentice of the 1770s, ink-stained fingers, wool coat, leather satchel of sealed letters. Three-quarter view front, side and back, plus four expressions: curious, worried, determined, delighted. Same face in every panel, neutral background, no text."
+   },
+   "traveler_token": {
+    "ratio": "1:1, transparent",
+    "style": "portrait",
+    "prompt": "The apprentice's head and shoulders inside a brass ring with a wax seal at the bottom, isolated on transparent background, for the board."
+   },
+   "route_plate_era1": {
+    "ratio": "2:1",
+    "style": "board",
+    "prompt": "Parchment map of the Atlantic coast from Patuxet to the Delaware, the road as a dotted brass line, six landmark markers as small wax seals, tiny painted vignettes at each: a shoreline, a print shop, a wharf, a farmhouse, a counting house, a frozen river. Compass rose bottom left, no labels, no text."
+   }
+  },
+  "stops": {
+   "tisquantum": "Patuxet shore, 1621. Empty village clearing by the sea at dawn, mist, one man standing where his people's homes stood, Plymouth's palisade small in the distance.",
+   "franklin": "Franklin's print shop, Philadelphia, 1730s. Doorway view into a shop, press mid-pull, drying sheets on lines, an old man in a fur cap looking up from the type case.",
+   "phillis": "Long Wharf, Boston, 1770s. A young Black woman in a fine dress holding a bound book, ships behind her, a group of doubting gentlemen in the background.",
+   "abigail": "Braintree farmhouse, 1776. A woman at a candlelit desk writing a letter, a window showing distant smoke over Boston, children asleep in the next room.",
+   "salomon": "Salomon's counting house, Philadelphia, 1781. A man at a ledger with stacks of coin and bills of exchange, a courier waiting at the door with an urgent letter, rain on the windows.",
+   "washington": "The Delaware riverbank, Christmas night 1776. Ice floes in black water, soldiers in rags by dying fires, a general on horseback looking across, snow beginning."
+  },
+  "clues": {
+   "tokens_sheet": {
+    "ratio": "1:1 sheet, transparent",
+    "prompt": "Three clue tokens: a brass pocket compass (where and when), a wax seal with a quill (what they're known for), a torn and re-folded letter (the hard part). Small, glowing edge, series colors, no text."
+   },
+   "catch_moment": {
+    "ratio": "16:9",
+    "prompt": "The apprentice's hand closing around a glowing brass compass mid-air, painted motion blur, warm spark, no text."
+   },
+   "travel_papers": {
+    "ratio": "3:4",
+    "prompt": "The apprentice's passport-style booklet open on a table: eighteen empty stamp circles in six rows, three filled with wax stamps, a quill beside it, no text."
+   }
+  },
+  "moment_washington_crossing": {
+   "backdrop": {
+    "ratio": "16:9",
+    "prompt": "The Delaware riverbank at night, three boats pulled up on the ice, lanterns hooded, the far shore just visible, no text."
+   },
+   "choice_cross": {
+    "ratio": "3:4",
+    "prompt": "Boats pushing through river ice in a snowstorm at night, men poling, a lantern held low, no text."
+   },
+   "choice_wait": {
+    "ratio": "3:4",
+    "prompt": "Winter camp at dawn, cold fires, men wrapped in blankets, a calendar page with the first of January circled resting on a drum, no other text."
+   },
+   "choice_retreat": {
+    "ratio": "3:4",
+    "prompt": "A muddy road south, a column of ragged soldiers walking away from the river, backs to the viewer, no text."
+   },
+   "branch_army_dissolves": {
+    "ratio": "16:9",
+    "prompt": "An empty winter camp, abandoned tents, footprints leading away in every direction, one flag left standing, cold blue light, no text."
+   },
+   "branch_hessians_warned": {
+    "ratio": "16:9",
+    "prompt": "Trenton at night, windows lit, sentries alert on the road, drums, cold blue light, no text."
+   },
+   "gold_timeline_dawn": {
+    "ratio": "16:9",
+    "prompt": "Boats landing on the far shore of the Delaware at first light, soldiers forming up in snow, the general stepping onto the bank. Warm gold key light, no text."
+   },
+   "resource_icons": {
+    "ratio": "1:1 sheet",
+    "prompt": "Three resource icons in three states each (full, half, empty): a loaf of bread for provisions, an hourglass for days, a wax handshake seal for trust. Series style, no text."
+   }
+  },
+  "era_door": {
+   "gate_sealed": {
+    "ratio": "3:4",
+    "prompt": "A great parchment door bound with a brass lock and a large wax seal, eighteen small seals around the frame, six of them still blank, lamp light, no text."
+   },
+   "gate_breaking": {
+    "ratio": "16:9",
+    "prompt": "The same parchment door with the seal cracking, golden light spilling through, a westward road beyond, no text."
+   },
+   "what_you_carry": {
+    "ratio": "16:9",
+    "prompt": "A wooden table with six objects side by side: a printer's composing stick, a bound book of poems, a letter with a wax seal, a ledger, a bundle of corn seed, a general's field glass. Lamp light, no text."
+   },
+   "board_pan_era2": {
+    "ratio": "16:9",
+    "prompt": "The parchment board sliding west, the Atlantic road behind now stamped gold, a new road beginning in fog toward the Mississippi, one new lantern lighting, no text."
+   },
+   "explore_unlocked": {
+    "ratio": "1:1, transparent",
+    "prompt": "A brass compass rose with a small key and an open-road motif, isolated on transparent background, no text."
+   }
+  },
+  "reuse": "The stop, clue, choice, branch and gate templates repeat for every figure and era. For the other Era 1 figures restage only the moment set: Tisquantum (navigate: the Atlantic crossing home), Franklin (build: the lightning rod), Phillis (persuade: the Boston panel), Abigail (persuade: the letter), Salomon (fund: the payroll)."
+ }
+}
