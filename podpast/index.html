@@ -405,6 +405,19 @@ h2.ledger{font:800 20px/1.1 var(--display);margin-top:22px}
   </div>
 </section>
 
+<section class="screen" id="s-live">
+  <div class="hero" id="livehero" style="height:min(46vh,420px);min-height:320px">
+    <img id="liveimg" alt="">
+    <div class="hero-fade"></div>
+    <div class="top float"><button class="tbtn glass" id="b-live-back">← End</button><span class="grow"></span><span class="badge glass">Plus · live</span></div>
+    <div class="hero-txt"><p class="eyebrow">Live conversation</p><h1 class="hero-nm" id="livenm"></h1><p class="hero-hook" id="livehint">Tap the call button, then just talk. They answer only from their own record.</p></div>
+  </div>
+  <div class="body">
+    <div id="livemount" style="min-height:120px;display:flex;justify-content:center;align-items:center"></div>
+    <p class="note center" id="livenote"></p>
+  </div>
+</section>
+
 <section class="screen" id="s-museum">
   <div class="top"><button class="tbtn" data-go="s-map">← Map</button><span class="grow"></span><span class="eyebrow">Museum</span></div>
   <div class="body">
@@ -465,6 +478,8 @@ const ROSTER={
  appleseed:{name:'Johnny Appleseed',tier:'icon',kind:'folk'},oakley:{name:'Annie Oakley',tier:'icon',kind:'folk'},johnhenry:{name:'John Henry',short:'John Henry',tier:'between',kind:'folk'},caseyjones:{name:'Casey Jones',short:'Casey Jones',tier:'between',kind:'folk'},bunyan:{name:'Paul Bunyan',tier:'gem',kind:'folk'},pecosbill:{name:'Pecos Bill',short:'Pecos Bill',tier:'gem',kind:'folk'},
  herzl:{name:'Theodor Herzl',tier:'icon'},benyehuda:{name:'Eliezer Ben-Yehuda',tier:'icon'},rachel:{name:'Rachel Bluwstein',short:'Rachel',tier:'between'},szenes:{name:'Hannah Szenes',tier:'between'},aaronsohn:{name:'Sarah Aaronsohn',tier:'gem'},trumpeldor:{name:'Yosef Trumpeldor',tier:'gem'}
 };
+/* ElevenLabs live agents (public embed). explorer = the Young Learners agent where one exists */
+const AGENTS={washington:{adult:'agent_6601kvf9kw22f90tcsskk84vwnw',explorer:'agent_1601kwm0cs0cengvjkvfn8kpe2jr'},parks:{adult:'agent_5601kvg6y7a0e5eawwzbw9dhjjy0'},lincoln:{adult:'agent_9901kvg9nnxrfrbtk78rjqamzyf3'},earhart:{adult:'agent_0401kvg9nkh1f3esacmfaceyy7jxr'}};
 /* clues: beat index for each of the three journey clues; every clue beat is min:'all' so every band can catch it */
 const CLUES={franklin:{where:0,known:5,hard:7},washington:{where:0,known:6,hard:3},abigail:{where:0,known:4,hard:3},phillis:{where:0,known:4,hard:1},salomon:{where:0,known:5,hard:2},tisquantum:{where:0,known:6,hard:1}};
 const CLUE_META={where:{l:'Where & when',e:'🧭'},known:{l:'Known for',e:'🔏'},hard:{l:'The hard part',e:'📜'}};
@@ -799,7 +814,21 @@ function openPlus(){
   track('plus_view');show('s-plus');
 }
 function track(ev){try{if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'podpast/'+ev,event:true});}catch(e){}}
-$('#b-talk-live').addEventListener('click',openPlus);
+function agentFor(f){const g=(typeof AGENTS!=='undefined')&&AGENTS[f.id];if(!g)return null;return (S.band==='explorer'&&g.explorer)||g.adult||null;}
+let widgetLoaded=false;
+function openLive(){
+  const id=agentFor(F);
+  $('#liveimg').src=(typeof PORTRAITS!=='undefined'&&PORTRAITS[F.id])||'';$('#livenm').textContent=F.name;
+  const mount=$('#livemount');mount.innerHTML='';
+  if(!id){$('#livenote').textContent=F.name.split(' ')[0]+'’s live voice is being recorded this week. Washington is live now.';show('s-live');return;}
+  if(location.protocol!=='https:'&&location.protocol!=='http:'){$('#livenote').textContent='Live calls run on the real site, not in this preview. Open miklatgames.fun/podpast/ to talk.';show('s-live');return;}
+  if(!widgetLoaded){widgetLoaded=true;const s=document.createElement('script');s.src='https://unpkg.com/@elevenlabs/convai-widget-embed';s.async=true;s.type='text/javascript';document.head.appendChild(s);}
+  const w=document.createElement('elevenlabs-convai');w.setAttribute('agent-id',id);w.setAttribute('variant','expanded');mount.appendChild(w);
+  $('#livenote').textContent=(S.band==='explorer'?'Young Learners voice. ':'')+'Your Plus minutes count while the call is connected. Tap End to stop.';
+  track('live_open');show('s-live');
+}
+$('#b-live-back').addEventListener('click',()=>{$('#livemount').innerHTML='';show('s-figure');});
+$('#b-talk-live').addEventListener('click',()=>{if(PLUS.active)openLive();else openPlus();});
 $('#b-plus-back').addEventListener('click',()=>show('s-figure'));
 const CHECKOUT='https://buy.stripe.com/28E4gyatu5tF5KScxFes009';
 $('#b-subscribe').addEventListener('click',()=>{track('plus_cta');if(PLUS.active){toast('Manage billing from your Stripe receipt email');return;}location.href=CHECKOUT;});
