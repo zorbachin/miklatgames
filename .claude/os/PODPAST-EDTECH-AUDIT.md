@@ -283,13 +283,17 @@ Sensitivity note, stated plainly: modern Israeli history is contested in some US
 | 4 · US public districts (later) | 50M students | Only after a case study; 12–18 month cycles; American track only | NCSS (social studies teachers) conference; state standards alignment; Clever/Google Classroom |
 
 ### 6.3 Price sheet (one page, no negotiation below school tier)
+**Launch rule (decided Sep 7, 2026): content is free, conversation is the product.** Never gate an era or a figure behind pay; gate live conversation, because that is the only thing with a per-minute cost (§4.2). "Ask them" from the canon pack runs on-device at zero marginal cost, so it stays free and is the funnel into Plus.
+
 | Tier | Price | Includes |
 |---|---|---|
-| **Teacher (free)** | $0 | Guided library, class codes, progress table, assign episodes. No live chat for students. |
-| **Family / Individual** | $5/mo or $49/yr | Everything guided + 100 messages + 30 voice minutes/mo per profile (up to 4 profiles). |
-| **School** | $8/student/yr, min $1,500 | Live chat with class-pooled minutes, transcripts, reporting, DPA, admin dashboard, both tracks. |
+| **Free** | $0 | The whole journey (board, every era as it ships, episodes in each figure's recorded voice, clues, stamps, mini-games, streaks) + "Ask them" from the canon pack. Teachers: class codes + progress table once classroom mode ships. |
+| **Plus** (launch week) | $5/mo · 7-day free trial | Live voice conversation with any Era 1 figure via ElevenLabs Agents, 30 minutes/mo, then unlimited text turns with the same guardrails. Up to 4 profiles. |
+| **School** | $8/student/yr, min $1,500 | Live chat with class-pooled minutes, transcripts, reporting, DPA, admin dashboard, both tracks. "Contact us" only until the first pilot. |
 | **District / Network** | custom (~$6/student at 10k+) | SSO (Clever/Google), rostering, standards reports, custom figures. |
 | Roadmap **Max** | $15/mo | Live video replies, longer voice quota. Only when video ≤ $0.02/s. |
+
+**Launch stack (subscriptions live by Fri Sep 11):** ElevenLabs Agents (one agent per figure, config in `podpast/assets/agents.json`) · Stripe Checkout + Customer Portal · Supabase magic-link auth · two Netlify Functions on podpast.dev (Stripe webhook → entitlement; signed agent session + minutes meter). The game stays the single-file build.
 
 ### 6.4 The dummies checklist (do these in this order; each is ≤ 1 day)
 - [ ] **Landing page = one free playable episode.** Not a description. Playable. Above the fold. (Reuse the Miklat share/challenge loop.)
@@ -306,14 +310,17 @@ Sensitivity note, stated plainly: modern Israeli history is contested in some US
 
 ## 7 · What to do this week (the only list that matters)
 
-1. **Rescue the source:** `git init` the podpast Hugo folder, push to `zorbachin/podpast`, link it to Netlify so deploys come from `main`. (30 min)
-2. **Write `podpast/WORLD.md`** from §3 and §5 (vision bible, house pattern). (1 hr — I can draft it from this audit.)
-3. **Fork the engine:** copy Changing History's map + Academy's lesson rail into a `podpast` player; strip the mini-games; wire figure JSON. (2 days)
-4. **Make Episode 1: Haym Salomon** (the gem that bridges both tracks): canon pack → script → ElevenLabs voice → Higgsfield portrait + 3 clips → assemble. (1 day)
-5. **Playtest with 5 kids** you can reach. Watch. Fix. (1 day)
-6. **Book the 10 teacher conversations.** (1 hr of emails)
+_Rewritten Sep 7, 2026 for the subscription launch. Earlier items 1–6 (source rescue, WORLD.md, engine fork, Salomon episode, playtest, teacher emails) stay valid; the engine fork and Era 1 episodes are done in `podpast/`._
 
-Stop condition for the week: **one playable episode on podpast.dev, source in git, 10 emails sent.** Nothing else.
+| Day | Ship | Blocker |
+|---|---|---|
+| Mon | Plus paywall + pricing screens in the build ✅ · six agent prompt packs ✅ · two-clip image-to-video proof (15 credits) | none |
+| Tue | Supabase sign-in, Stripe Checkout (test mode), Stripe webhook function | ElevenLabs key, Stripe keys, Supabase URL + anon key from Zorba |
+| Wed | Six ElevenLabs agents live, signed-session function, 30-minute cap, talk screen in the app | same keys |
+| Thu | Journey spine light (fixed order, stamps, era door), in-app signs/prompts, hero video clips (≤ 90 credits for Era 1) | none |
+| Fri | Phone QA, Stripe live mode, launch post, first subscribers | Zorba's go |
+
+Stop condition for the week: **one paying subscriber talking to Franklin in his own voice.** Nothing else.
 
 ---
 
