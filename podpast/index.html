@@ -324,7 +324,7 @@ h2.ledger{font:800 20px/1.1 var(--display);margin-top:22px}
       <div class="plan hot"><div class="pn">Plus</div><div class="pp">$5<small>/month</small></div><ul><li><b>Live voice conversation</b> with any Era 1 figure</li><li>30 minutes a month, then unlimited text</li><li>Their real voice, their real record, nothing invented</li><li>7-day free trial, cancel anytime</li></ul><button class="btn" id="b-subscribe">Start free trial</button><p class="note" id="plus-note"></p></div>
     </div>
     <div class="set"><h3>Schools</h3><p>Classroom mode with a teacher view, age bands per class, and stamps per student. <a href="mailto:hello@podpast.dev?subject=Podpast%20for%20schools" style="color:var(--brass)">Talk to us</a>.</p></div>
-    <p class="note">Test build. Subscriptions open this week at podpast.dev. Nothing is charged here.</p>
+    <p class="note">Live voice conversation ships this week. Subscribe now and your trial clock starts when it lands, not before.</p>
   </div>
 </section>
 
@@ -696,14 +696,17 @@ const PLUS={active:false,minutes:30}; // set by the account layer once Stripe + 
 function openPlus(){
   $('#plus-med').innerHTML=F?medal(F,'big').replace('class="med','class="med'):'';
   $('#plus-title').textContent=F?`Talk to ${F.name.split(' ')[0]}. Really.`:'Talk to them. Really.';
-  $('#plus-note').textContent=PLUS.active?'You’re on Plus. Live conversation opens here once the voice agents ship.':'Checkout opens at podpast.dev this week. This test build can’t take payments.';
+  $('#plus-note').textContent=PLUS.active?'You’re on Plus. Live conversation opens here this week as the voice agents ship.':'7 days free, then $5 a month. Cancel anytime from your receipt email.';
   $('#b-subscribe').textContent=PLUS.active?'Manage subscription':'Start free trial';
   track('plus_view');show('s-plus');
 }
 function track(ev){try{if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'podpast/'+ev,event:true});}catch(e){}}
 $('#b-talk-live').addEventListener('click',openPlus);
 $('#b-plus-back').addEventListener('click',()=>show('s-figure'));
-$('#b-subscribe').addEventListener('click',()=>{track('plus_cta');toast(PLUS.active?'Portal opens at podpast.dev':'Checkout opens at podpast.dev this week');});
+const CHECKOUT='https://buy.stripe.com/28E4gyatu5tF5KScxFes009';
+$('#b-subscribe').addEventListener('click',()=>{track('plus_cta');if(PLUS.active){toast('Manage billing from your Stripe receipt email');return;}location.href=CHECKOUT;});
+/* return from checkout: ?plus=1 flips Plus on this device until the account layer ships */
+try{const u=new URL(location.href);if(u.searchParams.get('plus')==='1'){PLUS.active=true;localStorage.setItem('podpast.plus','1');history.replaceState(null,'',u.pathname);toast('Welcome to Podpast Plus');track('plus_paid');}else if(localStorage.getItem('podpast.plus')==='1')PLUS.active=true;}catch(e){}
 
 /* ---- episode player ---- */
 let beats=[],bi=0,playing=false,finished=false,timer=null,utt=null,aud=null,audioBroken=false,audioUsed=false;
