@@ -137,6 +137,22 @@ textarea{width:100%;min-height:86px;background:var(--panel-2);border:1px solid v
 .stat b{display:block;font:800 22px var(--mono);color:var(--brass)}
 .stat span{font-size:12px;color:var(--dim)}
 #card{width:100%;border-radius:14px;margin-top:14px;border:1px solid var(--line);display:block}
+/* plus */
+.btn.plus{background:linear-gradient(135deg,#3E9C93,#2a6f69);color:#fff;position:relative}
+.pill{display:inline-block;font:700 10px var(--mono);letter-spacing:.1em;padding:3px 7px;border-radius:999px;background:var(--brass);color:#1a1405;vertical-align:middle;margin-left:6px}
+.plus-hero{text-align:center;padding:10px 0 4px}
+.plus-hero .med{margin:0 auto 10px}
+.plus-hero h2{font:800 28px/1.1 var(--display);text-wrap:balance}
+.plans{display:grid;gap:12px;margin-top:16px}
+.plan{border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:16px;position:relative}
+.plan.hot{border-color:var(--brass);background:linear-gradient(180deg,rgba(225,174,72,.10),var(--panel))}
+.plan .pn{font:800 13px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--brass)}
+.plan .pp{font:800 40px/1 var(--display);margin:6px 0 10px}
+.plan .pp small{font:700 14px var(--body);color:var(--dim)}
+.plan ul{list-style:none;display:grid;gap:6px;margin-bottom:10px}
+.plan li{padding-left:20px;position:relative;font-size:15px}
+.plan li::before{content:'✓';position:absolute;left:0;color:var(--ok);font-weight:900}
+.plan .badge{position:absolute;top:14px;right:14px}
 /* museum */
 .mus{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
 .mus .node{padding:12px 6px}
@@ -241,6 +257,7 @@ h2.ledger{font:800 20px/1.1 var(--display);margin-top:22px}
     <div class="card center" id="figcard"></div>
     <button class="btn" id="b-meet">▶ Meet them · 3-minute episode</button>
     <button class="btn sec" id="b-ask-direct">💬 Skip to “Ask them”</button>
+    <button class="btn plus" id="b-talk-live">🎙️ Talk to them live <span class="pill">Plus</span></button>
   </div>
 </section>
 
@@ -295,6 +312,19 @@ h2.ledger{font:800 20px/1.1 var(--display);margin-top:22px}
     <div class="stat"><div><b id="dn-xp">+0</b><span>XP earned</span></div><div><b id="dn-streak">1</b><span>day streak</span></div><div><b id="dn-met">1</b><span>figures met</span></div></div>
     <canvas id="card" width="1080" height="1350" aria-label="Share card"></canvas>
     <div class="row"><button class="btn" id="b-share">📣 Share</button><button class="btn sec" data-go="s-map">Next figure →</button></div>
+  </div>
+</section>
+
+<section class="screen" id="s-plus">
+  <div class="top"><button class="tbtn" id="b-plus-back">← Back</button><span class="grow"></span><span class="eyebrow">Podpast Plus</span></div>
+  <div class="body">
+    <div class="plus-hero"><div class="med big" id="plus-med"></div><h2 id="plus-title">Talk to them. Really.</h2><p class="sub" id="plus-sub">A live conversation in their own voice, from their own record. Ask anything. They answer only from what they lived.</p></div>
+    <div class="plans">
+      <div class="plan"><div class="pn">Free</div><div class="pp">$0</div><ul><li>The whole journey, every era as it ships</li><li>Episodes in each figure’s recorded voice</li><li>Clues, stamps, mini-games, streaks</li><li>“Ask them” from the canon pack</li></ul><span class="badge">You’re here</span></div>
+      <div class="plan hot"><div class="pn">Plus</div><div class="pp">$5<small>/month</small></div><ul><li><b>Live voice conversation</b> with any Era 1 figure</li><li>30 minutes a month, then unlimited text</li><li>Their real voice, their real record, nothing invented</li><li>7-day free trial, cancel anytime</li></ul><button class="btn" id="b-subscribe">Start free trial</button><p class="note" id="plus-note"></p></div>
+    </div>
+    <div class="set"><h3>Schools</h3><p>Classroom mode with a teacher view, age bands per class, and stamps per student. <a href="mailto:hello@podpast.dev?subject=Podpast%20for%20schools" style="color:var(--brass)">Talk to us</a>.</p></div>
+    <p class="note">Test build. Subscriptions open this week at podpast.dev. Nothing is charged here.</p>
   </div>
 </section>
 
@@ -661,6 +691,19 @@ function openFigure(id){
 }
 $('#b-meet').addEventListener('click',()=>startEpisode());
 $('#b-ask-direct').addEventListener('click',()=>openAsk(false));
+/* ---- Plus (paywall placeholder; the real gate is a signed agent session from podpast.dev) ---- */
+const PLUS={active:false,minutes:30}; // set by the account layer once Stripe + ElevenLabs are wired
+function openPlus(){
+  $('#plus-med').innerHTML=F?medal(F,'big').replace('class="med','class="med'):'';
+  $('#plus-title').textContent=F?`Talk to ${F.name.split(' ')[0]}. Really.`:'Talk to them. Really.';
+  $('#plus-note').textContent=PLUS.active?'You’re on Plus. Live conversation opens here once the voice agents ship.':'Checkout opens at podpast.dev this week. This test build can’t take payments.';
+  $('#b-subscribe').textContent=PLUS.active?'Manage subscription':'Start free trial';
+  track('plus_view');show('s-plus');
+}
+function track(ev){try{if(window.goatcounter&&goatcounter.count)goatcounter.count({path:'podpast/'+ev,event:true});}catch(e){}}
+$('#b-talk-live').addEventListener('click',openPlus);
+$('#b-plus-back').addEventListener('click',()=>show('s-figure'));
+$('#b-subscribe').addEventListener('click',()=>{track('plus_cta');toast(PLUS.active?'Portal opens at podpast.dev':'Checkout opens at podpast.dev this week');});
 
 /* ---- episode player ---- */
 let beats=[],bi=0,playing=false,finished=false,timer=null,utt=null,aud=null,audioBroken=false,audioUsed=false;
@@ -810,7 +853,8 @@ function answer(f,q){
 }
 
 /* ---- ask them (free chat, same retrieval) ---- */
-function openAsk(fromDone){
+let askN=0;
+function openAsk(fromDone){askN=0;
   $('#askcard').innerHTML=`<div style="display:flex;gap:12px;align-items:center">${medal(F)}<div><div style="font:800 18px var(--display)">${F.name}</div><div class="dt" style="font:600 12px var(--mono);color:var(--dim)">${F.dates}</div></div></div>`;
   $('#chat').innerHTML=`<div class="bubble"><b>${F.name}</b>Ask me anything about my life. I answer only from my own record, and I don’t know what happened after ${F.died}.</div>`;
   $('#b-ask-done').textContent=fromDone?'Back to card':'Done';
@@ -819,6 +863,7 @@ function openAsk(fromDone){
 $('#b-send').addEventListener('click',()=>{
   const q=$('#askbox').value.trim();if(!q)return;
   const a=answer(F,q);$('#chat').insertAdjacentHTML('beforeend',`<div class="bubble you"><b>You</b>${esc(q)}</div><div class="bubble"><b>${F.name}</b>${a.text}</div>`);
+  askN++;if(askN===3&&!PLUS.active)$('#chat').insertAdjacentHTML('beforeend',`<div class="bubble" style="border-color:rgba(62,156,147,.5)"><b style="color:var(--sea)">Podpast Plus</b>These answers come from ${F.name.split(' ')[0]}’s written record. On Plus you talk with ${F.name.split(' ')[0]} live, in ${F.name.split(' ')[0]}’s own voice. <button class="tbtn on" id="ask-plus" style="margin-top:8px">See Plus →</button></div>`),$('#ask-plus').addEventListener('click',openPlus);
   $('#askbox').value='';window.scrollTo(0,document.body.scrollHeight);
 });
 $('#b-ask-back').addEventListener('click',()=>show('s-figure'));
