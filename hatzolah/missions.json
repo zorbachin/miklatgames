@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "notes": "Stage 1 mission seeds. Medical condition wording is intentionally non-clinical; partner review required before release.",
+  "missions": [
+    {
+      "id": "tlv_beach_lane",
+      "city": "Tel Aviv-Yafo",
+      "title": "Beach Lane",
+      "patient": {
+        "name": "Camille",
+        "age": 31,
+        "background": "French-Israeli graphic designer",
+        "languages": ["he", "fr", "en"],
+        "personality": ["energetic", "anxious", "local-ish"]
+      },
+      "scene": "Gordon/Dizengoff corridor",
+      "scenario": "bicycle fall",
+      "route_problem": "bus-lane blockage and scooter traffic; beach road is longer but clearer",
+      "character_beat": "relaxes when the player takes a known shortcut",
+      "mechanic_focus": ["route choice", "scooter traffic", "clean stop"]
+    },
+    {
+      "id": "jer_stone_steps",
+      "city": "Jerusalem",
+      "title": "Stone Steps",
+      "patient": {
+        "name": "Rivka",
+        "age": 72,
+        "background": "Haredi grandmother",
+        "languages": ["he", "yi"],
+        "personality": ["calm", "dry humor", "quiet"]
+      },
+      "scene": "edge of Nachlaot",
+      "scenario": "fall",
+      "route_problem": "uphill approach, market spillover, light-rail crossing timing",
+      "character_beat": "family escort is frantic while Rivka stays composed",
+      "mechanic_focus": ["hill control", "intersection timing", "escort dialogue"]
+    },
+    {
+      "id": "hai_carmel_drop",
+      "city": "Haifa",
+      "title": "Carmel Drop",
+      "patient": {
+        "name": "Samir",
+        "age": 22,
+        "background": "Arab-Israeli engineering student",
+        "languages": ["ar", "he", "en"],
+        "personality": ["talkative", "local", "helpful"]
+      },
+      "scene": "campus district",
+      "scenario": "breathing difficulty",
+      "route_problem": "downhill speed control versus a switchback shortcut",
+      "character_beat": "offers a short local-navigation clue after smooth driving",
+      "mechanic_focus": ["downhill braking", "shortcut learning", "smooth ride"]
+    },
+    {
+      "id": "bsh_market_heat",
+      "city": "Be'er Sheva",
+      "title": "Market Heat",
+      "patient": {
+        "name": "Amal",
+        "age": 66,
+        "background": "Bedouin grandmother",
+        "languages": ["ar", "he"],
+        "personality": ["quiet", "direct", "composed"]
+      },
+      "scene": "market district",
+      "scenario": "dizziness in the heat",
+      "route_problem": "roundabout timing and one temporary road closure",
+      "character_beat": "family member joins; sparse Arabic/Hebrew lines add warmth",
+      "mechanic_focus": ["roundabouts", "closure reroute", "route efficiency"]
+    },
+    {
+      "id": "naz_closing_time",
+      "city": "Nazareth",
+      "title": "Closing Time",
+      "patient": {
+        "name": "Elias",
+        "age": 44,
+        "background": "Arab-Israeli baker",
+        "languages": ["ar", "he"],
+        "personality": ["joking", "nervous", "local"]
+      },
+      "scene": "old-city commercial street",
+      "scenario": "hand injury",
+      "route_problem": "narrow approach requires a precise outer stop zone before pickup",
+      "character_beat": "points out a faster outer-ring road during transport",
+      "mechanic_focus": ["precision stop", "narrow street", "local knowledge"]
+    },
+    {
+      "id": "eil_hotel_strip",
+      "city": "Eilat",
+      "title": "Hotel Strip",
+      "patient": {
+        "name": "Almaz",
+        "age": 27,
+        "background": "Ethiopian-Israeli lifeguard",
+        "languages": ["he", "am"],
+        "personality": ["calm", "athletic", "low-key"]
+      },
+      "scene": "hotel zone",
+      "scenario": "ankle injury",
+      "route_problem": "pedestrian-heavy frontage versus a faster rear service road",
+      "character_beat": "reacts positively to smooth non-aggressive driving",
+      "mechanic_focus": ["pedestrian zone avoidance", "service road", "smooth ride"]
+    },
+    {
+      "id": "ash_family_visit",
+      "city": "Ashdod",
+      "title": "Family Visit",
+      "patient": {
+        "name": "Anna",
+        "age": 58,
+        "background": "Russian-speaking Israeli",
+        "languages": ["ru", "he"],
+        "personality": ["skeptical", "observant", "appreciative"]
+      },
+      "scene": "residential block",
+      "scenario": "household fall",
+      "route_problem": "school-zone congestion and a blocked main avenue",
+      "character_beat": "starts in Russian and switches to Hebrew; companion can interpret",
+      "mechanic_focus": ["reroute", "traffic patience", "language variation"]
+    },
+    {
+      "id": "tib_lakeside_curve",
+      "city": "Tiberias",
+      "title": "Lakeside Curve",
+      "patient": {
+        "name": "Noam",
+        "age": 36,
+        "background": "Israeli tour guide",
+        "languages": ["he", "en"],
+        "personality": ["chatty", "funny", "local"]
+      },
+      "scene": "lakeside promenade",
+      "scenario": "heat-related symptoms",
+      "route_problem": "lakeside tourist traffic versus a steep inland bypass",
+      "character_beat": "narrates tiny landmark fragments when the driving stays calm",
+      "mechanic_focus": ["route choice", "hill bypass", "reactive dialogue"]
+    }
+  ]
+}
