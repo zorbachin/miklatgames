@@ -256,6 +256,7 @@ offline load verified by SW review, RTL overlay check, shelf card + SW bump.
   390×780, 320×568 and 520×1000, and with `?beat=7&lang=he`; each mission is
   driven to a win by a scripted bot and to a clean fail with no input.
   Playwright walkthrough of every screen at both phone sizes: no page errors.
-- **Not done (on purpose):** sprite art pass, music, daily seed, Haifa+,
+- **Art packs spec'd (2026-09-27):** `aliyah/assets/prompts.json` (6 sheets + 8 backdrops), `aliyah/press/prompts.json` (key art, icon, poster, itch cover, banner, share card), and `aliyah/PROMPTS-COPYPASTE.txt` (all 20 prompts fully inlined for ChatGPT / Gemini / Firefly, with a review brief on top). Source of truth is `aliyah/assets/build-prompts.py`; edit that, not the outputs. The game still renders emoji sprites: wiring the house ART loader + `keyMagenta()` is the follow-up once sheets exist.
+- **Not done (on purpose):** music, daily seed, Haifa+,
   the post-arrival bureaucracy side-quest board, fact verification against the
   live NBN site (§8 — sandbox could not reach nbn.org.il).

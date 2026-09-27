@@ -1,0 +1,76 @@
+{
+ "game": "Aliyah: The Adventure — gameplay art pack",
+ "style": "Anime-poster style: painted gradient skies with a giant sun, clean cel-shaded characters, bold readable silhouettes at phone-thumbnail size, soft haze bands, no photorealism. Brand palette: shelter-night #0d1120, gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff, cream #fdf3e3. Israeli light: warm, high, Mediterranean. Sprites go on FLAT MAGENTA #ff00ff; backdrops need no transparency. Generate with bin/imagepack aliyah/assets",
+ "images": [
+  {
+   "file": "hero-gap-sheet.png",
+   "aspect_ratio": "1:1",
+   "prompt": "CHARACTER REFERENCE SHEET, 1:1. NOA, the gap-year hero: 18 years old, curly dark-brown hair, warm tan skin, gold headband with a small Star of David on the forehead (the Naruto nod), orange t-shirt, blue jeans, cream sneakers, oversized green backpack, wide friendly grin. Round head, roughly 4 heads tall, chunky hands. Sheet layout: full-body front view, side view, back view, plus three head-and-shoulder expressions: determined, delighted, oops. Consistent proportions across all views. Also include one running pose and one jumping pose. Sprite on a FLAT solid magenta #ff00ff background, nothing else in frame, no shadow on the ground, no gradient (the game chroma-keys magenta out)."
+  },
+  {
+   "file": "hero-fam-sheet.png",
+   "aspect_ratio": "1:1",
+   "prompt": "CHARACTER REFERENCE SHEET, 1:1. THE COHENS, the young-family hero: a parent in a navy cap with a small gold Star of David, mint t-shirt, dark trousers, pushing a red stroller with BABY EZRA inside (round-faced, yellow beanie, one tooth). A diaper bag hangs off the stroller like a second suitcase. Same proportions as the other hero. Sheet layout: full-body front view, side view, back view, plus three head-and-shoulder expressions: determined, delighted, oops. Consistent proportions across all views. Also include one running pose pushing the stroller. Sprite on a FLAT solid magenta #ff00ff background, nothing else in frame, no shadow on the ground, no gradient (the game chroma-keys magenta out)."
+  },
+  {
+   "file": "savta-sheet.png",
+   "aspect_ratio": "1:1",
+   "prompt": "CHARACTER REFERENCE SHEET, 1:1. SAVTA, the arcade's mascot: 70s, small and mighty, floral dress, cardigan even in August, grey bun, reading glasses on a chain, a wooden matkot paddle in one hand and a slipper in the other. Fierce, loving grin. Sheet layout: full-body front view, side view, back view, plus three head-and-shoulder expressions: determined, delighted, oops. Consistent proportions across all views. Include one pose mid-serve with the slipper flying. Sprite on a FLAT solid magenta #ff00ff background, nothing else in frame, no shadow on the ground, no gradient (the game chroma-keys magenta out)."
+  },
+  {
+   "file": "shuki-sheet.png",
+   "aspect_ratio": "1:1",
+   "prompt": "CHARACTER REFERENCE SHEET, 1:1. SHUKI THE VENDOR: burly, thick black mustache, green apron over a white t-shirt, wooden spoon in his fist, one eyebrow raised mid-haggle. Sheet layout: full-body front view, side view, back view, plus three head-and-shoulder expressions: determined, delighted, oops. Consistent proportions across all views. Include one pose behind a market stall counter, arms crossed. Sprite on a FLAT solid magenta #ff00ff background, nothing else in frame, no shadow on the ground, no gradient (the game chroma-keys magenta out)."
+  },
+  {
+   "file": "dvir-sheet.png",
+   "aspect_ratio": "1:1",
+   "prompt": "CHARACTER REFERENCE SHEET, 1:1. DVIR, the Jewish Agency shaliach: 40s, neat beard, blue button-up shirt with a small Israeli-flag lanyard, clipboard, kind eyes, the expression of someone about to ask one more question. Sheet layout: full-body front view, side view, back view, plus three head-and-shoulder expressions: determined, delighted, oops. Consistent proportions across all views.  Sprite on a FLAT solid magenta #ff00ff background, nothing else in frame, no shadow on the ground, no gradient (the game chroma-keys magenta out)."
+  },
+  {
+   "file": "mendy-sheet.png",
+   "aspect_ratio": "1:1",
+   "prompt": "CHARACTER REFERENCE SHEET, 1:1. RABBI MENDY of Chabad: black hat, black coat, warm broad smile, holding a velvet tefillin bag, one hand open in a welcoming gesture. Never pushy, always glad. Sheet layout: full-body front view, side view, back view, plus three head-and-shoulder expressions: determined, delighted, oops. Consistent proportions across all views.  Sprite on a FLAT solid magenta #ff00ff background, nothing else in frame, no shadow on the ground, no gradient (the game chroma-keys magenta out)."
+  },
+  {
+   "file": "bg-archive.png",
+   "aspect_ratio": "9:16",
+   "prompt": "Painted vertical game background, 9:16, for a phone game. A cramped family archive at night: towering shelves of dusty boxes and photo albums, a single hanging bulb, filing cabinets leaning, gold dust motes in the beam, shadows in deep violet-brown. Nostalgic, a little spooky, funny. Composition: all detail in the upper 60%; the bottom 40% fades to a plain flat ground with NO objects (gameplay is drawn over it). No people, no animals, no text."
+  },
+  {
+   "file": "bg-office.png",
+   "aspect_ratio": "9:16",
+   "prompt": "Painted vertical game background, 9:16, for a phone game. A government notary office: a heavy wooden desk with a big stamp, stacks of certificates with red seals, a wall clock, a window with venetian blinds throwing warm stripes. Cel-shaded, slightly heroic, like the stamp is legendary. Composition: all detail in the upper 60%; the bottom 40% fades to a plain flat ground with NO objects (gameplay is drawn over it). No people, no animals, no text."
+  },
+  {
+   "file": "bg-bengurion.png",
+   "aspect_ratio": "9:16",
+   "prompt": "Painted vertical game background, 9:16, for a phone game. Ben Gurion airport arrivals hall: bright white and pale blue, a big blue sign reading nothing (no text), Israeli flags, the curve of a baggage carousel, glass wall with a plane tail outside in golden light. Composition: all detail in the upper 60%; the bottom 40% fades to a plain flat ground with NO objects (gameplay is drawn over it). No people, no animals, no text."
+  },
+  {
+   "file": "bg-gordon.png",
+   "aspect_ratio": "9:16",
+   "prompt": "Painted vertical game background, 9:16, for a phone game. Gordon Beach, Tel Aviv, midday: turquoise sea with rolling white waves, striped beach umbrellas, the Tel Aviv skyline and the Azrieli towers in the haze, a huge pale sun, cyan-to-cream sky. Composition: all detail in the upper 60%; the bottom 40% fades to a plain flat ground with NO objects (gameplay is drawn over it). No people, no animals, no text."
+  },
+  {
+   "file": "bg-matkot.png",
+   "aspect_ratio": "9:16",
+   "prompt": "Painted vertical game background, 9:16, for a phone game. Tel Aviv beach at golden hour for a matkot duel: orange-gold sky, giant low sun, silhouetted skyline, sea band, wide sand foreground kept empty. Composition: all detail in the upper 60%; the bottom 40% fades to a plain flat ground with NO objects (gameplay is drawn over it). No people, no animals, no text."
+  },
+  {
+   "file": "bg-mahane-yehuda.png",
+   "aspect_ratio": "9:16",
+   "prompt": "Painted vertical game background, 9:16, for a phone game. Mahane Yehuda market, Jerusalem, Friday early afternoon: red-and-cream striped awnings, strings of glowing bulbs, Jerusalem-stone arches, mountains of spices, challah and flowers, warm amber light, crowded color. Composition: all detail in the upper 60%; the bottom 40% fades to a plain flat ground with NO objects (gameplay is drawn over it). No people, no animals, no text."
+  },
+  {
+   "file": "bg-oldcity.png",
+   "aspect_ratio": "9:16",
+   "prompt": "Painted vertical game background, 9:16, for a phone game. Old City of Jerusalem alleys at sunset: worn stone steps, arches, hanging lanterns, a cat on a ledge, the Dome of the Rock silhouette on the horizon, sky going from gold to purple. Composition: all detail in the upper 60%; the bottom 40% fades to a plain flat ground with NO objects (gameplay is drawn over it). No people, no animals, no text."
+  },
+  {
+   "file": "bg-kotel.png",
+   "aspect_ratio": "9:16",
+   "prompt": "Painted vertical game background, 9:16, for a phone game. The Kotel plaza at dusk: the great stone wall with tufts of green capers in the cracks, warm floodlight on the stone, violet-pink sky above, calm and monumental. Composition: all detail in the upper 60%; the bottom 40% fades to a plain flat ground with NO objects (gameplay is drawn over it). No people, no animals, no text."
+  }
+ ]
+}
