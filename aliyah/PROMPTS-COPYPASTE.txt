@@ -1,0 +1,464 @@
+ALIYAH: THE ADVENTURE — COPY-PASTE PROMPT PACK (fully inlined)
+==================================================================
+Every prompt below is self-contained: style guide and avoid-list are
+already merged in. Copy one whole block (between the ---- lines) and paste
+it into ChatGPT (image mode), Gemini, or Adobe Firefly. Attach the
+reference sheet the prompt names when it names one.
+
+REVIEW BRIEF (paste this first, once, then run the prompts)
+------------------------------------------------------------------
+You are the art director for ALIYAH: THE ADVENTURE, a free mobile browser
+game on miklatgames.fun. Play the test build first:
+https://claude.ai/code/artifact/6fc572c2-105b-411f-9a73-c294bb9cd02c . The
+design spec is in the repo at .claude/os/games/ALIYAH.md and the world
+bible at aliyah/WORLD.md. Review for: (1) does the art direction below
+read as one world across all ten missions, (2) any character or scene that
+would read as a caricature to an Israeli or a religious player, (3)
+anything a Nefesh B'Nefesh reviewer would flag as factually off. Then
+generate the prompts below in order, reference sheets first.
+
+RULES THAT MAKE IT WORK
+1. Run the prompts IN ORDER. Character sheets first (prompts 1-6).
+2. From prompt 7 onward, ATTACH the sheets the prompt names.
+3. One prompt = one generation. Save every keeper; it is the next reference.
+4. Sprites must land on FLAT magenta #ff00ff or the game cannot key them.
+Aspect ratios: sheets 1:1 · game backdrops 9:16 · key art 16:9 ·
+poster 9:16 · itch cover 4:3 · banner 21:9 · share card 4:5.
+
+
+##################################################################
+GAMEPLAY PACK → aliyah/assets/
+##################################################################
+
+------------------------------------------------------------------
+PROMPT 1 — hero-gap-sheet.png — 1:1
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+CHARACTER REFERENCE SHEET, 1:1. NOA, the gap-year hero: 18 years old,
+curly dark-brown hair, warm tan skin, gold headband with a small Star of
+David on the forehead (the Naruto nod), orange t-shirt, blue jeans, cream
+sneakers, oversized green backpack, wide friendly grin. Round head,
+roughly 4 heads tall, chunky hands. Sheet layout: full-body front view,
+side view, back view, plus three head-and-shoulder expressions:
+determined, delighted, oops. Consistent proportions across all views. Also
+include one running pose and one jumping pose. Sprite on a FLAT solid
+magenta #ff00ff background, nothing else in frame, no shadow on the
+ground, no gradient (the game chroma-keys magenta out).
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 2 — hero-fam-sheet.png — 1:1
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+CHARACTER REFERENCE SHEET, 1:1. THE COHENS, the young-family hero: a
+parent in a navy cap with a small gold Star of David, mint t-shirt, dark
+trousers, pushing a red stroller with BABY EZRA inside (round-faced,
+yellow beanie, one tooth). A diaper bag hangs off the stroller like a
+second suitcase. Same proportions as the other hero. Sheet layout: full-
+body front view, side view, back view, plus three head-and-shoulder
+expressions: determined, delighted, oops. Consistent proportions across
+all views. Also include one running pose pushing the stroller. Sprite on a
+FLAT solid magenta #ff00ff background, nothing else in frame, no shadow on
+the ground, no gradient (the game chroma-keys magenta out).
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 3 — savta-sheet.png — 1:1
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+CHARACTER REFERENCE SHEET, 1:1. SAVTA, the arcade's mascot: 70s, small and
+mighty, floral dress, cardigan even in August, grey bun, reading glasses
+on a chain, a wooden matkot paddle in one hand and a slipper in the other.
+Fierce, loving grin. Sheet layout: full-body front view, side view, back
+view, plus three head-and-shoulder expressions: determined, delighted,
+oops. Consistent proportions across all views. Include one pose mid-serve
+with the slipper flying. Sprite on a FLAT solid magenta #ff00ff
+background, nothing else in frame, no shadow on the ground, no gradient
+(the game chroma-keys magenta out).
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 4 — shuki-sheet.png — 1:1
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+CHARACTER REFERENCE SHEET, 1:1. SHUKI THE VENDOR: burly, thick black
+mustache, green apron over a white t-shirt, wooden spoon in his fist, one
+eyebrow raised mid-haggle. Sheet layout: full-body front view, side view,
+back view, plus three head-and-shoulder expressions: determined,
+delighted, oops. Consistent proportions across all views. Include one pose
+behind a market stall counter, arms crossed. Sprite on a FLAT solid
+magenta #ff00ff background, nothing else in frame, no shadow on the
+ground, no gradient (the game chroma-keys magenta out).
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 5 — dvir-sheet.png — 1:1
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+CHARACTER REFERENCE SHEET, 1:1. DVIR, the Jewish Agency shaliach: 40s,
+neat beard, blue button-up shirt with a small Israeli-flag lanyard,
+clipboard, kind eyes, the expression of someone about to ask one more
+question. Sheet layout: full-body front view, side view, back view, plus
+three head-and-shoulder expressions: determined, delighted, oops.
+Consistent proportions across all views.  Sprite on a FLAT solid magenta
+#ff00ff background, nothing else in frame, no shadow on the ground, no
+gradient (the game chroma-keys magenta out).
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 6 — mendy-sheet.png — 1:1
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+CHARACTER REFERENCE SHEET, 1:1. RABBI MENDY of Chabad: black hat, black
+coat, warm broad smile, holding a velvet tefillin bag, one hand open in a
+welcoming gesture. Never pushy, always glad. Sheet layout: full-body front
+view, side view, back view, plus three head-and-shoulder expressions:
+determined, delighted, oops. Consistent proportions across all views.
+Sprite on a FLAT solid magenta #ff00ff background, nothing else in frame,
+no shadow on the ground, no gradient (the game chroma-keys magenta out).
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 7 — bg-archive.png — 9:16
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+Painted vertical game background, 9:16, for a phone game. A cramped family
+archive at night: towering shelves of dusty boxes and photo albums, a
+single hanging bulb, filing cabinets leaning, gold dust motes in the beam,
+shadows in deep violet-brown. Nostalgic, a little spooky, funny.
+Composition: all detail in the upper 60%; the bottom 40% fades to a plain
+flat ground with NO objects (gameplay is drawn over it). No people, no
+animals, no text.
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 8 — bg-office.png — 9:16
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+Painted vertical game background, 9:16, for a phone game. A government
+notary office: a heavy wooden desk with a big stamp, stacks of
+certificates with red seals, a wall clock, a window with venetian blinds
+throwing warm stripes. Cel-shaded, slightly heroic, like the stamp is
+legendary. Composition: all detail in the upper 60%; the bottom 40% fades
+to a plain flat ground with NO objects (gameplay is drawn over it). No
+people, no animals, no text.
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 9 — bg-bengurion.png — 9:16
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+Painted vertical game background, 9:16, for a phone game. Ben Gurion
+airport arrivals hall: bright white and pale blue, a big blue sign reading
+nothing (no text), Israeli flags, the curve of a baggage carousel, glass
+wall with a plane tail outside in golden light. Composition: all detail in
+the upper 60%; the bottom 40% fades to a plain flat ground with NO objects
+(gameplay is drawn over it). No people, no animals, no text.
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 10 — bg-gordon.png — 9:16
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+Painted vertical game background, 9:16, for a phone game. Gordon Beach,
+Tel Aviv, midday: turquoise sea with rolling white waves, striped beach
+umbrellas, the Tel Aviv skyline and the Azrieli towers in the haze, a huge
+pale sun, cyan-to-cream sky. Composition: all detail in the upper 60%; the
+bottom 40% fades to a plain flat ground with NO objects (gameplay is drawn
+over it). No people, no animals, no text.
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 11 — bg-matkot.png — 9:16
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+Painted vertical game background, 9:16, for a phone game. Tel Aviv beach
+at golden hour for a matkot duel: orange-gold sky, giant low sun,
+silhouetted skyline, sea band, wide sand foreground kept empty.
+Composition: all detail in the upper 60%; the bottom 40% fades to a plain
+flat ground with NO objects (gameplay is drawn over it). No people, no
+animals, no text.
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 12 — bg-mahane-yehuda.png — 9:16
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+Painted vertical game background, 9:16, for a phone game. Mahane Yehuda
+market, Jerusalem, Friday early afternoon: red-and-cream striped awnings,
+strings of glowing bulbs, Jerusalem-stone arches, mountains of spices,
+challah and flowers, warm amber light, crowded color. Composition: all
+detail in the upper 60%; the bottom 40% fades to a plain flat ground with
+NO objects (gameplay is drawn over it). No people, no animals, no text.
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 13 — bg-oldcity.png — 9:16
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+Painted vertical game background, 9:16, for a phone game. Old City of
+Jerusalem alleys at sunset: worn stone steps, arches, hanging lanterns, a
+cat on a ledge, the Dome of the Rock silhouette on the horizon, sky going
+from gold to purple. Composition: all detail in the upper 60%; the bottom
+40% fades to a plain flat ground with NO objects (gameplay is drawn over
+it). No people, no animals, no text.
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 14 — bg-kotel.png — 9:16
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+Painted vertical game background, 9:16, for a phone game. The Kotel plaza
+at dusk: the great stone wall with tufts of green capers in the cracks,
+warm floodlight on the stone, violet-pink sky above, calm and monumental.
+Composition: all detail in the upper 60%; the bottom 40% fades to a plain
+flat ground with NO objects (gameplay is drawn over it). No people, no
+animals, no text.
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+##################################################################
+PRESS PACK → aliyah/press/
+##################################################################
+
+------------------------------------------------------------------
+PROMPT 15 — keyart.png — 16:9
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+KEY ART, 16:9, poster composition. NOA, the gap-year hero: 18 years old,
+curly dark-brown hair, warm tan skin, gold headband with a small Star of
+David on the forehead (the Naruto nod), orange t-shirt, blue jeans, cream
+sneakers, oversized green backpack, wide friendly grin. Round head,
+roughly 4 heads tall, chunky hands. stands on Gordon Beach at sunset
+holding a red suitcase with an Israeli-flag sticker, headband ribbon
+flying; behind them a giant gold sun, the Tel Aviv skyline on the left and
+the Old City walls with the Dome of the Rock on the right, both impossibly
+close like an anime opening. Savta with a matkot paddle small in the
+background. Confetti of Hebrew-letter-shaped sparkles (no readable words).
+Wide margin at the top-left for a title to be added later. ATTACH: hero-
+gap-sheet.png, savta-sheet.png
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 16 — icon.png — 1:1
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+APP ICON, 1:1, centred, no text. A red suitcase with an Israeli-flag
+sticker and a gold headband tied around its handle, on a shelter-night
+#0d1120 background with a gold #ffd166 sunburst behind it. Chunky,
+readable at 64px.
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 17 — poster.png — 9:16
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+VERTICAL POSTER, 9:16, no text. Stacked anime-poster collage top to
+bottom: the family archive with flying documents, Ben Gurion arrivals,
+Gordon Beach surf, Savta serving a slipper at matkot, Mahane Yehuda
+awnings, and at the bottom the Kotel at dusk with NOA, the gap-year hero:
+18 years old, curly dark-brown hair, warm tan skin, gold headband with a
+small Star of David on the forehead (the Naruto nod), orange t-shirt, blue
+jeans, cream sneakers, oversized green backpack, wide friendly grin. Round
+head, roughly 4 heads tall, chunky hands. arriving. Gold sun rays tie the
+panels together. Leave the top 15% quiet for a title. ATTACH: hero-gap-
+sheet.png, savta-sheet.png
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 18 — cover-itch.png — 4:3
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+GAME COVER, 4:3, no text. NOA, the gap-year hero: 18 years old, curly
+dark-brown hair, warm tan skin, gold headband with a small Star of David
+on the forehead (the Naruto nod), orange t-shirt, blue jeans, cream
+sneakers, oversized green backpack, wide friendly grin. Round head,
+roughly 4 heads tall, chunky hands. and THE COHENS, the young-family hero:
+a parent in a navy cap with a small gold Star of David, mint t-shirt, dark
+trousers, pushing a red stroller with BABY EZRA inside (round-faced,
+yellow beanie, one tooth). A diaper bag hangs off the stroller like a
+second suitcase. Same proportions as the other hero. side by side on the
+Tel Aviv tayelet, suitcases at their feet, looking toward Jerusalem on the
+horizon under a giant gold sun. Savta photobombs from the left with a
+paddle. ATTACH: hero-gap-sheet.png, hero-fam-sheet.png, savta-sheet.png
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 19 — banner.png — 21:9
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+WIDE BANNER, 21:9, no text, no characters. A single continuous painted
+panorama left to right: New York skyline at night with a plane taking off,
+the Mediterranean, the Tel Aviv shore, the Judean hills, the Old City of
+Jerusalem at sunset. Gold sun in the centre. Quiet, cinematic.
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.
+
+------------------------------------------------------------------
+PROMPT 20 — share-card.png — 4:5
+------------------------------------------------------------------
+STYLE: Anime-poster style: painted gradient skies with a giant sun, clean
+cel-shaded characters, bold readable silhouettes at phone-thumbnail size,
+soft haze bands, no photorealism. Brand palette: shelter-night #0d1120,
+gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff,
+cream #fdf3e3. Israeli light: warm, high, Mediterranean.
+
+SHARE CARD TEMPLATE, 4:5 (1080x1350), for WhatsApp. Shelter-night #0d1120
+background, gold #ffd166 frame, a big empty rounded panel in the centre
+for a number to be overlaid later, a row of four small circular slots
+along the bottom third for chapter icons, subtle sun rays from the top. No
+text, no characters.
+
+AVOID: photorealism, text, captions, watermarks, logos, extra fingers,
+weapons, gore, religious caricature, muddy desaturated palettes, tourist-
+brochure stock-photo look.

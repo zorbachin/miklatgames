@@ -1,0 +1,36 @@
+{
+ "game": "Aliyah: The Adventure — press pack",
+ "style": "Anime-poster style: painted gradient skies with a giant sun, clean cel-shaded characters, bold readable silhouettes at phone-thumbnail size, soft haze bands, no photorealism. Brand palette: shelter-night #0d1120, gold #ffd166 (the accent), siren red #ff5d73, mint #7ee8c7, cyan #3ee6ff, cream #fdf3e3. Israeli light: warm, high, Mediterranean. Generate with bin/imagepack aliyah",
+ "images": [
+  {
+   "file": "keyart.png",
+   "aspect_ratio": "16:9",
+   "prompt": "KEY ART, 16:9, poster composition. NOA, the gap-year hero: 18 years old, curly dark-brown hair, warm tan skin, gold headband with a small Star of David on the forehead (the Naruto nod), orange t-shirt, blue jeans, cream sneakers, oversized green backpack, wide friendly grin. Round head, roughly 4 heads tall, chunky hands. stands on Gordon Beach at sunset holding a red suitcase with an Israeli-flag sticker, headband ribbon flying; behind them a giant gold sun, the Tel Aviv skyline on the left and the Old City walls with the Dome of the Rock on the right, both impossibly close like an anime opening. Savta with a matkot paddle small in the background. Confetti of Hebrew-letter-shaped sparkles (no readable words). Wide margin at the top-left for a title to be added later."
+  },
+  {
+   "file": "icon.png",
+   "aspect_ratio": "1:1",
+   "prompt": "APP ICON, 1:1, centred, no text. A red suitcase with an Israeli-flag sticker and a gold headband tied around its handle, on a shelter-night #0d1120 background with a gold #ffd166 sunburst behind it. Chunky, readable at 64px."
+  },
+  {
+   "file": "poster.png",
+   "aspect_ratio": "9:16",
+   "prompt": "VERTICAL POSTER, 9:16, no text. Stacked anime-poster collage top to bottom: the family archive with flying documents, Ben Gurion arrivals, Gordon Beach surf, Savta serving a slipper at matkot, Mahane Yehuda awnings, and at the bottom the Kotel at dusk with NOA, the gap-year hero: 18 years old, curly dark-brown hair, warm tan skin, gold headband with a small Star of David on the forehead (the Naruto nod), orange t-shirt, blue jeans, cream sneakers, oversized green backpack, wide friendly grin. Round head, roughly 4 heads tall, chunky hands. arriving. Gold sun rays tie the panels together. Leave the top 15% quiet for a title."
+  },
+  {
+   "file": "cover-itch.png",
+   "aspect_ratio": "4:3",
+   "prompt": "GAME COVER, 4:3, no text. NOA, the gap-year hero: 18 years old, curly dark-brown hair, warm tan skin, gold headband with a small Star of David on the forehead (the Naruto nod), orange t-shirt, blue jeans, cream sneakers, oversized green backpack, wide friendly grin. Round head, roughly 4 heads tall, chunky hands. and THE COHENS, the young-family hero: a parent in a navy cap with a small gold Star of David, mint t-shirt, dark trousers, pushing a red stroller with BABY EZRA inside (round-faced, yellow beanie, one tooth). A diaper bag hangs off the stroller like a second suitcase. Same proportions as the other hero. side by side on the Tel Aviv tayelet, suitcases at their feet, looking toward Jerusalem on the horizon under a giant gold sun. Savta photobombs from the left with a paddle."
+  },
+  {
+   "file": "banner.png",
+   "aspect_ratio": "21:9",
+   "prompt": "WIDE BANNER, 21:9, no text, no characters. A single continuous painted panorama left to right: New York skyline at night with a plane taking off, the Mediterranean, the Tel Aviv shore, the Judean hills, the Old City of Jerusalem at sunset. Gold sun in the centre. Quiet, cinematic."
+  },
+  {
+   "file": "share-card.png",
+   "aspect_ratio": "4:5",
+   "prompt": "SHARE CARD TEMPLATE, 4:5 (1080x1350), for WhatsApp. Shelter-night #0d1120 background, gold #ffd166 frame, a big empty rounded panel in the centre for a number to be overlaid later, a row of four small circular slots along the bottom third for chapter icons, subtle sun rays from the top. No text, no characters."
+  }
+ ]
+}
